@@ -1,0 +1,36 @@
+name: tests
+
+on:
+  push:
+    paths:
+      - '**/*.rs'
+      - 'Cargo.toml'
+    branches:
+      - main
+  pull_request:
+    paths:
+      - '**/*.rs'
+      - 'Cargo.toml'
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v2
+      - name: "Install SDL2"
+        run: |
+          sudo apt update
+          sudo apt install -y libsdl2-dev
+      - name: "Install Rust toolchain"
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          components: clippy
+      - name: "Run tests"
+        run: make check

@@ -1,0 +1,7 @@
+"documentation":
+  - "**/*.md"
+  - "/doc/**/*"
+
+"dependencies":
+  - "/Cargo.toml"
+

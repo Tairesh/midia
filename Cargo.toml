@@ -1,0 +1,25 @@
+[package]
+name = "midia"
+description = "Roguelike about The Chetyrekhstvorchataya Midia"
+version = "0.1.0"
+authors = ["Ilya Agafonov <tairesh.rus@gmail.com>"]
+edition = "2021"
+
+[dependencies.tetra]
+version = "0.7"
+default-features = false
+features = ["serde_support", "texture_png", "texture_jpeg", "font_ttf"]
+
+[dependencies]
+# my small library for roguelikes' geometry
+geometry = { git = "https://github.com/Tairesh/geometry.git", features = ["serde", "rand"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde_with = "2.0"
+rand = "^0.8"
+time = { version = "0.3", features = ["formatting", "local-offset", "macros"] }
+enum_dispatch = "0.3"
+arrayvec = { version = "0.7", features = ["serde"] }
+phf = { version = "0.11", features = ["macros"] }
+once_cell = "1.10"
+enum-iterator = "1.1"

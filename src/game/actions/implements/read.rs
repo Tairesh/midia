@@ -21,6 +21,7 @@ impl ActionImpl for Read {
         // TODO: check skill of reading, and probably even another languages
         let tile = map.get_tile(pos);
         if tile.is_readable() {
+            // Every character takes one tick to read, wow!
             Yes(tile.read().len() as u32)
         } else {
             No("There is nothing to read".to_string())

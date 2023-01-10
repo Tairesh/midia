@@ -3,22 +3,15 @@ use std::convert::TryFrom;
 use std::rc::Rc;
 
 use geometry::{Direction, Point, TwoDimDirection, Vec2};
-use tetra::{
-    graphics::{
-        mesh::{Mesh, ShapeStyle},
-        DrawParams, Rectangle,
-    },
-    Context,
-};
+use tetra::graphics::Color;
+use tetra::Context;
 
+use crate::scenes::map_view;
 use crate::{
     app::App,
-    assets::{Assets, Tileset},
+    assets::Assets,
     colors::Colors,
-    game::{
-        map::{item::ItemView, terrain::TerrainView},
-        Action, ActionType, World,
-    },
+    game::{Action, ActionType, World},
     ui::{GameLog, Label, Position, SomeUISprites, SomeUISpritesMut, UiSprite, Vertical},
 };
 
@@ -31,7 +24,6 @@ pub struct GameScene {
     sprites: [Box<dyn UiSprite>; 2],
     pub world: Rc<RefCell<World>>,
     pub modes: Vec<Rc<RefCell<GameMode>>>,
-    pub cursor: Mesh,
     pub log: GameLog,
     pub shift_of_view: Point,
     pub assets: Rc<Assets>,
@@ -39,7 +31,7 @@ pub struct GameScene {
 }
 
 impl GameScene {
-    pub fn new(app: &App, ctx: &mut Context) -> Self {
+    pub fn new(app: &App) -> Self {
         let world = app.get_world();
         let name_label = Box::new(Label::new(
             world.borrow().player().person().mind.name.as_str(),
@@ -56,17 +48,6 @@ impl GameScene {
         Self {
             sprites: [name_label, current_time_label],
             modes: vec![Rc::new(RefCell::new(Walking::new().into()))],
-            cursor: Mesh::rectangle(
-                ctx,
-                ShapeStyle::Stroke(1.0),
-                Rectangle::new(
-                    0.0,
-                    0.0,
-                    app.assets.tileset.tile_size as f32,
-                    app.assets.tileset.tile_size as f32,
-                ),
-            )
-            .unwrap(),
             log: GameLog::new(app.assets.fonts.default.font.clone()),
             shift_of_view: Point::default(),
             assets: app.assets.clone(),
@@ -139,6 +120,10 @@ impl GameScene {
     fn current_time_label(&mut self) -> &mut Label {
         self.sprites[1].as_label().unwrap()
     }
+
+    fn cursors(&self) -> Vec<(Point, Color)> {
+        self.current_mode().borrow().cursors(&self.world.borrow())
+    }
 }
 
 impl SceneImpl for GameScene {
@@ -153,92 +138,33 @@ impl SceneImpl for GameScene {
     }
 
     fn before_draw(&mut self, ctx: &mut Context) {
-        tetra::graphics::clear(ctx, Colors::BLACK);
-        let world = self.world.borrow();
-        let width = self.window_size.0 as f32;
-        let height = self.window_size.1 as f32;
-        let zoom = world.game_view.zoom;
-        let scale = zoom.as_scale();
-        let zoom = zoom.as_view();
-        let tile_size = self.tile_size();
-        let window_size_in_tiles = (
-            (width / tile_size).ceil() as i32,
-            (height / tile_size).ceil() as i32,
+        map_view::view::draw(
+            ctx,
+            &self.world,
+            &self.assets,
+            self.window_size,
+            self.shift_of_view,
+            self.cursors(),
         );
-        let center = Vec2::new(
-            width / 2.0 - tile_size / 2.0,
-            height / 2.0 - tile_size / 2.0,
-        );
-        let center_tile = world.player().pos + self.shift_of_view;
-        let left_top = center_tile + (-window_size_in_tiles.0 / 2, -window_size_in_tiles.1 / 2);
-        let right_bottom = center_tile + (window_size_in_tiles.0 / 2, window_size_in_tiles.1 / 2);
-        world.map().load_tiles_between(left_top, right_bottom);
-        for (pos, tile) in world.map().tiles_between(left_top, right_bottom) {
-            if !world.is_visible(pos) {
-                continue; // TODO: TileView struct for remembering tiles and optimizing drawing
-            }
-            let dx = pos.x - center_tile.x;
-            let dy = pos.y - center_tile.y;
-            let this_tile_size = Tileset::get_size(tile.terrain.looks_like());
-            let asset_tile_size = self.assets.tileset.tile_size as f32;
-            let x_correction = -(this_tile_size.x - asset_tile_size) / 2.0 * zoom;
-            let y_correction = -(this_tile_size.y - asset_tile_size) * zoom;
-            let params = DrawParams::new()
-                .position(Vec2::new(
-                    (center.x + dx as f32 * tile_size + x_correction).round(),
-                    (center.y + dy as f32 * tile_size + y_correction).round(),
-                ))
-                .scale(scale);
-            self.assets
-                .tileset
-                .draw_region(ctx, tile.terrain.looks_like(), params.clone());
-            if let Some(item) = tile.top_item() {
-                self.assets
-                    .tileset
-                    .draw_region(ctx, item.looks_like(), params.clone());
-                if tile.items.len() > 1 {
-                    self.assets.tileset.draw_region(ctx, "highlight", params);
-                }
-            }
-            // TODO: multitile units
-            let position = Vec2::new(
-                center.x + dx as f32 * tile_size,
-                center.y + dy as f32 * tile_size,
-            );
-            for i in tile.units.iter().copied() {
-                let unit = world.get_unit(i);
-                unit.draw(ctx, &self.assets.tileset, position, zoom, true);
-            }
-        }
-        // if world.player().action.is_some() {
-        //     self.draw_action_loader(ctx, center);
-        // } else {
-        //     self.action_text = None;
-        // }
-        for (delta, color) in self.current_mode().borrow().cursors(&world) {
-            let delta = delta * tile_size;
-            self.cursor.draw(
-                ctx,
-                DrawParams::new()
-                    .position(center + delta)
-                    .scale(scale)
-                    .color(color.with_alpha(0.7)),
-            );
-        }
-
-        for (i, msg) in self.log.texts.iter_mut().enumerate() {
-            msg.draw(Vec2::new(10.0, height - 20.0 * (i + 1) as f32), ctx);
-        }
     }
 
     fn after_draw(&mut self, ctx: &mut Context) {
-        // UI
-        self.world.borrow().player().draw(
+        // TODO: move this to UI
+
+        for (i, msg) in self.log.texts.iter_mut().enumerate() {
+            msg.draw(
+                Vec2::new(10.0, self.window_size.1 as f32 - 20.0 * (i + 1) as f32),
+                ctx,
+            );
+        }
+
+        map_view::view::draw_unit(
             ctx,
             &self.assets.tileset,
             Vec2::new(5.0, 5.0),
             3.0,
             false,
+            self.world.borrow().player(),
         );
         self.current_mode().borrow_mut().draw(ctx, self);
     }

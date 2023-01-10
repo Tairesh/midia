@@ -113,10 +113,14 @@ mod tests {
     fn test_settings_load_and_save() {
         let mut settings = load(TEST_PATH);
         settings.window.width = 987;
+        settings.window.height = 654;
+        settings.input.repeat_interval = 42;
         save(&settings, TEST_PATH);
 
         let settings = load(TEST_PATH);
         assert_eq!(987, settings.window.width);
+        assert_eq!(654, settings.window.height);
+        assert_eq!(42, settings.input.repeat_interval);
 
         std::fs::remove_file(TEST_PATH).ok();
     }

@@ -1,7 +1,7 @@
 use geometry::Point;
 
 use super::super::{
-    super::{bodies::Body, human::Personality},
+    super::{bodies::Body, races::Personality},
     item::{ItemInteract, ItemView},
 };
 
@@ -27,7 +27,7 @@ impl ItemView for Corpse {
             adjectives.push(bp.freshness().adjective());
             bp.age_name()
         } else {
-            "dismembered"
+            "dismembered".to_string()
         };
         format!("{} {age_name} corpse", adjectives.join(" "))
     }

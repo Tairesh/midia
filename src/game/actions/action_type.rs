@@ -24,12 +24,12 @@ mod tests {
     use super::{
         super::super::{
             bodies::{Freshness, OrganData},
-            human::{tests::personality::dead_boy, Gender, MainHand, SkinTone},
             map::{
                 items::{Axe, BodyPart, BodyPartType, Gravestone, Shovel},
                 terrains::{Boulder, BoulderSize, Dirt, Grave, GraveData, GraveVariant},
                 Item, Terrain,
             },
+            races::{tests::personality::dead_boy, Gender, MainHand, SkinTone},
             world::tests::{add_zombie, prepare_world},
         },
         Action, Dig, Drop, Read, Skip, Walk, Wield,
@@ -269,13 +269,11 @@ mod tests {
                 assert!(matches!(
                     body.parts.get(&Point::new(0, 0)),
                     Some(BodyPart {
-                        typ: BodyPartType::HumanTorso(
-                            OrganData {
-                                freshness: Freshness::Rotten,
-                                ..
-                            },
+                        typ: BodyPartType::Torso,
+                        data: OrganData {
+                            freshness: Freshness::Rotten,
                             ..
-                        ),
+                        },
                         ..
                     })
                 ));

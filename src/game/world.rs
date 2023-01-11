@@ -324,15 +324,17 @@ pub mod tests {
 
     use geometry::Point;
 
+    use crate::game::bodies::OrganData;
+
     use super::{
         super::{
             actions::implements::{Skip, Walk},
             bodies::Freshness,
-            human::{
-                helpers::human_body,
+            map::terrains::{Boulder, BoulderSize, Dirt},
+            races::{
+                helpers::body,
                 tests::personality::{dead_boy, tester_girl},
             },
-            map::terrains::{Boulder, BoulderSize, Dirt},
         },
         savefile::{GameView, Meta},
         Action, Avatar, Direction, Log, TerrainView, World,
@@ -350,7 +352,7 @@ pub mod tests {
 
     pub fn add_zombie(world: &mut World, pos: Point) -> usize {
         let character = dead_boy();
-        let body = human_body(&character, Freshness::Rotten);
+        let body = body(OrganData::new(&character, Freshness::Rotten));
         let zombie = Avatar::zombie(character, body, pos);
         world.add_unit(zombie)
     }

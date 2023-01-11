@@ -2,11 +2,13 @@
 
 use geometry::{Point, TwoDimDirection};
 
+use crate::game::bodies::OrganData;
+
 use super::{
     ai::ZombieAI,
     bodies::{Body, Freshness},
-    human::{helpers::human_body, Personality},
     map::items::{Cloak, Hat},
+    races::{helpers::body, Personality},
     Action, Item,
 };
 
@@ -19,21 +21,21 @@ pub enum Soul {
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct Avatar {
     pub body: Body,
+    pub soul: Soul,
     pub pos: Point,
     pub action: Option<Action>,
-    pub vision: TwoDimDirection,
     // TODO: rotation of multitile body
-    pub wield: Vec<Item>,
+    pub vision: TwoDimDirection,
     // TODO: custom struct with hands counter
+    pub wield: Vec<Item>,
     pub stamina: u8,
-    pub soul: Soul,
     // TODO: traits
     // TODO: skills
 }
 
 impl Avatar {
     pub fn player(personality: Personality, pos: Point) -> Self {
-        let mut body = human_body(&personality, Freshness::Fresh);
+        let mut body = body(OrganData::new(&personality, Freshness::Fresh));
         body.wear.push(Cloak::new().into());
         body.wear.push(Hat::new().into());
         Self::new(body, Soul::Player(personality), pos)

@@ -7,7 +7,7 @@ use arrayvec::ArrayVec;
 use rand::{distributions::Standard, rngs::StdRng, Rng, SeedableRng};
 
 use super::{
-    super::human::Personality,
+    super::races::Personality,
     items::Shovel,
     terrains::{Boulder, Dirt, Grass, Grave, GraveData, GraveVariant, Tree},
     ChunkPos, Tile,

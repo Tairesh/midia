@@ -34,7 +34,8 @@ pub trait ItemInteract {
     fn tags(&self) -> HashSet<ItemTag> {
         HashSet::new()
     }
-    fn mass(&self) -> u32; // in grams
+    fn mass(&self) -> u32;
+    // in grams
     fn wield_time(&self, _avatar: &Avatar) -> f64 {
         // 100 grams per tick
         self.mass() as f64 / 100.0
@@ -62,14 +63,12 @@ pub enum ItemTag {
 
 #[cfg(test)]
 mod tests {
-    use std::convert::TryInto;
-
     use super::super::super::map::terrains::GraveData;
     use super::{
         super::{
             super::{
                 bodies::{Freshness, OrganData},
-                human::{helpers::human_body, tests::personality::dead_boy},
+                races::{helpers::body, tests::personality::dead_boy},
             },
             items::{Axe, BodyPart, BodyPartType, Cloak, Corpse, Gravestone, Hat, Knife, Shovel},
         },
@@ -102,9 +101,9 @@ mod tests {
     #[test]
     fn test_corpse() {
         let character = dead_boy();
-        let body = human_body(&character, Freshness::Rotten);
+        let body = body(OrganData::new(&character, Freshness::Rotten));
         let corpse: Item = Corpse::new(character, body).into();
-        assert_eq!("naked rotten boy corpse", corpse.name());
+        assert_eq!("naked rotten gazan boy corpse", corpse.name());
     }
 
     #[test]
@@ -112,27 +111,20 @@ mod tests {
         let character = dead_boy();
         let brain: Item = BodyPart::new(
             "brain",
-            BodyPartType::HumanBrain(
-                OrganData::new(&character, Freshness::Fresh),
-                character.clone(),
-            ),
+            BodyPartType::Brain,
+            OrganData::new(&character, Freshness::Fresh),
         )
         .into();
-        // We can't see the sex of the brain but can understand that is the child one
-        assert_eq!("fresh child brain", brain.name());
+        // TODO: We can't see the sex of the brain but can understand that is the child one
+        assert_eq!("fresh gazan boy brain", brain.name());
 
         let head: Item = BodyPart::new(
             "head",
-            BodyPartType::HumanHead(
-                OrganData::new(&character, Freshness::Skeletal),
-                character.appearance.hair_color,
-                character.appearance.skin_tone,
-                (&character.mind.gender).try_into().unwrap_or_default(),
-            ),
+            BodyPartType::Head,
+            OrganData::new(&character, Freshness::Skeletal),
         )
         .into();
-        // We can understand the sex of the skull due to our dark necromantic knowledge of skulls
-        assert_eq!("boy skull", head.name());
+        assert_eq!("gazan boy skull", head.name());
     }
 
     #[test]

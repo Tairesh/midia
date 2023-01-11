@@ -1,8 +1,8 @@
-use std::convert::TryFrom;
-
+use rand::distributions::{Distribution, Standard};
+use rand::Rng;
 use serde::{Deserialize, Serialize};
 
-use super::super::human::Gender;
+use super::super::races::Gender;
 
 #[derive(Serialize, Deserialize, Debug, Copy, Clone, Eq, PartialEq)]
 pub enum Sex {
@@ -10,6 +10,8 @@ pub enum Sex {
     Male,
     #[serde(rename = "f")]
     Female,
+    #[serde(rename = "u")]
+    Undefined,
 }
 
 impl Default for Sex {
@@ -18,14 +20,12 @@ impl Default for Sex {
     }
 }
 
-impl TryFrom<&Gender> for Sex {
-    type Error = &'static str;
-
-    fn try_from(value: &Gender) -> Result<Self, Self::Error> {
+impl From<Gender> for Sex {
+    fn from(value: Gender) -> Self {
         match value {
-            Gender::Male => Ok(Self::Male),
-            Gender::Female => Ok(Self::Female),
-            Gender::Custom(_) => Err("Can't match custom genders to biological sex"),
+            Gender::Male => Self::Male,
+            Gender::Female => Self::Female,
+            Gender::Custom(_) => Self::Undefined,
         }
     }
 }
@@ -35,6 +35,17 @@ impl From<Sex> for Gender {
         match value {
             Sex::Male => Gender::Male,
             Sex::Female => Gender::Female,
+            Sex::Undefined => Gender::Custom("None".to_string()),
+        }
+    }
+}
+
+impl Distribution<Sex> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Sex {
+        match rng.gen_range(0..2) {
+            0 => Sex::Male,
+            1 => Sex::Female,
+            _ => unreachable!(),
         }
     }
 }

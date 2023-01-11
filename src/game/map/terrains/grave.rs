@@ -3,10 +3,12 @@ use rand::{
     Rng,
 };
 
+use crate::game::bodies::OrganData;
+
 use super::super::{
     super::{
         bodies::Freshness,
-        human::{helpers::human_body, Personality},
+        races::{helpers::body, Personality},
     },
     items::{Corpse, Gravestone, Rags},
     terrains::Pit,
@@ -57,13 +59,13 @@ impl TerrainInteract for Grave {
     }
 
     fn dig_result(&self) -> (Terrain, Vec<Item>) {
-        let mut body = human_body(
+        let mut body = body(OrganData::new(
             &self.data.character,
             match self.data.death_year {
                 253..=255 => Freshness::Rotten,
                 _ => Freshness::Skeletal,
             },
-        );
+        ));
         body.wear.push(Rags::new().into());
         (
             Pit::new().into(),

@@ -7,11 +7,10 @@ use tetra::Context;
 
 use crate::assets::{Assets, Tileset};
 use crate::colors::Colors;
-use crate::game::bodies::{Freshness, OrganData};
-use crate::game::human::Gender;
+use crate::game::bodies::Freshness;
 use crate::game::map::item::ItemView;
-use crate::game::map::items::BodyPartType;
 use crate::game::map::terrain::TerrainView;
+use crate::game::races::Gender;
 use crate::game::{Avatar, Soul, World};
 
 // TODO: refactor this to small functions
@@ -130,18 +129,11 @@ pub fn draw_unit(
     };
     match &avatar.soul {
         Soul::Zombie(person, ..) => {
-            let freshness =
-                avatar
-                    .body
-                    .parts
-                    .get(&Point::new(0, 0))
-                    .map_or(Freshness::Rotten, |i| {
-                        if let BodyPartType::HumanTorso(OrganData { freshness, .. }, ..) = i.typ {
-                            freshness
-                        } else {
-                            panic!("Root bodypart is not a human torso!")
-                        }
-                    });
+            let freshness = avatar
+                .body
+                .parts
+                .get(&Point::new(0, 0))
+                .map_or(Freshness::Rotten, |i| i.data.freshness);
             let (name, color) = match freshness {
                 Freshness::Fresh => (
                     if person.appearance.age > 15 {

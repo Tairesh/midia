@@ -11,12 +11,11 @@ pub use world::World;
 
 pub mod actions;
 pub mod ai;
-mod animals;
 mod avatar;
 pub mod bodies;
 mod fov;
 mod game_data;
-pub mod human;
 mod log;
 pub mod map;
+pub mod races;
 pub mod world;

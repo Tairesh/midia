@@ -1,7 +1,10 @@
 use rand::distributions::{Distribution, Standard};
 use rand::Rng;
 
-use super::super::human::Personality;
+use super::{
+    super::races::{FurColor, Personality, Race, SkinTone},
+    Sex,
+};
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Copy, Clone)]
 pub enum Freshness {
@@ -51,8 +54,10 @@ impl Distribution<BodySize> for Standard {
     }
 }
 
-#[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
+#[derive(serde::Serialize, serde::Deserialize, Debug, Copy, Clone)]
 pub struct OrganData {
+    #[serde(rename = "r")]
+    pub race: Race,
     #[serde(rename = "f")]
     pub freshness: Freshness,
     #[serde(rename = "a")]
@@ -61,6 +66,12 @@ pub struct OrganData {
     pub size: BodySize,
     #[serde(rename = "l")]
     pub alive: bool,
+    #[serde(rename = "x")]
+    pub sex: Sex,
+    #[serde(rename = "t")]
+    pub skin_tone: SkinTone,
+    #[serde(rename = "c")]
+    pub fur_color: Option<FurColor>,
 }
 
 // TODO: SkinData with SkinTone and scars/tattoo/etc.
@@ -69,9 +80,13 @@ impl OrganData {
     pub fn new(character: &Personality, freshness: Freshness) -> Self {
         Self {
             freshness,
+            race: character.appearance.race,
             age: character.appearance.age,
             size: character.appearance.body_size,
             alive: character.mind.alive,
+            sex: character.appearance.sex,
+            skin_tone: character.appearance.skin_tone,
+            fur_color: character.appearance.fur_color,
         }
     }
 }

@@ -5,12 +5,13 @@ use geometry::Point;
 use tetra::input::{Key, KeyModifier};
 use tetra::{Context, Event};
 
+use crate::game::races::{Gender, Race};
 use crate::{
     app::App,
     colors::Colors,
     game::{
         bodies::BodySize,
-        human::{Appearance, HairColor, MainHand, Mind, Personality, SkinTone},
+        races::{Appearance, FurColor, MainHand, Mind, Personality, SkinTone},
         Avatar, Log, World,
     },
     savefile::{self, GameView, Meta},
@@ -27,6 +28,8 @@ use super::super::{
 
 #[derive(Debug, Copy, Clone)]
 enum ButtonEvent {
+    RaceLeft,
+    RaceRight,
     GenderLeft,
     GenderRight,
     AgeMinus,
@@ -40,14 +43,16 @@ enum ButtonEvent {
 impl From<u8> for ButtonEvent {
     fn from(n: u8) -> Self {
         match n {
-            0 => Self::GenderLeft,
-            1 => Self::GenderRight,
-            2 => Self::AgeMinus,
-            3 => Self::AgePlus,
-            4 => Self::HandLeft,
-            5 => Self::HandRight,
-            6 => Self::Randomize,
-            7 => Self::Create,
+            0 => Self::RaceLeft,
+            1 => Self::RaceRight,
+            2 => Self::GenderLeft,
+            3 => Self::GenderRight,
+            4 => Self::AgeMinus,
+            5 => Self::AgePlus,
+            6 => Self::HandLeft,
+            7 => Self::HandRight,
+            8 => Self::Randomize,
+            9 => Self::Create,
             _ => unreachable!(),
         }
     }
@@ -55,7 +60,8 @@ impl From<u8> for ButtonEvent {
 
 pub struct CreateCharacter {
     meta: Meta,
-    sprites: [Box<dyn UiSprite>; 21],
+    sprites: [Box<dyn UiSprite>; 25],
+    race: Race,
     main_hand: MainHand,
     window_size: (i32, i32),
 }
@@ -118,7 +124,7 @@ impl CreateCharacter {
                     &app.assets,
                     Position {
                         x: Horizontal::AtWindowCenterByRight { offset: -60.0 },
-                        y: Vertical::ByCenter { y: 195.0 },
+                        y: Vertical::ByCenter { y: 200.0 },
                     },
                 ),
                 text_input(
@@ -139,11 +145,11 @@ impl CreateCharacter {
                     },
                 ),
                 label(
-                    "Gender:",
+                    "Race:",
                     &app.assets,
                     Position {
                         x: Horizontal::AtWindowCenterByRight { offset: -60.0 },
-                        y: Vertical::ByCenter { y: 245.0 },
+                        y: Vertical::ByCenter { y: 250.0 },
                     },
                 ),
                 Box::new(Button::icon(
@@ -154,6 +160,45 @@ impl CreateCharacter {
                     Position {
                         x: Horizontal::AtWindowCenterByLeft { offset: -40.0 },
                         y: Vertical::ByCenter { y: 250.0 },
+                    },
+                    Transition::CustomEvent(ButtonEvent::RaceLeft as u8),
+                )),
+                Box::new(Label::new(
+                    "Gazan",
+                    app.assets.fonts.header.clone(),
+                    Colors::DARK_BROWN,
+                    Position {
+                        x: Horizontal::AtWindowCenterByCenter { offset: 110.0 },
+                        y: Vertical::ByCenter { y: 250.0 },
+                    },
+                )),
+                Box::new(Button::icon(
+                    vec![],
+                    "mt",
+                    app.assets.tileset.clone(),
+                    app.assets.button.clone(),
+                    Position {
+                        x: Horizontal::AtWindowCenterByRight { offset: 260.0 },
+                        y: Vertical::ByCenter { y: 250.0 },
+                    },
+                    Transition::CustomEvent(ButtonEvent::RaceRight as u8),
+                )),
+                label(
+                    "Gender:",
+                    &app.assets,
+                    Position {
+                        x: Horizontal::AtWindowCenterByRight { offset: -60.0 },
+                        y: Vertical::ByCenter { y: 295.0 },
+                    },
+                ),
+                Box::new(Button::icon(
+                    vec![],
+                    "lt",
+                    app.assets.tileset.clone(),
+                    app.assets.button.clone(),
+                    Position {
+                        x: Horizontal::AtWindowCenterByLeft { offset: -40.0 },
+                        y: Vertical::ByCenter { y: 300.0 },
                     },
                     Transition::CustomEvent(ButtonEvent::GenderLeft as u8),
                 )),
@@ -167,7 +212,7 @@ impl CreateCharacter {
                     &app.assets,
                     Position {
                         x: Horizontal::AtWindowCenterByLeft { offset: 5.0 },
-                        y: Vertical::ByCenter { y: 250.0 },
+                        y: Vertical::ByCenter { y: 300.0 },
                     },
                 ),
                 Box::new(Button::icon(
@@ -177,7 +222,7 @@ impl CreateCharacter {
                     app.assets.button.clone(),
                     Position {
                         x: Horizontal::AtWindowCenterByRight { offset: 260.0 },
-                        y: Vertical::ByCenter { y: 250.0 },
+                        y: Vertical::ByCenter { y: 300.0 },
                     },
                     Transition::CustomEvent(ButtonEvent::GenderRight as u8),
                 )),
@@ -186,7 +231,7 @@ impl CreateCharacter {
                     &app.assets,
                     Position {
                         x: Horizontal::AtWindowCenterByRight { offset: -60.0 },
-                        y: Vertical::ByCenter { y: 298.0 },
+                        y: Vertical::ByCenter { y: 350.0 },
                     },
                 ),
                 Box::new(Button::icon(
@@ -196,7 +241,7 @@ impl CreateCharacter {
                     app.assets.button.clone(),
                     Position {
                         x: Horizontal::AtWindowCenterByLeft { offset: -40.0 },
-                        y: Vertical::ByCenter { y: 300.0 },
+                        y: Vertical::ByCenter { y: 350.0 },
                     },
                     Transition::CustomEvent(ButtonEvent::AgeMinus as u8),
                 )),
@@ -207,7 +252,7 @@ impl CreateCharacter {
                     app.assets.fonts.header.clone(),
                     Position {
                         x: Horizontal::AtWindowCenterByLeft { offset: 5.0 },
-                        y: Vertical::ByCenter { y: 300.0 },
+                        y: Vertical::ByCenter { y: 350.0 },
                     },
                 )),
                 Box::new(Button::icon(
@@ -217,7 +262,7 @@ impl CreateCharacter {
                     app.assets.button.clone(),
                     Position {
                         x: Horizontal::AtWindowCenterByRight { offset: 260.0 },
-                        y: Vertical::ByCenter { y: 300.0 },
+                        y: Vertical::ByCenter { y: 350.0 },
                     },
                     Transition::CustomEvent(ButtonEvent::AgePlus as u8),
                 )),
@@ -226,7 +271,7 @@ impl CreateCharacter {
                     &app.assets,
                     Position {
                         x: Horizontal::AtWindowCenterByRight { offset: -60.0 },
-                        y: Vertical::ByCenter { y: 345.0 },
+                        y: Vertical::ByCenter { y: 400.0 },
                     },
                 ),
                 Box::new(Button::icon(
@@ -236,7 +281,7 @@ impl CreateCharacter {
                     app.assets.button.clone(),
                     Position {
                         x: Horizontal::AtWindowCenterByLeft { offset: -40.0 },
-                        y: Vertical::ByCenter { y: 350.0 },
+                        y: Vertical::ByCenter { y: 400.0 },
                     },
                     Transition::CustomEvent(ButtonEvent::HandLeft as u8),
                 )),
@@ -246,7 +291,7 @@ impl CreateCharacter {
                     Colors::DARK_BROWN,
                     Position {
                         x: Horizontal::AtWindowCenterByCenter { offset: 110.0 },
-                        y: Vertical::ByCenter { y: 348.0 },
+                        y: Vertical::ByCenter { y: 400.0 },
                     },
                 )),
                 Box::new(Button::icon(
@@ -256,7 +301,7 @@ impl CreateCharacter {
                     app.assets.button.clone(),
                     Position {
                         x: Horizontal::AtWindowCenterByRight { offset: 260.0 },
-                        y: Vertical::ByCenter { y: 350.0 },
+                        y: Vertical::ByCenter { y: 400.0 },
                     },
                     Transition::CustomEvent(ButtonEvent::HandRight as u8),
                 )),
@@ -265,6 +310,7 @@ impl CreateCharacter {
                 create_btn,
             ],
             meta,
+            race: Race::Gazan,
             main_hand: MainHand::Right,
             window_size: app.window_size,
         }
@@ -276,14 +322,76 @@ impl CreateCharacter {
     fn name_empty(&mut self) -> &mut Label {
         self.sprites[5].as_label().unwrap()
     }
-    fn gender_input(&mut self) -> &mut TextInput {
-        self.sprites[8].as_text_input().unwrap()
+    fn race_name(&mut self) -> &mut Label {
+        self.sprites[8].as_label().unwrap()
     }
-    fn age_input(&mut self) -> &mut TextInput {
+    fn gender_input(&mut self) -> &mut TextInput {
         self.sprites[12].as_text_input().unwrap()
     }
+    fn age_input(&mut self) -> &mut TextInput {
+        self.sprites[16].as_text_input().unwrap()
+    }
     fn hand_name(&mut self) -> &mut Label {
-        self.sprites[16].as_label().unwrap()
+        self.sprites[20].as_label().unwrap()
+    }
+
+    fn randomize(&mut self, ctx: &mut Context) {
+        let mut rng = rand::thread_rng();
+        let character = Personality::random(&mut rng, true);
+        self.gender_input().set_value(character.mind.gender);
+        self.name_input().set_value(character.mind.name);
+        self.age_input()
+            .set_value(character.appearance.age.to_string());
+        self.race = character.appearance.race;
+        self.main_hand = character.mind.main_hand;
+        let name = self.main_hand.name();
+        let race = self.race.name();
+        let window_size = self.window_size;
+        self.hand_name().update(name, ctx, window_size);
+        self.race_name().update(race, ctx, window_size);
+    }
+
+    fn create(&mut self) -> SomeTransitions {
+        let name = self.name_input().value();
+        if name.is_empty() {
+            self.name_input().set_danger(true);
+            self.name_empty().set_visible(true);
+            None
+        } else {
+            let gender: Gender = self.gender_input().value().into();
+            let age = self.age_input().value().parse::<u8>().unwrap();
+            let character = Personality::new(
+                Appearance {
+                    race: self.race,
+                    age,
+                    skin_tone: SkinTone::PaleIvory,
+                    fur_color: Some(FurColor::LightBrown),
+                    body_size: BodySize::Normal,
+                    sex: gender.clone().into(),
+                },
+                Mind {
+                    name,
+                    gender,
+                    main_hand: self.main_hand,
+                    alive: true,
+                },
+            );
+            // TODO: find available starting pos in the world
+            let avatar = Avatar::player(character, Point::new(0, 0));
+            let mut world = World::new(
+                self.meta.clone(),
+                GameView::default(),
+                Log::new(),
+                vec![avatar],
+                HashMap::new(),
+            )
+            .init();
+            world.save();
+            Some(vec![
+                Transition::LoadWorld(self.meta.path.clone()),
+                Transition::Replace(Scene::GameScene),
+            ])
+        }
     }
 }
 
@@ -314,6 +422,17 @@ impl SceneImpl for CreateCharacter {
     fn custom_event(&mut self, ctx: &mut Context, event: u8) -> SomeTransitions {
         let event = ButtonEvent::from(event);
         match event {
+            ButtonEvent::RaceLeft | ButtonEvent::RaceRight => {
+                self.race = match event {
+                    ButtonEvent::RaceLeft => self.race.prev(),
+                    ButtonEvent::RaceRight => self.race.next(),
+                    _ => unreachable!(),
+                };
+                let name = self.race.name();
+                let window_size = self.window_size;
+                self.race_name().update(name, ctx, window_size);
+                None
+            }
             ButtonEvent::GenderLeft | ButtonEvent::GenderRight => {
                 let input = self.gender_input();
                 let value = input.value();
@@ -348,58 +467,10 @@ impl SceneImpl for CreateCharacter {
                 None
             }
             ButtonEvent::Randomize => {
-                let mut rng = rand::thread_rng();
-                let character = Personality::random(&mut rng, true);
-                self.gender_input().set_value(character.mind.gender);
-                self.name_input().set_value(character.mind.name);
-                self.age_input()
-                    .set_value(character.appearance.age.to_string());
-                self.main_hand = character.mind.main_hand;
-                let name = self.main_hand.name();
-                let window_size = self.window_size;
-                self.hand_name().update(name, ctx, window_size);
+                self.randomize(ctx);
                 None
             }
-            ButtonEvent::Create => {
-                let name = self.name_input().value();
-                if name.is_empty() {
-                    self.name_input().set_danger(true);
-                    self.name_empty().set_visible(true);
-                    None
-                } else {
-                    let gender = self.gender_input().value().into();
-                    let age = self.age_input().value().parse::<u8>().unwrap();
-                    let character = Personality::new(
-                        Appearance {
-                            age,
-                            skin_tone: SkinTone::PaleIvory,
-                            hair_color: HairColor::White,
-                            body_size: BodySize::Normal,
-                        },
-                        Mind {
-                            name,
-                            gender,
-                            main_hand: self.main_hand,
-                            alive: true,
-                        },
-                    );
-                    // TODO: find available starting pos in the world
-                    let avatar = Avatar::player(character, Point::new(0, 0));
-                    let mut world = World::new(
-                        self.meta.clone(),
-                        GameView::default(),
-                        Log::new(),
-                        vec![avatar],
-                        HashMap::new(),
-                    )
-                    .init();
-                    world.save();
-                    Some(vec![
-                        Transition::LoadWorld(self.meta.path.clone()),
-                        Transition::Replace(Scene::GameScene),
-                    ])
-                }
-            }
+            ButtonEvent::Create => self.create(),
         }
     }
 }

@@ -48,6 +48,8 @@ pub trait TerrainInteract {
     fn read(&self) -> String {
         unreachable!()
     }
+    /// Can put items on this tile
+    fn can_stock_items(&self) -> bool;
 }
 
 #[cfg(test)]

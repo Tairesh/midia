@@ -33,4 +33,8 @@ impl TerrainInteract for Pit {
     fn passage(&self) -> Passage {
         Passage::Impassable
     }
+
+    fn can_stock_items(&self) -> bool {
+        true
+    }
 }

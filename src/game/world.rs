@@ -177,7 +177,7 @@ impl World {
     pub fn this_is(&self, pos: Point, multiline: bool) -> String {
         let mut map = self.map();
         let tile = map.get_tile(pos);
-        let mut this_is = format!("This is the {}.", tile.terrain.name());
+        let mut this_is = format!("This is a {}.", tile.terrain.name());
         if multiline {
             this_is = this_is.replace(". ", ".\n");
         }

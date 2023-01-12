@@ -58,6 +58,10 @@ impl TerrainInteract for Dirt {
     fn dig_result(&self) -> (Terrain, Vec<Item>) {
         (Pit::new().into(), vec![])
     }
+
+    fn can_stock_items(&self) -> bool {
+        true
+    }
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Copy, Clone)]

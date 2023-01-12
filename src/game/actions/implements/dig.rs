@@ -6,7 +6,7 @@ use super::super::{
         log::{LogCategory, LogEvent},
         map::{
             item::{ItemInteract, ItemTag},
-            terrain::{TerrainInteract, TerrainView},
+            terrain::{Terrain, TerrainInteract, TerrainView},
         },
         Avatar, World,
     },
@@ -25,7 +25,11 @@ impl ActionImpl for Dig {
         let mut map = world.map();
         let tile = map.get_tile(pos);
         if !tile.terrain.is_diggable() {
-            return No(format!("You can't dig the {}", tile.terrain.name()));
+            return if let Terrain::Pit(..) = tile.terrain {
+                No("You can't dig a hole in a hole".to_string())
+            } else {
+                No(format!("You can't dig {}", tile.terrain.name()))
+            };
         }
         if !actor
             .wield

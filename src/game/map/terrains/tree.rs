@@ -40,6 +40,10 @@ impl TerrainInteract for Tree {
     fn passage(&self) -> Passage {
         Passage::Impassable
     }
+
+    fn can_stock_items(&self) -> bool {
+        false
+    }
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Copy, Clone)]

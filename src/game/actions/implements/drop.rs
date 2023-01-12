@@ -27,7 +27,7 @@ impl ActionImpl for Drop {
         let pos = actor.pos + self.dir;
         let mut map = world.map();
         let tile = map.get_tile(pos);
-        if !tile.terrain.is_passable() {
+        if !tile.terrain.can_stock_items() {
             return No(format!("You can't put items on {}", tile.terrain.name()));
         }
 

@@ -37,7 +37,7 @@ impl GameModeImpl for Dropping {
                 .copied()
                 .filter(|d| {
                     let pos = world.player().pos + *d;
-                    world.map().get_tile(pos).terrain.is_passable()
+                    world.map().get_tile(pos).terrain.can_stock_items()
                 })
                 .map(|d| (d.into(), Colors::WHITE_SMOKE))
                 .collect()

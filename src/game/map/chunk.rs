@@ -6,6 +6,8 @@ use std::hash::{Hash, Hasher};
 use arrayvec::ArrayVec;
 use rand::{distributions::Standard, rngs::StdRng, Rng, SeedableRng};
 
+use crate::game::map::items::{Axe, Hat, Knife, Rags};
+
 use super::{
     items::Shovel,
     terrains::{Boulder, Dirt, Grass, Tree},
@@ -67,7 +69,18 @@ impl Chunk {
                 blocked_tiles.insert(pos + Chunk::SIZE as usize);
             }
 
-            tiles.get_mut(pos).unwrap().items.push(Shovel::new().into());
+            tiles
+                .get_mut(pos)
+                .unwrap()
+                .items
+                .push(match rng.gen_range(0..5) {
+                    0 => Shovel::new().into(),
+                    1 => Axe::new().into(),
+                    2 => Knife::new().into(),
+                    3 => Rags::new().into(),
+                    4 => Hat::new().into(),
+                    _ => unreachable!(),
+                });
         }
         Chunk { pos, tiles }
     }

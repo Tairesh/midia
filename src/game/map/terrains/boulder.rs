@@ -47,6 +47,10 @@ impl TerrainInteract for Boulder {
             BoulderSize::Small => Passage::Passable(50.0),
         }
     }
+
+    fn can_stock_items(&self) -> bool {
+        false
+    }
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Copy, Clone)]

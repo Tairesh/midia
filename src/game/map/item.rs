@@ -52,13 +52,18 @@ pub trait ItemInteract {
     fn is_wearable(&self) -> bool {
         false
     }
+    fn tool_or_weapon(&self) -> bool {
+        self.tags().contains(&ItemTag::Tool) || self.tags().contains(&ItemTag::Weapon)
+    }
 }
 
-// TODO: rename this to qualities
 #[derive(Debug, Hash, Eq, PartialEq)]
 pub enum ItemTag {
+    // TODO: rename this to qualities
     DigTool,
     ButchTool,
+    Tool,
+    Weapon,
 }
 
 #[cfg(test)]

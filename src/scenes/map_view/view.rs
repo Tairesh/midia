@@ -7,7 +7,7 @@ use tetra::Context;
 
 use crate::assets::{Assets, Tileset};
 use crate::colors::Colors;
-use crate::game::map::item::ItemView;
+use crate::game::map::item::{ItemInteract, ItemView};
 use crate::game::map::terrain::TerrainView;
 use crate::game::traits::Name;
 use crate::game::{Avatar, World};
@@ -131,17 +131,28 @@ pub fn draw_unit(
     }
     tileset.draw_region(ctx, avatar.personality.appearance.race.name(), draw_params);
     if let Some(item) = avatar.wield.get(0) {
-        let offset = if !rotate || matches!(avatar.vision, TwoDimDirection::East) {
-            Vec2::new(15.0 * zoom, 10.0 * zoom)
-        } else {
-            Vec2::new(-15.0 * zoom, 10.0 * zoom)
-        };
+        let (offset_x, offset_y) = (
+            if !rotate || matches!(avatar.vision, TwoDimDirection::East) {
+                5.0
+            } else {
+                -5.0
+            } * zoom,
+            if item.tool_or_weapon() {
+                0.0
+            } else {
+                3.0 * zoom
+            },
+        );
         tileset.draw_region(
             ctx,
             item.looks_like(),
             DrawParams::new()
-                .position(position + offset)
-                .scale(scale * -1.0),
+                .position(position + Vec2::new(offset_x, offset_y))
+                .scale(if item.tool_or_weapon() {
+                    scale
+                } else {
+                    scale * 0.7
+                }),
         );
     }
 }

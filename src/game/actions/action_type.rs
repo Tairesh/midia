@@ -19,20 +19,18 @@ pub enum ActionType {
 
 #[cfg(test)]
 mod tests {
-    use geometry::{Direction, Point, DIR8};
+    use geometry::{Direction, Point};
 
     use super::{
         super::super::{
-            bodies::{Freshness, OrganData},
             map::{
-                items::{Axe, BodyPart, BodyPartType, Gravestone, Shovel},
-                terrains::{Boulder, BoulderSize, Dirt, Grave, GraveData, GraveVariant},
+                items::{Axe, Shovel},
+                terrains::{Boulder, BoulderSize, Dirt},
                 Item, Terrain,
             },
-            races::{tests::personality::dead_boy, Gender, MainHand},
-            world::tests::{add_zombie, prepare_world},
+            world::tests::{add_npc, prepare_world},
         },
-        Action, Dig, Drop, Read, Skip, Walk, Wield,
+        Action, Dig, Drop, Skip, Walk, Wield,
     };
 
     #[test]
@@ -69,7 +67,7 @@ mod tests {
     fn test_walking_fail_to_unit() {
         let mut world = prepare_world();
         world.map().get_tile_mut(Point::new(1, 0)).terrain = Dirt::default().into();
-        add_zombie(&mut world, Point::new(1, 0));
+        add_npc(&mut world, Point::new(1, 0));
 
         assert!(Action::new(
             0,
@@ -86,22 +84,11 @@ mod tests {
     fn test_fail_walking_two_units_to_same_place() {
         let mut world = prepare_world();
         world.map().get_tile_mut(Point::new(1, 1)).terrain = Dirt::default().into();
-        let zombie = add_zombie(&mut world, Point::new(1, 0));
+        let npc = add_npc(&mut world, Point::new(1, 0));
 
         world.player_mut().action = Some(
             Action::new(
                 0,
-                Walk {
-                    dir: Direction::SouthEast,
-                }
-                .into(),
-                &world,
-            )
-            .unwrap(),
-        );
-        world.get_unit_mut(zombie).action = Some(
-            Action::new(
-                zombie,
                 Walk {
                     dir: Direction::South,
                 }
@@ -110,16 +97,27 @@ mod tests {
             )
             .unwrap(),
         );
+        world.get_unit_mut(npc).action = Some(
+            Action::new(
+                npc,
+                Walk {
+                    dir: Direction::SouthWest,
+                }
+                .into(),
+                &world,
+            )
+            .unwrap(),
+        );
         world.tick();
-        assert_eq!(Point::new(1, 1), world.player().pos);
-        assert_eq!(Point::new(1, 0), world.get_unit(zombie).pos);
+        assert_eq!(Point::new(0, 1), world.player().pos);
+        assert_eq!(Point::new(1, 0), world.get_unit(npc).pos);
         assert!(world.player().action.is_none());
 
         world.player_mut().action = Some(Action::new(0, Skip {}.into(), &world).unwrap());
         world.tick();
-        // do not check zombie.action because it can be already new one, selected by AI
-        assert_eq!(Point::new(1, 0), world.get_unit(zombie).pos);
-        assert_eq!(1, world.map().get_tile(Point::new(1, 1)).units.len());
+        // do not check npc.action because it can be already new one, selected by AI
+        assert_eq!(Point::new(1, 0), world.get_unit(npc).pos);
+        assert_eq!(1, world.map().get_tile(Point::new(0, 1)).units.len());
         assert_eq!(1, world.map().get_tile(Point::new(1, 0)).units.len());
         assert_eq!(0, world.map().get_tile(Point::new(0, 0)).units.len());
     }
@@ -218,134 +216,10 @@ mod tests {
             world.map().get_tile(Point::new(1, 0)).terrain,
             Terrain::Pit(..)
         ));
-
-        let character = dead_boy();
-        world.map().get_tile_mut(Point::new(1, 0)).terrain = Grave::new(
-            GraveVariant::New,
-            GraveData {
-                character,
-                death_year: 255,
-            },
-        )
-        .into();
-        world.player_mut().action = Some(Action::new(0, typ.into(), &world).unwrap());
-        while world.player().action.is_some() {
-            world.tick();
-        }
-        assert!(matches!(
-            world.map().get_tile(Point::new(1, 0)).terrain,
-            Terrain::Pit(..)
-        ));
-        let mut corpse = None;
-        let mut gravestone = None;
-        for dir in DIR8 {
-            for item in world
-                .map()
-                .get_tile_mut(Point::new(1, 0) + dir)
-                .items
-                .iter()
-            {
-                match item {
-                    Item::Corpse(..) => {
-                        corpse = Some(item.clone());
-                    }
-                    Item::Gravestone(..) => {
-                        gravestone = Some(item.clone());
-                    }
-                    _ => {}
-                }
-            }
-        }
-        assert!(corpse.is_some());
-        if let Some(corpse) = corpse {
-            if let Item::Corpse(corpse) = corpse {
-                let ch = &corpse.character;
-                let body = &corpse.body;
-                assert_eq!("Dead Boy", ch.mind.name);
-                assert_eq!(Gender::Male, ch.mind.gender);
-                assert_eq!(9, ch.appearance.age);
-                assert_eq!(MainHand::Right, ch.mind.main_hand);
-                assert!(matches!(
-                    body.parts.get(&Point::new(0, 0)),
-                    Some(BodyPart {
-                        typ: BodyPartType::Torso,
-                        data: OrganData {
-                            freshness: Freshness::Rotten,
-                            ..
-                        },
-                        ..
-                    })
-                ));
-            } else {
-                unreachable!();
-            }
-        } else {
-            unreachable!();
-        }
-        assert!(gravestone.is_some());
-        if let Some(gravestone) = gravestone {
-            if let Item::Gravestone(gravestone) = gravestone {
-                let data = &gravestone.data;
-                assert_eq!("Dead Boy", data.character.mind.name);
-                assert_eq!(Gender::Male, data.character.mind.gender);
-                assert_eq!(9, data.character.appearance.age);
-                assert_eq!(MainHand::Right, data.character.mind.main_hand);
-            } else {
-                unreachable!();
-            }
-        } else {
-            unreachable!();
-        }
     }
 
     #[test]
     fn test_reading() {
-        let mut world = prepare_world();
-
-        let character = dead_boy();
-        let data = GraveData {
-            character,
-            death_year: 255,
-        };
-        world.map().get_tile_mut(Point::new(1, 0)).terrain =
-            Grave::new(GraveVariant::New, data.clone()).into();
-        world.player_mut().action = Some(
-            Action::new(
-                0,
-                Read {
-                    dir: Direction::East,
-                }
-                .into(),
-                &world,
-            )
-            .unwrap(),
-        );
-        while world.player().action.is_some() {
-            world.tick();
-            for event in world.log().new_events() {
-                assert_eq!("You read on gravestone: Dead Boy. 246 — 255", event.msg);
-            }
-        }
-
-        world.map().get_tile_mut(Point::new(0, 1)).terrain = Dirt::default().into();
-        world.map().get_tile_mut(Point::new(0, 1)).items.clear();
-        let typ = Read {
-            dir: Direction::South,
-        };
-        assert!(Action::new(0, typ.into(), &world).is_err());
-
-        world
-            .map()
-            .get_tile_mut(Point::new(0, 1))
-            .items
-            .push(Gravestone::new(data).into());
-
-        world.player_mut().action = Some(Action::new(0, typ.into(), &world).unwrap());
-        while world.player().action.is_some() {
-            world.tick();
-            for event in world.log().new_events() {
-                assert_eq!("You read on gravestone: Dead Boy. 246 — 255", event.msg);
-            }
-        }
+        // TODO
     }
 }

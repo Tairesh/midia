@@ -29,7 +29,7 @@ impl ItemView for Knife {
 
 impl ItemInteract for Knife {
     fn tags(&self) -> HashSet<ItemTag> {
-        HashSet::from([ItemTag::Butch])
+        HashSet::from([ItemTag::ButchTool])
     }
 
     fn mass(&self) -> u32 {

@@ -10,9 +10,7 @@ pub use map::{
 pub use world::World;
 
 pub mod actions;
-pub mod ai;
 mod avatar;
-pub mod bodies;
 mod fov;
 mod game_data;
 mod log;

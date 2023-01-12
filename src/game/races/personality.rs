@@ -2,13 +2,9 @@ use rand::distributions::Standard;
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 
-use crate::game::bodies::Sex;
-use crate::game::races::PlayableRace;
-use crate::game::traits::Name;
-
 use super::{
-    super::{bodies::BodySize, GameData},
-    FurColor, Gender, MainHand, Race,
+    super::{traits::Name, GameData},
+    FurColor, Gender, MainHand, PlayableRace, Race, Sex,
 };
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -19,8 +15,6 @@ pub struct Appearance {
     pub age: u8,
     #[serde(rename = "f")]
     pub fur_color: Option<FurColor>,
-    #[serde(rename = "z")]
-    pub body_size: BodySize,
     #[serde(rename = "x")]
     pub sex: Sex,
 }
@@ -40,6 +34,8 @@ pub struct Mind {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Personality {
+    #[serde(rename = "p")]
+    pub is_player: bool,
     #[serde(rename = "a")]
     pub appearance: Appearance,
     #[serde(rename = "m")]
@@ -47,11 +43,15 @@ pub struct Personality {
 }
 
 impl Personality {
-    pub fn new(appearance: Appearance, mind: Mind) -> Self {
-        Self { appearance, mind }
+    pub fn new(is_player: bool, appearance: Appearance, mind: Mind) -> Self {
+        Self {
+            is_player,
+            appearance,
+            mind,
+        }
     }
 
-    pub fn random<R: Rng + ?Sized>(rng: &mut R, alive: bool) -> Personality {
+    pub fn random<R: Rng + ?Sized>(rng: &mut R, is_player: bool, alive: bool) -> Personality {
         let gender = rng.sample(Standard);
         let game_data = GameData::instance();
         let name = format!(
@@ -63,9 +63,14 @@ impl Personality {
             },
             game_data.names.random_name(rng)
         );
-        let race: PlayableRace = rng.sample(Standard);
-        let race = Race::from(race);
+        let race = if is_player {
+            let race: PlayableRace = rng.sample(Standard);
+            Race::from(race)
+        } else {
+            rng.sample(Standard)
+        };
         Personality::new(
+            is_player,
             Appearance {
                 age: rng.gen_range(0..=99),
                 fur_color: if race.has_fur() {
@@ -73,7 +78,6 @@ impl Personality {
                 } else {
                     None
                 },
-                body_size: rng.sample(Standard),
                 sex: rng.sample(Standard),
                 race,
             },
@@ -88,76 +92,46 @@ impl Personality {
 
     #[allow(dead_code)]
     pub fn age_name(&self) -> String {
-        age_name(
-            self.appearance.race,
-            self.appearance.age,
-            Some(self.mind.gender.clone()),
-        )
+        age_name(&self.appearance)
     }
 }
 
-pub fn age_name(race: Race, age: u8, gender: Option<Gender>) -> String {
-    let race_name = race.name().to_lowercase();
-    match age {
+pub fn age_name(appearance: &Appearance) -> String {
+    let race_name = appearance.race.name().to_lowercase();
+    match appearance.age {
         0..=3 => format!("baby {race_name}"),
         4..=15 => {
             race_name
                 + " "
-                + if let Some(gender) = gender {
-                    match gender {
-                        Gender::Male => "boy",
-                        Gender::Female => "girl",
-                        Gender::Custom(_) => "child",
-                    }
-                } else {
-                    "child"
+                + match appearance.sex {
+                    Sex::Male => "boy",
+                    Sex::Female => "girl",
+                    Sex::Undefined => "child",
                 }
         }
         16.. => {
-            if let Some(gender) = gender {
-                match gender {
-                    Gender::Male => race_name + " man",
-                    Gender::Female => race_name + " woman",
-                    Gender::Custom(_) => race_name,
+            race_name
+                + " "
+                + match appearance.sex {
+                    Sex::Male => "man",
+                    Sex::Female => "woman",
+                    Sex::Undefined => "person",
                 }
-            } else {
-                race_name
-            }
         }
     }
 }
 
 #[cfg(test)]
 pub mod tests {
-    use crate::game::bodies::Sex;
-
-    use super::{Appearance, BodySize, FurColor, Gender, MainHand, Mind, Personality, Race};
-
-    pub fn dead_boy() -> Personality {
-        Personality::new(
-            Appearance {
-                race: Race::Gazan,
-                age: 9,
-                fur_color: Some(FurColor::Ginger),
-                body_size: BodySize::Tiny,
-                sex: Sex::Male,
-            },
-            Mind {
-                name: "Dead Boy".to_string(),
-                gender: Gender::Male,
-                main_hand: MainHand::Right,
-                alive: false,
-            },
-        )
-    }
+    use super::{Appearance, FurColor, Gender, MainHand, Mind, Personality, Race, Sex};
 
     pub fn tester_girl() -> Personality {
         Personality::new(
+            false,
             Appearance {
                 race: Race::Gazan,
                 age: 15,
                 fur_color: Some(FurColor::Ginger),
-                body_size: BodySize::Small,
                 sex: Sex::Female,
             },
             Mind {
@@ -171,11 +145,11 @@ pub mod tests {
 
     pub fn old_queer() -> Personality {
         Personality::new(
+            false,
             Appearance {
                 race: Race::Bug,
                 age: 99,
                 fur_color: None,
-                body_size: BodySize::Large,
                 sex: Sex::Undefined,
             },
             Mind {

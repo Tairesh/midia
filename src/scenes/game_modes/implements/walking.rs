@@ -88,7 +88,6 @@ impl GameModeImpl for Walking {
                 .world
                 .borrow()
                 .player()
-                .body
                 .wear
                 .iter()
                 .map(ItemView::name)

@@ -6,7 +6,7 @@ use super::super::{
         log::{LogCategory, LogEvent},
         map::{
             item::{ItemInteract, ItemTag},
-            terrain::{Terrain, TerrainInteract, TerrainView},
+            terrain::{TerrainInteract, TerrainView},
         },
         Avatar, World,
     },
@@ -27,14 +27,15 @@ impl ActionImpl for Dig {
         if !tile.terrain.is_diggable() {
             return No(format!("You can't dig the {}", tile.terrain.name()));
         }
-        if !actor.wield.iter().any(|i| i.tags().contains(&ItemTag::Dig)) {
+        if !actor
+            .wield
+            .iter()
+            .any(|i| i.tags().contains(&ItemTag::DigTool))
+        {
             return No("You need a shovel to dig!".to_string());
         }
 
-        Yes(match tile.terrain {
-            Terrain::Grave(..) => 2000,
-            _ => 1000,
-        })
+        Yes(1000)
     }
 
     fn on_start(&self, action: &Action, world: &mut World) {

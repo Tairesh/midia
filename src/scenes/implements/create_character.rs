@@ -7,14 +7,14 @@ use tetra::graphics::Rectangle;
 use tetra::input::{Key, KeyModifier};
 use tetra::{Context, Event};
 
-use crate::game::bodies::Sex;
 use crate::ui::{Colorize, JustMesh};
 use crate::{
     app::App,
     colors::Colors,
     game::{
-        bodies::BodySize,
-        races::{Appearance, FurColor, Gender, MainHand, Mind, Personality, PlayableRace, Race},
+        races::{
+            Appearance, FurColor, Gender, MainHand, Mind, Personality, PlayableRace, Race, Sex,
+        },
         traits::Name,
         Avatar, Log, World,
     },
@@ -390,7 +390,7 @@ impl CreateCharacter {
 
     fn randomize(&mut self, ctx: &mut Context) {
         let mut rng = rand::thread_rng();
-        let character = Personality::random(&mut rng, true);
+        let character = Personality::random(&mut rng, true, true);
         self.gender_input().set_value(character.mind.gender);
         self.name_input().set_value(character.mind.name);
         self.age_input()
@@ -422,9 +422,9 @@ impl CreateCharacter {
             let age = self.age_input().value().parse::<u8>().unwrap();
             let race = Race::from(self.race);
             let character = Personality::new(
+                true,
                 Appearance {
                     fur_color: self.fur_color,
-                    body_size: BodySize::Normal,
                     sex: Sex::from(&gender),
                     race,
                     age,
@@ -437,7 +437,7 @@ impl CreateCharacter {
                 },
             );
             // TODO: find available starting pos in the world
-            let avatar = Avatar::player(character, Point::new(0, 0));
+            let avatar = Avatar::dressed_default(character, Point::new(0, 0));
             let mut world = World::new(
                 self.meta.clone(),
                 GameView::default(),

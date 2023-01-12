@@ -2,7 +2,7 @@ use enum_dispatch::enum_dispatch;
 use serde::{Deserialize, Serialize};
 
 use super::{
-    terrains::{Boulder, Dirt, Grass, Grave, Pit, Tree},
+    terrains::{Boulder, Dirt, Grass, Pit, Tree},
     Item, Passage,
 };
 
@@ -15,7 +15,6 @@ pub enum Terrain {
     Dirt,
     Grass,
     Boulder,
-    Grave,
     Pit,
     Tree,
 }

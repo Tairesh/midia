@@ -43,6 +43,19 @@ impl Name for Race {
     }
 }
 
+impl Distribution<Race> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Race {
+        match rng.gen_range(0..5) {
+            0 => Race::Gazan,
+            1 => Race::Nyarnik,
+            2 => Race::Totik,
+            3 => Race::Lagnam,
+            4 => Race::Bug,
+            _ => unreachable!(),
+        }
+    }
+}
+
 #[derive(Sequence, Debug, Copy, Clone)]
 pub enum PlayableRace {
     Gazan,

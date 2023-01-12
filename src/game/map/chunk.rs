@@ -7,9 +7,8 @@ use arrayvec::ArrayVec;
 use rand::{distributions::Standard, rngs::StdRng, Rng, SeedableRng};
 
 use super::{
-    super::races::Personality,
     items::Shovel,
-    terrains::{Boulder, Dirt, Grass, Grave, GraveData, GraveVariant, Tree},
+    terrains::{Boulder, Dirt, Grass, Tree},
     ChunkPos, Tile,
 };
 
@@ -67,23 +66,8 @@ impl Chunk {
             if pos < Chunk::USIZE - 1 - Chunk::SIZE as usize {
                 blocked_tiles.insert(pos + Chunk::SIZE as usize);
             }
-            if rng.gen_bool(0.1) {
-                tiles.get_mut(pos).unwrap().items.push(Shovel::new().into());
-            } else {
-                let death_year = rng.gen_range(200..=255);
-                tiles.get_mut(pos).unwrap().terrain = Grave::new(
-                    if death_year < 200 {
-                        GraveVariant::Old
-                    } else {
-                        GraveVariant::New
-                    },
-                    GraveData {
-                        character: Personality::random(&mut rng, false),
-                        death_year,
-                    },
-                )
-                .into();
-            }
+
+            tiles.get_mut(pos).unwrap().items.push(Shovel::new().into());
         }
         Chunk { pos, tiles }
     }

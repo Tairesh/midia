@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use super::{
     super::Avatar,
-    items::{Axe, BodyPart, Cloak, Corpse, Gravestone, Hat, Knife, Rags, Shovel},
+    items::{Axe, Cloak, Hat, Knife, Rags, Shovel},
 };
 
 // TODO: JSON-ize all items
@@ -17,9 +17,6 @@ pub enum Item {
     Shovel,
     Axe,
     Knife,
-    Corpse,
-    Gravestone,
-    BodyPart,
     Hat,
     Cloak,
     Rags,
@@ -57,23 +54,17 @@ pub trait ItemInteract {
     }
 }
 
+// TODO: rename this to qualities
 #[derive(Debug, Hash, Eq, PartialEq)]
 pub enum ItemTag {
-    Dig,
-    Butch,
+    DigTool,
+    ButchTool,
 }
 
 #[cfg(test)]
 mod tests {
-    use super::super::super::map::terrains::GraveData;
     use super::{
-        super::{
-            super::{
-                bodies::{Freshness, OrganData},
-                races::{helpers::body, tests::personality::dead_boy},
-            },
-            items::{Axe, BodyPart, BodyPartType, Cloak, Corpse, Gravestone, Hat, Knife, Shovel},
-        },
+        super::items::{Axe, Cloak, Hat, Knife, Shovel},
         Item, ItemInteract, ItemTag, ItemView,
     };
 
@@ -81,65 +72,23 @@ mod tests {
     fn test_shovel() {
         let shovel: Item = Shovel::new().into();
         assert_eq!("shovel", shovel.name());
-        assert!(shovel.tags().contains(&ItemTag::Dig));
+        assert!(shovel.tags().contains(&ItemTag::DigTool));
     }
 
     #[test]
     fn test_axe() {
         let axe: Item = Axe::new().into();
         assert_eq!("axe", axe.name());
-        assert!(axe.tags().contains(&ItemTag::Butch));
-        assert!(!axe.tags().contains(&ItemTag::Dig));
+        assert!(axe.tags().contains(&ItemTag::ButchTool));
+        assert!(!axe.tags().contains(&ItemTag::DigTool));
     }
 
     #[test]
     fn test_knife() {
         let knife: Item = Knife::new().into();
         assert_eq!("knife", knife.name());
-        assert!(knife.tags().contains(&ItemTag::Butch));
-        assert!(!knife.tags().contains(&ItemTag::Dig));
-    }
-
-    #[test]
-    fn test_corpse() {
-        let character = dead_boy();
-        let body = body(OrganData::new(&character, Freshness::Rotten));
-        let corpse: Item = Corpse::new(character, body).into();
-        assert_eq!("naked rotten gazan boy corpse", corpse.name());
-    }
-
-    #[test]
-    fn test_bodypart() {
-        let character = dead_boy();
-        let brain: Item = BodyPart::new(
-            "brain",
-            BodyPartType::Brain,
-            OrganData::new(&character, Freshness::Fresh),
-        )
-        .into();
-        // TODO: We can't see the sex of the brain but can understand that is the child one
-        assert_eq!("fresh gazan boy brain", brain.name());
-
-        let head: Item = BodyPart::new(
-            "head",
-            BodyPartType::Head,
-            OrganData::new(&character, Freshness::Skeletal),
-        )
-        .into();
-        assert_eq!("gazan boy skull", head.name());
-    }
-
-    #[test]
-    fn test_gravestone() {
-        let character = dead_boy();
-        let gravestone: Item = Gravestone::new(GraveData {
-            character,
-            death_year: 255,
-        })
-        .into();
-        assert_eq!("gravestone", gravestone.name());
-        assert!(gravestone.is_readable());
-        assert!(gravestone.read().contains("Dead Boy"));
+        assert!(knife.tags().contains(&ItemTag::ButchTool));
+        assert!(!knife.tags().contains(&ItemTag::DigTool));
     }
 
     #[test]

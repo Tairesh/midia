@@ -29,7 +29,7 @@ impl ItemView for Shovel {
 
 impl ItemInteract for Shovel {
     fn tags(&self) -> HashSet<ItemTag> {
-        HashSet::from([ItemTag::Dig])
+        HashSet::from([ItemTag::DigTool])
     }
 
     fn mass(&self) -> u32 {

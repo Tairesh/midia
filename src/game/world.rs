@@ -2,8 +2,7 @@ use std::cell::{RefCell, RefMut};
 use std::collections::{HashMap, HashSet};
 use std::convert::TryFrom;
 
-use geometry::{circles, Direction, Point, TwoDimDirection};
-use rand::Rng;
+use geometry::{Direction, Point, TwoDimDirection};
 
 use crate::{
     fov::field_of_view_set,
@@ -60,8 +59,7 @@ impl World {
     }
 
     /// Calls one time after world is created
-    pub fn init(mut self) -> Self {
-        self.kill_grass(self.player().pos, 13, 0.8);
+    pub fn init(self) -> Self {
         self.units.iter().enumerate().for_each(|(i, unit)| {
             self.map.borrow_mut().get_tile_mut(unit.pos).on_step(i);
         });
@@ -223,23 +221,6 @@ impl World {
         this_is
     }
 
-    pub fn kill_grass(&mut self, around: Point, diameter: u8, probability: f64) {
-        for (dx, dy) in match diameter {
-            7 => circles::CIRCLE7.iter().copied(),
-            9 => circles::CIRCLE9.iter().copied(),
-            11 => circles::CIRCLE11.iter().copied(),
-            13 => circles::CIRCLE13.iter().copied(),
-            _ => unimplemented!(),
-        } {
-            let k = (1.0 - (dx as f64).hypot(dy as f64) / ((diameter - 1) as f64 / 2.0))
-                .clamp(0.0, 1.0);
-            if rand::thread_rng().gen_bool(probability * k) {
-                let pos = around + (dx, dy);
-                self.map().get_tile_mut(pos).kill_grass();
-            }
-        }
-    }
-
     /// Doing actions that should be done
     fn act(&mut self) {
         let actions: Vec<Action> = self
@@ -296,22 +277,22 @@ impl World {
             spend += 1;
             self.act();
 
-            let mut unit_wants_actions = HashMap::new();
-            for (unit_id, unit) in self.units.iter_mut().skip(1).enumerate() {
-                if unit.action.is_none() {
-                    if let Some(brain) = &mut unit.ai {
-                        brain.plan();
-                        if let Some(action_type) = brain.action() {
-                            // +1 is because we skipped first one in enumeration
-                            unit_wants_actions.insert(unit_id + 1, action_type);
-                        }
-                    }
-                }
-            }
-            for (unit_id, typ) in unit_wants_actions {
-                self.units.get_mut(unit_id).unwrap().action = Action::new(unit_id, typ, self).ok();
-            }
-            // self.kill_grass(self.player().pos, 13, 0.01);
+            // TODO: npcs AI
+            // let mut unit_wants_actions = HashMap::new();
+            // for (unit_id, unit) in self.units.iter_mut().skip(1).enumerate() {
+            //     if unit.action.is_none() {
+            //         if let Some(brain) = &mut unit.ai {
+            //             brain.plan();
+            //             if let Some(action_type) = brain.action() {
+            //                 // +1 is because we skipped first one in enumeration
+            //                 unit_wants_actions.insert(unit_id + 1, action_type);
+            //             }
+            //         }
+            //     }
+            // }
+            // for (unit_id, typ) in unit_wants_actions {
+            //     self.units.get_mut(unit_id).unwrap().action = Action::new(unit_id, typ, self).ok();
+            // }
         }
     }
 }
@@ -322,17 +303,13 @@ pub mod tests {
 
     use geometry::Point;
 
-    use crate::game::bodies::OrganData;
+    use crate::game::races::tests::personality::old_queer;
 
     use super::{
         super::{
             actions::implements::{Skip, Walk},
-            bodies::Freshness,
             map::terrains::{Boulder, BoulderSize, Dirt},
-            races::{
-                helpers::body,
-                tests::personality::{dead_boy, tester_girl},
-            },
+            races::tests::personality::tester_girl,
         },
         savefile::{GameView, Meta},
         Action, Avatar, Direction, Log, TerrainView, World,
@@ -343,22 +320,19 @@ pub mod tests {
             Meta::new("test", "test"),
             GameView::default(),
             Log::new(),
-            vec![Avatar::player(tester_girl(), Point::new(0, 0))],
+            vec![Avatar::dressed_default(tester_girl(), Point::new(0, 0))],
             HashMap::new(),
         )
     }
 
-    pub fn add_zombie(world: &mut World, pos: Point) -> usize {
-        let character = dead_boy();
-        let body = body(OrganData::new(&character, Freshness::Rotten));
-        let zombie = Avatar::zombie(character, body, pos);
-        world.add_unit(zombie)
+    pub fn add_npc(world: &mut World, pos: Point) -> usize {
+        world.add_unit(Avatar::new(old_queer(), pos))
     }
 
     #[test]
     pub fn test_moving_other_unit() {
         let mut world = prepare_world();
-        add_zombie(&mut world, Point::new(1, 0));
+        add_npc(&mut world, Point::new(1, 0));
 
         assert_eq!(2, world.units.len());
         world.map().get_tile_mut(Point::new(2, 0)).terrain = Dirt::default().into();

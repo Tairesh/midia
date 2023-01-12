@@ -56,7 +56,7 @@ impl GameModeImpl for Digging {
             .player()
             .wield
             .iter()
-            .any(|i| i.tags().contains(&ItemTag::Dig))
+            .any(|i| i.tags().contains(&ItemTag::DigTool))
         {
             Ok(())
         } else {

@@ -1,5 +1,3 @@
-#![allow(clippy::needless_question_mark)] // Sequence causes it idk why
-
 use enum_iterator::{next_cycle, previous_cycle, Sequence};
 use rand::distributions::{Distribution, Standard};
 use rand::Rng;
@@ -7,10 +5,10 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Sequence, Debug, Copy, Clone, Eq, PartialEq)]
 pub enum MainHand {
-    #[serde(rename = "l")]
-    Left,
     #[serde(rename = "r")]
     Right,
+    #[serde(rename = "l")]
+    Left,
     #[serde(rename = "a")]
     Ambidexter,
 }
@@ -32,8 +30,8 @@ impl MainHand {
 impl From<MainHand> for &str {
     fn from(s: MainHand) -> Self {
         match s {
-            MainHand::Left => "Left",
             MainHand::Right => "Right",
+            MainHand::Left => "Left",
             MainHand::Ambidexter => "Ambidexter",
         }
     }

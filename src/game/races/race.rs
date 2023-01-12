@@ -1,8 +1,7 @@
+use enum_iterator::{next_cycle, previous_cycle, Sequence};
 use rand::distributions::{Distribution, Standard};
 use rand::Rng;
 use serde::{Deserialize, Serialize};
-
-use enum_iterator::{next_cycle, previous_cycle, Sequence};
 
 #[derive(Serialize, Deserialize, Sequence, Debug, Copy, Clone)]
 pub enum Race {
@@ -15,7 +14,7 @@ pub enum Race {
     #[serde(rename = "l")]
     Lagnam,
     #[serde(rename = "b")]
-    Bug,
+    Bug, // TODO: create enum for only playable races
 }
 
 impl Race {

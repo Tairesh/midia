@@ -170,7 +170,7 @@ impl Draw for TextInput {
             .text_with_spaces
             .get_bounds(ctx)
             .map_or(-1.0, |r| r.width + 3.0);
-        let y = (rect.y + rect.h / 2.0 - self.line_height / 2.0 - 4.0).round();
+        let y = (rect.y + rect.h / 2.0 - self.line_height / 2.0 + 2.0).round();
         let text_pos = if !self.is_focused || self.is_disabled {
             Vec2::new(rect.x + rect.w / 2.0 - text_width / 2.0, y)
         } else {
@@ -189,7 +189,7 @@ impl Draw for TextInput {
                 DrawParams::new()
                     .position(Vec2::new(
                         rect.x + text_width + 10.0,
-                        rect.y + rect.h / 2.0 - 15.0,
+                        rect.y + rect.h / 2.0 - (self.line_height + 8.0) / 2.0,
                     ))
                     .color(self.text_color()),
             );
@@ -215,7 +215,7 @@ impl Positionate for TextInput {
     }
 
     fn calc_size(&mut self, ctx: &mut Context) -> Vec2 {
-        let (w, h) = (self.width, 42.0);
+        let (w, h) = (self.width, self.line_height + 16.0);
         self.bg = Some(
             Mesh::rounded_rectangle(
                 ctx,
@@ -235,7 +235,12 @@ impl Positionate for TextInput {
             .unwrap(),
         );
         self.cursor = Some(
-            Mesh::rectangle(ctx, ShapeStyle::Fill, Rectangle::new(0.0, 0.0, 10.0, 30.0)).unwrap(),
+            Mesh::rectangle(
+                ctx,
+                ShapeStyle::Fill,
+                Rectangle::new(0.0, 0.0, 10.0, h - 8.0),
+            )
+            .unwrap(),
         );
         Vec2::new(w, h)
     }

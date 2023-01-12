@@ -305,6 +305,7 @@ impl CreateCharacter {
                     },
                     Transition::CustomEvent(ButtonEvent::HandRight as u8),
                 )),
+                // TODO: add fur selector
                 back_btn,
                 randomize_btn,
                 create_btn,

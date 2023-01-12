@@ -33,7 +33,7 @@ pub(crate) fn bg(assets: &Assets) -> Box<Image> {
 pub(crate) fn title(title: impl Into<String>, assets: &Assets) -> Box<Label> {
     Box::new(Label::new(
         title,
-        assets.fonts.header.clone(),
+        assets.fonts.title.clone(),
         Colors::DARK_GREEN,
         Position::horizontal_center(0.0, Vertical::ByTop { y: 20.0 }),
     ))

@@ -4,8 +4,8 @@ use std::rc::Rc;
 
 use geometry::{Rect, Vec2};
 use tetra::{
+    graphics::{text::Text, DrawParams},
     Context,
-    graphics::{DrawParams, text::Text},
 };
 
 use crate::{
@@ -122,8 +122,8 @@ impl Button {
         position: Position,
         on_click: Transition,
     ) -> Self
-        where
-            S: Into<String>,
+    where
+        S: Into<String>,
     {
         Self::new(
             keys,
@@ -323,8 +323,7 @@ impl Update for Button {
         } else if self.hovered() && !collides {
             self.off_hovered();
         }
-        if collides && !self.pressed() && input::is_mouse_button_pressed(ctx, MouseButton::Left)
-        {
+        if collides && !self.pressed() && input::is_mouse_button_pressed(ctx, MouseButton::Left) {
             self.on_pressed();
         } else if self.pressed() && input::is_mouse_button_released(ctx, MouseButton::Left) {
             self.off_pressed();

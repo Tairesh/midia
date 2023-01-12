@@ -1,6 +1,6 @@
 use geometry::{Rect, Vec2};
-use tetra::Context;
 use tetra::graphics::Color;
+use tetra::Context;
 
 use crate::scenes::Transition;
 

@@ -81,20 +81,10 @@ impl SettingsScene {
                 x: Horizontal::AtWindowCenterByRight {
                     offset: 90.0 - window_btn_size.x,
                 },
-                y: Vertical::ByCenter { y: 145.0 },
+                y: Vertical::ByCenter { y: 150.0 },
             },
         );
 
-        let repeat_interval_label = label(
-            "Repeat delay:",
-            &app.assets,
-            Position {
-                x: Horizontal::AtWindowCenterByRight {
-                    offset: 90.0 - window_btn_size.x,
-                },
-                y: Vertical::ByCenter { y: 195.0 },
-            },
-        );
         let repeat_interval_minus = Box::new(Button::icon(
             vec![],
             "minus",
@@ -127,6 +117,16 @@ impl SettingsScene {
             },
             Transition::CustomEvent(ButtonEvent::RepeatIntervalPlus as u8),
         ));
+        let repeat_interval_label = label(
+            "Repeat delay:",
+            &app.assets,
+            Position {
+                x: Horizontal::AtWindowCenterByRight {
+                    offset: 90.0 - window_btn_size.x,
+                },
+                y: Vertical::ByCenter { y: 200.0 },
+            },
+        );
 
         let back_btn = back_btn(
             Position::horizontal_center(0.0, Vertical::AtWindowBottomByBottom { offset: -200.0 }),
@@ -231,6 +231,9 @@ impl SceneImpl for SettingsScene {
 
 impl Drop for SettingsScene {
     fn drop(&mut self) {
-        Settings::instance().save();
+        let mut settings = Settings::instance();
+        settings.input.repeat_interval =
+            self.repeat_interval_input().value().parse::<u32>().unwrap();
+        settings.save();
     }
 }

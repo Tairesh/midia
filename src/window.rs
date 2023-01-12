@@ -16,7 +16,7 @@ pub fn create_window(title: impl Into<String>) -> Result<Context> {
         .resizable(true)
         .build()?;
 
-    let mut icon = ImageData::from_encoded(include_bytes!("../assets/img/mussel.png"))?;
+    let mut icon = ImageData::from_encoded(include_bytes!("../assets/img/icon.png"))?;
     window::set_icon(&mut ctx, &mut icon)?;
 
     window::set_minimum_size(&mut ctx, 1024, 768)?;

@@ -54,15 +54,12 @@ impl Personality {
     pub fn random<R: Rng + ?Sized>(rng: &mut R, is_player: bool, alive: bool) -> Personality {
         let gender = rng.sample(Standard);
         let game_data = GameData::instance();
-        let name = format!(
-            "{} {}",
-            match gender {
-                Gender::Male => game_data.names.random_male_name(rng),
-                Gender::Female => game_data.names.random_female_name(rng),
-                Gender::Custom(_) => game_data.names.random_name(rng),
-            },
-            game_data.names.random_name(rng)
-        );
+        let name = match gender {
+            Gender::Male => game_data.names.random_male_name(rng),
+            Gender::Female => game_data.names.random_female_name(rng),
+            Gender::Custom(_) => game_data.names.random_name(rng),
+        }
+        .to_string();
         let race = if is_player {
             let race: PlayableRace = rng.sample(Standard);
             Race::from(race)

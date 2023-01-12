@@ -1,10 +1,14 @@
 #![allow(dead_code)]
 
+use std::rc::Rc;
+
 use geometry::{Rect, Vec2};
 use tetra::{
     graphics::{Color, DrawParams, NineSlice, Rectangle, Texture},
     window, Context,
 };
+
+use crate::assets::Tileset;
 
 use super::super::{Colorize, Draw, Focus, Position, Positionate, UiSprite, Update};
 
@@ -139,4 +143,104 @@ impl Focus for Image {}
 
 impl UiSprite for Image {}
 
-// TODO add sprite from tileset
+pub struct TilesetSprite {
+    name: &'static str,
+    scale: Vec2,
+    tileset: Rc<Tileset>,
+    position: Position,
+    rect: Option<Rect>,
+    visible: bool,
+    color: Option<Color>,
+}
+
+impl TilesetSprite {
+    pub fn new(
+        name: &'static str,
+        tileset: Rc<Tileset>,
+        position: Position,
+        scale: f32,
+        color: Option<Color>,
+    ) -> Self {
+        TilesetSprite {
+            name,
+            scale: Vec2::new(scale, scale),
+            tileset,
+            position,
+            rect: None,
+            visible: true,
+            color,
+        }
+    }
+
+    pub fn set_name(&mut self, name: &'static str) {
+        self.name = name;
+    }
+
+    pub fn remove_color(&mut self) {
+        self.color = None;
+    }
+}
+
+impl Draw for TilesetSprite {
+    fn draw(&mut self, ctx: &mut Context) {
+        let rect = self.rect.unwrap();
+        let mut params = DrawParams::new()
+            .position(Vec2::new(rect.x, rect.y))
+            .scale(self.scale);
+        if let Some(color) = self.color {
+            params = params.color(color);
+        }
+        self.tileset.draw_region(ctx, self.name, params);
+    }
+
+    fn visible(&self) -> bool {
+        self.visible
+    }
+
+    fn set_visible(&mut self, visible: bool) {
+        self.visible = visible;
+    }
+}
+
+impl Positionate for TilesetSprite {
+    fn position(&self) -> Position {
+        self.position
+    }
+
+    fn set_position(&mut self, position: Position) {
+        self.position = position;
+    }
+
+    fn calc_size(&mut self, _ctx: &mut Context) -> Vec2 {
+        let size = Tileset::get_size(self.name);
+        size * self.scale
+    }
+
+    fn rect(&self) -> Rect {
+        self.rect.unwrap()
+    }
+
+    fn set_rect(&mut self, rect: Rect) {
+        self.rect = Some(rect);
+    }
+}
+
+impl Colorize for TilesetSprite {
+    fn color(&self) -> Color {
+        self.color.unwrap_or(Color::WHITE)
+    }
+
+    fn set_color<C: Into<Color>>(&mut self, value: C) {
+        self.color = Some(value.into());
+    }
+}
+
+impl Update for TilesetSprite {}
+
+impl Focus for TilesetSprite {}
+
+impl UiSprite for TilesetSprite {
+    fn as_tileset_sprite(&mut self) -> Option<&mut TilesetSprite> {
+        Some(self)
+    }
+}

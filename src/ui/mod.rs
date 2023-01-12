@@ -2,7 +2,7 @@ pub use self::game_log::GameLog;
 pub use self::implements::{
     alert::Alert,
     button::Button,
-    image::Image,
+    image::{Image, TilesetSprite},
     inputs::TextInput,
     label::{ItemDisplay, Label},
     meshy::{HoverableMesh, JustMesh},

@@ -136,7 +136,7 @@ impl World {
                 Appearance {
                     race: Race::Lagnam,
                     age: 25,
-                    fur_color: Some(FurColor::Yellow),
+                    fur_color: Some(FurColor::White),
                     sex: Sex::Male,
                 },
                 Mind {

@@ -33,6 +33,9 @@ pub trait ItemInteract {
     fn tags(&self) -> HashSet<ItemTag> {
         HashSet::new()
     }
+    fn qualities(&self) -> HashSet<ItemQuality> {
+        HashSet::new()
+    }
     fn mass(&self) -> u32;
     // in grams
     fn wield_time(&self, _avatar: &Avatar) -> f64 {
@@ -57,43 +60,51 @@ pub trait ItemInteract {
     }
 }
 
-#[derive(Debug, Hash, Eq, PartialEq)]
+#[derive(Debug, Hash, Eq, PartialEq, Copy, Clone)]
 pub enum ItemTag {
-    // TODO: rename this to qualities
-    DigTool,
-    ButchTool,
     Tool,
     Weapon,
+}
+
+#[derive(Debug, Hash, Eq, PartialEq, Copy, Clone)]
+pub enum ItemQuality {
+    Dig,
+    Butch,
 }
 
 #[cfg(test)]
 mod tests {
     use super::{
         super::items::{Axe, Cloak, Hat, Knife, Shovel},
-        Item, ItemInteract, ItemTag, ItemView,
+        Item, ItemInteract, ItemQuality, ItemTag, ItemView,
     };
 
     #[test]
     fn test_shovel() {
         let shovel: Item = Shovel::new().into();
         assert_eq!("shovel", shovel.name());
-        assert!(shovel.tags().contains(&ItemTag::DigTool));
+        assert!(shovel.tags().contains(&ItemTag::Tool));
+        assert!(shovel.qualities().contains(&ItemQuality::Dig));
     }
 
     #[test]
     fn test_axe() {
         let axe: Item = Axe::new().into();
         assert_eq!("axe", axe.name());
-        assert!(axe.tags().contains(&ItemTag::ButchTool));
-        assert!(!axe.tags().contains(&ItemTag::DigTool));
+        assert!(axe.tags().contains(&ItemTag::Tool));
+        assert!(axe.tags().contains(&ItemTag::Weapon));
+        assert!(axe.qualities().contains(&ItemQuality::Butch));
+        assert!(!axe.qualities().contains(&ItemQuality::Dig));
     }
 
     #[test]
     fn test_knife() {
         let knife: Item = Knife::new().into();
         assert_eq!("knife", knife.name());
-        assert!(knife.tags().contains(&ItemTag::ButchTool));
-        assert!(!knife.tags().contains(&ItemTag::DigTool));
+        assert!(knife.tags().contains(&ItemTag::Tool));
+        assert!(knife.tags().contains(&ItemTag::Weapon));
+        assert!(knife.qualities().contains(&ItemQuality::Butch));
+        assert!(!knife.qualities().contains(&ItemQuality::Dig));
     }
 
     #[test]

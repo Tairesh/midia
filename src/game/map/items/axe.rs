@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use super::super::item::{ItemInteract, ItemTag, ItemView};
+use super::super::item::{ItemInteract, ItemQuality, ItemTag, ItemView};
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
 pub struct Axe {}
@@ -29,7 +29,11 @@ impl ItemView for Axe {
 
 impl ItemInteract for Axe {
     fn tags(&self) -> HashSet<ItemTag> {
-        HashSet::from([ItemTag::ButchTool, ItemTag::Tool, ItemTag::Weapon])
+        HashSet::from([ItemTag::Tool, ItemTag::Weapon])
+    }
+
+    fn qualities(&self) -> HashSet<ItemQuality> {
+        HashSet::from([ItemQuality::Butch])
     }
 
     fn mass(&self) -> u32 {

@@ -6,7 +6,7 @@ use crate::{
     game::{
         actions::implements::Dig,
         map::{
-            item::{ItemInteract, ItemTag},
+            item::{ItemInteract, ItemQuality},
             terrain::TerrainInteract,
         },
         World,
@@ -56,7 +56,7 @@ impl GameModeImpl for Digging {
             .player()
             .wield
             .iter()
-            .any(|i| i.tags().contains(&ItemTag::DigTool))
+            .any(|i| i.qualities().contains(&ItemQuality::Dig))
         {
             Ok(())
         } else {

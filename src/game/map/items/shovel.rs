@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use super::super::item::{ItemInteract, ItemTag, ItemView};
+use super::super::item::{ItemInteract, ItemQuality, ItemTag, ItemView};
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
 pub struct Shovel {}
@@ -29,7 +29,11 @@ impl ItemView for Shovel {
 
 impl ItemInteract for Shovel {
     fn tags(&self) -> HashSet<ItemTag> {
-        HashSet::from([ItemTag::DigTool, ItemTag::Tool])
+        HashSet::from([ItemTag::Tool])
+    }
+
+    fn qualities(&self) -> HashSet<ItemQuality> {
+        HashSet::from([ItemQuality::Dig])
     }
 
     fn mass(&self) -> u32 {

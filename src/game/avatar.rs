@@ -16,6 +16,7 @@ pub struct Avatar {
     pub vision: TwoDimDirection,
     // TODO: custom struct with hands counter and methods to return names and icons for UI
     pub wield: Vec<Item>,
+    // TODO: custom struct with layers for dress and methods to return names and icons for UI
     pub wear: Vec<Item>,
     pub stamina: u8,
     // TODO: traits
@@ -35,6 +36,7 @@ impl Avatar {
         }
     }
 
+    // TODO: remove this and select dress in create character scene
     pub fn dressed_default(personality: Personality, pos: Point) -> Self {
         Self {
             wear: vec![Hat::new().into(), Cloak::new().into()],

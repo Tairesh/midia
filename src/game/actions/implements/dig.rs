@@ -5,7 +5,7 @@ use super::super::{
     super::{
         log::{LogCategory, LogEvent},
         map::{
-            item::{ItemInteract, ItemTag},
+            item::{ItemInteract, ItemQuality},
             terrain::{Terrain, TerrainInteract, TerrainView},
         },
         Avatar, World,
@@ -34,7 +34,7 @@ impl ActionImpl for Dig {
         if !actor
             .wield
             .iter()
-            .any(|i| i.tags().contains(&ItemTag::DigTool))
+            .any(|i| i.qualities().contains(&ItemQuality::Dig))
         {
             return No("You need a shovel to dig!".to_string());
         }

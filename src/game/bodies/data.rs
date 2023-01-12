@@ -2,7 +2,7 @@ use rand::distributions::{Distribution, Standard};
 use rand::Rng;
 
 use super::{
-    super::races::{FurColor, Personality, Race, SkinTone},
+    super::races::{FurColor, Personality, Race},
     Sex,
 };
 
@@ -68,8 +68,6 @@ pub struct OrganData {
     pub alive: bool,
     #[serde(rename = "x")]
     pub sex: Sex,
-    #[serde(rename = "t")]
-    pub skin_tone: SkinTone,
     #[serde(rename = "c")]
     pub fur_color: Option<FurColor>,
 }
@@ -85,7 +83,6 @@ impl OrganData {
             size: character.appearance.body_size,
             alive: character.mind.alive,
             sex: character.appearance.sex,
-            skin_tone: character.appearance.skin_tone,
             fur_color: character.appearance.fur_color,
         }
     }

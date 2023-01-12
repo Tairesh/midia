@@ -19,6 +19,12 @@ pub enum Race {
     Bug,
 }
 
+impl Race {
+    pub fn has_fur(self) -> bool {
+        matches!(self, Race::Gazan | Race::Lagnam)
+    }
+}
+
 impl From<Race> for &str {
     fn from(value: Race) -> Self {
         match value {

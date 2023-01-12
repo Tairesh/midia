@@ -11,8 +11,6 @@ use crate::{
 };
 
 use super::{
-    ai::Brain,
-    avatar::Soul,
     map::{item::ItemView, terrain::TerrainView},
     Action, Avatar, Chunk, ChunkPos, Fov, Log, Map, TilePos,
 };
@@ -301,7 +299,7 @@ impl World {
             let mut unit_wants_actions = HashMap::new();
             for (unit_id, unit) in self.units.iter_mut().skip(1).enumerate() {
                 if unit.action.is_none() {
-                    if let Soul::Zombie(_, brain) = &mut unit.soul {
+                    if let Some(brain) = &mut unit.ai {
                         brain.plan();
                         if let Some(action_type) = brain.action() {
                             // +1 is because we skipped first one in enumeration

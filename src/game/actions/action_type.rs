@@ -29,7 +29,7 @@ mod tests {
                 terrains::{Boulder, BoulderSize, Dirt, Grave, GraveData, GraveVariant},
                 Item, Terrain,
             },
-            races::{tests::personality::dead_boy, Gender, MainHand, SkinTone},
+            races::{tests::personality::dead_boy, Gender, MainHand},
             world::tests::{add_zombie, prepare_world},
         },
         Action, Dig, Drop, Read, Skip, Walk, Wield,
@@ -262,7 +262,6 @@ mod tests {
                 let ch = &corpse.character;
                 let body = &corpse.body;
                 assert_eq!("Dead Boy", ch.mind.name);
-                assert_eq!(SkinTone::Almond, ch.appearance.skin_tone);
                 assert_eq!(Gender::Male, ch.mind.gender);
                 assert_eq!(9, ch.appearance.age);
                 assert_eq!(MainHand::Right, ch.mind.main_hand);
@@ -288,7 +287,6 @@ mod tests {
             if let Item::Gravestone(gravestone) = gravestone {
                 let data = &gravestone.data;
                 assert_eq!("Dead Boy", data.character.mind.name);
-                assert_eq!(SkinTone::Almond, data.character.appearance.skin_tone);
                 assert_eq!(Gender::Male, data.character.mind.gender);
                 assert_eq!(9, data.character.appearance.age);
                 assert_eq!(MainHand::Right, data.character.mind.main_hand);

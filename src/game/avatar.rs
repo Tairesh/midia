@@ -2,26 +2,20 @@
 
 use geometry::{Point, TwoDimDirection};
 
-use crate::game::bodies::OrganData;
-
 use super::{
-    ai::ZombieAI,
-    bodies::{Body, Freshness},
+    ai::{Brain, ZombieAI},
+    bodies::{Body, Freshness, OrganData},
     map::items::{Cloak, Hat},
     races::{helpers::body, Personality},
     Action, Item,
 };
 
-#[derive(serde::Serialize, serde::Deserialize, Debug)]
-pub enum Soul {
-    Player(Personality),
-    Zombie(Personality, ZombieAI),
-}
-
-#[derive(serde::Serialize, serde::Deserialize, Debug)]
+#[derive(serde::Serialize, serde::Deserialize)]
 pub struct Avatar {
     pub body: Body,
-    pub soul: Soul,
+    pub personality: Personality,
+    #[serde(skip)] // TODO: serialize brains
+    pub ai: Option<Box<dyn Brain>>,
     pub pos: Point,
     pub action: Option<Action>,
     // TODO: rotation of multitile body
@@ -34,21 +28,16 @@ pub struct Avatar {
 }
 
 impl Avatar {
-    pub fn player(personality: Personality, pos: Point) -> Self {
-        let mut body = body(OrganData::new(&personality, Freshness::Fresh));
-        body.wear.push(Cloak::new().into());
-        body.wear.push(Hat::new().into());
-        Self::new(body, Soul::Player(personality), pos)
-    }
-
-    pub fn zombie(personality: Personality, body: Body, pos: Point) -> Self {
-        Self::new(body, Soul::Zombie(personality, ZombieAI::default()), pos)
-    }
-
-    pub fn new(body: Body, soul: Soul, pos: Point) -> Self {
+    pub fn new(
+        body: Body,
+        personality: Personality,
+        ai: Option<Box<dyn Brain>>,
+        pos: Point,
+    ) -> Self {
         Avatar {
             body,
-            soul,
+            personality,
+            ai,
             pos,
             action: None,
             vision: TwoDimDirection::East,
@@ -57,16 +46,22 @@ impl Avatar {
         }
     }
 
-    pub fn person(&self) -> &Personality {
-        match &self.soul {
-            Soul::Player(p) | Soul::Zombie(p, ..) => p,
-        }
+    pub fn player(personality: Personality, pos: Point) -> Self {
+        let mut body = body(OrganData::new(&personality, Freshness::Fresh));
+        body.wear.push(Cloak::new().into());
+        body.wear.push(Hat::new().into());
+        Self::new(body, personality, None, pos)
+    }
+
+    pub fn zombie(personality: Personality, body: Body, pos: Point) -> Self {
+        Self::new(body, personality, Some(Box::new(ZombieAI::new())), pos)
     }
 
     pub fn name_for_actions(&self) -> String {
-        match &self.soul {
-            Soul::Player(..) => "You".to_string(),
-            Soul::Zombie(person, ..) => format!("Zombie {}", person.mind.name),
+        if self.ai.is_none() {
+            "You".to_string()
+        } else {
+            self.personality.mind.name.clone()
         }
     }
 }

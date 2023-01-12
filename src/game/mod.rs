@@ -1,5 +1,5 @@
 pub use actions::{Action, ActionType};
-pub use avatar::{Avatar, Soul};
+pub use avatar::Avatar;
 pub use fov::Fov;
 pub use game_data::GameData;
 pub use log::Log;

@@ -5,15 +5,11 @@ use tetra::{
 };
 
 static REGIONS: phf::Map<&'static str, Rectangle> = phf::phf_map! {
-    "female" => Rectangle::new(0.0, 0.0, 10.0, 10.0),
-    "male" => Rectangle::new(10.0, 0.0, 10.0, 10.0),
-    "queer" => Rectangle::new(20.0, 0.0, 10.0, 10.0),
-    "zombie" => Rectangle::new(30.0, 0.0, 10.0, 10.0),
-    "zombie_child" => Rectangle::new(40.0, 0.0, 10.0, 10.0),
-    "skeleton" => Rectangle::new(50.0, 0.0, 10.0, 10.0),
-    "skeleton_child" => Rectangle::new(60.0, 0.0, 10.0, 10.0),
-    "raw_zombie" => Rectangle::new(70.0, 0.0, 10.0, 10.0),
-    "raw_zombie_child" => Rectangle::new(80.0, 0.0, 10.0, 10.0),
+    "gazan" => Rectangle::new(0.0, 0.0, 10.0, 10.0),
+    "nyarnik" => Rectangle::new(10.0, 0.0, 10.0, 10.0),
+    "totik" => Rectangle::new(20.0, 0.0, 10.0, 10.0),
+    "lagnam" => Rectangle::new(30.0, 0.0, 10.0, 10.0),
+    "bug" => Rectangle::new(40.0, 0.0, 10.0, 10.0),
     "highlight" => Rectangle::new(90.0, 0.0, 10.0, 10.0),
     "dirt1" => Rectangle::new(0.0, 10.0, 10.0, 10.0),
     "dirt2" => Rectangle::new(10.0, 10.0, 10.0, 10.0),

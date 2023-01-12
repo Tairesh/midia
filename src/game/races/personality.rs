@@ -8,7 +8,7 @@ use crate::game::traits::Name;
 
 use super::{
     super::{bodies::BodySize, GameData},
-    FurColor, Gender, MainHand, Race, SkinTone,
+    FurColor, Gender, MainHand, Race,
 };
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -17,8 +17,6 @@ pub struct Appearance {
     pub race: Race,
     #[serde(rename = "a")]
     pub age: u8,
-    #[serde(rename = "s")]
-    pub skin_tone: SkinTone,
     #[serde(rename = "f")]
     pub fur_color: Option<FurColor>,
     #[serde(rename = "z")]
@@ -66,14 +64,18 @@ impl Personality {
             game_data.names.random_name(rng)
         );
         let race: PlayableRace = rng.sample(Standard);
+        let race = Race::from(race);
         Personality::new(
             Appearance {
-                race: race.into(),
                 age: rng.gen_range(0..=99),
-                skin_tone: rng.sample(Standard),
-                fur_color: rng.sample(Standard),
+                fur_color: if race.has_fur() {
+                    Some(rng.sample(Standard))
+                } else {
+                    None
+                },
                 body_size: rng.sample(Standard),
                 sex: rng.sample(Standard),
+                race,
             },
             Mind {
                 name,
@@ -129,16 +131,13 @@ pub fn age_name(race: Race, age: u8, gender: Option<Gender>) -> String {
 pub mod tests {
     use crate::game::bodies::Sex;
 
-    use super::{
-        Appearance, BodySize, FurColor, Gender, MainHand, Mind, Personality, Race, SkinTone,
-    };
+    use super::{Appearance, BodySize, FurColor, Gender, MainHand, Mind, Personality, Race};
 
     pub fn dead_boy() -> Personality {
         Personality::new(
             Appearance {
                 race: Race::Gazan,
                 age: 9,
-                skin_tone: SkinTone::Almond,
                 fur_color: Some(FurColor::Ginger),
                 body_size: BodySize::Tiny,
                 sex: Sex::Male,
@@ -157,7 +156,6 @@ pub mod tests {
             Appearance {
                 race: Race::Gazan,
                 age: 15,
-                skin_tone: SkinTone::WarmIvory,
                 fur_color: Some(FurColor::Ginger),
                 body_size: BodySize::Small,
                 sex: Sex::Female,
@@ -176,7 +174,6 @@ pub mod tests {
             Appearance {
                 race: Race::Bug,
                 age: 99,
-                skin_tone: SkinTone::Almond,
                 fur_color: None,
                 body_size: BodySize::Large,
                 sex: Sex::Undefined,

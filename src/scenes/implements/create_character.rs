@@ -10,9 +10,7 @@ use crate::{
     colors::Colors,
     game::{
         bodies::BodySize,
-        races::{
-            Appearance, FurColor, Gender, MainHand, Mind, Personality, PlayableRace, SkinTone,
-        },
+        races::{Appearance, FurColor, Gender, MainHand, Mind, Personality, PlayableRace, Race},
         traits::Name,
         Avatar, Log, World,
     },
@@ -336,14 +334,18 @@ impl CreateCharacter {
         } else {
             let gender: Gender = self.gender_input().value().into();
             let age = self.age_input().value().parse::<u8>().unwrap();
+            let race = Race::from(self.race);
             let character = Personality::new(
                 Appearance {
-                    race: self.race.into(),
-                    age,
-                    skin_tone: SkinTone::PaleIvory,
-                    fur_color: Some(FurColor::LightBrown),
+                    fur_color: if race.has_fur() {
+                        Some(FurColor::Ginger)
+                    } else {
+                        None
+                    },
                     body_size: BodySize::Normal,
                     sex: gender.clone().into(),
+                    race,
+                    age,
                 },
                 Mind {
                     name,

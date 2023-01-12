@@ -7,11 +7,10 @@ use tetra::Context;
 
 use crate::assets::{Assets, Tileset};
 use crate::colors::Colors;
-use crate::game::bodies::Freshness;
 use crate::game::map::item::ItemView;
 use crate::game::map::terrain::TerrainView;
-use crate::game::races::Gender;
-use crate::game::{Avatar, Soul, World};
+use crate::game::traits::Name;
+use crate::game::{Avatar, World};
 
 // TODO: refactor this to small functions
 
@@ -126,64 +125,11 @@ pub fn draw_unit(
         position.x += 10.0 * zoom;
         Vec2::new(-zoom, zoom)
     };
-    match &avatar.soul {
-        Soul::Zombie(person, ..) => {
-            let freshness = avatar
-                .body
-                .parts
-                .get(&Point::new(0, 0))
-                .map_or(Freshness::Rotten, |i| i.data.freshness);
-            let (name, color) = match freshness {
-                Freshness::Fresh => (
-                    if person.appearance.age > 15 {
-                        "raw_zombie"
-                    } else {
-                        "raw_zombie_child"
-                    },
-                    person.appearance.skin_tone.into(),
-                ),
-                Freshness::Rotten => (
-                    if person.appearance.age > 15 {
-                        "zombie"
-                    } else {
-                        "zombie_child"
-                    },
-                    Colors::WHITE,
-                ),
-                Freshness::Skeletal => (
-                    if person.appearance.age > 15 {
-                        "skeleton"
-                    } else {
-                        "skeleton_child"
-                    },
-                    Colors::WARM_IVORY,
-                ),
-            };
-            tileset.draw_region(
-                ctx,
-                name,
-                DrawParams::new()
-                    .position(position)
-                    .scale(scale)
-                    .color(color),
-            );
-        }
-        Soul::Player(person) => {
-            // TODO: draw wear
-            tileset.draw_region(
-                ctx,
-                match person.mind.gender {
-                    Gender::Female => "female",
-                    Gender::Male => "male",
-                    Gender::Custom(_) => "queer",
-                },
-                DrawParams::new()
-                    .position(position)
-                    .scale(scale)
-                    .color(person.appearance.skin_tone.into()),
-            );
-        }
+    let mut draw_params = DrawParams::new().position(position).scale(scale);
+    if let Some(fur_color) = avatar.personality.appearance.fur_color {
+        draw_params = draw_params.color(fur_color.into());
     }
+    tileset.draw_region(ctx, avatar.personality.appearance.race.name(), draw_params);
     if let Some(item) = avatar.wield.get(0) {
         let offset = if !rotate || matches!(avatar.vision, TwoDimDirection::East) {
             Vec2::new(15.0 * zoom, 10.0 * zoom)

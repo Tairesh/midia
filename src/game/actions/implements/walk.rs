@@ -4,7 +4,6 @@ use geometry::Direction;
 
 use super::super::{
     super::{
-        avatar::Soul,
         log::{LogCategory, LogEvent},
         map::{
             passage::Passage::Passable,
@@ -35,9 +34,6 @@ impl ActionImpl for Walk {
             return No(format!("{} is on the way", unit.name_for_actions()));
         }
         Yes({
-            let person = match &actor.soul {
-                Soul::Zombie(person, ..) | Soul::Player(person) => person,
-            };
             let k_diagonal = match self.dir {
                 Direction::NorthEast
                 | Direction::SouthEast
@@ -45,17 +41,13 @@ impl ActionImpl for Walk {
                 | Direction::NorthWest => SQRT_2,
                 _ => 1.0,
             };
-            let k_soul = match &actor.soul {
-                Soul::Zombie(..) => 1.5,
-                Soul::Player(..) => 1.0,
-            };
-            let k_age = match person.appearance.age {
+            let k_age = match actor.personality.appearance.age {
                 0 => 100.0,
                 1..=3 => 10.0,
                 4..=10 => 3.0,
                 11.. => 1.0,
             };
-            let k = k_diagonal * k_soul * k_age;
+            let k = k_diagonal * k_age;
             if let Passable(pass_time) = tile.terrain.passage() {
                 f32::round(pass_time * k) as u32
             } else {

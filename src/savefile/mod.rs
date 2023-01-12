@@ -47,8 +47,8 @@ mod tests {
         assert_eq!(world.game_view.zoom, world2.game_view.zoom);
         assert_eq!(world.player().pos, world2.player().pos);
         assert_eq!(
-            world.player().person().mind.name,
-            world2.player().person().mind.name
+            world.player().personality.mind.name,
+            world2.player().personality.mind.name
         );
 
         delete(&path);

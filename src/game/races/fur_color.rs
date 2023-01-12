@@ -1,6 +1,9 @@
 use rand::distributions::{Distribution, Standard};
 use rand::Rng;
 use serde::{Deserialize, Serialize};
+use tetra::graphics::Color;
+
+use crate::colors::Colors;
 
 #[derive(Serialize, Deserialize, Debug, Copy, Clone, Eq, PartialEq)]
 pub enum FurColor {
@@ -34,6 +37,21 @@ impl Distribution<FurColor> for Standard {
             6 => FurColor::Yellow,
             7 => FurColor::Gray,
             _ => unreachable!(),
+        }
+    }
+}
+
+impl From<FurColor> for Color {
+    fn from(s: FurColor) -> Self {
+        match s {
+            FurColor::White => Colors::WHITE_SMOKE,
+            FurColor::Gray => Colors::LIGHT_SLATE_GRAY,
+            FurColor::Yellow => Colors::LIGHT_YELLOW,
+            FurColor::Ginger => Colors::BRONZE,
+            FurColor::LightBrown => Colors::SADDLE_BROWN,
+            FurColor::MediumBrown => Colors::BROWN,
+            FurColor::DarkBrown => Colors::DARK_BROWN,
+            FurColor::Black => Colors::DARKEST_GRAY,
         }
     }
 }

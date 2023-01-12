@@ -4,8 +4,8 @@ use std::rc::Rc;
 
 use geometry::{Rect, Vec2};
 use tetra::{
-    graphics::{text::Text, DrawParams},
     Context,
+    graphics::{DrawParams, text::Text},
 };
 
 use crate::{
@@ -122,8 +122,8 @@ impl Button {
         position: Position,
         on_click: Transition,
     ) -> Self
-    where
-        S: Into<String>,
+        where
+            S: Into<String>,
     {
         Self::new(
             keys,
@@ -211,22 +211,6 @@ impl Button {
             ),
         }
     }
-
-    // TODO: move this to Press trait
-    pub fn is_pressed(&self) -> bool {
-        matches!(
-            self.state,
-            ButtonState::Pressed | ButtonState::PressedAndHovered
-        )
-    }
-
-    // TODO: move this to Hover trait
-    pub fn is_hovered(&self) -> bool {
-        matches!(
-            self.state,
-            ButtonState::Hovered | ButtonState::PressedAndHovered
-        )
-    }
 }
 
 impl Draw for Button {
@@ -250,7 +234,7 @@ impl Draw for Button {
         );
 
         vec += Vec2::new(rect.w, rect.h) / 2.0 - content_size / 2.0;
-        if !self.is_pressed() {
+        if !self.pressed() {
             vec.y -= 2.0;
         }
         match &mut self.content {
@@ -317,7 +301,7 @@ impl Update for Button {
                 if input::is_key_with_mod_pressed(ctx, kwm) {
                     on_pressed = true;
                 }
-                if input::is_key_released(ctx, kwm.key) && self.is_pressed() {
+                if input::is_key_released(ctx, kwm.key) && self.pressed() {
                     off_pressed = true;
                 }
             }
@@ -334,15 +318,15 @@ impl Update for Button {
         if collides && blocked.iter().any(|r| r.contains_point(mouse)) {
             return None;
         }
-        if !self.is_hovered() && collides {
+        if !self.hovered() && collides {
             self.on_hovered();
-        } else if self.is_hovered() && !collides {
+        } else if self.hovered() && !collides {
             self.off_hovered();
         }
-        if collides && !self.is_pressed() && input::is_mouse_button_pressed(ctx, MouseButton::Left)
+        if collides && !self.pressed() && input::is_mouse_button_pressed(ctx, MouseButton::Left)
         {
             self.on_pressed();
-        } else if self.is_pressed() && input::is_mouse_button_released(ctx, MouseButton::Left) {
+        } else if self.pressed() && input::is_mouse_button_released(ctx, MouseButton::Left) {
             self.off_pressed();
             if collides {
                 return Some(self.on_click.clone());

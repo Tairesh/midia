@@ -1,6 +1,6 @@
 use geometry::{Rect, Vec2};
-use tetra::graphics::Color;
 use tetra::Context;
+use tetra::graphics::Color;
 
 use crate::scenes::Transition;
 
@@ -30,7 +30,7 @@ pub trait Positionate {
 }
 
 pub trait Update {
-    // focused means there is some focused sprite on the scene
+    // focused means there is some focused sprite on the scene, that intercepts all input
     // blocked is rects of ui elements above current one
     // TODO: implement a way to tell there is an yes-or-no-style alert, blocking even hovering
     fn update(

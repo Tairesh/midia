@@ -3,6 +3,8 @@ use rand::distributions::{Distribution, Standard};
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 
+use crate::game::traits::Name;
+
 #[derive(Serialize, Deserialize, Sequence, Debug, Copy, Clone, Eq, PartialEq)]
 pub enum MainHand {
     #[serde(rename = "r")]
@@ -14,10 +16,6 @@ pub enum MainHand {
 }
 
 impl MainHand {
-    pub fn name(self) -> &'static str {
-        self.into()
-    }
-
     pub fn next(self) -> Self {
         next_cycle(&self).unwrap()
     }
@@ -46,5 +44,11 @@ impl Distribution<MainHand> for Standard {
         } else {
             MainHand::Right
         }
+    }
+}
+
+impl Name for MainHand {
+    fn name(&self) -> &'static str {
+        (*self).into()
     }
 }

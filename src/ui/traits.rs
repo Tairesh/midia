@@ -3,6 +3,7 @@ use tetra::graphics::Color;
 use tetra::Context;
 
 use crate::scenes::Transition;
+use crate::ui::JustMesh;
 
 use super::{Alert, Button, Label, Position, TextInput};
 
@@ -92,6 +93,9 @@ pub trait UiSprite: Draw + Positionate + Update + Focus {
         None
     }
     fn as_alert(&mut self) -> Option<&mut Alert> {
+        None
+    }
+    fn as_just_mesh(&mut self) -> Option<&mut JustMesh> {
         None
     }
 }

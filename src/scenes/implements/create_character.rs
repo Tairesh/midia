@@ -1,10 +1,14 @@
 use std::collections::HashMap;
 use std::path::Path;
 
-use geometry::Point;
+use geometry::{Point, Vec2};
+use tetra::graphics::mesh::{BorderRadii, Mesh, ShapeStyle};
+use tetra::graphics::Rectangle;
 use tetra::input::{Key, KeyModifier};
 use tetra::{Context, Event};
 
+use crate::game::bodies::Sex;
+use crate::ui::{Colorize, JustMesh};
 use crate::{
     app::App,
     colors::Colors,
@@ -39,6 +43,8 @@ enum ButtonEvent {
     AgePlus,
     HandLeft,
     HandRight,
+    FurLeft,
+    FurRight,
     Randomize,
     Create,
 }
@@ -51,9 +57,10 @@ impl From<u8> for ButtonEvent {
 
 pub struct CreateCharacter {
     meta: Meta,
-    sprites: [Box<dyn UiSprite>; 25],
+    sprites: [Box<dyn UiSprite>; 30],
     race: PlayableRace,
     main_hand: MainHand,
+    fur_color: Option<FurColor>,
     window_size: (i32, i32),
 }
 
@@ -94,6 +101,7 @@ impl CreateCharacter {
             },
             Transition::CustomEvent(ButtonEvent::Create as u8),
         ));
+        let fur_color = FurColor::Gray;
 
         Self {
             // Order is matter, change hardcoded indices in functions below if modified
@@ -126,7 +134,7 @@ impl CreateCharacter {
                     &app.assets,
                     Position {
                         x: Horizontal::AtWindowCenterByCenter { offset: 110.0 },
-                        y: Vertical::ByBottom { y: 170.0 },
+                        y: Vertical::ByBottom { y: 180.0 },
                     },
                 ),
                 label(
@@ -149,7 +157,7 @@ impl CreateCharacter {
                     Transition::CustomEvent(ButtonEvent::RaceLeft as u8),
                 )),
                 Box::new(Label::new(
-                    "Gazan",
+                    "Gazan", // TODO: add icon from tileset
                     app.assets.fonts.header.clone(),
                     Colors::DARK_BROWN,
                     Position {
@@ -278,7 +286,54 @@ impl CreateCharacter {
                     },
                     ButtonEvent::HandRight as u8,
                 ),
-                // TODO: add fur selector
+                label(
+                    "Fur color:",
+                    &app.assets,
+                    Position {
+                        x: Horizontal::AtWindowCenterByRight { offset: -60.0 },
+                        y: Vertical::ByCenter { y: 450.0 },
+                    },
+                ),
+                icon_left(
+                    &app.assets,
+                    Position {
+                        x: Horizontal::AtWindowCenterByLeft { offset: -40.0 },
+                        y: Vertical::ByCenter { y: 450.0 },
+                    },
+                    ButtonEvent::FurLeft as u8,
+                ),
+                Box::new(JustMesh::new(
+                    Mesh::rounded_rectangle(
+                        ctx,
+                        ShapeStyle::Fill,
+                        Rectangle::new(0.0, 0.0, 200.0, 42.0),
+                        BorderRadii::new(5.0),
+                    )
+                    .unwrap(),
+                    Some(fur_color.into()),
+                    Vec2::new(200.0, 42.0),
+                    Position {
+                        x: Horizontal::AtWindowCenterByCenter { offset: 110.0 },
+                        y: Vertical::ByCenter { y: 450.0 },
+                    },
+                )),
+                Box::new(Label::new(
+                    fur_color.name(),
+                    app.assets.fonts.header.clone(),
+                    fur_color.text_color(),
+                    Position {
+                        x: Horizontal::AtWindowCenterByCenter { offset: 110.0 },
+                        y: Vertical::ByCenter { y: 450.0 },
+                    },
+                )),
+                icon_right(
+                    &app.assets,
+                    Position {
+                        x: Horizontal::AtWindowCenterByRight { offset: 260.0 },
+                        y: Vertical::ByCenter { y: 450.0 },
+                    },
+                    ButtonEvent::FurRight as u8,
+                ),
                 back_btn,
                 randomize_btn,
                 create_btn,
@@ -287,6 +342,7 @@ impl CreateCharacter {
             race: PlayableRace::Gazan,
             main_hand: MainHand::Right,
             window_size: app.window_size,
+            fur_color: Some(fur_color),
         }
     }
 
@@ -308,6 +364,29 @@ impl CreateCharacter {
     fn hand_name(&mut self) -> &mut Label {
         self.sprites[20].as_label().unwrap()
     }
+    fn fur_label(&mut self) -> &mut Label {
+        self.sprites[22].as_label().unwrap()
+    }
+    fn fur_left(&mut self) -> &mut Button {
+        self.sprites[23].as_button().unwrap()
+    }
+    fn fur_bg(&mut self) -> &mut JustMesh {
+        self.sprites[24].as_just_mesh().unwrap()
+    }
+    fn fur_name(&mut self) -> &mut Label {
+        self.sprites[25].as_label().unwrap()
+    }
+    fn fur_right(&mut self) -> &mut Button {
+        self.sprites[26].as_button().unwrap()
+    }
+
+    fn hide_fur_selectors(&mut self, hide: bool) {
+        self.fur_label().set_visible(!hide);
+        self.fur_left().set_visible(!hide);
+        self.fur_bg().set_visible(!hide);
+        self.fur_name().set_visible(!hide);
+        self.fur_right().set_visible(!hide);
+    }
 
     fn randomize(&mut self, ctx: &mut Context) {
         let mut rng = rand::thread_rng();
@@ -323,6 +402,13 @@ impl CreateCharacter {
         let window_size = self.window_size;
         self.hand_name().update(name, ctx, window_size);
         self.race_name().update(race, ctx, window_size);
+        self.fur_color = character.appearance.fur_color;
+        self.hide_fur_selectors(!Race::from(self.race).has_fur());
+        if let Some(fur_color) = self.fur_color {
+            self.fur_bg().set_color(fur_color);
+            self.fur_name().update(fur_color.name(), ctx, window_size);
+            self.fur_name().set_color(fur_color.text_color());
+        }
     }
 
     fn create(&mut self) -> SomeTransitions {
@@ -337,13 +423,9 @@ impl CreateCharacter {
             let race = Race::from(self.race);
             let character = Personality::new(
                 Appearance {
-                    fur_color: if race.has_fur() {
-                        Some(FurColor::Ginger)
-                    } else {
-                        None
-                    },
+                    fur_color: self.fur_color,
                     body_size: BodySize::Normal,
-                    sex: gender.clone().into(),
+                    sex: Sex::from(&gender),
                     race,
                     age,
                 },
@@ -409,6 +491,19 @@ impl SceneImpl for CreateCharacter {
                 let name = self.race.name();
                 let window_size = self.window_size;
                 self.race_name().update(name, ctx, window_size);
+                let has_fur = Race::from(self.race).has_fur();
+                self.hide_fur_selectors(!has_fur);
+                if has_fur {
+                    let fur_color = FurColor::Ginger;
+                    self.fur_color = Some(fur_color);
+                    let name = fur_color.name();
+                    self.fur_name().update(name, ctx, window_size);
+                    self.fur_name().set_color(fur_color.text_color());
+                    self.fur_bg().set_color(fur_color);
+                } else {
+                    self.fur_color = None;
+                }
+
                 None
             }
             ButtonEvent::GenderLeft | ButtonEvent::GenderRight => {
@@ -442,6 +537,22 @@ impl SceneImpl for CreateCharacter {
                 let name = self.main_hand.name();
                 let window_size = self.window_size;
                 self.hand_name().update(name, ctx, window_size);
+                None
+            }
+            ButtonEvent::FurLeft | ButtonEvent::FurRight => {
+                if let Some(fur_color) = self.fur_color {
+                    let fur_color = match event {
+                        ButtonEvent::FurLeft => fur_color.prev(),
+                        ButtonEvent::FurRight => fur_color.next(),
+                        _ => unreachable!(),
+                    };
+                    self.fur_color = Some(fur_color);
+                    let name = fur_color.name();
+                    let window_size = self.window_size;
+                    self.fur_name().update(name, ctx, window_size);
+                    self.fur_name().set_color(fur_color.text_color());
+                    self.fur_bg().set_color(fur_color);
+                }
                 None
             }
             ButtonEvent::Randomize => {

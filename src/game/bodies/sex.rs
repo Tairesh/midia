@@ -20,8 +20,8 @@ impl Default for Sex {
     }
 }
 
-impl From<Gender> for Sex {
-    fn from(value: Gender) -> Self {
+impl From<&Gender> for Sex {
+    fn from(value: &Gender) -> Self {
         match value {
             Gender::Male => Self::Male,
             Gender::Female => Self::Female,

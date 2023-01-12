@@ -91,7 +91,11 @@ impl Update for JustMesh {}
 
 impl Focus for JustMesh {}
 
-impl UiSprite for JustMesh {}
+impl UiSprite for JustMesh {
+    fn as_just_mesh(&mut self) -> Option<&mut JustMesh> {
+        Some(self)
+    }
+}
 
 pub struct HoverableMesh {
     mesh: Mesh,

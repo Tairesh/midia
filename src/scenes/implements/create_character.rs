@@ -5,14 +5,15 @@ use geometry::Point;
 use tetra::input::{Key, KeyModifier};
 use tetra::{Context, Event};
 
-use crate::game::races::{Gender, PlayableRace};
-use crate::game::traits::Name;
 use crate::{
     app::App,
     colors::Colors,
     game::{
         bodies::BodySize,
-        races::{Appearance, FurColor, MainHand, Mind, Personality, SkinTone},
+        races::{
+            Appearance, FurColor, Gender, MainHand, Mind, Personality, PlayableRace, SkinTone,
+        },
+        traits::Name,
         Avatar, Log, World,
     },
     savefile::{self, GameView, Meta},
@@ -23,7 +24,10 @@ use crate::{
 };
 
 use super::super::{
-    helpers::{back_btn, bg, easy_back, error_label, label, subtitle, text_input, title},
+    helpers::{
+        back_btn, bg, easy_back, error_label, icon_left, icon_minus, icon_plus, icon_right, label,
+        randomize_btn, subtitle, text_input, title,
+    },
     Scene, SceneImpl, SomeTransitions, Transition,
 };
 
@@ -61,20 +65,14 @@ impl CreateCharacter {
     pub fn new(path: &Path, app: &App, ctx: &mut Context) -> Self {
         let meta = savefile::load(path).unwrap();
 
-        let mut randomize_btn = Box::new(Button::text(
-            vec![
-                Key::NumPadMultiply.into(),
-                (Key::Num8, KeyModifier::Shift).into(),
-            ],
-            "[*] Randomize",
-            app.assets.fonts.default.clone(),
-            app.assets.button.clone(),
+        let mut randomize_btn = randomize_btn(
+            &app.assets,
             Position {
                 x: Horizontal::AtWindowCenterByCenter { offset: 0.0 },
                 y: Vertical::ByCenter { y: 500.0 },
             },
-            Transition::CustomEvent(ButtonEvent::Randomize as u8),
-        ));
+            ButtonEvent::Randomize as u8,
+        );
         let randomize_btn_size = randomize_btn.calc_size(ctx);
         let back_btn = back_btn(
             Position {
@@ -223,17 +221,14 @@ impl CreateCharacter {
                         y: Vertical::ByCenter { y: 350.0 },
                     },
                 ),
-                Box::new(Button::icon(
-                    vec![],
-                    "minus",
-                    app.assets.tileset.clone(),
-                    app.assets.button.clone(),
+                icon_minus(
+                    &app.assets,
                     Position {
                         x: Horizontal::AtWindowCenterByLeft { offset: -40.0 },
                         y: Vertical::ByCenter { y: 350.0 },
                     },
-                    Transition::CustomEvent(ButtonEvent::AgeMinus as u8),
-                )),
+                    ButtonEvent::AgeMinus as u8,
+                ),
                 Box::new(TextInput::int(
                     18,
                     (16, 99),
@@ -244,17 +239,14 @@ impl CreateCharacter {
                         y: Vertical::ByCenter { y: 350.0 },
                     },
                 )),
-                Box::new(Button::icon(
-                    vec![],
-                    "plus",
-                    app.assets.tileset.clone(),
-                    app.assets.button.clone(),
+                icon_plus(
+                    &app.assets,
                     Position {
                         x: Horizontal::AtWindowCenterByRight { offset: 260.0 },
                         y: Vertical::ByCenter { y: 350.0 },
                     },
-                    Transition::CustomEvent(ButtonEvent::AgePlus as u8),
-                )),
+                    ButtonEvent::AgePlus as u8,
+                ),
                 label(
                     "Main hand:",
                     &app.assets,
@@ -263,17 +255,14 @@ impl CreateCharacter {
                         y: Vertical::ByCenter { y: 400.0 },
                     },
                 ),
-                Box::new(Button::icon(
-                    vec![],
-                    "lt",
-                    app.assets.tileset.clone(),
-                    app.assets.button.clone(),
+                icon_left(
+                    &app.assets,
                     Position {
                         x: Horizontal::AtWindowCenterByLeft { offset: -40.0 },
                         y: Vertical::ByCenter { y: 400.0 },
                     },
-                    Transition::CustomEvent(ButtonEvent::HandLeft as u8),
-                )),
+                    ButtonEvent::HandLeft as u8,
+                ),
                 Box::new(Label::new(
                     "Right",
                     app.assets.fonts.header.clone(),
@@ -283,17 +272,14 @@ impl CreateCharacter {
                         y: Vertical::ByCenter { y: 400.0 },
                     },
                 )),
-                Box::new(Button::icon(
-                    vec![],
-                    "mt",
-                    app.assets.tileset.clone(),
-                    app.assets.button.clone(),
+                icon_right(
+                    &app.assets,
                     Position {
                         x: Horizontal::AtWindowCenterByRight { offset: 260.0 },
                         y: Vertical::ByCenter { y: 400.0 },
                     },
-                    Transition::CustomEvent(ButtonEvent::HandRight as u8),
-                )),
+                    ButtonEvent::HandRight as u8,
+                ),
                 // TODO: add fur selector
                 back_btn,
                 randomize_btn,

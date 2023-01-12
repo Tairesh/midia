@@ -1,3 +1,4 @@
+use tetra::input::KeyModifier;
 use tetra::{
     input::{Key, MouseButton},
     Event,
@@ -92,5 +93,63 @@ pub(crate) fn text_input(
         width,
         assets.fonts.header.clone(),
         position,
+    ))
+}
+
+pub(crate) fn randomize_btn(assets: &Assets, position: Position, custom_event: u8) -> Box<Button> {
+    Box::new(Button::text(
+        vec![
+            Key::NumPadMultiply.into(),
+            (Key::Num8, KeyModifier::Shift).into(),
+        ],
+        "[*] Randomize",
+        assets.fonts.default.clone(),
+        assets.button.clone(),
+        position,
+        Transition::CustomEvent(custom_event),
+    ))
+}
+
+pub(crate) fn icon_left(assets: &Assets, position: Position, custom_event: u8) -> Box<Button> {
+    Box::new(Button::icon(
+        vec![],
+        "lt",
+        assets.tileset.clone(),
+        assets.button.clone(),
+        position,
+        Transition::CustomEvent(custom_event),
+    ))
+}
+
+pub(crate) fn icon_right(assets: &Assets, position: Position, custom_event: u8) -> Box<Button> {
+    Box::new(Button::icon(
+        vec![],
+        "mt",
+        assets.tileset.clone(),
+        assets.button.clone(),
+        position,
+        Transition::CustomEvent(custom_event),
+    ))
+}
+
+pub(crate) fn icon_plus(assets: &Assets, position: Position, custom_event: u8) -> Box<Button> {
+    Box::new(Button::icon(
+        vec![],
+        "plus",
+        assets.tileset.clone(),
+        assets.button.clone(),
+        position,
+        Transition::CustomEvent(custom_event),
+    ))
+}
+
+pub(crate) fn icon_minus(assets: &Assets, position: Position, custom_event: u8) -> Box<Button> {
+    Box::new(Button::icon(
+        vec![],
+        "minus",
+        assets.tileset.clone(),
+        assets.button.clone(),
+        position,
+        Transition::CustomEvent(custom_event),
     ))
 }

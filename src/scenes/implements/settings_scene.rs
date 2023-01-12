@@ -2,6 +2,7 @@ use tetra::input::{Key, KeyModifier};
 use tetra::window::WindowPosition;
 use tetra::{Context, Event};
 
+use crate::scenes::helpers::{icon_minus, icon_plus};
 use crate::{
     app::App,
     settings::Settings,
@@ -44,9 +45,6 @@ impl SettingsScene {
     // TODO: refactor and delete this allow
     #[allow(clippy::too_many_lines)]
     pub fn new(app: &App, ctx: &mut Context) -> Self {
-        let bg = bg(&app.assets);
-        let title = title("Settings", &app.assets);
-
         let settings = Settings::instance();
         let fullscreen_btn = Box::new(Button::fixed(
             vec![(Key::F, KeyModifier::Alt).into()],
@@ -74,78 +72,66 @@ impl SettingsScene {
         ));
         let window_btn_size = window_btn.calc_size(ctx);
 
-        let window_mode_label = label(
-            "Window mode:",
-            &app.assets,
-            Position {
-                x: Horizontal::AtWindowCenterByRight {
-                    offset: 90.0 - window_btn_size.x,
-                },
-                y: Vertical::ByCenter { y: 200.0 },
-            },
-        );
-
-        let repeat_interval_minus = Box::new(Button::icon(
-            vec![],
-            "minus",
-            app.assets.tileset.clone(),
-            app.assets.button.clone(),
-            Position {
-                x: Horizontal::AtWindowCenterByRight { offset: 0.0 },
-                y: Vertical::ByCenter { y: 250.0 },
-            },
-            Transition::CustomEvent(ButtonEvent::RepeatIntervalMinus as u8),
-        ));
-        let repeat_interval_input = Box::new(TextInput::int(
-            settings.input.repeat_interval,
-            (1, 10000),
-            190.0,
-            app.assets.fonts.header.clone(),
-            Position {
-                x: Horizontal::AtWindowCenterByLeft { offset: 5.0 },
-                y: Vertical::ByCenter { y: 250.0 },
-            },
-        ));
-        let repeat_interval_plus = Box::new(Button::icon(
-            vec![],
-            "plus",
-            app.assets.tileset.clone(),
-            app.assets.button.clone(),
-            Position {
-                x: Horizontal::AtWindowCenterByLeft { offset: 200.0 },
-                y: Vertical::ByCenter { y: 250.0 },
-            },
-            Transition::CustomEvent(ButtonEvent::RepeatIntervalPlus as u8),
-        ));
-        let repeat_interval_label = label(
-            "Repeat delay:",
-            &app.assets,
-            Position {
-                x: Horizontal::AtWindowCenterByRight {
-                    offset: 90.0 - window_btn_size.x,
-                },
-                y: Vertical::ByCenter { y: 250.0 },
-            },
-        );
-
-        let back_btn = back_btn(
-            Position::horizontal_center(0.0, Vertical::AtWindowBottomByBottom { offset: -200.0 }),
-            &app.assets,
-        );
-
         Self {
             // Order is matter, change hardcoded indices in functions below if modified
             sprites: [
-                bg,
-                title,
+                bg(&app.assets),
+                title("Settings", &app.assets),
                 fullscreen_btn,
                 window_btn,
-                window_mode_label,
-                repeat_interval_label,
-                repeat_interval_minus,
-                repeat_interval_input,
-                repeat_interval_plus,
-                back_btn,
+                label(
+                    "Window mode:",
+                    &app.assets,
+                    Position {
+                        x: Horizontal::AtWindowCenterByRight {
+                            offset: 90.0 - window_btn_size.x,
+                        },
+                        y: Vertical::ByCenter { y: 200.0 },
+                    },
+                ),
+                label(
+                    "Repeat delay:",
+                    &app.assets,
+                    Position {
+                        x: Horizontal::AtWindowCenterByRight {
+                            offset: 90.0 - window_btn_size.x,
+                        },
+                        y: Vertical::ByCenter { y: 250.0 },
+                    },
+                ),
+                icon_minus(
+                    &app.assets,
+                    Position {
+                        x: Horizontal::AtWindowCenterByRight { offset: 0.0 },
+                        y: Vertical::ByCenter { y: 250.0 },
+                    },
+                    ButtonEvent::RepeatIntervalMinus as u8,
+                ),
+                Box::new(TextInput::int(
+                    settings.input.repeat_interval,
+                    (1, 10000),
+                    190.0,
+                    app.assets.fonts.header.clone(),
+                    Position {
+                        x: Horizontal::AtWindowCenterByLeft { offset: 5.0 },
+                        y: Vertical::ByCenter { y: 250.0 },
+                    },
+                )),
+                icon_plus(
+                    &app.assets,
+                    Position {
+                        x: Horizontal::AtWindowCenterByLeft { offset: 200.0 },
+                        y: Vertical::ByCenter { y: 250.0 },
+                    },
+                    ButtonEvent::RepeatIntervalPlus as u8,
+                ),
+                back_btn(
+                    Position::horizontal_center(
+                        0.0,
+                        Vertical::AtWindowBottomByBottom { offset: -200.0 },
+                    ),
+                    &app.assets,
+                ),
             ],
         }
     }

@@ -12,7 +12,7 @@ use crate::{
     app::App,
     assets::Assets,
     colors::Colors,
-    game::{map::item::ItemView, Action, ActionType, World},
+    game::{map::ItemView, Action, ActionType, World},
     ui::{GameLog, Label, Position, SomeUISprites, SomeUISpritesMut, UiSprite, Vertical},
 };
 

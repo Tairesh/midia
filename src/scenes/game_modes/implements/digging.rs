@@ -5,10 +5,7 @@ use crate::{
     colors::Colors,
     game::{
         actions::implements::Dig,
-        map::{
-            item::{ItemInteract, ItemQuality},
-            terrain::TerrainInteract,
-        },
+        map::{ItemInteract, ItemQuality, TerrainInteract},
         World,
     },
     input,

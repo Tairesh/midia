@@ -16,7 +16,7 @@ use crate::{
             Appearance, FurColor, Gender, MainHand, Mind, Personality, PlayableRace, Race, Sex,
         },
         traits::Name,
-        Avatar, Log, World,
+        Attributes, Avatar, Log, World,
     },
     savefile::{self, GameView, Meta},
     ui::{
@@ -436,8 +436,10 @@ impl CreateCharacter {
                     alive: true,
                 },
             );
+            // TODO: attributes, traits, skills, etc.
             // TODO: find available starting pos in the world
-            let avatar = Avatar::dressed_default(character, Point::new(0, 0));
+            let avatar =
+                Avatar::dressed_default(character, Attributes::default(), Point::new(0, 0));
             let mut world = World::new(
                 self.meta.clone(),
                 GameView::default(),

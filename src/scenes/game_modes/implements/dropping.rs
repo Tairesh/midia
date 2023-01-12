@@ -3,7 +3,7 @@ use tetra::{graphics::Color, input::Key, Context};
 
 use crate::{
     colors::Colors,
-    game::{actions::implements::Drop, map::terrain::TerrainInteract, World},
+    game::{actions::implements::Drop, map::TerrainInteract, World},
     input,
 };
 

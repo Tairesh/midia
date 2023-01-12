@@ -23,6 +23,7 @@ mod tests {
     use std::path::PathBuf;
 
     use crate::game::world::tests::prepare_world;
+    use crate::game::Dice;
 
     use super::{delete, load, load_world, SAVEFILES_FOLDER};
 
@@ -35,6 +36,8 @@ mod tests {
             .collect::<PathBuf>();
         let mut world = prepare_world();
         world.meta.path = path.clone();
+        world.player_mut().personality.mind.name = "test".to_string();
+        world.player_mut().attributes.agility = Dice::D12;
         world.save();
 
         let meta = load(&path).unwrap();
@@ -46,10 +49,8 @@ mod tests {
         let world2 = load_world(&path).unwrap();
         assert_eq!(world.game_view.zoom, world2.game_view.zoom);
         assert_eq!(world.player().pos, world2.player().pos);
-        assert_eq!(
-            world.player().personality.mind.name,
-            world2.player().personality.mind.name
-        );
+        assert_eq!("test", world2.player().personality.mind.name);
+        assert_eq!(Dice::D12, world2.player().attributes.agility);
 
         delete(&path);
     }

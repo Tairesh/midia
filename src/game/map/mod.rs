@@ -3,7 +3,7 @@ use std::collections::{HashMap, HashSet};
 use geometry::Point;
 
 pub use chunk::Chunk;
-pub use item::{Item, ItemInteract, ItemTag, ItemView};
+pub use item::{Item, ItemInteract, ItemQuality, ItemTag, ItemView};
 pub use passage::Passage;
 pub use pos::{ChunkPos, TilePos};
 pub use terrain::{Terrain, TerrainInteract, TerrainView};
@@ -11,14 +11,14 @@ pub use tile::Tile;
 
 use crate::fov::FovMap;
 
-pub mod chunk;
-pub mod item;
+mod chunk;
+mod item;
 pub mod items;
-pub mod passage;
-pub mod pos;
-pub mod terrain;
+mod passage;
+mod pos;
+mod terrain;
 pub mod terrains;
-pub mod tile;
+mod tile;
 
 pub struct Map {
     pub seed: String,

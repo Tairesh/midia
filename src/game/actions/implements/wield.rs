@@ -3,7 +3,7 @@ use geometry::Direction;
 use super::super::{
     super::{
         log::{LogCategory, LogEvent},
-        map::item::{ItemInteract, ItemView},
+        map::{ItemInteract, ItemView},
         Avatar, World,
     },
     Action, ActionImpl,

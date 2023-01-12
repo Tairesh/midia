@@ -3,7 +3,7 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::path::Path;
 
-use crate::game::{map::chunk::Chunk, Avatar, World};
+use crate::game::{map::Chunk, Avatar, World};
 
 use super::{Meta, SAVEFILES_FOLDER};
 

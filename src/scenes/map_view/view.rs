@@ -7,8 +7,7 @@ use tetra::Context;
 
 use crate::assets::{Assets, Tileset};
 use crate::colors::Colors;
-use crate::game::map::item::{ItemInteract, ItemView};
-use crate::game::map::terrain::TerrainView;
+use crate::game::map::{ItemInteract, ItemView, TerrainView};
 use crate::game::traits::Name;
 use crate::game::{Avatar, World};
 

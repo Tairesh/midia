@@ -30,7 +30,6 @@ pub trait TerrainView {
 #[enum_dispatch(Terrain)]
 pub trait TerrainInteract {
     // TODO: implement Interact enum for adding more interaction types easily
-    // see https://github.com/Tairesh/SpaceAge/blob/e90817c4f8ef25eee1d6fdc1986dd910dcdfbec6/src/game/ship_parts/mod.rs#L51
     fn passage(&self) -> Passage;
     fn is_passable(&self) -> bool {
         matches!(self.passage(), Passage::Passable(..))

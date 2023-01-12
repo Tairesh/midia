@@ -10,7 +10,7 @@ use crate::{
     colors::Colors,
     game::{
         actions::implements::{Drop, Skip, Walk},
-        map::item::ItemView,
+        map::ItemView,
     },
     input,
     settings::Settings,

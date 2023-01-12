@@ -4,10 +4,7 @@ use rand::seq::SliceRandom;
 use super::super::{
     super::{
         log::{LogCategory, LogEvent},
-        map::{
-            item::{ItemInteract, ItemQuality},
-            terrain::{Terrain, TerrainInteract, TerrainView},
-        },
+        map::{ItemInteract, ItemQuality, Terrain, TerrainInteract, TerrainView},
         Avatar, World,
     },
     Action, ActionImpl,

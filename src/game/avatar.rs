@@ -5,6 +5,7 @@ use geometry::{Point, TwoDimDirection};
 use super::{
     map::items::{Cloak, Hat},
     races::Personality,
+    savage::Attributes,
     Action, Item,
 };
 
@@ -18,13 +19,14 @@ pub struct Avatar {
     pub wield: Vec<Item>,
     // TODO: custom struct with layers for dress and methods to return names and icons for UI
     pub wear: Vec<Item>,
-    pub stamina: u8,
+    pub attributes: Attributes,
+    // TODO: stamina
     // TODO: traits
     // TODO: skills
 }
 
 impl Avatar {
-    pub fn new(personality: Personality, pos: Point) -> Self {
+    pub fn new(personality: Personality, attributes: Attributes, pos: Point) -> Self {
         Avatar {
             personality,
             pos,
@@ -32,15 +34,15 @@ impl Avatar {
             vision: TwoDimDirection::East,
             wield: Vec::new(),
             wear: Vec::new(),
-            stamina: 100,
+            attributes,
         }
     }
 
     // TODO: remove this and select dress in create character scene
-    pub fn dressed_default(personality: Personality, pos: Point) -> Self {
+    pub fn dressed_default(personality: Personality, attributes: Attributes, pos: Point) -> Self {
         Self {
             wear: vec![Hat::new().into(), Cloak::new().into()],
-            ..Self::new(personality, pos)
+            ..Self::new(personality, attributes, pos)
         }
     }
 

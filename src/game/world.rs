@@ -10,8 +10,9 @@ use crate::{
 };
 
 use super::{
-    map::{item::ItemView, terrain::TerrainView},
+    map::{ItemView, TerrainView},
     races::{Appearance, FurColor, Gender, MainHand, Mind, Personality, Race, Sex},
+    savage::Attributes,
     Action, Avatar, Chunk, ChunkPos, Fov, Log, Map, TilePos,
 };
 
@@ -78,6 +79,7 @@ impl World {
                     alive: true,
                 },
             ),
+            Attributes::default(),
             Point::new(0, -5),
         ));
         self.add_unit(Avatar::new(
@@ -96,6 +98,7 @@ impl World {
                     alive: true,
                 },
             ),
+            Attributes::default(),
             Point::new(-3, -5),
         ));
         self.add_unit(Avatar::new(
@@ -114,6 +117,7 @@ impl World {
                     alive: true,
                 },
             ),
+            Attributes::default(),
             Point::new(3, -5),
         ));
         self.add_unit(Avatar::new(
@@ -132,6 +136,7 @@ impl World {
                     alive: true,
                 },
             ),
+            Attributes::default(),
             Point::new(6, -5),
         ));
         self.add_unit(Avatar::new(
@@ -150,6 +155,7 @@ impl World {
                     alive: true,
                 },
             ),
+            Attributes::default(),
             Point::new(-6, -5),
         ));
 
@@ -396,16 +402,14 @@ pub mod tests {
 
     use geometry::Point;
 
-    use crate::game::races::tests::personality::old_queer;
-
     use super::{
         super::{
             actions::implements::{Skip, Walk},
             map::terrains::{Boulder, BoulderSize, Dirt},
-            races::tests::personality::tester_girl,
+            races::tests::personality::{old_queer, tester_girl},
         },
         savefile::{GameView, Meta},
-        Action, Avatar, Direction, Log, TerrainView, World,
+        Action, Attributes, Avatar, Direction, Log, TerrainView, World,
     };
 
     pub fn prepare_world() -> World {
@@ -413,13 +417,17 @@ pub mod tests {
             Meta::new("test", "test"),
             GameView::default(),
             Log::new(),
-            vec![Avatar::dressed_default(tester_girl(), Point::new(0, 0))],
+            vec![Avatar::dressed_default(
+                tester_girl(),
+                Attributes::default(),
+                Point::new(0, 0),
+            )],
             HashMap::new(),
         )
     }
 
     pub fn add_npc(world: &mut World, pos: Point) -> usize {
-        world.add_unit(Avatar::new(old_queer(), pos))
+        world.add_unit(Avatar::new(old_queer(), Attributes::default(), pos))
     }
 
     #[test]
@@ -439,8 +447,8 @@ pub mod tests {
         )
         .unwrap();
         let length = action.length;
-        if let Some(zombie) = world.units.get_mut(1) {
-            zombie.action = Some(action);
+        if let Some(npc) = world.units.get_mut(1) {
+            npc.action = Some(action);
         } else {
             unreachable!();
         }

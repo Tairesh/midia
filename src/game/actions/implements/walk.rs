@@ -5,10 +5,7 @@ use geometry::Direction;
 use super::super::{
     super::{
         log::{LogCategory, LogEvent},
-        map::{
-            passage::Passage::Passable,
-            terrain::{TerrainInteract, TerrainView},
-        },
+        map::{Passage::Passable, TerrainInteract, TerrainView},
         Avatar, World,
     },
     Action, ActionImpl,

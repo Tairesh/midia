@@ -10,7 +10,7 @@ use tetra::{
 
 use crate::{
     assets::{PreparedFont, Tileset},
-    game::map::item::{Item, ItemView},
+    game::map::{Item, ItemView},
 };
 
 use super::super::{Colorize, Draw, Focus, Position, Positionate, Stringify, UiSprite, Update};

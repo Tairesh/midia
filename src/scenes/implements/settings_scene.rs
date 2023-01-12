@@ -42,8 +42,6 @@ pub struct SettingsScene {
 }
 
 impl SettingsScene {
-    // TODO: refactor and delete this allow
-    #[allow(clippy::too_many_lines)]
     pub fn new(app: &App, ctx: &mut Context) -> Self {
         let settings = Settings::instance();
         let fullscreen_btn = Box::new(Button::fixed(

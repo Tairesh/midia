@@ -22,10 +22,10 @@ pub fn draw(
     shift_of_view: Point,
     cursors: Vec<(Point, Color)>,
 ) {
-    let world = world.borrow();
     tetra::graphics::clear(ctx, Colors::BLACK);
-    let width = window_size.0 as f32;
-    let height = window_size.1 as f32;
+    let (width, height) = (window_size.0 as f32, window_size.1 as f32);
+
+    let world = world.borrow();
     let scale = world.game_view.zoom.as_scale();
     let zoom = world.game_view.zoom.as_view();
     let tile_size = assets.tileset.tile_size as f32 * zoom;
@@ -34,8 +34,8 @@ pub fn draw(
         (height / tile_size).ceil() as i32,
     );
     let center = Vec2::new(
-        width / 2.0 - tile_size / 2.0,
-        height / 2.0 - tile_size / 2.0,
+        (width / 2.0 - tile_size / 2.0).round(),
+        (height / 2.0 - tile_size / 2.0).round(),
     );
     let center_tile = world.player().pos + shift_of_view;
     let left_top = center_tile + (-window_size_in_tiles.0 / 2, -window_size_in_tiles.1 / 2);

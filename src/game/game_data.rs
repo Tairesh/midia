@@ -10,7 +10,7 @@ pub struct GameData {
 }
 
 impl GameData {
-    pub fn load() -> Self {
+    fn load() -> Self {
         Self {
             names: Names::load(),
         }

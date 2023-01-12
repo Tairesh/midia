@@ -20,6 +20,13 @@ struct ChunkUnique {
     world_seed: String,
 }
 
+fn chunk_seed(world_seed: String, pos: ChunkPos) -> u64 {
+    let mut hasher = DefaultHasher::new();
+    let seed = ChunkUnique { pos, world_seed };
+    seed.hash(&mut hasher);
+    hasher.finish()
+}
+
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct Chunk {
     pub pos: ChunkPos,
@@ -31,11 +38,7 @@ impl Chunk {
     pub const USIZE: usize = (Chunk::SIZE * Chunk::SIZE) as usize;
 
     pub fn generate(world_seed: String, pos: ChunkPos) -> Self {
-        let mut hasher = DefaultHasher::new();
-        let seed = ChunkUnique { pos, world_seed };
-        seed.hash(&mut hasher);
-        let seed = hasher.finish();
-        let mut rng = StdRng::seed_from_u64(seed);
+        let mut rng = StdRng::seed_from_u64(chunk_seed(world_seed, pos));
         let mut tiles = ArrayVec::new();
         for _ in 0..Chunk::USIZE {
             tiles.push(Tile::new(if rng.gen_bool(0.005) {

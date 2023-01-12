@@ -6,12 +6,13 @@ use geometry::{Direction, Point, TwoDimDirection, Vec2};
 use tetra::graphics::Color;
 use tetra::Context;
 
+use crate::game::Item;
 use crate::scenes::map_view;
 use crate::{
     app::App,
     assets::Assets,
     colors::Colors,
-    game::{Action, ActionType, World},
+    game::{map::item::ItemView, Action, ActionType, World},
     ui::{GameLog, Label, Position, SomeUISprites, SomeUISpritesMut, UiSprite, Vertical},
 };
 
@@ -21,7 +22,7 @@ use super::super::{
 };
 
 pub struct GameScene {
-    sprites: [Box<dyn UiSprite>; 2],
+    sprites: [Box<dyn UiSprite>; 4],
     pub world: Rc<RefCell<World>>,
     pub modes: Vec<Rc<RefCell<GameMode>>>,
     pub log: GameLog,
@@ -37,16 +38,34 @@ impl GameScene {
             world.borrow().player().person().mind.name.as_str(),
             app.assets.fonts.header.clone(),
             Colors::WHITE_SMOKE,
-            Position::by_left_top(50.0, 1.0),
+            Position::by_left_top(55.0, 8.0),
         ));
+        // TODO: custom calendar
         let current_time_label = Box::new(Label::new(
             format!("{}", world.borrow().meta.current_tick),
             app.assets.fonts.default.clone(),
             Colors::WHITE_SMOKE,
             Position::horizontal_center(0.0, Vertical::ByTop { y: 5.0 }),
         ));
+        let hands_label = Box::new(Label::new(
+            "Hands:",
+            app.assets.fonts.default.clone(),
+            Colors::WHITE_SMOKE,
+            Position::by_left_top(5.0, 40.0),
+        ));
+        let hands_display = Box::new(Label::new(
+            world
+                .borrow()
+                .player()
+                .wield
+                .first()
+                .map_or("empty".to_string(), Item::name),
+            app.assets.fonts.default.clone(),
+            Colors::WHITE_SMOKE,
+            Position::by_left_top(65.0, 40.0),
+        ));
         Self {
-            sprites: [name_label, current_time_label],
+            sprites: [name_label, hands_label, hands_display, current_time_label],
             modes: vec![Rc::new(RefCell::new(Walking::new().into()))],
             log: GameLog::new(app.assets.fonts.default.font.clone()),
             shift_of_view: Point::default(),
@@ -112,13 +131,26 @@ impl GameScene {
             self.log.log(event.msg.as_str(), event.category.into());
         }
         let current_time = format!("{}", self.world.borrow().meta.current_tick);
+        let hands_display = self
+            .world
+            .borrow()
+            .player()
+            .wield
+            .first()
+            .map_or("empty".to_string(), Item::name);
         let window_size = self.window_size;
         self.current_time_label()
             .update(current_time, ctx, window_size);
+        self.hands_display_label()
+            .update(hands_display, ctx, window_size);
+    }
+
+    fn hands_display_label(&mut self) -> &mut Label {
+        self.sprites[2].as_label().unwrap()
     }
 
     fn current_time_label(&mut self) -> &mut Label {
-        self.sprites[1].as_label().unwrap()
+        self.sprites[3].as_label().unwrap()
     }
 
     fn cursors(&self) -> Vec<(Point, Color)> {
@@ -151,12 +183,7 @@ impl SceneImpl for GameScene {
     fn after_draw(&mut self, ctx: &mut Context) {
         // TODO: move this to UI
 
-        for (i, msg) in self.log.texts.iter_mut().enumerate() {
-            msg.draw(
-                Vec2::new(10.0, self.window_size.1 as f32 - 20.0 * (i + 1) as f32),
-                ctx,
-            );
-        }
+        map_view::ui::draw_log(ctx, &mut self.log);
 
         map_view::view::draw_unit(
             ctx,

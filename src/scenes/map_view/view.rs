@@ -69,7 +69,6 @@ pub fn draw(
                 assets.tileset.draw_region(ctx, "highlight", params);
             }
         }
-        // TODO: multitile units
         let position = Vec2::new(
             center.x + dx as f32 * tile_size,
             center.y + dy as f32 * tile_size,

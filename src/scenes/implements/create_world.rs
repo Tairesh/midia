@@ -2,6 +2,7 @@ use rand::{thread_rng, Rng};
 use tetra::input::{Key, KeyModifier};
 use tetra::{Context, Event};
 
+use crate::scenes::helpers::randomize_btn;
 use crate::{
     app::App,
     game::GameData,
@@ -34,20 +35,14 @@ impl CreateWorld {
     pub fn new(app: &App, ctx: &mut Context) -> Self {
         let mut rng = thread_rng();
 
-        let mut randomize_btn = Box::new(Button::text(
-            vec![
-                Key::NumPadMultiply.into(),
-                (Key::Num8, KeyModifier::Shift).into(),
-            ],
-            "[*] Randomize",
-            app.assets.fonts.default.clone(),
-            app.assets.button.clone(),
+        let mut randomize_btn = randomize_btn(
+            &app.assets,
             Position {
                 x: Horizontal::AtWindowCenterByCenter { offset: 0.0 },
                 y: Vertical::ByCenter { y: 500.0 },
             },
-            Transition::CustomEvent(RANDOMIZE_EVENT),
-        ));
+            RANDOMIZE_EVENT,
+        );
         let randomize_size = randomize_btn.calc_size(ctx);
         let back_btn = back_btn(
             Position {

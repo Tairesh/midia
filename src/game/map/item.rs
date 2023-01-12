@@ -8,6 +8,8 @@ use super::{
     items::{Axe, BodyPart, Cloak, Corpse, Gravestone, Hat, Knife, Rags, Shovel},
 };
 
+// TODO: JSON-ize all items
+
 #[enum_dispatch]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "snake_case")]

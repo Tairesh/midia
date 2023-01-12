@@ -6,6 +6,8 @@ use super::{
     Item, Passage,
 };
 
+// TODO: JSON-ize all terrains
+
 #[enum_dispatch]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "snake_case")]
@@ -20,7 +22,8 @@ pub enum Terrain {
 
 #[enum_dispatch(Terrain)]
 pub trait TerrainView {
-    fn name(&self) -> &str; // TODO: probably use String
+    fn name(&self) -> &str;
+    // TODO: probably use String
     fn looks_like(&self) -> &'static str;
     fn is_transparent(&self) -> bool; // for FOV
 }

@@ -26,7 +26,7 @@ pub struct Avatar {
     pub action: Option<Action>,
     // TODO: rotation of multitile body
     pub vision: TwoDimDirection,
-    // TODO: custom struct with hands counter
+    // TODO: custom struct with hands counter and methods to return names and icons for UI
     pub wield: Vec<Item>,
     pub stamina: u8,
     // TODO: traits

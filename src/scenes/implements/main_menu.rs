@@ -4,8 +4,11 @@ use crate::{
     app::App,
     colors::Colors,
     savefile::savefiles_exists,
-    ui::{Button, Disable, Label, Position, SomeUISprites, SomeUISpritesMut, UiSprite, Vertical},
-    NAME, VERSION,
+    ui::{
+        Button, Disable, Image, Label, Position, SomeUISprites, SomeUISpritesMut, UiSprite,
+        Vertical,
+    },
+    VERSION,
 };
 
 use super::super::{helpers::bg, Scene, SceneImpl, Transition};
@@ -17,10 +20,8 @@ pub struct MainMenu {
 impl MainMenu {
     pub fn new(app: &App) -> Self {
         let bg = bg(&app.assets);
-        let logo = Box::new(Label::new(
-            NAME,
-            app.assets.fonts.logo.clone(),
-            Colors::BLANCHED_ALMOND,
+        let logo = Box::new(Image::new(
+            app.assets.images.logo.clone(),
             Position::horizontal_center(0.0, Vertical::AtWindowCenterByBottom { offset: -100.0 }),
         ));
         let version = Box::new(Label::new(

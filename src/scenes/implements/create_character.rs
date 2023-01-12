@@ -3,7 +3,6 @@ use std::path::Path;
 use geometry::Vec2;
 use tetra::graphics::mesh::{BorderRadii, Mesh, ShapeStyle};
 use tetra::graphics::Rectangle;
-use tetra::input::{Key, KeyModifier};
 use tetra::{Context, Event};
 
 use crate::ui::{Colorize, JustMesh};
@@ -18,15 +17,15 @@ use crate::{
     },
     savefile::{self, Meta},
     ui::{
-        Button, Draw, Horizontal, Label, Position, Positionate, SomeUISprites, SomeUISpritesMut,
-        Stringify, TextInput, UiSprite, Vertical,
+        Button, Draw, Horizontal, Label, Position, SomeUISprites, SomeUISpritesMut, Stringify,
+        TextInput, UiSprite, Vertical,
     },
 };
 
 use super::super::{
     helpers::{
-        back_btn, bg, easy_back, error_label, icon_left, icon_minus, icon_plus, icon_right, label,
-        randomize_btn, subtitle, text_input, title,
+        back_randomize_next, bg, easy_back, error_label, icon_left, icon_minus, icon_plus,
+        icon_right, label, subtitle, text_input, title,
     },
     Scene, SceneImpl, SomeTransitions, Transition,
 };
@@ -67,39 +66,14 @@ impl CreateCharacter {
     #[allow(clippy::too_many_lines)]
     pub fn new(path: &Path, app: &App, ctx: &mut Context) -> Self {
         let meta = savefile::load(path).unwrap();
-
-        let mut randomize_btn = randomize_btn(
-            &app.assets,
-            Position {
-                x: Horizontal::AtWindowCenterByCenter { offset: 0.0 },
-                y: Vertical::ByCenter { y: 500.0 },
-            },
-            ButtonEvent::Randomize as u8,
-        );
-        let randomize_btn_size = randomize_btn.calc_size(ctx);
-        let back_btn = back_btn(
-            Position {
-                x: Horizontal::AtWindowCenterByRight {
-                    offset: -randomize_btn_size.x / 2.0 - 2.0,
-                },
-                y: Vertical::ByCenter { y: 500.0 },
-            },
-            &app.assets,
-        );
-        let next_btn = Box::new(Button::text(
-            vec![(Key::Enter, KeyModifier::Alt).into()],
-            "[Alt+Enter] Next step",
-            app.assets.fonts.default.clone(),
-            app.assets.button.clone(),
-            Position {
-                x: Horizontal::AtWindowCenterByLeft {
-                    offset: randomize_btn_size.x / 2.0 + 2.0,
-                },
-                y: Vertical::ByCenter { y: 500.0 },
-            },
-            Transition::CustomEvent(ButtonEvent::Next as u8),
-        ));
         let fur_color = FurColor::Gray;
+
+        let (back_btn, randomize_btn, next_btn) = back_randomize_next(
+            &app.assets,
+            ctx,
+            ButtonEvent::Randomize as u8,
+            ButtonEvent::Next as u8,
+        );
 
         Self {
             // Order matters, change hardcoded indices in functions below if modified

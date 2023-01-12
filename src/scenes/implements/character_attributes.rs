@@ -1,7 +1,6 @@
 use std::path::Path;
 
 use geometry::Point;
-use tetra::input::{Key, KeyModifier};
 use tetra::{Context, Event};
 
 use crate::{
@@ -12,14 +11,14 @@ use crate::{
     savefile::Meta,
     scenes::{
         helpers::{
-            back_btn, bg, decorative_label, decorative_label_with_color, easy_back, icon_minus,
-            icon_plus, randomize_btn, title,
+            back_randomize_next, bg, decorative_label, decorative_label_with_color, easy_back,
+            icon_minus, icon_plus, title,
         },
         Scene, SceneImpl, SomeTransitions, Transition,
     },
     ui::{
-        Alert, Button, Disable, Horizontal, Label, Position, Positionate, SomeUISprites,
-        SomeUISpritesMut, UiSprite, Vertical,
+        Alert, Button, Disable, Horizontal, Label, Position, SomeUISprites, SomeUISpritesMut,
+        UiSprite, Vertical,
     },
 };
 
@@ -51,7 +50,7 @@ pub struct CharacterAttributes {
     attributes: Attributes,
     attributes_points: u8,
     window_size: (i32, i32),
-    sprites: Vec<Box<dyn UiSprite>>, //; 4], TODO use array
+    sprites: [Box<dyn UiSprite>; 31],
 }
 
 impl CharacterAttributes {
@@ -59,41 +58,15 @@ impl CharacterAttributes {
     #[allow(clippy::too_many_lines)]
     pub fn new(path: &Path, personality: Personality, app: &App, ctx: &mut Context) -> Self {
         let meta = savefile::load(path).unwrap();
-
-        let mut randomize_btn = randomize_btn(
+        let (back_btn, randomize_btn, next_btn) = back_randomize_next(
             &app.assets,
-            Position {
-                x: Horizontal::AtWindowCenterByCenter { offset: 0.0 },
-                y: Vertical::ByCenter { y: 500.0 },
-            },
+            ctx,
             ButtonEvent::Randomize as u8,
+            ButtonEvent::Next as u8,
         );
-        let randomize_btn_size = randomize_btn.calc_size(ctx);
-        let back_btn = back_btn(
-            Position {
-                x: Horizontal::AtWindowCenterByRight {
-                    offset: -randomize_btn_size.x / 2.0 - 2.0,
-                },
-                y: Vertical::ByCenter { y: 500.0 },
-            },
-            &app.assets,
-        );
-        let next_btn = Box::new(Button::text(
-            vec![(Key::Enter, KeyModifier::Alt).into()],
-            "[Alt+Enter] Next step",
-            app.assets.fonts.default.clone(),
-            app.assets.button.clone(),
-            Position {
-                x: Horizontal::AtWindowCenterByLeft {
-                    offset: randomize_btn_size.x / 2.0 + 2.0,
-                },
-                y: Vertical::ByCenter { y: 500.0 },
-            },
-            Transition::CustomEvent(ButtonEvent::Next as u8),
-        ));
 
         Self {
-            sprites: vec![
+            sprites: [
                 bg(&app.assets),
                 title(
                     format!("Choose attributes of {}", personality.mind.name),

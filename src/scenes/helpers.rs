@@ -1,13 +1,13 @@
 use tetra::{
     graphics::Color,
     input::{Key, KeyModifier, MouseButton},
-    Event,
+    Context, Event,
 };
 
 use crate::{
     assets::Assets,
     colors::Colors,
-    ui::{Button, Image, Label, Position, TextInput, Vertical},
+    ui::{Button, Horizontal, Image, Label, Position, Positionate, TextInput, Vertical},
 };
 
 use super::{SomeTransitions, Transition};
@@ -109,6 +109,17 @@ pub(crate) fn back_btn(position: Position, assets: &Assets) -> Box<Button> {
     ))
 }
 
+pub(crate) fn next_btn(assets: &Assets, position: Position, custom_event: u8) -> Box<Button> {
+    Box::new(Button::text(
+        vec![(Key::Enter, KeyModifier::Alt).into()],
+        "[Alt+Enter] Next step",
+        assets.fonts.default.clone(),
+        assets.button.clone(),
+        position,
+        Transition::CustomEvent(custom_event),
+    ))
+}
+
 pub(crate) fn text_input(
     value: impl Into<String>,
     width: f32,
@@ -135,6 +146,43 @@ pub(crate) fn randomize_btn(assets: &Assets, position: Position, custom_event: u
         position,
         Transition::CustomEvent(custom_event),
     ))
+}
+
+pub(crate) fn back_randomize_next(
+    assets: &Assets,
+    ctx: &mut Context,
+    randomize: u8,
+    next: u8,
+) -> (Box<Button>, Box<Button>, Box<Button>) {
+    let mut randomize_btn = randomize_btn(
+        assets,
+        Position {
+            x: Horizontal::AtWindowCenterByCenter { offset: 0.0 },
+            y: Vertical::ByCenter { y: 500.0 },
+        },
+        randomize,
+    );
+    let randomize_btn_size = randomize_btn.calc_size(ctx);
+    let back_btn = back_btn(
+        Position {
+            x: Horizontal::AtWindowCenterByRight {
+                offset: -randomize_btn_size.x / 2.0 - 2.0,
+            },
+            y: Vertical::ByCenter { y: 500.0 },
+        },
+        assets,
+    );
+    let next_btn = next_btn(
+        assets,
+        Position {
+            x: Horizontal::AtWindowCenterByLeft {
+                offset: randomize_btn_size.x / 2.0 + 2.0,
+            },
+            y: Vertical::ByCenter { y: 500.0 },
+        },
+        next,
+    );
+    (back_btn, randomize_btn, next_btn)
 }
 
 pub(crate) fn icon_left(assets: &Assets, position: Position, custom_event: u8) -> Box<Button> {

@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 
+use chrono::{DateTime, Local};
 use geometry::Vec2;
 use tetra::{
     graphics::{
@@ -9,13 +10,11 @@ use tetra::{
     input::{Key, KeyModifier},
     Context, Event,
 };
-use time::{format_description::FormatItem, OffsetDateTime};
 
 use crate::{
     app::App,
     colors::Colors,
     savefile::{self, savefiles, savefiles_exists, Meta},
-    settings::Settings,
     ui::{
         Alert, Button, Horizontal, HoverableMesh, Label, Position, Positionate, SomeUISprites,
         SomeUISpritesMut, UiSprite, Vertical,
@@ -37,9 +36,6 @@ const KEYS: [Key; 10] = [
     Key::Num9,
     Key::Num0,
 ];
-
-const DATETIME_FORMAT: &[FormatItem] =
-    time::macros::format_description!("[year].[month].[day] [hour]:[minute]:[second]");
 
 type Sprites = Vec<Box<dyn UiSprite>>;
 
@@ -122,9 +118,9 @@ impl LoadWorld {
         ));
         let version_label_size = version_label.calc_size(ctx);
         sprites.push(version_label);
-        let time = OffsetDateTime::from(savefile.time).to_offset(Settings::instance().time.offset);
+        let time: DateTime<Local> = savefile.time.into();
         sprites.push(Box::new(Label::new(
-            time.format(&DATETIME_FORMAT).unwrap(),
+            time.format("%Y.%m.%d %H:%M:%S").to_string(),
             app.assets.fonts.default.clone(),
             Colors::LIGHT_YELLOW,
             Position {

@@ -8,6 +8,7 @@ use super::super::{map::items::BodyPart, Item};
 
 pub type BodyPartsCollections = HashMap<Point, BodyPart>;
 
+// TODO: drop multitile bodies support, probably serde_as will not needed then
 #[serde_as]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Body {

@@ -4,22 +4,14 @@ use std::path::Path;
 use std::sync::{Mutex, MutexGuard};
 
 use once_cell::sync::OnceCell;
-use time::UtcOffset;
 
-const DEFAULT_PATH: &str = "./settings.json";
+// TODO: move settings to a separate directory
+
+const PATH: &str = "settings.json";
 static INSTANCE: OnceCell<Mutex<Settings>> = OnceCell::new();
 
-#[derive(Debug)]
-pub struct TimeSettings {
-    pub offset: UtcOffset,
-}
-
-impl Default for TimeSettings {
-    fn default() -> Self {
-        Self {
-            offset: UtcOffset::current_local_offset().unwrap_or(UtcOffset::UTC),
-        }
-    }
+trait Validate {
+    fn validate(&mut self);
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
@@ -32,10 +24,17 @@ pub struct WindowSettings {
 impl Default for WindowSettings {
     fn default() -> Self {
         Self {
-            width: 800,
-            height: 600,
+            width: 1024,
+            height: 768,
             fullscreen: false,
         }
+    }
+}
+
+impl Validate for WindowSettings {
+    fn validate(&mut self) {
+        self.width = self.width.clamp(800, 1920);
+        self.height = self.height.clamp(600, 1280);
     }
 }
 
@@ -43,6 +42,12 @@ impl Default for WindowSettings {
 pub struct DebugSettings {
     pub show_fps: bool,
     // TODO: debug log, backtrace, god-mode, etc.
+}
+
+impl Validate for DebugSettings {
+    fn validate(&mut self) {
+        // do nothing
+    }
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
@@ -58,26 +63,36 @@ impl Default for InputSettings {
     }
 }
 
+impl Validate for InputSettings {
+    fn validate(&mut self) {
+        self.repeat_interval = self.repeat_interval.clamp(1, 1000);
+    }
+}
+
 #[derive(serde::Serialize, serde::Deserialize, Debug, Default)]
 pub struct Settings {
     pub window: WindowSettings,
     pub debug: DebugSettings,
     pub input: InputSettings,
-    #[serde(skip)]
-    pub time: TimeSettings,
 }
 
 impl Settings {
     pub fn instance() -> MutexGuard<'static, Settings> {
         INSTANCE
-            .get_or_init(|| Mutex::new(load(DEFAULT_PATH)))
+            .get_or_init(|| Mutex::new(load(PATH)))
             .lock()
-            .expect("Can't lock Mutex<Settings>!")
+            .expect("CATS: ALL YOUR SETTINGS ARE BELONGS TO US")
     }
 
     pub fn save(&mut self) {
-        // TODO: self.validate();
-        save(self, DEFAULT_PATH);
+        self.validate();
+        save(self, PATH);
+    }
+
+    pub fn validate(&mut self) {
+        self.window.validate();
+        self.debug.validate();
+        self.input.validate();
     }
 }
 
@@ -88,7 +103,12 @@ fn load_from_file(path: &'static str) -> Result<Settings, ()> {
     }
     let file = File::open(path).map_err(|_| ())?;
     let reader = BufReader::new(file);
-    serde_json::from_reader(reader).map_err(|_| ())
+    serde_json::from_reader(reader)
+        .map_err(|_| ())
+        .map(|mut settings: Settings| {
+            settings.validate();
+            settings
+        })
 }
 
 fn load(path: &'static str) -> Settings {
@@ -109,19 +129,29 @@ mod tests {
 
     const TEST_PATH: &str = "./settings-test.json";
 
+    // TODO: this test blocking FS which seems to be a bad idea
     #[test]
     fn test_settings_load_and_save() {
         let mut settings = load(TEST_PATH);
         settings.window.width = 987;
-        settings.window.height = 654;
-        settings.input.repeat_interval = 42;
         save(&settings, TEST_PATH);
 
         let settings = load(TEST_PATH);
         assert_eq!(987, settings.window.width);
-        assert_eq!(654, settings.window.height);
-        assert_eq!(42, settings.input.repeat_interval);
 
         std::fs::remove_file(TEST_PATH).ok();
+    }
+
+    #[test]
+    fn test_invalid_settings() {
+        let mut settings = load(TEST_PATH);
+        settings.window.width = 123;
+        settings.window.height = 456;
+        settings.input.repeat_interval = 0;
+        settings.validate();
+
+        assert_eq!(800, settings.window.width);
+        assert_eq!(600, settings.window.height);
+        assert_eq!(1, settings.input.repeat_interval);
     }
 }

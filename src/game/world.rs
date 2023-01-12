@@ -11,6 +11,7 @@ use crate::{
 
 use super::{
     map::{item::ItemView, terrain::TerrainView},
+    races::{Appearance, FurColor, Gender, MainHand, Mind, Personality, Race, Sex},
     Action, Avatar, Chunk, ChunkPos, Fov, Log, Map, TilePos,
 };
 
@@ -59,7 +60,99 @@ impl World {
     }
 
     /// Calls one time after world is created
-    pub fn init(self) -> Self {
+    pub fn init(mut self) -> Self {
+        // TODO: don't forget to remove
+        self.add_unit(Avatar::new(
+            Personality::new(
+                false,
+                Appearance {
+                    race: Race::Gazan,
+                    age: 25,
+                    fur_color: Some(FurColor::LightBrown),
+                    sex: Sex::Male,
+                },
+                Mind {
+                    name: "Dragan".to_string(),
+                    gender: Gender::Male,
+                    main_hand: MainHand::Right,
+                    alive: true,
+                },
+            ),
+            Point::new(0, -5),
+        ));
+        self.add_unit(Avatar::new(
+            Personality::new(
+                false,
+                Appearance {
+                    race: Race::Nyarnik,
+                    age: 22,
+                    fur_color: None,
+                    sex: Sex::Female,
+                },
+                Mind {
+                    name: "Shasha".to_string(),
+                    gender: Gender::Female,
+                    main_hand: MainHand::Left,
+                    alive: true,
+                },
+            ),
+            Point::new(-3, -5),
+        ));
+        self.add_unit(Avatar::new(
+            Personality::new(
+                false,
+                Appearance {
+                    race: Race::Gazan,
+                    age: 20,
+                    fur_color: Some(FurColor::Ginger),
+                    sex: Sex::Male,
+                },
+                Mind {
+                    name: "Yasma".to_string(),
+                    gender: Gender::Male,
+                    main_hand: MainHand::Right,
+                    alive: true,
+                },
+            ),
+            Point::new(3, -5),
+        ));
+        self.add_unit(Avatar::new(
+            Personality::new(
+                false,
+                Appearance {
+                    race: Race::Lagnam,
+                    age: 25,
+                    fur_color: Some(FurColor::Yellow),
+                    sex: Sex::Male,
+                },
+                Mind {
+                    name: "Grem".to_string(),
+                    gender: Gender::Male,
+                    main_hand: MainHand::Right,
+                    alive: true,
+                },
+            ),
+            Point::new(6, -5),
+        ));
+        self.add_unit(Avatar::new(
+            Personality::new(
+                false,
+                Appearance {
+                    race: Race::Totik,
+                    age: 20,
+                    fur_color: None,
+                    sex: Sex::Male,
+                },
+                Mind {
+                    name: "Unnamed totik".to_string(),
+                    gender: Gender::Male,
+                    main_hand: MainHand::Right,
+                    alive: true,
+                },
+            ),
+            Point::new(-6, -5),
+        ));
+
         self.units.iter().enumerate().for_each(|(i, unit)| {
             self.map.borrow_mut().get_tile_mut(unit.pos).on_step(i);
         });

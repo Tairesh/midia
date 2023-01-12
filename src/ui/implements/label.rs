@@ -4,8 +4,8 @@ use std::rc::Rc;
 
 use geometry::{Rect, Vec2};
 use tetra::{
-    graphics::{text::Text, Color, DrawParams},
     Context,
+    graphics::{Color, DrawParams, text::Text},
 };
 
 use crate::{

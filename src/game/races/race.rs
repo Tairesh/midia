@@ -3,7 +3,9 @@ use rand::distributions::{Distribution, Standard};
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Sequence, Debug, Copy, Clone)]
+use crate::game::traits::Name;
+
+#[derive(Serialize, Deserialize, Debug, Copy, Clone)]
 pub enum Race {
     #[serde(rename = "g")]
     Gazan,
@@ -14,14 +16,36 @@ pub enum Race {
     #[serde(rename = "l")]
     Lagnam,
     #[serde(rename = "b")]
-    Bug, // TODO: create enum for only playable races
+    Bug,
 }
 
-impl Race {
-    pub fn name(self) -> &'static str {
-        self.into()
+impl From<Race> for &str {
+    fn from(value: Race) -> Self {
+        match value {
+            Race::Gazan => "gazan",
+            Race::Nyarnik => "nyarnik",
+            Race::Totik => "totik",
+            Race::Lagnam => "lagnam",
+            Race::Bug => "Bug",
+        }
     }
+}
 
+impl Name for Race {
+    fn name(&self) -> &'static str {
+        (*self).into()
+    }
+}
+
+#[derive(Sequence, Debug, Copy, Clone)]
+pub enum PlayableRace {
+    Gazan,
+    Nyarnik,
+    Totik,
+    Lagnam,
+}
+
+impl PlayableRace {
     pub fn next(self) -> Self {
         next_cycle(&self).unwrap()
     }
@@ -31,26 +55,54 @@ impl Race {
     }
 }
 
-impl From<Race> for &str {
-    fn from(value: Race) -> Self {
+impl From<PlayableRace> for &str {
+    fn from(value: PlayableRace) -> Self {
         match value {
-            Race::Gazan => "Gazan",
-            Race::Nyarnik => "Nyarnik",
-            Race::Totik => "Totik",
-            Race::Lagnam => "Lagnam",
-            Race::Bug => "Bug",
+            PlayableRace::Gazan => "Gazan",
+            PlayableRace::Nyarnik => "Nyarnik",
+            PlayableRace::Totik => "Totik",
+            PlayableRace::Lagnam => "Lagnam",
         }
     }
 }
 
-impl Distribution<Race> for Standard {
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Race {
-        match rng.gen_range(0..4) {
-            0 => Race::Gazan,
-            1 => Race::Nyarnik,
-            2 => Race::Totik,
-            3 => Race::Lagnam,
+impl From<PlayableRace> for Race {
+    fn from(value: PlayableRace) -> Self {
+        match value {
+            PlayableRace::Gazan => Race::Gazan,
+            PlayableRace::Nyarnik => Race::Nyarnik,
+            PlayableRace::Totik => Race::Totik,
+            PlayableRace::Lagnam => Race::Lagnam,
+        }
+    }
+}
+
+impl From<Race> for PlayableRace {
+    fn from(value: Race) -> Self {
+        match value {
+            Race::Gazan => PlayableRace::Gazan,
+            Race::Nyarnik => PlayableRace::Nyarnik,
+            Race::Totik => PlayableRace::Totik,
+            Race::Lagnam => PlayableRace::Lagnam,
             _ => unreachable!(),
         }
+    }
+}
+
+impl Distribution<PlayableRace> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> PlayableRace {
+        match rng.gen_range(0..4) {
+            0 => PlayableRace::Gazan,
+            1 => PlayableRace::Nyarnik,
+            2 => PlayableRace::Totik,
+            3 => PlayableRace::Lagnam,
+            _ => unreachable!(),
+        }
+    }
+}
+
+impl Name for PlayableRace {
+    fn name(&self) -> &'static str {
+        (*self).into()
     }
 }

@@ -1,6 +1,6 @@
+use tetra::{Context, Event};
 use tetra::input::{Key, KeyModifier};
 use tetra::window::WindowPosition;
-use tetra::{Context, Event};
 
 use crate::{
     app::App,
@@ -56,7 +56,7 @@ impl SettingsScene {
             settings.window.fullscreen,
             Position {
                 x: Horizontal::AtWindowCenterByLeft { offset: 100.0 },
-                y: Vertical::ByCenter { y: 150.0 },
+                y: Vertical::ByCenter { y: 200.0 },
             },
             Transition::CustomEvent(ButtonEvent::FullscreenMode as u8),
         ));
@@ -68,7 +68,7 @@ impl SettingsScene {
             !settings.window.fullscreen,
             Position {
                 x: Horizontal::AtWindowCenterByRight { offset: 98.0 },
-                y: Vertical::ByCenter { y: 150.0 },
+                y: Vertical::ByCenter { y: 200.0 },
             },
             Transition::CustomEvent(ButtonEvent::WindowMode as u8),
         ));
@@ -81,7 +81,7 @@ impl SettingsScene {
                 x: Horizontal::AtWindowCenterByRight {
                     offset: 90.0 - window_btn_size.x,
                 },
-                y: Vertical::ByCenter { y: 150.0 },
+                y: Vertical::ByCenter { y: 200.0 },
             },
         );
 
@@ -92,7 +92,7 @@ impl SettingsScene {
             app.assets.button.clone(),
             Position {
                 x: Horizontal::AtWindowCenterByRight { offset: 0.0 },
-                y: Vertical::ByCenter { y: 200.0 },
+                y: Vertical::ByCenter { y: 250.0 },
             },
             Transition::CustomEvent(ButtonEvent::RepeatIntervalMinus as u8),
         ));
@@ -103,7 +103,7 @@ impl SettingsScene {
             app.assets.fonts.header.clone(),
             Position {
                 x: Horizontal::AtWindowCenterByLeft { offset: 5.0 },
-                y: Vertical::ByCenter { y: 200.0 },
+                y: Vertical::ByCenter { y: 250.0 },
             },
         ));
         let repeat_interval_plus = Box::new(Button::icon(
@@ -113,7 +113,7 @@ impl SettingsScene {
             app.assets.button.clone(),
             Position {
                 x: Horizontal::AtWindowCenterByLeft { offset: 200.0 },
-                y: Vertical::ByCenter { y: 200.0 },
+                y: Vertical::ByCenter { y: 250.0 },
             },
             Transition::CustomEvent(ButtonEvent::RepeatIntervalPlus as u8),
         ));
@@ -124,7 +124,7 @@ impl SettingsScene {
                 x: Horizontal::AtWindowCenterByRight {
                     offset: 90.0 - window_btn_size.x,
                 },
-                y: Vertical::ByCenter { y: 200.0 },
+                y: Vertical::ByCenter { y: 250.0 },
             },
         );
 

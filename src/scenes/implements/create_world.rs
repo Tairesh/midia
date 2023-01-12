@@ -1,6 +1,6 @@
-use rand::{thread_rng, Rng};
-use tetra::input::{Key, KeyModifier};
+use rand::{Rng, thread_rng};
 use tetra::{Context, Event};
+use tetra::input::{Key, KeyModifier};
 
 use crate::{
     app::App,
@@ -82,7 +82,7 @@ impl CreateWorld {
                     &app.assets,
                     Position {
                         x: Horizontal::AtWindowCenterByRight { offset: -10.0 },
-                        y: Vertical::ByCenter { y: 195.0 },
+                        y: Vertical::ByCenter { y: 200.0 },
                     },
                 ),
                 text_input(
@@ -99,7 +99,7 @@ impl CreateWorld {
                     &app.assets,
                     Position {
                         x: Horizontal::AtWindowCenterByRight { offset: -10.0 },
-                        y: Vertical::ByCenter { y: 265.0 },
+                        y: Vertical::ByCenter { y: 270.0 },
                     },
                 ),
                 text_input(

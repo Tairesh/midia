@@ -1,6 +1,6 @@
 use tetra::{
-    input::{Key, MouseButton},
     Event,
+    input::{Key, MouseButton},
 };
 
 use crate::{
@@ -34,8 +34,8 @@ pub(crate) fn title(title: impl Into<String>, assets: &Assets) -> Box<Label> {
     Box::new(Label::new(
         title,
         assets.fonts.title.clone(),
-        Colors::DARK_GREEN,
-        Position::horizontal_center(0.0, Vertical::ByTop { y: 20.0 }),
+        Colors::BLANCHED_ALMOND,
+        Position::horizontal_center(0.0, Vertical::ByTop { y: 90.0 }),
     ))
 }
 
@@ -43,8 +43,8 @@ pub(crate) fn subtitle(subtitle: impl Into<String>, assets: &Assets) -> Box<Labe
     Box::new(Label::new(
         subtitle,
         assets.fonts.header.clone(),
-        Colors::DARK_BROWN,
-        Position::horizontal_center(0.0, Vertical::ByTop { y: 100.0 }),
+        Colors::BLANCHED_ALMOND,
+        Position::horizontal_center(0.0, Vertical::ByTop { y: 130.0 }),
     ))
 }
 

@@ -1,11 +1,11 @@
-use tetra::{input::Key, Context};
+use tetra::{Context, input::Key};
 
 use crate::{
     app::App,
     colors::Colors,
+    NAME,
     savefile::savefiles_exists,
-    ui::{Button, Disable, Label, Position, SomeUISprites, SomeUISpritesMut, UiSprite, Vertical},
-    NAME, VERSION,
+    ui::{Button, Disable, Label, Position, SomeUISprites, SomeUISpritesMut, UiSprite, Vertical}, VERSION,
 };
 
 use super::super::{helpers::bg, Scene, SceneImpl, Transition};
@@ -20,7 +20,7 @@ impl MainMenu {
         let logo = Box::new(Label::new(
             NAME,
             app.assets.fonts.logo.clone(),
-            Colors::DARK_BROWN,
+            Colors::BLANCHED_ALMOND,
             Position::horizontal_center(0.0, Vertical::AtWindowCenterByBottom { offset: -100.0 }),
         ));
         let version = Box::new(Label::new(
@@ -38,7 +38,7 @@ impl MainMenu {
                 Position::horizontal_center(0.0, Vertical::AtWindowCenterByTop { offset: 0.0 }),
                 Transition::Push(Scene::LoadWorld),
             )
-            .with_disabled(true),
+                .with_disabled(true),
         );
         let create_btn = Box::new(Button::text(
             vec![Key::C.into()],

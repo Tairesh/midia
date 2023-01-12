@@ -2,17 +2,16 @@ use std::collections::HashMap;
 use std::path::Path;
 
 use geometry::Point;
-use tetra::input::{Key, KeyModifier};
 use tetra::{Context, Event};
+use tetra::input::{Key, KeyModifier};
 
-use crate::game::races::{Gender, Race};
 use crate::{
     app::App,
     colors::Colors,
     game::{
+        Avatar,
         bodies::BodySize,
-        races::{Appearance, FurColor, MainHand, Mind, Personality, SkinTone},
-        Avatar, Log, World,
+        Log, races::{Appearance, FurColor, MainHand, Mind, Personality, SkinTone}, World,
     },
     savefile::{self, GameView, Meta},
     ui::{
@@ -20,6 +19,8 @@ use crate::{
         Stringify, TextInput, UiSprite, Vertical,
     },
 };
+use crate::game::races::{Gender, PlayableRace};
+use crate::game::traits::Name;
 
 use super::super::{
     helpers::{back_btn, bg, easy_back, error_label, label, subtitle, text_input, title},
@@ -42,26 +43,14 @@ enum ButtonEvent {
 
 impl From<u8> for ButtonEvent {
     fn from(n: u8) -> Self {
-        match n {
-            0 => Self::RaceLeft,
-            1 => Self::RaceRight,
-            2 => Self::GenderLeft,
-            3 => Self::GenderRight,
-            4 => Self::AgeMinus,
-            5 => Self::AgePlus,
-            6 => Self::HandLeft,
-            7 => Self::HandRight,
-            8 => Self::Randomize,
-            9 => Self::Create,
-            _ => unreachable!(),
-        }
+        unsafe { std::mem::transmute(n) }
     }
 }
 
 pub struct CreateCharacter {
     meta: Meta,
     sprites: [Box<dyn UiSprite>; 25],
-    race: Race,
+    race: PlayableRace,
     main_hand: MainHand,
     window_size: (i32, i32),
 }
@@ -311,7 +300,7 @@ impl CreateCharacter {
                 create_btn,
             ],
             meta,
-            race: Race::Gazan,
+            race: PlayableRace::Gazan,
             main_hand: MainHand::Right,
             window_size: app.window_size,
         }
@@ -343,7 +332,7 @@ impl CreateCharacter {
         self.name_input().set_value(character.mind.name);
         self.age_input()
             .set_value(character.appearance.age.to_string());
-        self.race = character.appearance.race;
+        self.race = character.appearance.race.into();
         self.main_hand = character.mind.main_hand;
         let name = self.main_hand.name();
         let race = self.race.name();
@@ -363,7 +352,7 @@ impl CreateCharacter {
             let age = self.age_input().value().parse::<u8>().unwrap();
             let character = Personality::new(
                 Appearance {
-                    race: self.race,
+                    race: self.race.into(),
                     age,
                     skin_tone: SkinTone::PaleIvory,
                     fur_color: Some(FurColor::LightBrown),
@@ -386,7 +375,7 @@ impl CreateCharacter {
                 vec![avatar],
                 HashMap::new(),
             )
-            .init();
+                .init();
             world.save();
             Some(vec![
                 Transition::LoadWorld(self.meta.path.clone()),

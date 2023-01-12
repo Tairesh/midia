@@ -3,10 +3,12 @@ use rand::Rng;
 use serde::{Deserialize, Serialize};
 
 use crate::game::bodies::Sex;
+use crate::game::races::PlayableRace;
+use crate::game::traits::Name;
 
 use super::{
-    super::{bodies::BodySize, GameData},
-    FurColor, Gender, MainHand, Race, SkinTone,
+    FurColor,
+    Gender, MainHand, Race, SkinTone, super::{bodies::BodySize, GameData},
 };
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -63,9 +65,10 @@ impl Personality {
             },
             game_data.names.random_name(rng)
         );
+        let race: PlayableRace = rng.sample(Standard);
         Personality::new(
             Appearance {
-                race: rng.sample(Standard),
+                race: race.into(),
                 age: rng.gen_range(0..=99),
                 skin_tone: rng.sample(Standard),
                 fur_color: rng.sample(Standard),
@@ -99,14 +102,14 @@ pub fn age_name(race: Race, age: u8, gender: Option<Gender>) -> String {
             race_name
                 + " "
                 + if let Some(gender) = gender {
-                    match gender {
-                        Gender::Male => "boy",
-                        Gender::Female => "girl",
-                        Gender::Custom(_) => "child",
-                    }
-                } else {
-                    "child"
+                match gender {
+                    Gender::Male => "boy",
+                    Gender::Female => "girl",
+                    Gender::Custom(_) => "child",
                 }
+            } else {
+                "child"
+            }
         }
         16.. => {
             if let Some(gender) = gender {

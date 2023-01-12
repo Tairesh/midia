@@ -7,8 +7,8 @@ use crate::game::races::PlayableRace;
 use crate::game::traits::Name;
 
 use super::{
-    FurColor,
-    Gender, MainHand, Race, SkinTone, super::{bodies::BodySize, GameData},
+    super::{bodies::BodySize, GameData},
+    FurColor, Gender, MainHand, Race, SkinTone,
 };
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -102,14 +102,14 @@ pub fn age_name(race: Race, age: u8, gender: Option<Gender>) -> String {
             race_name
                 + " "
                 + if let Some(gender) = gender {
-                match gender {
-                    Gender::Male => "boy",
-                    Gender::Female => "girl",
-                    Gender::Custom(_) => "child",
+                    match gender {
+                        Gender::Male => "boy",
+                        Gender::Female => "girl",
+                        Gender::Custom(_) => "child",
+                    }
+                } else {
+                    "child"
                 }
-            } else {
-                "child"
-            }
         }
         16.. => {
             if let Some(gender) = gender {

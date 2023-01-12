@@ -4,8 +4,8 @@ pub use fov::Fov;
 pub use game_data::GameData;
 pub use log::Log;
 pub use map::{
-    Chunk,
-    Item, ItemInteract, ItemTag, ItemView, Map, pos::{ChunkPos, TilePos}, Terrain, TerrainInteract, TerrainView, Tile,
+    pos::{ChunkPos, TilePos},
+    Chunk, Item, ItemInteract, ItemTag, ItemView, Map, Terrain, TerrainInteract, TerrainView, Tile,
 };
 pub use world::World;
 
@@ -18,5 +18,5 @@ mod game_data;
 mod log;
 pub mod map;
 pub mod races;
-pub mod world;
 pub mod traits;
+pub mod world;

@@ -1,6 +1,6 @@
 use tetra::{
-    Event,
     input::{Key, MouseButton},
+    Event,
 };
 
 use crate::{

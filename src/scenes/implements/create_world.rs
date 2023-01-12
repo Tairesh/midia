@@ -1,6 +1,6 @@
-use rand::{Rng, thread_rng};
-use tetra::{Context, Event};
+use rand::{thread_rng, Rng};
 use tetra::input::{Key, KeyModifier};
+use tetra::{Context, Event};
 
 use crate::{
     app::App,

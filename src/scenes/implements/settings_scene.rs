@@ -1,6 +1,6 @@
-use tetra::{Context, Event};
 use tetra::input::{Key, KeyModifier};
 use tetra::window::WindowPosition;
+use tetra::{Context, Event};
 
 use crate::{
     app::App,

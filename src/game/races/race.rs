@@ -84,7 +84,7 @@ impl From<Race> for PlayableRace {
             Race::Nyarnik => PlayableRace::Nyarnik,
             Race::Totik => PlayableRace::Totik,
             Race::Lagnam => PlayableRace::Lagnam,
-            _ => unreachable!(),
+            Race::Bug => unreachable!(),
         }
     }
 }

@@ -2,16 +2,18 @@ use std::collections::HashMap;
 use std::path::Path;
 
 use geometry::Point;
-use tetra::{Context, Event};
 use tetra::input::{Key, KeyModifier};
+use tetra::{Context, Event};
 
+use crate::game::races::{Gender, PlayableRace};
+use crate::game::traits::Name;
 use crate::{
     app::App,
     colors::Colors,
     game::{
-        Avatar,
         bodies::BodySize,
-        Log, races::{Appearance, FurColor, MainHand, Mind, Personality, SkinTone}, World,
+        races::{Appearance, FurColor, MainHand, Mind, Personality, SkinTone},
+        Avatar, Log, World,
     },
     savefile::{self, GameView, Meta},
     ui::{
@@ -19,8 +21,6 @@ use crate::{
         Stringify, TextInput, UiSprite, Vertical,
     },
 };
-use crate::game::races::{Gender, PlayableRace};
-use crate::game::traits::Name;
 
 use super::super::{
     helpers::{back_btn, bg, easy_back, error_label, label, subtitle, text_input, title},
@@ -375,7 +375,7 @@ impl CreateCharacter {
                 vec![avatar],
                 HashMap::new(),
             )
-                .init();
+            .init();
             world.save();
             Some(vec![
                 Transition::LoadWorld(self.meta.path.clone()),

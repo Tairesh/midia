@@ -1,7 +1,6 @@
-use std::collections::HashMap;
 use std::path::Path;
 
-use geometry::{Point, Vec2};
+use geometry::Vec2;
 use tetra::graphics::mesh::{BorderRadii, Mesh, ShapeStyle};
 use tetra::graphics::Rectangle;
 use tetra::input::{Key, KeyModifier};
@@ -16,9 +15,8 @@ use crate::{
             Appearance, FurColor, Gender, MainHand, Mind, Personality, PlayableRace, Race, Sex,
         },
         traits::Name,
-        Attributes, Avatar, Log, World,
     },
-    savefile::{self, GameView, Meta},
+    savefile::{self, Meta},
     ui::{
         Button, Draw, Horizontal, Label, Position, Positionate, SomeUISprites, SomeUISpritesMut,
         Stringify, TextInput, UiSprite, Vertical,
@@ -46,7 +44,7 @@ enum ButtonEvent {
     FurLeft,
     FurRight,
     Randomize,
-    Create,
+    Next,
 }
 
 impl From<u8> for ButtonEvent {
@@ -88,9 +86,9 @@ impl CreateCharacter {
             },
             &app.assets,
         );
-        let create_btn = Box::new(Button::text(
+        let next_btn = Box::new(Button::text(
             vec![(Key::Enter, KeyModifier::Alt).into()],
-            "[Alt+Enter] Create",
+            "[Alt+Enter] Next step",
             app.assets.fonts.default.clone(),
             app.assets.button.clone(),
             Position {
@@ -99,12 +97,12 @@ impl CreateCharacter {
                 },
                 y: Vertical::ByCenter { y: 500.0 },
             },
-            Transition::CustomEvent(ButtonEvent::Create as u8),
+            Transition::CustomEvent(ButtonEvent::Next as u8),
         ));
         let fur_color = FurColor::Gray;
 
         Self {
-            // Order is matter, change hardcoded indices in functions below if modified
+            // Order matters, change hardcoded indices in functions below if modified
             sprites: [
                 bg(&app.assets),
                 title("Create new character:", &app.assets),
@@ -336,7 +334,7 @@ impl CreateCharacter {
                 ),
                 back_btn,
                 randomize_btn,
-                create_btn,
+                next_btn,
             ],
             meta,
             race: PlayableRace::Gazan,
@@ -436,23 +434,10 @@ impl CreateCharacter {
                     alive: true,
                 },
             );
-            // TODO: attributes, traits, skills, etc.
-            // TODO: find available starting pos in the world
-            let avatar =
-                Avatar::dressed_default(character, Attributes::default(), Point::new(0, 0));
-            let mut world = World::new(
-                self.meta.clone(),
-                GameView::default(),
-                Log::new(),
-                vec![avatar],
-                HashMap::new(),
-            )
-            .init();
-            world.save();
-            Some(vec![
-                Transition::LoadWorld(self.meta.path.clone()),
-                Transition::Replace(Scene::GameScene),
-            ])
+            Some(vec![Transition::Push(Scene::CharacterAttributes(
+                self.meta.path.clone(),
+                character,
+            ))])
         }
     }
 }
@@ -561,7 +546,7 @@ impl SceneImpl for CreateCharacter {
                 self.randomize(ctx);
                 None
             }
-            ButtonEvent::Create => self.create(),
+            ButtonEvent::Next => self.create(),
         }
     }
 }

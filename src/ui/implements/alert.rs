@@ -21,6 +21,7 @@ pub struct Alert {
     position: Position,
     rect: Option<Rect>,
     visible: bool,
+    active: bool,
 }
 
 impl Alert {
@@ -33,6 +34,14 @@ impl Alert {
             position,
             rect: None,
             visible: true,
+            active: true,
+        }
+    }
+
+    pub fn passive(width: f32, height: f32, asset: Rc<AlertAsset>, position: Position) -> Self {
+        Self {
+            active: false,
+            ..Self::new(width, height, asset, position)
         }
     }
 
@@ -95,6 +104,9 @@ impl Positionate for Alert {
 
 impl Update for Alert {
     fn update(&mut self, ctx: &mut Context, focused: bool, blocked: &[Rect]) -> Option<Transition> {
+        if !self.active {
+            return None;
+        }
         if focused {
             return None;
         }

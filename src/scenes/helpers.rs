@@ -1,6 +1,6 @@
-use tetra::input::KeyModifier;
 use tetra::{
-    input::{Key, MouseButton},
+    graphics::Color,
+    input::{Key, KeyModifier, MouseButton},
     Event,
 };
 
@@ -54,6 +54,33 @@ pub(crate) fn label(text: impl Into<String>, assets: &Assets, position: Position
         text,
         assets.fonts.header.clone(),
         Colors::DARK_BROWN,
+        position,
+    ))
+}
+
+pub(crate) fn decorative_label(
+    text: impl Into<String>,
+    assets: &Assets,
+    position: Position,
+) -> Box<Label> {
+    Box::new(Label::new(
+        text,
+        assets.fonts.subtitle.clone(),
+        Colors::BLANCHED_ALMOND,
+        position,
+    ))
+}
+
+pub(crate) fn decorative_label_with_color(
+    text: impl Into<String>,
+    assets: &Assets,
+    position: Position,
+    color: Color,
+) -> Box<Label> {
+    Box::new(Label::new(
+        text,
+        assets.fonts.subtitle.clone(),
+        color,
         position,
     ))
 }

@@ -3,11 +3,12 @@ use std::path::PathBuf;
 use tetra::Context;
 
 use crate::app::App;
+use crate::game::races::Personality;
 
 use super::{
     implements::{
-        CreateCharacter, CreateWorld, Empty, GameMenu, GameScene, LoadWorld, MainMenu,
-        SettingsScene,
+        CharacterAttributes, CreateCharacter, CreateWorld, Empty, GameMenu, GameScene, LoadWorld,
+        MainMenu, SettingsScene,
     },
     SceneImpl,
 };
@@ -21,6 +22,7 @@ pub enum Scene {
     CreateWorld,
     LoadWorld,
     CreateCharacter(PathBuf),
+    CharacterAttributes(PathBuf, Personality),
     GameScene,
     GameMenu,
 }
@@ -35,6 +37,9 @@ impl Scene {
             Scene::CreateWorld => Box::new(CreateWorld::new(app, ctx)),
             Scene::LoadWorld => Box::new(LoadWorld::new(app, ctx)),
             Scene::CreateCharacter(path) => Box::new(CreateCharacter::new(&path, app, ctx)),
+            Scene::CharacterAttributes(path, personality) => {
+                Box::new(CharacterAttributes::new(&path, personality, app, ctx))
+            }
             Scene::GameScene => Box::new(GameScene::new(app)),
             Scene::GameMenu => Box::new(GameMenu::new(app)),
         }

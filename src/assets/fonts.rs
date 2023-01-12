@@ -6,8 +6,8 @@ use super::PreparedFont;
 pub struct Fonts {
     pub default: PreparedFont,
     pub header: PreparedFont,
-    pub logo: PreparedFont,
     pub title: PreparedFont,
+    pub subtitle: PreparedFont,
 }
 
 impl Fonts {
@@ -18,13 +18,13 @@ impl Fonts {
         let consolab16 = Font::from_vector_file_data(ctx, consolab, 16.0)?;
         let consolab24 = Font::from_vector_file_data(ctx, consolab, 24.0)?;
         let universe48 = Font::from_vector_file_data(ctx, universe, 48.0)?;
-        let universe72 = Font::from_vector_file_data(ctx, universe, 72.0)?;
+        let universe32 = Font::from_vector_file_data(ctx, universe, 32.0)?;
 
         Ok(Self {
             default: PreparedFont::new(ctx, consolab16),
             header: PreparedFont::new(ctx, consolab24),
-            logo: PreparedFont::new(ctx, universe72),
             title: PreparedFont::new(ctx, universe48),
+            subtitle: PreparedFont::new(ctx, universe32),
         })
     }
 }

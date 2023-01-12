@@ -1,3 +1,4 @@
+pub use character_attributes::CharacterAttributes;
 pub use create_character::CreateCharacter;
 pub use create_world::CreateWorld;
 pub use empty::Empty;
@@ -7,6 +8,7 @@ pub use load_world::LoadWorld;
 pub use main_menu::MainMenu;
 pub use settings_scene::SettingsScene;
 
+mod character_attributes;
 mod create_character;
 mod create_world;
 mod empty;

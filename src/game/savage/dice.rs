@@ -1,6 +1,21 @@
+use std::ops::{Add, AddAssign, Sub, SubAssign};
+
+use enum_iterator::{next, previous, Sequence};
+
 use crate::game::traits::Name;
 
-#[derive(serde::Serialize, serde::Deserialize, Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(
+    serde::Serialize,
+    serde::Deserialize,
+    Sequence,
+    Debug,
+    Copy,
+    Clone,
+    Eq,
+    PartialEq,
+    Ord,
+    PartialOrd,
+)]
 pub enum Dice {
     D4,
     D6,
@@ -64,6 +79,47 @@ impl Dice {
             }
         }
         total + roll
+    }
+
+    pub fn next(self) -> Option<Self> {
+        next(&self)
+    }
+
+    pub fn prev(self) -> Option<Self> {
+        previous(&self)
+    }
+}
+
+impl Add<i8> for Dice {
+    type Output = Dice;
+
+    fn add(self, rhs: i8) -> Self::Output {
+        match rhs {
+            0 => self,
+            1 => self.next().unwrap_or(self),
+            -1 => self.prev().unwrap_or(self),
+            _ => self + rhs.signum(),
+        }
+    }
+}
+
+impl AddAssign<i8> for Dice {
+    fn add_assign(&mut self, rhs: i8) {
+        *self = *self + rhs;
+    }
+}
+
+impl Sub<i8> for Dice {
+    type Output = Dice;
+
+    fn sub(self, rhs: i8) -> Self::Output {
+        self + -rhs
+    }
+}
+
+impl SubAssign<i8> for Dice {
+    fn sub_assign(&mut self, rhs: i8) {
+        *self = *self - rhs;
     }
 }
 

@@ -60,6 +60,16 @@ impl World {
         world
     }
 
+    pub fn create(meta: Meta, avatar: Avatar) -> Self {
+        Self::new(
+            meta,
+            GameView::default(),
+            Log::new(),
+            vec![avatar],
+            HashMap::new(),
+        )
+    }
+
     /// Calls one time after world is created
     pub fn init(mut self) -> Self {
         // TODO: don't forget to remove

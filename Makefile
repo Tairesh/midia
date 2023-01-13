@@ -9,7 +9,7 @@ run:
 	cargo run --release
 
 before-commit: fmt check
-check: fmt-check test clippy
+check: fmt-check cargo-check test clippy
 
 fmt:
 	cargo fmt --
@@ -25,3 +25,6 @@ clippy:
 
 clean:
 	cargo clean
+
+cargo-check:
+	cargo check

@@ -28,15 +28,7 @@ pub enum Dice {
 
 impl From<Dice> for u8 {
     fn from(dice: Dice) -> Self {
-        match dice {
-            Dice::D4 => 4,
-            Dice::D6 => 6,
-            Dice::D8 => 8,
-            Dice::D10 => 10,
-            Dice::D12 => 12,
-            Dice::D20 => 20,
-            Dice::D100 => 100,
-        }
+        unsafe { std::mem::transmute(dice) }
     }
 }
 
@@ -61,8 +53,20 @@ impl Name for Dice {
 }
 
 impl Dice {
+    pub fn value(self) -> u8 {
+        match self {
+            Dice::D4 => 4,
+            Dice::D6 => 6,
+            Dice::D8 => 8,
+            Dice::D10 => 10,
+            Dice::D12 => 12,
+            Dice::D20 => 20,
+            Dice::D100 => 100,
+        }
+    }
+
     pub fn roll(self) -> u8 {
-        rand::random::<u8>() % u8::from(self) + 1
+        rand::random::<u8>() % self.value() + 1
     }
 
     /// Roll a dice that explodes on the maximum value.
@@ -279,5 +283,19 @@ impl From<Dice> for SkillLevel {
             Dice::D10 => SkillLevel::D10,
             _ => SkillLevel::D12,
         }
+    }
+}
+
+impl From<SkillLevel> for u8 {
+    fn from(skill_level: SkillLevel) -> Self {
+        unsafe { std::mem::transmute(skill_level) }
+    }
+}
+
+impl Sub<Dice> for SkillLevel {
+    type Output = u8;
+
+    fn sub(self, attribute: Dice) -> Self::Output {
+        u8::from(self).saturating_sub(u8::from(attribute).add(1))
     }
 }

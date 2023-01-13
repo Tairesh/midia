@@ -173,16 +173,16 @@ pub(crate) fn back_randomize_next(
     let total_width = randomize_btn_size.x + back_btn_size.x + next_btn_size.x + 4.0;
     let y = Vertical::AtWindowBottomByBottom { offset: -50.0 };
     // positionate them in center
-    randomize_btn.set_position(Position::horizontal_center(
-        -total_width / 2.0 + randomize_btn_size.x / 2.0,
+    back_btn.set_position(Position::horizontal_center(
+        -total_width / 2.0 + back_btn_size.x / 2.0,
         y,
     ));
-    back_btn.set_position(Position::horizontal_center(
-        -total_width / 2.0 + randomize_btn_size.x + back_btn_size.x / 2.0 + 2.0,
+    randomize_btn.set_position(Position::horizontal_center(
+        -total_width / 2.0 + back_btn_size.x + randomize_btn_size.x / 2.0 + 2.0,
         y,
     ));
     next_btn.set_position(Position::horizontal_center(
-        -total_width / 2.0 + randomize_btn_size.x + back_btn_size.x + next_btn_size.x / 2.0 + 4.0,
+        -total_width / 2.0 + back_btn_size.x + randomize_btn_size.x + next_btn_size.x / 2.0 + 4.0,
         y,
     ));
 

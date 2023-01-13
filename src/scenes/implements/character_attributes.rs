@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::path::Path;
 
 use geometry::Point;
@@ -17,8 +18,8 @@ use crate::{
         Scene, SceneImpl, SomeTransitions, Transition,
     },
     ui::{
-        Alert, Button, Disable, Horizontal, Label, Position, SomeUISprites, SomeUISpritesMut,
-        UiSprite, Vertical,
+        Alert, Disable, Horizontal, Label, Position, SomeUISprites, SomeUISpritesMut, UiSprite,
+        Vertical,
     },
 };
 
@@ -102,6 +103,7 @@ impl CharacterAttributes {
             ButtonEvent::Next as u8,
             "Create character",
         );
+        // TODO: races traits and skills
         let char_sheet = CharSheet::default();
 
         Self {
@@ -873,50 +875,20 @@ impl CharacterAttributes {
         }
     }
 
-    fn agility_minus(&mut self) -> &mut Button {
-        self.sprites[4].as_button().unwrap()
-    }
     fn agility_label(&mut self) -> &mut Label {
         self.sprites[5].as_label().unwrap()
-    }
-    fn agility_plus(&mut self) -> &mut Button {
-        self.sprites[6].as_button().unwrap()
-    }
-    fn smarts_minus(&mut self) -> &mut Button {
-        self.sprites[9].as_button().unwrap()
     }
     fn smarts_label(&mut self) -> &mut Label {
         self.sprites[10].as_label().unwrap()
     }
-    fn smarts_plus(&mut self) -> &mut Button {
-        self.sprites[11].as_button().unwrap()
-    }
-    fn spirit_minus(&mut self) -> &mut Button {
-        self.sprites[14].as_button().unwrap()
-    }
     fn spirit_label(&mut self) -> &mut Label {
         self.sprites[15].as_label().unwrap()
-    }
-    fn spirit_plus(&mut self) -> &mut Button {
-        self.sprites[16].as_button().unwrap()
-    }
-    fn strength_minus(&mut self) -> &mut Button {
-        self.sprites[19].as_button().unwrap()
     }
     fn strength_label(&mut self) -> &mut Label {
         self.sprites[20].as_label().unwrap()
     }
-    fn strength_plus(&mut self) -> &mut Button {
-        self.sprites[21].as_button().unwrap()
-    }
-    fn vigor_minus(&mut self) -> &mut Button {
-        self.sprites[24].as_button().unwrap()
-    }
     fn vigor_label(&mut self) -> &mut Label {
         self.sprites[25].as_label().unwrap()
-    }
-    fn vigor_plus(&mut self) -> &mut Button {
-        self.sprites[26].as_button().unwrap()
     }
     fn attributes_points_label(&mut self) -> &mut Label {
         self.sprites[27].as_label().unwrap()
@@ -924,148 +896,77 @@ impl CharacterAttributes {
     fn skills_points_label(&mut self) -> &mut Label {
         self.sprites[28].as_label().unwrap()
     }
-    fn athletics_minus(&mut self) -> &mut Button {
-        self.sprites[31].as_button().unwrap()
-    }
     fn athletics_label(&mut self) -> &mut Label {
         self.sprites[32].as_label().unwrap()
-    }
-    fn athletics_plus(&mut self) -> &mut Button {
-        self.sprites[33].as_button().unwrap()
-    }
-    fn fighting_minus(&mut self) -> &mut Button {
-        self.sprites[35].as_button().unwrap()
     }
     fn fighting_label(&mut self) -> &mut Label {
         self.sprites[36].as_label().unwrap()
     }
-    fn fighting_plus(&mut self) -> &mut Button {
-        self.sprites[37].as_button().unwrap()
-    }
-    fn shooting_minus(&mut self) -> &mut Button {
-        self.sprites[39].as_button().unwrap()
-    }
     fn shooting_label(&mut self) -> &mut Label {
         self.sprites[40].as_label().unwrap()
-    }
-    fn shooting_plus(&mut self) -> &mut Button {
-        self.sprites[41].as_button().unwrap()
-    }
-    fn stealth_minus(&mut self) -> &mut Button {
-        self.sprites[43].as_button().unwrap()
     }
     fn stealth_label(&mut self) -> &mut Label {
         self.sprites[44].as_label().unwrap()
     }
-    fn stealth_plus(&mut self) -> &mut Button {
-        self.sprites[45].as_button().unwrap()
-    }
-    fn thievery_minus(&mut self) -> &mut Button {
-        self.sprites[47].as_button().unwrap()
-    }
     fn thievery_label(&mut self) -> &mut Label {
         self.sprites[48].as_label().unwrap()
-    }
-    fn thievery_plus(&mut self) -> &mut Button {
-        self.sprites[49].as_button().unwrap()
-    }
-    fn swimming_minus(&mut self) -> &mut Button {
-        self.sprites[51].as_button().unwrap()
     }
     fn swimming_label(&mut self) -> &mut Label {
         self.sprites[52].as_label().unwrap()
     }
-    fn swimming_plus(&mut self) -> &mut Button {
-        self.sprites[53].as_button().unwrap()
-    }
-    fn gambling_minus(&mut self) -> &mut Button {
-        self.sprites[55].as_button().unwrap()
-    }
     fn gambling_label(&mut self) -> &mut Label {
         self.sprites[56].as_label().unwrap()
-    }
-    fn gambling_plus(&mut self) -> &mut Button {
-        self.sprites[57].as_button().unwrap()
-    }
-    fn notice_minus(&mut self) -> &mut Button {
-        self.sprites[59].as_button().unwrap()
     }
     fn notice_label(&mut self) -> &mut Label {
         self.sprites[60].as_label().unwrap()
     }
-    fn notice_plus(&mut self) -> &mut Button {
-        self.sprites[61].as_button().unwrap()
-    }
-    fn survival_minus(&mut self) -> &mut Button {
-        self.sprites[63].as_button().unwrap()
-    }
     fn survival_label(&mut self) -> &mut Label {
         self.sprites[64].as_label().unwrap()
-    }
-    fn survival_plus(&mut self) -> &mut Button {
-        self.sprites[65].as_button().unwrap()
-    }
-    fn healing_minus(&mut self) -> &mut Button {
-        self.sprites[67].as_button().unwrap()
     }
     fn healing_label(&mut self) -> &mut Label {
         self.sprites[68].as_label().unwrap()
     }
-    fn healing_plus(&mut self) -> &mut Button {
-        self.sprites[69].as_button().unwrap()
-    }
-    fn repair_minus(&mut self) -> &mut Button {
-        self.sprites[71].as_button().unwrap()
-    }
     fn repair_label(&mut self) -> &mut Label {
         self.sprites[72].as_label().unwrap()
-    }
-    fn repair_plus(&mut self) -> &mut Button {
-        self.sprites[73].as_button().unwrap()
-    }
-    fn reading_minus(&mut self) -> &mut Button {
-        self.sprites[75].as_button().unwrap()
     }
     fn reading_label(&mut self) -> &mut Label {
         self.sprites[76].as_label().unwrap()
     }
-    fn reading_plus(&mut self) -> &mut Button {
-        self.sprites[77].as_button().unwrap()
-    }
-    fn persuasion_minus(&mut self) -> &mut Button {
-        self.sprites[79].as_button().unwrap()
-    }
     fn persuasion_label(&mut self) -> &mut Label {
         self.sprites[80].as_label().unwrap()
-    }
-    fn persuasion_plus(&mut self) -> &mut Button {
-        self.sprites[81].as_button().unwrap()
-    }
-    fn intimidation_minus(&mut self) -> &mut Button {
-        self.sprites[83].as_button().unwrap()
     }
     fn intimidation_label(&mut self) -> &mut Label {
         self.sprites[84].as_label().unwrap()
     }
-    fn intimidation_plus(&mut self) -> &mut Button {
-        self.sprites[85].as_button().unwrap()
-    }
-    fn climbing_minus(&mut self) -> &mut Button {
-        self.sprites[87].as_button().unwrap()
-    }
     fn climbing_label(&mut self) -> &mut Label {
         self.sprites[88].as_label().unwrap()
     }
-    fn climbing_plus(&mut self) -> &mut Button {
-        self.sprites[89].as_button().unwrap()
+
+    fn set_buttons_disabled(&mut self, sprites: &[usize]) {
+        for &i in sprites {
+            self.sprites[i].as_button().unwrap().set_disabled(true);
+        }
     }
 
-    // TODO: refactor and delete this allow
-    #[allow(clippy::too_many_lines)]
+    fn set_buttons_disabled_by_value(
+        &mut self,
+        data: HashMap<usize, impl Into<SkillLevel>>,
+        value: SkillLevel,
+    ) {
+        for (i, dice) in data {
+            let dice: SkillLevel = dice.into();
+            self.sprites[i]
+                .as_button()
+                .unwrap()
+                .set_disabled(dice == value);
+        }
+    }
+
     fn update_points(&mut self, ctx: &mut Context) {
         let attributes_points = self.attributes_points;
-        // TODO: recalc skills points when attributes change
-        let skills_points = self.skills_points;
+        let skills_points = self.char_sheet.calc_skill_points();
+        self.skills_points = skills_points;
+
         let window_size = self.window_size;
         self.attributes_points_label().update(
             format!("Attributes' points left: {attributes_points}"),
@@ -1077,233 +978,78 @@ impl CharacterAttributes {
             ctx,
             window_size,
         );
+
         if attributes_points == 0 {
-            self.agility_plus().set_disabled(true);
-            self.smarts_plus().set_disabled(true);
-            self.spirit_plus().set_disabled(true);
-            self.strength_plus().set_disabled(true);
-            self.vigor_plus().set_disabled(true);
+            self.set_buttons_disabled(&[6, 11, 16, 21, 26]);
         } else {
-            if self.char_sheet.attributes.agility == Dice::D12 {
-                self.agility_plus().set_disabled(true);
-            } else {
-                self.agility_plus().set_disabled(false);
-            }
-            if self.char_sheet.attributes.smarts == Dice::D12 {
-                self.smarts_plus().set_disabled(true);
-            } else {
-                self.smarts_plus().set_disabled(false);
-            }
-            if self.char_sheet.attributes.spirit == Dice::D12 {
-                self.spirit_plus().set_disabled(true);
-            } else {
-                self.spirit_plus().set_disabled(false);
-            }
-            if self.char_sheet.attributes.strength == Dice::D12 {
-                self.strength_plus().set_disabled(true);
-            } else {
-                self.strength_plus().set_disabled(false);
-            }
-            if self.char_sheet.attributes.vigor == Dice::D12 {
-                self.vigor_plus().set_disabled(true);
-            } else {
-                self.vigor_plus().set_disabled(false);
-            }
+            self.set_buttons_disabled_by_value(
+                HashMap::from_iter(vec![
+                    (6, self.char_sheet.attributes.agility),
+                    (11, self.char_sheet.attributes.smarts),
+                    (16, self.char_sheet.attributes.spirit),
+                    (21, self.char_sheet.attributes.strength),
+                    (26, self.char_sheet.attributes.vigor),
+                ]),
+                SkillLevel::D12,
+            );
         }
-        if self.char_sheet.attributes.agility == Dice::D4 {
-            self.agility_minus().set_disabled(true);
-        } else {
-            self.agility_minus().set_disabled(false);
-        }
-        if self.char_sheet.attributes.smarts == Dice::D4 {
-            self.smarts_minus().set_disabled(true);
-        } else {
-            self.smarts_minus().set_disabled(false);
-        }
-        if self.char_sheet.attributes.spirit == Dice::D4 {
-            self.spirit_minus().set_disabled(true);
-        } else {
-            self.spirit_minus().set_disabled(false);
-        }
-        if self.char_sheet.attributes.strength == Dice::D4 {
-            self.strength_minus().set_disabled(true);
-        } else {
-            self.strength_minus().set_disabled(false);
-        }
-        if self.char_sheet.attributes.vigor == Dice::D4 {
-            self.vigor_minus().set_disabled(true);
-        } else {
-            self.vigor_minus().set_disabled(false);
-        }
+        self.set_buttons_disabled_by_value(
+            HashMap::from_iter(vec![
+                (4, self.char_sheet.attributes.agility),
+                (9, self.char_sheet.attributes.smarts),
+                (14, self.char_sheet.attributes.spirit),
+                (19, self.char_sheet.attributes.strength),
+                (24, self.char_sheet.attributes.vigor),
+            ]),
+            SkillLevel::D4,
+        );
 
         if skills_points == 0 {
-            self.athletics_plus().set_disabled(true);
-            self.fighting_plus().set_disabled(true);
-            self.shooting_plus().set_disabled(true);
-            self.stealth_plus().set_disabled(true);
-            self.thievery_plus().set_disabled(true);
-            self.swimming_plus().set_disabled(true);
-            self.gambling_plus().set_disabled(true);
-            self.notice_plus().set_disabled(true);
-            self.survival_plus().set_disabled(true);
-            self.healing_plus().set_disabled(true);
-            self.repair_plus().set_disabled(true);
-            self.reading_plus().set_disabled(true);
-            self.persuasion_plus().set_disabled(true);
-            self.intimidation_plus().set_disabled(true);
-            self.climbing_plus().set_disabled(true);
+            self.set_buttons_disabled(&[
+                33, 37, 41, 45, 49, 53, 57, 61, 65, 69, 73, 77, 81, 85, 89,
+            ]);
         } else {
-            if self.char_sheet.skills.athletics == SkillLevel::D12 {
-                self.athletics_plus().set_disabled(true);
-            } else {
-                self.athletics_plus().set_disabled(false);
-            }
-            if self.char_sheet.skills.fighting == SkillLevel::D12 {
-                self.fighting_plus().set_disabled(true);
-            } else {
-                self.fighting_plus().set_disabled(false);
-            }
-            if self.char_sheet.skills.shooting == SkillLevel::D12 {
-                self.shooting_plus().set_disabled(true);
-            } else {
-                self.shooting_plus().set_disabled(false);
-            }
-            if self.char_sheet.skills.stealth == SkillLevel::D12 {
-                self.stealth_plus().set_disabled(true);
-            } else {
-                self.stealth_plus().set_disabled(false);
-            }
-            if self.char_sheet.skills.thievery == SkillLevel::D12 {
-                self.thievery_plus().set_disabled(true);
-            } else {
-                self.thievery_plus().set_disabled(false);
-            }
-            if self.char_sheet.skills.swimming == SkillLevel::D12 {
-                self.swimming_plus().set_disabled(true);
-            } else {
-                self.swimming_plus().set_disabled(false);
-            }
-            if self.char_sheet.skills.gambling == SkillLevel::D12 {
-                self.gambling_plus().set_disabled(true);
-            } else {
-                self.gambling_plus().set_disabled(false);
-            }
-            if self.char_sheet.skills.notice == SkillLevel::D12 {
-                self.notice_plus().set_disabled(true);
-            } else {
-                self.notice_plus().set_disabled(false);
-            }
-            if self.char_sheet.skills.survival == SkillLevel::D12 {
-                self.survival_plus().set_disabled(true);
-            } else {
-                self.survival_plus().set_disabled(false);
-            }
-            if self.char_sheet.skills.healing == SkillLevel::D12 {
-                self.healing_plus().set_disabled(true);
-            } else {
-                self.healing_plus().set_disabled(false);
-            }
-            if self.char_sheet.skills.repair == SkillLevel::D12 {
-                self.repair_plus().set_disabled(true);
-            } else {
-                self.repair_plus().set_disabled(false);
-            }
-            if self.char_sheet.skills.reading == SkillLevel::D12 {
-                self.reading_plus().set_disabled(true);
-            } else {
-                self.reading_plus().set_disabled(false);
-            }
-            if self.char_sheet.skills.persuasion == SkillLevel::D12 {
-                self.persuasion_plus().set_disabled(true);
-            } else {
-                self.persuasion_plus().set_disabled(false);
-            }
-            if self.char_sheet.skills.intimidation == SkillLevel::D12 {
-                self.intimidation_plus().set_disabled(true);
-            } else {
-                self.intimidation_plus().set_disabled(false);
-            }
-            if self.char_sheet.skills.climbing == SkillLevel::D12 {
-                self.climbing_plus().set_disabled(true);
-            } else {
-                self.climbing_plus().set_disabled(false);
-            }
+            self.set_buttons_disabled_by_value(
+                HashMap::from_iter(vec![
+                    (33, self.char_sheet.skills.athletics),
+                    (37, self.char_sheet.skills.fighting),
+                    (41, self.char_sheet.skills.shooting),
+                    (45, self.char_sheet.skills.stealth),
+                    (49, self.char_sheet.skills.thievery),
+                    (53, self.char_sheet.skills.swimming),
+                    (57, self.char_sheet.skills.gambling),
+                    (61, self.char_sheet.skills.notice),
+                    (65, self.char_sheet.skills.survival),
+                    (69, self.char_sheet.skills.healing),
+                    (73, self.char_sheet.skills.repair),
+                    (77, self.char_sheet.skills.reading),
+                    (81, self.char_sheet.skills.persuasion),
+                    (85, self.char_sheet.skills.intimidation),
+                    (89, self.char_sheet.skills.climbing),
+                ]),
+                SkillLevel::D12,
+            );
         }
-        if self.char_sheet.skills.athletics == SkillLevel::D4_2 {
-            self.athletics_minus().set_disabled(true);
-        } else {
-            self.athletics_minus().set_disabled(false);
-        }
-        if self.char_sheet.skills.fighting == SkillLevel::D4_2 {
-            self.fighting_minus().set_disabled(true);
-        } else {
-            self.fighting_minus().set_disabled(false);
-        }
-        if self.char_sheet.skills.shooting == SkillLevel::D4_2 {
-            self.shooting_minus().set_disabled(true);
-        } else {
-            self.shooting_minus().set_disabled(false);
-        }
-        if self.char_sheet.skills.stealth == SkillLevel::D4_2 {
-            self.stealth_minus().set_disabled(true);
-        } else {
-            self.stealth_minus().set_disabled(false);
-        }
-        if self.char_sheet.skills.thievery == SkillLevel::D4_2 {
-            self.thievery_minus().set_disabled(true);
-        } else {
-            self.thievery_minus().set_disabled(false);
-        }
-        if self.char_sheet.skills.swimming == SkillLevel::D4_2 {
-            self.swimming_minus().set_disabled(true);
-        } else {
-            self.swimming_minus().set_disabled(false);
-        }
-        if self.char_sheet.skills.gambling == SkillLevel::D4_2 {
-            self.gambling_minus().set_disabled(true);
-        } else {
-            self.gambling_minus().set_disabled(false);
-        }
-        if self.char_sheet.skills.notice == SkillLevel::D4_2 {
-            self.notice_minus().set_disabled(true);
-        } else {
-            self.notice_minus().set_disabled(false);
-        }
-        if self.char_sheet.skills.survival == SkillLevel::D4_2 {
-            self.survival_minus().set_disabled(true);
-        } else {
-            self.survival_minus().set_disabled(false);
-        }
-        if self.char_sheet.skills.healing == SkillLevel::D4_2 {
-            self.healing_minus().set_disabled(true);
-        } else {
-            self.healing_minus().set_disabled(false);
-        }
-        if self.char_sheet.skills.repair == SkillLevel::D4_2 {
-            self.repair_minus().set_disabled(true);
-        } else {
-            self.repair_minus().set_disabled(false);
-        }
-        if self.char_sheet.skills.reading == SkillLevel::D4_2 {
-            self.reading_minus().set_disabled(true);
-        } else {
-            self.reading_minus().set_disabled(false);
-        }
-        if self.char_sheet.skills.persuasion == SkillLevel::D4_2 {
-            self.persuasion_minus().set_disabled(true);
-        } else {
-            self.persuasion_minus().set_disabled(false);
-        }
-        if self.char_sheet.skills.intimidation == SkillLevel::D4_2 {
-            self.intimidation_minus().set_disabled(true);
-        } else {
-            self.intimidation_minus().set_disabled(false);
-        }
-        if self.char_sheet.skills.climbing == SkillLevel::D4_2 {
-            self.climbing_minus().set_disabled(true);
-        } else {
-            self.climbing_minus().set_disabled(false);
-        }
+        self.set_buttons_disabled_by_value(
+            HashMap::from_iter(vec![
+                (31, self.char_sheet.skills.athletics),
+                (35, self.char_sheet.skills.fighting),
+                (39, self.char_sheet.skills.shooting),
+                (43, self.char_sheet.skills.stealth),
+                (47, self.char_sheet.skills.thievery),
+                (51, self.char_sheet.skills.swimming),
+                (55, self.char_sheet.skills.gambling),
+                (59, self.char_sheet.skills.notice),
+                (63, self.char_sheet.skills.survival),
+                (67, self.char_sheet.skills.healing),
+                (71, self.char_sheet.skills.repair),
+                (75, self.char_sheet.skills.reading),
+                (79, self.char_sheet.skills.persuasion),
+                (83, self.char_sheet.skills.intimidation),
+                (87, self.char_sheet.skills.climbing),
+            ]),
+            SkillLevel::D4_2,
+        );
     }
 
     fn randomize(&mut self, ctx: &mut Context) -> SomeTransitions {

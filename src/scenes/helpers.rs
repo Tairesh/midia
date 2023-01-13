@@ -7,7 +7,7 @@ use tetra::{
 use crate::{
     assets::Assets,
     colors::Colors,
-    ui::{Button, Horizontal, Image, Label, Position, Positionate, TextInput, Vertical},
+    ui::{Button, Image, Label, Position, Positionate, TextInput, Vertical},
 };
 
 use super::{SomeTransitions, Transition};
@@ -161,37 +161,31 @@ pub(crate) fn back_randomize_next(
     next: u8,
     next_text: &str,
 ) -> (Box<Button>, Box<Button>, Box<Button>) {
-    // TODO: positionate in center
-    let y = Vertical::AtWindowBottomByBottom { offset: -50.0 };
-    let mut randomize_btn = randomize_btn(
-        assets,
-        Position {
-            x: Horizontal::AtWindowCenterByCenter { offset: 0.0 },
-            y,
-        },
-        randomize,
-    );
+    let mut randomize_btn = randomize_btn(assets, Position::center(), randomize);
     let randomize_btn_size = randomize_btn.calc_size(ctx);
-    let back_btn = back_btn(
-        Position {
-            x: Horizontal::AtWindowCenterByRight {
-                offset: -randomize_btn_size.x / 2.0 - 2.0,
-            },
-            y,
-        },
-        assets,
-    );
-    let next_btn = next_btn(
-        assets,
-        Position {
-            x: Horizontal::AtWindowCenterByLeft {
-                offset: randomize_btn_size.x / 2.0 + 2.0,
-            },
-            y,
-        },
-        next,
-        next_text,
-    );
+
+    let mut back_btn = back_btn(Position::center(), assets);
+    let back_btn_size = back_btn.calc_size(ctx);
+
+    let mut next_btn = next_btn(assets, Position::center(), next, next_text);
+    let next_btn_size = next_btn.calc_size(ctx);
+
+    let total_width = randomize_btn_size.x + back_btn_size.x + next_btn_size.x + 4.0;
+    let y = Vertical::AtWindowBottomByBottom { offset: -50.0 };
+    // positionate them in center
+    randomize_btn.set_position(Position::horizontal_center(
+        -total_width / 2.0 + randomize_btn_size.x / 2.0,
+        y,
+    ));
+    back_btn.set_position(Position::horizontal_center(
+        -total_width / 2.0 + randomize_btn_size.x + back_btn_size.x / 2.0 + 2.0,
+        y,
+    ));
+    next_btn.set_position(Position::horizontal_center(
+        -total_width / 2.0 + randomize_btn_size.x + back_btn_size.x + next_btn_size.x / 2.0 + 4.0,
+        y,
+    ));
+
     (back_btn, randomize_btn, next_btn)
 }
 

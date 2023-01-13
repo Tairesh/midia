@@ -12,7 +12,7 @@ use crate::{
 use super::{
     map::{ItemView, TerrainView},
     races::{Appearance, FurColor, Gender, MainHand, Mind, Personality, Race, Sex},
-    savage::Attributes,
+    savage::CharSheet,
     Action, Avatar, Chunk, ChunkPos, Fov, Log, Map, TilePos,
 };
 
@@ -89,7 +89,7 @@ impl World {
                     alive: true,
                 },
             ),
-            Attributes::default(),
+            CharSheet::default(),
             Point::new(0, -5),
         ));
         self.add_unit(Avatar::new(
@@ -108,7 +108,7 @@ impl World {
                     alive: true,
                 },
             ),
-            Attributes::default(),
+            CharSheet::default(),
             Point::new(-3, -5),
         ));
         self.add_unit(Avatar::new(
@@ -127,7 +127,7 @@ impl World {
                     alive: true,
                 },
             ),
-            Attributes::default(),
+            CharSheet::default(),
             Point::new(3, -5),
         ));
         self.add_unit(Avatar::new(
@@ -146,7 +146,7 @@ impl World {
                     alive: true,
                 },
             ),
-            Attributes::default(),
+            CharSheet::default(),
             Point::new(6, -5),
         ));
         self.add_unit(Avatar::new(
@@ -165,7 +165,7 @@ impl World {
                     alive: true,
                 },
             ),
-            Attributes::default(),
+            CharSheet::default(),
             Point::new(-6, -5),
         ));
 
@@ -419,7 +419,7 @@ pub mod tests {
             races::tests::personality::{old_queer, tester_girl},
         },
         savefile::{GameView, Meta},
-        Action, Attributes, Avatar, Direction, Log, TerrainView, World,
+        Action, Avatar, CharSheet, Direction, Log, TerrainView, World,
     };
 
     pub fn prepare_world() -> World {
@@ -429,7 +429,7 @@ pub mod tests {
             Log::new(),
             vec![Avatar::dressed_default(
                 tester_girl(),
-                Attributes::default(),
+                CharSheet::default(),
                 Point::new(0, 0),
             )],
             HashMap::new(),
@@ -437,7 +437,7 @@ pub mod tests {
     }
 
     pub fn add_npc(world: &mut World, pos: Point) -> usize {
-        world.add_unit(Avatar::new(old_queer(), Attributes::default(), pos))
+        world.add_unit(Avatar::new(old_queer(), CharSheet::default(), pos))
     }
 
     #[test]

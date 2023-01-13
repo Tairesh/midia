@@ -5,7 +5,6 @@ use tetra::graphics::mesh::{BorderRadii, Mesh, ShapeStyle};
 use tetra::graphics::Rectangle;
 use tetra::{Context, Event};
 
-use crate::ui::{Colorize, JustMesh, TilesetSprite};
 use crate::{
     app::App,
     colors::Colors,
@@ -17,8 +16,8 @@ use crate::{
     },
     savefile::{self, Meta},
     ui::{
-        Button, Draw, Horizontal, Label, Position, SomeUISprites, SomeUISpritesMut, Stringify,
-        TextInput, UiSprite, Vertical,
+        Button, Colorize, Draw, Horizontal, JustMesh, Label, Position, SomeUISprites,
+        SomeUISpritesMut, Stringify, TextInput, TilesetSprite, UiSprite, Vertical,
     },
 };
 
@@ -73,6 +72,7 @@ impl CreateCharacter {
             ctx,
             ButtonEvent::Randomize as u8,
             ButtonEvent::Next as u8,
+            "Next step",
         );
 
         Self {
@@ -495,6 +495,7 @@ impl SceneImpl for CreateCharacter {
                 None
             }
             ButtonEvent::AgeMinus | ButtonEvent::AgePlus => {
+                // TODO: disable buttons on maximum, minimum values
                 let input = self.age_input();
                 if let Ok(mut value) = input.value().parse::<u8>() {
                     match event {

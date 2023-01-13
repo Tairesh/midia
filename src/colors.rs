@@ -421,6 +421,7 @@ impl Colors {
     pub const WHITE_SMOKE: Color = Color::rgb(u8tof32(245), u8tof32(245), u8tof32(245));
     pub const YELLOW: Color = Color::rgb(u8tof32(255), u8tof32(255), u8tof32(0));
     pub const YELLOW_GREEN: Color = Color::rgb(u8tof32(154), u8tof32(205), u8tof32(50));
+    pub const MIDIA_SAND: Color = Color::rgb(u8tof32(203), u8tof32(149), u8tof32(85));
 
     // skin colors
     pub const WARM_IVORY: Color = Color::rgb(u8tof32(253), u8tof32(231), u8tof32(173));

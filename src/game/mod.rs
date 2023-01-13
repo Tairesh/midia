@@ -7,7 +7,7 @@ pub use map::{
     Chunk, ChunkPos, Item, ItemInteract, ItemTag, ItemView, Map, Terrain, TerrainInteract,
     TerrainView, Tile, TilePos,
 };
-pub use savage::{Attributes, Dice};
+pub use savage::{CharSheet, Dice, SkillLevel};
 pub use world::World;
 
 pub mod actions;

@@ -1,17 +1,36 @@
-use tetra::{graphics, Context, Event};
+use tetra::{Context, Event};
 
-use crate::colors::Colors;
+use super::super::{
+    super::{
+        app::App,
+        ui::{SomeUISprites, SomeUISpritesMut, UiSprite},
+    },
+    helpers::{bg, easy_back},
+    SceneImpl, SomeTransitions,
+};
 
-use super::super::{helpers::easy_back, SceneImpl, SomeTransitions};
+pub struct Empty {
+    sprites: [Box<dyn UiSprite>; 1],
+}
 
-pub struct Empty {}
+impl Empty {
+    pub fn new(_ctx: &mut Context, app: &App) -> Self {
+        Self {
+            sprites: [bg(&app.assets)],
+        }
+    }
+}
 
 impl SceneImpl for Empty {
     fn event(&mut self, _ctx: &mut Context, event: Event) -> SomeTransitions {
         easy_back(&event, false)
     }
 
-    fn before_draw(&mut self, ctx: &mut Context) {
-        graphics::clear(ctx, Colors::DARK_BROWN);
+    fn sprites(&self) -> SomeUISprites {
+        Some(&self.sprites)
+    }
+
+    fn sprites_mut(&mut self) -> SomeUISpritesMut {
+        Some(&mut self.sprites)
     }
 }

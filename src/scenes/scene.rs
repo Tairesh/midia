@@ -32,7 +32,7 @@ impl Scene {
     pub fn into_impl(self, app: &App, ctx: &mut Context) -> Box<dyn SceneImpl> {
         match self {
             Scene::MainMenu => Box::new(MainMenu::new(app)),
-            Scene::Empty => Box::new(Empty {}),
+            Scene::Empty => Box::new(Empty::new(ctx, app)),
             Scene::Settings => Box::new(SettingsScene::new(app, ctx)),
             Scene::CreateWorld => Box::new(CreateWorld::new(app, ctx)),
             Scene::LoadWorld => Box::new(LoadWorld::new(app, ctx)),

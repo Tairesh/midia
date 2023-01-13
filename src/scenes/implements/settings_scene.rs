@@ -2,7 +2,6 @@ use tetra::input::{Key, KeyModifier};
 use tetra::window::WindowPosition;
 use tetra::{Context, Event};
 
-use crate::scenes::helpers::{icon_minus, icon_plus};
 use crate::{
     app::App,
     settings::Settings,
@@ -13,7 +12,7 @@ use crate::{
 };
 
 use super::super::{
-    helpers::{back_btn, bg, easy_back, label, title},
+    helpers::{back_btn, bg, easy_back, icon_minus, icon_plus, label, title},
     SceneImpl, SomeTransitions, Transition,
 };
 

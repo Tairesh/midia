@@ -1,20 +1,18 @@
 use rand::{thread_rng, Rng};
-use tetra::input::{Key, KeyModifier};
 use tetra::{Context, Event};
 
-use crate::scenes::helpers::randomize_btn;
 use crate::{
     app::App,
     game::GameData,
     savefile,
     ui::{
-        Button, Draw, Horizontal, Label, Position, Positionate, SomeUISprites, SomeUISpritesMut,
-        Stringify, TextInput, UiSprite, Vertical,
+        Draw, Horizontal, Label, Position, SomeUISprites, SomeUISpritesMut, Stringify, TextInput,
+        UiSprite, Vertical,
     },
 };
 
 use super::super::{
-    helpers::{back_btn, bg, easy_back, error_label, label, text_input, title},
+    helpers::{back_randomize_next, bg, easy_back, error_label, label, text_input, title},
     Scene, SceneImpl, SomeTransitions, Transition,
 };
 
@@ -33,37 +31,13 @@ impl CreateWorld {
     pub fn new(app: &App, ctx: &mut Context) -> Self {
         let mut rng = thread_rng();
 
-        let mut randomize_btn = randomize_btn(
+        let (back_btn, randomize_btn, create_btn) = back_randomize_next(
             &app.assets,
-            Position {
-                x: Horizontal::AtWindowCenterByCenter { offset: 0.0 },
-                y: Vertical::ByCenter { y: 500.0 },
-            },
+            ctx,
             RANDOMIZE_EVENT,
+            CREATE_EVENT,
+            "Create world",
         );
-        let randomize_size = randomize_btn.calc_size(ctx);
-        let back_btn = back_btn(
-            Position {
-                x: Horizontal::AtWindowCenterByRight {
-                    offset: -randomize_size.x / 2.0 - 2.0,
-                },
-                y: Vertical::ByCenter { y: 500.0 },
-            },
-            &app.assets,
-        );
-        let create_btn = Box::new(Button::text(
-            vec![(Key::Enter, KeyModifier::Alt).into()],
-            "[Alt+Enter] Create",
-            app.assets.fonts.default.clone(),
-            app.assets.button.clone(),
-            Position {
-                x: Horizontal::AtWindowCenterByLeft {
-                    offset: randomize_size.x / 2.0 + 2.0,
-                },
-                y: Vertical::ByCenter { y: 500.0 },
-            },
-            Transition::CustomEvent(CREATE_EVENT),
-        ));
 
         Self {
             // Order is matter, change hardcoded indices in functions below if modified

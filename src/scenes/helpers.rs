@@ -35,7 +35,7 @@ pub(crate) fn title(title: impl Into<String>, assets: &Assets) -> Box<Label> {
     Box::new(Label::new(
         title,
         assets.fonts.title.clone(),
-        Colors::BLANCHED_ALMOND,
+        Colors::DARK_BROWN,
         Position::horizontal_center(0.0, Vertical::ByTop { y: 90.0 }),
     ))
 }
@@ -43,8 +43,8 @@ pub(crate) fn title(title: impl Into<String>, assets: &Assets) -> Box<Label> {
 pub(crate) fn subtitle(subtitle: impl Into<String>, assets: &Assets) -> Box<Label> {
     Box::new(Label::new(
         subtitle,
-        assets.fonts.header.clone(),
-        Colors::BLANCHED_ALMOND,
+        assets.fonts.subtitle.clone(),
+        Colors::DARK_BROWN,
         Position::horizontal_center(0.0, Vertical::ByTop { y: 130.0 }),
     ))
 }
@@ -58,20 +58,21 @@ pub(crate) fn label(text: impl Into<String>, assets: &Assets, position: Position
     ))
 }
 
-pub(crate) fn decorative_label(
+pub(crate) fn colored_label(
     text: impl Into<String>,
     assets: &Assets,
     position: Position,
+    color: Color,
 ) -> Box<Label> {
     Box::new(Label::new(
         text,
-        assets.fonts.subtitle.clone(),
-        Colors::BLANCHED_ALMOND,
+        assets.fonts.header.clone(),
+        color,
         position,
     ))
 }
 
-pub(crate) fn decorative_label_with_color(
+pub(crate) fn decorative_label(
     text: impl Into<String>,
     assets: &Assets,
     position: Position,
@@ -109,10 +110,15 @@ pub(crate) fn back_btn(position: Position, assets: &Assets) -> Box<Button> {
     ))
 }
 
-pub(crate) fn next_btn(assets: &Assets, position: Position, custom_event: u8) -> Box<Button> {
+pub(crate) fn next_btn(
+    assets: &Assets,
+    position: Position,
+    custom_event: u8,
+    text: &str,
+) -> Box<Button> {
     Box::new(Button::text(
         vec![(Key::Enter, KeyModifier::Alt).into()],
-        "[Alt+Enter] Next step",
+        format!("[Alt+Enter] {text}"),
         assets.fonts.default.clone(),
         assets.button.clone(),
         position,
@@ -153,12 +159,15 @@ pub(crate) fn back_randomize_next(
     ctx: &mut Context,
     randomize: u8,
     next: u8,
+    next_text: &str,
 ) -> (Box<Button>, Box<Button>, Box<Button>) {
+    // TODO: positionate in center
+    let y = Vertical::AtWindowBottomByBottom { offset: -50.0 };
     let mut randomize_btn = randomize_btn(
         assets,
         Position {
             x: Horizontal::AtWindowCenterByCenter { offset: 0.0 },
-            y: Vertical::ByCenter { y: 500.0 },
+            y,
         },
         randomize,
     );
@@ -168,7 +177,7 @@ pub(crate) fn back_randomize_next(
             x: Horizontal::AtWindowCenterByRight {
                 offset: -randomize_btn_size.x / 2.0 - 2.0,
             },
-            y: Vertical::ByCenter { y: 500.0 },
+            y,
         },
         assets,
     );
@@ -178,9 +187,10 @@ pub(crate) fn back_randomize_next(
             x: Horizontal::AtWindowCenterByLeft {
                 offset: randomize_btn_size.x / 2.0 + 2.0,
             },
-            y: Vertical::ByCenter { y: 500.0 },
+            y,
         },
         next,
+        next_text,
     );
     (back_btn, randomize_btn, next_btn)
 }

@@ -335,10 +335,8 @@ impl World {
             .map(|u| u.action.as_ref().unwrap().clone())
             .collect();
         for action in actions {
-            if action.finish >= self.meta.current_tick {
-                action.act(self);
-            }
-            if self.meta.current_tick == action.finish {
+            action.act(self);
+            if self.meta.current_tick >= action.finish {
                 self.get_unit_mut(action.owner).action = None;
             }
         }

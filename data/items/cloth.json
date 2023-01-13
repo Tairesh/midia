@@ -2,7 +2,7 @@
   {
     "type": "item",
     "id": "cloak",
-    "name": "Cloak",
+    "name": "cloak",
     "look_like": "cloak",
     "mass": 100,
     "is_wearable": true
@@ -10,7 +10,7 @@
   {
     "type": "item",
     "id": "hat",
-    "name": "Hat",
+    "name": "strange hat",
     "look_like": "hat",
     "mass": 50,
     "is_wearable": true
@@ -18,7 +18,7 @@
   {
     "type": "item",
     "id": "rags",
-    "name": "Dirty rags",
+    "name": "dirty rags",
     "look_like": "rags",
     "mass": 100,
     "is_wearable": true

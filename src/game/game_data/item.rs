@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 pub enum ItemTag {
     Tool,
     Weapon,
+    Book,
 }
 
 #[derive(Serialize, Deserialize, Debug, Hash, Eq, PartialEq, Copy, Clone)]
@@ -20,7 +21,7 @@ pub enum ItemQuality {
 #[derive(Serialize, Deserialize, Debug, Hash, Eq, PartialEq, Copy, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum ItemSpecial {
-    Name,
+    Named,
     LookLike,
     Mass,
     Read,

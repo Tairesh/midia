@@ -1,0 +1,17 @@
+[
+  {
+    "type": "item",
+    "id": "book",
+    "name": "book",
+    "look_like": "book",
+    "mass": 100,
+    "specials": [
+      "READ",
+      "NAMED",
+      "COLORED"
+    ],
+    "tags": [
+      "BOOK"
+    ]
+  }
+]

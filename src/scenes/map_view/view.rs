@@ -60,9 +60,10 @@ pub fn draw(
             .tileset
             .draw_region(ctx, tile.terrain.looks_like(), params.clone());
         if let Some(item) = tile.top_item() {
+            let item_params = params.clone().color(item.color());
             assets
                 .tileset
-                .draw_region(ctx, item.look_like(), params.clone());
+                .draw_region(ctx, item.look_like(), item_params);
             if tile.items.len() > 1 {
                 assets.tileset.draw_region(ctx, "highlight", params);
             }
@@ -147,6 +148,7 @@ pub fn draw_unit(
             item.look_like(),
             DrawParams::new()
                 .position(position + Vec2::new(offset_x, offset_y))
+                .color(item.color())
                 .scale(if item.tool_or_weapon() {
                     scale
                 } else {

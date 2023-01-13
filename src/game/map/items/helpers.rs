@@ -1,3 +1,4 @@
+use crate::colors::Colors;
 use crate::game::GameData;
 
 use super::Item;
@@ -20,4 +21,12 @@ pub fn axe() -> Item {
 pub fn shovel() -> Item {
     let game_data = GameData::instance();
     Item::new(game_data.items.get("shovel").cloned().unwrap())
+}
+
+pub fn random_book() -> Item {
+    let game_data = GameData::instance();
+    Item::new(game_data.items.get("book").cloned().unwrap())
+        .with_colored(Colors::BLUE_VIOLET)
+        .with_named("strange book")
+        .with_readable("Lore of the Midia")
 }

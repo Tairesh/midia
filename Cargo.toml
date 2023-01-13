@@ -4,6 +4,7 @@ description = "Roguelike about The Chetyrekhstvorchataya Midia"
 version = "0.1.0"
 authors = ["Ilya Agafonov <tairesh.rus@gmail.com>"]
 edition = "2021"
+build = "build.rs"
 
 [dependencies.tetra]
 version = "0.7"
@@ -23,3 +24,6 @@ arrayvec = { version = "0.7", features = ["serde"] }
 phf = { version = "0.11", features = ["macros"] }
 once_cell = "1.10"
 enum-iterator = "1.1"
+
+[build-dependencies]
+winres = "0.1"

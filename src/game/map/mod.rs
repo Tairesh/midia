@@ -3,15 +3,15 @@ use std::collections::{HashMap, HashSet};
 use geometry::Point;
 
 pub use chunk::Chunk;
+pub use fov::{field_of_view_set, Fov, FovMap};
 pub use item::{Item, ItemInteract, ItemQuality, ItemTag, ItemView};
 pub use passage::Passage;
 pub use pos::{ChunkPos, TilePos};
 pub use terrain::{Terrain, TerrainInteract, TerrainView};
 pub use tile::Tile;
 
-use crate::fov::FovMap;
-
 mod chunk;
+mod fov;
 mod item;
 pub mod items;
 mod passage;

@@ -2,9 +2,36 @@ use std::collections::HashSet;
 
 use geometry::Point;
 
-use crate::game::map::Map;
+use crate::game::Map;
 
 // it is basically just copy-pasted from https://github.com/amethyst/bracket-lib/blob/master/bracket-pathfinding/src/field_of_view/recursive_shadowcasting.rs
+
+#[derive(Debug)]
+pub struct Fov {
+    visible: HashSet<Point>,
+}
+
+impl Fov {
+    pub fn new() -> Self {
+        Self {
+            visible: HashSet::default(),
+        }
+    }
+
+    pub fn set_visible(&mut self, set: HashSet<Point>) {
+        self.visible = set;
+    }
+
+    pub fn visible(&self) -> &HashSet<Point> {
+        &self.visible
+    }
+}
+
+impl Default for Fov {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 pub trait FovMap {
     fn is_transparent(&self, point: Point) -> bool;

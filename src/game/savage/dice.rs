@@ -1,6 +1,7 @@
 use std::ops::{Add, AddAssign, Sub, SubAssign};
 
 use enum_iterator::{next, previous, Sequence};
+use rand::Rng;
 
 use crate::game::traits::Name;
 
@@ -66,21 +67,17 @@ impl Dice {
     }
 
     pub fn roll(self) -> u8 {
-        rand::random::<u8>() % self.value() + 1
+        rand::thread_rng().gen::<u8>() % self.value() + 1
     }
 
     /// Roll a dice that explodes on the maximum value.
     pub fn roll_wild(self) -> u8 {
-        let mut total = 0;
+        let mut total = 0u8;
         let mut roll = self.roll();
-        while roll == u8::from(self) {
+        while roll == self.value() {
             // probably u8 here is not an intelligent choice but who cares
-            if 255 - roll <= total {
-                total += roll;
-                roll = self.roll();
-            } else {
-                return 255;
-            }
+            total = total.saturating_add(roll);
+            roll = self.roll();
         }
         total + roll
     }

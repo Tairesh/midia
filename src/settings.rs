@@ -125,26 +125,11 @@ fn save(settings: &Settings, path: &'static str) {
 
 #[cfg(test)]
 mod tests {
-    use super::{load, save};
-
-    const TEST_PATH: &str = "./settings-test.json";
-
-    // TODO: this test blocking FS which seems to be a bad idea
-    #[test]
-    fn test_settings_load_and_save() {
-        let mut settings = load(TEST_PATH);
-        settings.window.width = 987;
-        save(&settings, TEST_PATH);
-
-        let settings = load(TEST_PATH);
-        assert_eq!(987, settings.window.width);
-
-        std::fs::remove_file(TEST_PATH).ok();
-    }
+    use super::Settings;
 
     #[test]
     fn test_invalid_settings() {
-        let mut settings = load(TEST_PATH);
+        let mut settings = Settings::default();
         settings.window.width = 123;
         settings.window.height = 456;
         settings.input.repeat_interval = 0;

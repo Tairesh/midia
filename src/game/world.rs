@@ -4,16 +4,13 @@ use std::convert::TryFrom;
 
 use geometry::{Direction, Point, TwoDimDirection};
 
-use crate::{
-    fov::field_of_view_set,
-    savefile::{self, GameView, Meta, SaveError},
-};
+use crate::savefile::{self, GameView, Meta, SaveError};
 
 use super::{
-    map::{ItemView, TerrainView},
+    map::{field_of_view_set, Fov, ItemView, TerrainView},
     races::{Appearance, FurColor, Gender, MainHand, Mind, Personality, Race, Sex},
     savage::CharSheet,
-    Action, Avatar, Chunk, ChunkPos, Fov, Log, Map, TilePos,
+    Action, Avatar, Chunk, ChunkPos, Log, Map, TilePos,
 };
 
 // TODO: weather and outside lighting system

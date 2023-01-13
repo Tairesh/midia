@@ -1,7 +1,6 @@
 mod app;
 mod assets;
 mod colors;
-mod fov;
 mod game;
 mod input;
 mod savefile;

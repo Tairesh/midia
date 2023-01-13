@@ -22,6 +22,7 @@ pub struct Image {
     rect: Option<Rect>,
     visible: bool,
     repeat: bool,
+    auto_size: bool,
     window_size: (i32, i32),
 }
 
@@ -37,14 +38,21 @@ impl Image {
             rect: None,
             visible: true,
             repeat: false,
+            auto_size: false,
             window_size: (0, 0),
         }
     }
 
-    // TODO: add centered with bg color image for backgrounds
     pub fn repeat(texture: Texture) -> Self {
         Self {
             repeat: true,
+            ..Self::new(texture, Position::center())
+        }
+    }
+
+    pub fn auto_size(texture: Texture) -> Self {
+        Self {
+            auto_size: true,
             ..Self::new(texture, Position::center())
         }
     }
@@ -106,11 +114,18 @@ impl Positionate for Image {
     }
 
     fn calc_size(&mut self, ctx: &mut Context) -> Vec2 {
-        if self.repeat {
+        if self.repeat || self.auto_size {
             self.window_size = window::get_size(ctx);
         }
         let size = if let Some(region) = self.region {
             (region.width, region.height)
+        } else if self.auto_size {
+            let (w, h) = self.texture.size();
+            let kx = self.window_size.0 as f32 / w as f32;
+            let ky = self.window_size.1 as f32 / h as f32;
+            let k = kx.max(ky) + 0.1;
+            self.scale = Vec2::new(k, k);
+            (w as f32, h as f32)
         } else {
             let (w, h) = self.texture.size();
             (w as f32, h as f32)

@@ -28,7 +28,7 @@ pub(crate) fn easy_back(event: &Event, focused: bool) -> SomeTransitions {
 }
 
 pub(crate) fn bg(assets: &Assets) -> Box<Image> {
-    Box::new(Image::repeat(assets.images.bg.clone()))
+    Box::new(Image::auto_size(assets.images.bg.clone()))
 }
 
 pub(crate) fn title(title: impl Into<String>, assets: &Assets) -> Box<Label> {

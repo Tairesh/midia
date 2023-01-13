@@ -346,7 +346,7 @@ impl CharacterAttributes {
                 ),
                 Box::new(Alert::passive(
                     1100.0,
-                    280.0,
+                    285.0,
                     app.assets.alert.clone(),
                     Position::horizontal_center(0.0, Vertical::ByTop { y: 370.0 }),
                 )),
@@ -1064,6 +1064,7 @@ impl CharacterAttributes {
     #[allow(clippy::too_many_lines)]
     fn update_points(&mut self, ctx: &mut Context) {
         let attributes_points = self.attributes_points;
+        // TODO: recalc skills points when attributes change
         let skills_points = self.skills_points;
         let window_size = self.window_size;
         self.attributes_points_label().update(

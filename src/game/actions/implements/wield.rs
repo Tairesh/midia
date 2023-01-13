@@ -3,7 +3,6 @@ use geometry::Direction;
 use super::super::{
     super::{
         log::{LogCategory, LogEvent},
-        map::{ItemInteract, ItemView},
         Avatar, World,
     },
     Action, ActionImpl,
@@ -22,7 +21,7 @@ impl ActionImpl for Wield {
         }
         let pos = actor.pos + self.dir;
         if let Some(item) = world.map().get_tile(pos).items.last() {
-            Yes(item.wield_time(actor).round() as u32)
+            Yes(item.wield_time().round() as u32)
         } else {
             No("There is nothing to pick up".to_string())
         }
@@ -32,7 +31,7 @@ impl ActionImpl for Wield {
         let pos = action.owner(world).pos + self.dir;
         let item = world.map().get_tile_mut(pos).items.pop();
         if let Some(item) = item {
-            let name = item.name();
+            let name = item.name().to_string();
             action.owner_mut(world).wield.push(item);
             world.log().push(LogEvent::new(
                 format!(

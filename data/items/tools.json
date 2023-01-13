@@ -1,0 +1,46 @@
+[
+  {
+    "type": "item",
+    "id": "shovel",
+    "name": "Shovel",
+    "look_like": "shovel",
+    "tags": [
+      "TOOL"
+    ],
+    "qualities": [
+      "DIG"
+    ],
+    "mass": 2000,
+    "two_handed_tool": true
+  },
+  {
+    "type": "item",
+    "id": "axe",
+    "name": "Axe",
+    "look_like": "axe",
+    "tags": [
+      "TOOL",
+      "WEAPON"
+    ],
+    "qualities": [
+      "BUTCH"
+    ],
+    "mass": 1000
+  },
+  {
+    "type": "item",
+    "id": "knife",
+    "name": "Knife",
+    "look_like": "knife",
+    "tags": [
+      "TOOL",
+      "WEAPON"
+    ],
+    "qualities": [
+      "BUTCH",
+      "CUT"
+    ],
+    "mass": 100,
+    "two_handed_tool": false
+  }
+]

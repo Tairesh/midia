@@ -1,15 +1,12 @@
-#![allow(dead_code)]
-
 use std::collections::{hash_map::DefaultHasher, HashSet};
 use std::hash::{Hash, Hasher};
 
 use arrayvec::ArrayVec;
 use rand::{distributions::Standard, rngs::StdRng, Rng, SeedableRng};
 
-use crate::game::map::items::{Axe, Hat, Knife, Rags};
+use crate::game::map::items::helpers::{axe, cloak, hat, shovel};
 
 use super::{
-    items::Shovel,
     terrains::{Boulder, Dirt, Grass, Tree},
     ChunkPos, Tile,
 };
@@ -76,12 +73,11 @@ impl Chunk {
                 .get_mut(pos)
                 .unwrap()
                 .items
-                .push(match rng.gen_range(0..5) {
-                    0 => Shovel::new().into(),
-                    1 => Axe::new().into(),
-                    2 => Knife::new().into(),
-                    3 => Rags::new().into(),
-                    4 => Hat::new().into(),
+                .push(match rng.gen_range(0..4) {
+                    0 => cloak(),
+                    1 => hat(),
+                    2 => axe(),
+                    3 => shovel(),
                     _ => unreachable!(),
                 });
         }

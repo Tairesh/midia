@@ -3,7 +3,6 @@ use tetra::{Context, Event};
 
 use crate::{
     app::App,
-    game::GameData,
     savefile,
     ui::{
         Draw, Horizontal, Label, Position, SomeUISprites, SomeUISpritesMut, Stringify, TextInput,
@@ -53,7 +52,7 @@ impl CreateWorld {
                     },
                 ),
                 text_input(
-                    GameData::instance().names.random_name(&mut rng),
+                    "Test world",
                     250.0,
                     &app.assets,
                     Position {
@@ -157,8 +156,7 @@ impl SceneImpl for CreateWorld {
         match event {
             RANDOMIZE_EVENT => {
                 let mut rng = thread_rng();
-                self.name_input()
-                    .set_value(GameData::instance().names.random_name(&mut rng));
+                self.name_input().set_value("Test world");
                 self.seed_input().set_value(random_seed(&mut rng).as_str());
                 None
             }

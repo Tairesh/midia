@@ -3,15 +3,14 @@ use std::rc::Rc;
 use tetra::Context;
 
 pub use self::{
-    alert::Alert, button::Button, fonts::Fonts, images::Images, names::Names,
-    prepared_font::PreparedFont, tileset::Tileset,
+    alert::Alert, button::Button, fonts::Fonts, images::Images, prepared_font::PreparedFont,
+    tileset::Tileset,
 };
 
 mod alert;
 mod button;
 mod fonts;
 mod images;
-mod names;
 mod prepared_font;
 mod tileset;
 

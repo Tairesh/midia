@@ -3,7 +3,7 @@ use geometry::Direction;
 use super::super::{
     super::{
         log::{LogCategory, LogEvent},
-        map::{ItemInteract, ItemView, TerrainInteract, TerrainView},
+        map::{TerrainInteract, TerrainView},
         Avatar, World,
     },
     Action, ActionImpl,
@@ -34,7 +34,7 @@ impl ActionImpl for Drop {
             } else {
                 1.5
             };
-            Yes((item.drop_time(actor) * k).round() as u32)
+            Yes((item.drop_time() * k).round() as u32)
         } else {
             No("Item doesn't exists".to_string())
         }
@@ -45,7 +45,7 @@ impl ActionImpl for Drop {
         let item = owner.wield.remove(self.item_id);
         let owner = action.owner(world);
         let pos = owner.pos + self.dir;
-        let name = item.name();
+        let name = item.name().to_string();
         world.map().get_tile_mut(pos).items.push(item);
         world.log().push(LogEvent::new(
             format!("{} dropped the {name}", owner.name_for_actions()),

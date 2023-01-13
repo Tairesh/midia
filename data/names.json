@@ -1,0 +1,41 @@
+[
+  {
+    "type": "names_pack",
+    "id": "core",
+    "names": {
+      "gazan": {
+        "m": [
+          "Dragan",
+          "Yasma"
+        ],
+        "f": [
+          "Dooka"
+        ],
+        "u": []
+      },
+      "lagnam": {
+        "m": [
+          "Grem"
+        ],
+        "f": [
+          "Test"
+        ],
+        "u": []
+      },
+      "nyarnik": {
+        "m": [
+          "Mnerk"
+        ],
+        "f": [
+          "Shasha"
+        ],
+        "u": []
+      },
+      "totik": {
+        "m": [],
+        "f": [],
+        "u": []
+      }
+    }
+  }
+]

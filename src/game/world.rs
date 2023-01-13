@@ -7,7 +7,7 @@ use geometry::{Direction, Point, TwoDimDirection};
 use crate::savefile::{self, GameView, Meta, SaveError};
 
 use super::{
-    map::{field_of_view_set, Fov, ItemView, TerrainView},
+    map::{field_of_view_set, Fov, TerrainView},
     races::{Appearance, FurColor, Gender, MainHand, Mind, Personality, Race, Sex},
     savage::CharSheet,
     Action, Avatar, Chunk, ChunkPos, Log, Map, TilePos,
@@ -86,7 +86,7 @@ impl World {
                     alive: true,
                 },
             ),
-            CharSheet::default(),
+            CharSheet::default(Race::Gazan),
             Point::new(0, -5),
         ));
         self.add_unit(Avatar::new(
@@ -105,7 +105,7 @@ impl World {
                     alive: true,
                 },
             ),
-            CharSheet::default(),
+            CharSheet::default(Race::Nyarnik),
             Point::new(-3, -5),
         ));
         self.add_unit(Avatar::new(
@@ -124,7 +124,7 @@ impl World {
                     alive: true,
                 },
             ),
-            CharSheet::default(),
+            CharSheet::default(Race::Gazan),
             Point::new(3, -5),
         ));
         self.add_unit(Avatar::new(
@@ -143,7 +143,7 @@ impl World {
                     alive: true,
                 },
             ),
-            CharSheet::default(),
+            CharSheet::default(Race::Lagnam),
             Point::new(6, -5),
         ));
         self.add_unit(Avatar::new(
@@ -162,7 +162,7 @@ impl World {
                     alive: true,
                 },
             ),
-            CharSheet::default(),
+            CharSheet::default(Race::Totik),
             Point::new(-6, -5),
         ));
 
@@ -302,9 +302,7 @@ impl World {
                 &mut tile
                     .items
                     .iter()
-                    .map(|item| {
-                        (if multiline { " - " } else { "" }).to_string() + item.name().as_str()
-                    })
+                    .map(|item| (if multiline { " - " } else { "" }).to_string() + item.name())
                     .collect(),
             );
         }
@@ -413,7 +411,10 @@ pub mod tests {
         super::{
             actions::implements::{Skip, Walk},
             map::terrains::{Boulder, BoulderSize, Dirt},
-            races::tests::personality::{old_queer, tester_girl},
+            races::{
+                tests::personality::{old_queer, tester_girl},
+                Race,
+            },
         },
         savefile::{GameView, Meta},
         Action, Avatar, CharSheet, Direction, Log, TerrainView, World,
@@ -426,7 +427,7 @@ pub mod tests {
             Log::new(),
             vec![Avatar::dressed_default(
                 tester_girl(),
-                CharSheet::default(),
+                CharSheet::default(Race::Gazan),
                 Point::new(0, 0),
             )],
             HashMap::new(),
@@ -434,7 +435,7 @@ pub mod tests {
     }
 
     pub fn add_npc(world: &mut World, pos: Point) -> usize {
-        world.add_unit(Avatar::new(old_queer(), CharSheet::default(), pos))
+        world.add_unit(Avatar::new(old_queer(), CharSheet::default(Race::Bug), pos))
     }
 
     #[test]

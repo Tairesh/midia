@@ -7,7 +7,7 @@ use tetra::Context;
 
 use crate::assets::{Assets, Tileset};
 use crate::colors::Colors;
-use crate::game::map::{ItemInteract, ItemView, TerrainView};
+use crate::game::map::TerrainView;
 use crate::game::traits::Name;
 use crate::game::{Avatar, World};
 
@@ -62,7 +62,7 @@ pub fn draw(
         if let Some(item) = tile.top_item() {
             assets
                 .tileset
-                .draw_region(ctx, item.looks_like(), params.clone());
+                .draw_region(ctx, item.look_like(), params.clone());
             if tile.items.len() > 1 {
                 assets.tileset.draw_region(ctx, "highlight", params);
             }
@@ -144,7 +144,7 @@ pub fn draw_unit(
         );
         tileset.draw_region(
             ctx,
-            item.looks_like(),
+            item.look_like(),
             DrawParams::new()
                 .position(position + Vec2::new(offset_x, offset_y))
                 .scale(if item.tool_or_weapon() {

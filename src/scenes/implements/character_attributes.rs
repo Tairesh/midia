@@ -103,7 +103,7 @@ impl CharacterAttributes {
             ButtonEvent::Next as u8,
             "Create character",
         );
-        let mut char_sheet = CharSheet::default();
+        let mut char_sheet = CharSheet::default(personality.appearance.race);
         for (skill, level) in personality.appearance.race.free_skills() {
             char_sheet.skills.set_skill(skill, level);
         }
@@ -1057,7 +1057,7 @@ impl CharacterAttributes {
     }
 
     fn randomize(&mut self, ctx: &mut Context) -> SomeTransitions {
-        self.char_sheet = CharSheet::random();
+        self.char_sheet = CharSheet::random(self.personality.appearance.race);
         self.attributes_points = 0;
         let window_size = self.window_size;
         let agility = self.char_sheet.attributes.agility.name();

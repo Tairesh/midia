@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::game::races::Gender;
 
-#[derive(Serialize, Deserialize, Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub enum Sex {
     #[serde(rename = "m")]
     Male,
@@ -12,6 +12,12 @@ pub enum Sex {
     Female,
     #[serde(rename = "u")]
     Undefined,
+}
+
+impl Sex {
+    pub fn iterator() -> impl Iterator<Item = Sex> {
+        [Self::Male, Self::Female, Self::Undefined].iter().copied()
+    }
 }
 
 impl Default for Sex {

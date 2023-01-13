@@ -48,15 +48,14 @@ static REGIONS: phf::Map<&'static str, Rectangle> = phf::phf_map! {
     "dead_grass12" => Rectangle::new(40.0, 50.0, 10.0, 10.0),
     "dead_grass13" => Rectangle::new(50.0, 50.0, 10.0, 10.0),
     "dead_grass14" => Rectangle::new(60.0, 50.0, 10.0, 10.0),
-    "grave_new" => Rectangle::new(0.0, 60.0, 10.0, 10.0),
-    "grave_old" => Rectangle::new(10.0, 60.0, 10.0, 10.0),
-    "grave_stone" => Rectangle::new(20.0, 60.0, 10.0, 10.0),
+    "book" => Rectangle::new(0.0, 60.0, 10.0, 10.0),
     "corpse" => Rectangle::new(30.0, 60.0, 10.0, 10.0),
     "flesh" => Rectangle::new(40.0, 60.0, 10.0, 10.0),
     "shovel" => Rectangle::new(0.0, 70.0, 10.0, 10.0),
     "knife" => Rectangle::new(10.0, 70.0, 10.0, 10.0),
     "axe" => Rectangle::new(20.0, 70.0, 10.0, 10.0),
     "cloak" => Rectangle::new(30.0, 70.0, 10.0, 10.0),
+    "rags" => Rectangle::new(40.0, 70.0, 10.0, 10.0),
     "hat" => Rectangle::new(40.0, 70.0, 10.0, 10.0),
     "mt" => Rectangle::new(0.0, 90.0, 10.0, 10.0),
     "lt" => Rectangle::new(10.0, 90.0, 10.0, 10.0),
@@ -88,12 +87,7 @@ impl Tileset {
             .unwrap_or_default()
     }
 
-    pub fn draw_region<P: Into<DrawParams>>(
-        &self,
-        ctx: &mut Context,
-        name: &'static str,
-        params: P,
-    ) {
+    pub fn draw_region<P: Into<DrawParams>>(&self, ctx: &mut Context, name: &str, params: P) {
         let region = REGIONS
             .get(name)
             .copied()

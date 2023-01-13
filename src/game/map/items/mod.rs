@@ -1,14 +1,5 @@
-pub use axe::Axe;
-pub use cloak::Cloak;
-pub use hat::Hat;
-pub use knife::Knife;
-pub use rags::Rags;
-pub use shovel::Shovel;
+pub use item::Item;
 
-// TODO: JSON-ize them
-mod axe;
-mod cloak;
-mod hat;
-mod knife;
-mod rags;
-mod shovel;
+pub mod helpers;
+mod item;
+pub mod specials;

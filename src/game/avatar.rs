@@ -2,12 +2,9 @@
 
 use geometry::{Point, TwoDimDirection};
 
-use super::{
-    map::items::{Cloak, Hat},
-    races::Personality,
-    savage::CharSheet,
-    Action, Item,
-};
+use crate::game::map::items::helpers::{cloak, hat};
+
+use super::{races::Personality, savage::CharSheet, Action, Item};
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct Avatar {
@@ -40,7 +37,7 @@ impl Avatar {
     // TODO: remove this and select dress in create character scene
     pub fn dressed_default(personality: Personality, char_sheet: CharSheet, pos: Point) -> Self {
         Self {
-            wear: vec![Hat::new().into(), Cloak::new().into()],
+            wear: vec![hat(), cloak()],
             ..Self::new(personality, char_sheet, pos)
         }
     }

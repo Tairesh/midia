@@ -24,9 +24,9 @@ mod tests {
     use super::{
         super::super::{
             map::{
-                items::{Axe, Shovel},
+                items::helpers::{axe, shovel},
                 terrains::{Boulder, BoulderSize, Dirt},
-                Item, Terrain,
+                Terrain,
             },
             world::tests::{add_npc, prepare_world},
         },
@@ -126,11 +126,7 @@ mod tests {
     fn test_wielding() {
         let mut world = prepare_world();
         world.map().get_tile_mut(Point::new(1, 0)).items.clear();
-        world
-            .map()
-            .get_tile_mut(Point::new(1, 0))
-            .items
-            .push(Axe::new().into());
+        world.map().get_tile_mut(Point::new(1, 0)).items.push(axe());
 
         assert!(world.player().wield.is_empty());
         assert_eq!(0, world.meta.current_tick);
@@ -151,7 +147,7 @@ mod tests {
         assert_eq!(Point::new(0, 0), world.player().pos);
         assert_eq!(1, world.player().wield.len());
         let item = world.player().wield.first().unwrap();
-        assert!(matches!(item, Item::Axe(..)));
+        assert_eq!(item.proto.id, axe().proto.id);
     }
 
     #[test]
@@ -170,7 +166,7 @@ mod tests {
         world.map().get_tile_mut(Point::new(0, 0)).terrain = Dirt::default().into();
         world.map().get_tile_mut(Point::new(0, 0)).items.clear();
         world.player_mut().wield.clear();
-        world.player_mut().wield.push(Axe::new().into());
+        world.player_mut().wield.push(axe());
 
         world.player_mut().action = Some(
             Action::new(
@@ -191,7 +187,7 @@ mod tests {
         let mut map = world.map();
         assert_eq!(1, map.get_tile(Point::new(0, 0)).items.len());
         let item = map.get_tile(Point::new(0, 0)).items.first().unwrap();
-        assert!(matches!(item, Item::Axe(..)));
+        assert_eq!(item.proto.id, axe().proto.id);
     }
 
     #[test]
@@ -205,7 +201,7 @@ mod tests {
         };
         assert!(Action::new(0, typ.into(), &world).is_err());
 
-        world.player_mut().wield.push(Shovel::new().into());
+        world.player_mut().wield.push(shovel());
         world.player_mut().action = Some(Action::new(0, typ.into(), &world).unwrap());
         while world.player().action.is_some() {
             world.tick();

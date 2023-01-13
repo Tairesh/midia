@@ -9,17 +9,13 @@ use crate::game::savage::Skill;
 use crate::game::traits::Name;
 use crate::game::SkillLevel;
 
-#[derive(Serialize, Deserialize, Debug, Copy, Clone)]
+#[derive(Serialize, Deserialize, Debug, Copy, Clone, Eq, PartialEq, Hash)]
+#[serde(rename_all = "snake_case")]
 pub enum Race {
-    #[serde(rename = "g")]
     Gazan,
-    #[serde(rename = "n")]
     Nyarnik,
-    #[serde(rename = "t")]
     Totik,
-    #[serde(rename = "l")]
     Lagnam,
-    #[serde(rename = "b")]
     Bug,
 }
 
@@ -34,6 +30,18 @@ impl Race {
             Race::Totik => vec![(Skill::Swimming, SkillLevel::D6)],
             _ => vec![],
         })
+    }
+
+    pub fn iterator() -> impl Iterator<Item = Race> {
+        [
+            Self::Gazan,
+            Self::Lagnam,
+            Self::Nyarnik,
+            Self::Totik,
+            Self::Bug,
+        ]
+        .iter()
+        .copied()
     }
 }
 

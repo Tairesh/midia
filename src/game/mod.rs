@@ -1,11 +1,8 @@
 pub use actions::{Action, ActionType};
 pub use avatar::Avatar;
-pub use game_data::GameData;
+pub use game_data::{GameData, ItemPrototype, ItemQuality, ItemSpecial, ItemTag};
 pub use log::Log;
-pub use map::{
-    Chunk, ChunkPos, Item, ItemInteract, ItemTag, ItemView, Map, Terrain, TerrainInteract,
-    TerrainView, Tile, TilePos,
-};
+pub use map::{Chunk, ChunkPos, Item, Map, Terrain, TerrainInteract, TerrainView, Tile, TilePos};
 pub use savage::{CharSheet, Dice, SkillLevel};
 pub use world::World;
 

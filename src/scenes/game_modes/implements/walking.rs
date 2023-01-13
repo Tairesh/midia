@@ -8,10 +8,7 @@ use tetra::{
 
 use crate::{
     colors::Colors,
-    game::{
-        actions::implements::{Drop, Skip, Walk},
-        map::ItemView,
-    },
+    game::actions::implements::{Drop, Skip, Walk},
     input,
     settings::Settings,
 };
@@ -90,7 +87,7 @@ impl GameModeImpl for Walking {
                 .player()
                 .wear
                 .iter()
-                .map(ItemView::name)
+                .map(|i| i.name().to_string())
                 .collect();
             game.log.log(
                 format!("You wear: {}", items.join(", ")),

@@ -3,17 +3,25 @@ use crate::game::{Dice, SkillLevel};
 
 use super::{Attributes, Skills};
 
-#[derive(serde::Serialize, serde::Deserialize, Default, Debug, Clone)]
+#[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
 pub struct CharSheet {
     pub attributes: Attributes,
     pub skills: Skills,
 }
 
 impl CharSheet {
-    pub fn random() -> Self {
+    pub fn default(race: Race) -> Self {
+        Self {
+            attributes: Attributes::default(),
+            skills: Skills::default(race),
+        }
+    }
+
+    pub fn random(race: Race) -> Self {
         Self {
             attributes: Attributes::random(),
-            skills: Skills::default(),
+            // TODO: randomize skills
+            skills: Skills::default(race),
         }
     }
 
@@ -30,9 +38,9 @@ impl CharSheet {
                 base_value = free_skill_level;
             }
             skill_points -=
-                (value as u8 - base_value as u8) + value.steps_above_attr(attr_value).max(0) as u8;
+                (value as i8 - base_value as i8) + value.steps_above_attr(attr_value).max(0);
         }
 
-        skill_points
+        skill_points.max(0) as u8
     }
 }

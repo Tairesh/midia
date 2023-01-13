@@ -10,7 +10,7 @@ use tetra::{
 
 use crate::{
     assets::{PreparedFont, Tileset},
-    game::map::{Item, ItemView},
+    game::map::Item,
 };
 
 use super::super::{Colorize, Draw, Focus, Position, Positionate, Stringify, UiSprite, Update};
@@ -141,7 +141,7 @@ pub struct ItemDisplay {
     color: Color,
     icon: bool,
     tileset: Rc<Tileset>,
-    looks_like: &'static str,
+    looks_like: String,
     scale: Vec2,
     position: Position,
     rect: Option<Rect>,
@@ -158,16 +158,16 @@ impl ItemDisplay {
         position: Position,
     ) -> Self {
         let (name, looks_like) = if let Some(item) = item {
-            (item.name(), item.looks_like())
+            (item.name(), item.look_like())
         } else {
-            ("(empty)".to_string(), "")
+            ("(empty)", "")
         };
         Self {
             text: Text::new(name, font.font),
             color,
             icon: item.is_some(),
             tileset,
-            looks_like,
+            looks_like: looks_like.to_string(),
             scale,
             position,
             rect: None,
@@ -177,14 +177,14 @@ impl ItemDisplay {
 
     pub fn set_item(&mut self, item: Option<&Item>, ctx: &mut Context, window_size: (i32, i32)) {
         let (name, looks_like) = if let Some(item) = item {
-            (item.name(), Some(item.looks_like()))
+            (item.name(), Some(item.look_like()))
         } else {
-            ("(empty)".to_string(), None)
+            ("(empty)", None)
         };
         if name != self.text.content() || looks_like.is_some() != self.icon {
             if let Some(looks_like) = looks_like {
                 self.icon = true;
-                self.looks_like = looks_like;
+                self.looks_like = looks_like.to_string();
             } else {
                 self.icon = false;
             }
@@ -200,7 +200,7 @@ impl Draw for ItemDisplay {
         let text_pos = if self.icon {
             self.tileset.draw_region(
                 ctx,
-                self.looks_like,
+                &self.looks_like,
                 DrawParams::new()
                     .position(Vec2::new(rect.x, rect.y))
                     .scale(self.scale),

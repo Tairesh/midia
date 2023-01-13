@@ -1,6 +1,8 @@
+use crate::game::races::Race;
+
 use super::{Attribute, SkillLevel};
 
-#[derive(serde::Serialize, serde::Deserialize, Default, Debug, Clone)]
+#[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
 pub struct Skills {
     pub athletics: SkillLevel,
     pub fighting: SkillLevel,
@@ -20,6 +22,34 @@ pub struct Skills {
 }
 
 impl Skills {
+    pub fn default(race: Race) -> Self {
+        Self {
+            athletics: SkillLevel::D4_2,
+            fighting: SkillLevel::D4_2,
+            shooting: SkillLevel::D4_2,
+            stealth: SkillLevel::D4_2,
+            thievery: SkillLevel::D4_2,
+            swimming: if race == Race::Totik {
+                SkillLevel::D6
+            } else {
+                SkillLevel::D4_2
+            },
+            gambling: SkillLevel::D4_2,
+            notice: SkillLevel::D4_2,
+            survival: SkillLevel::D4_2,
+            healing: SkillLevel::D4_2,
+            repair: SkillLevel::D4_2,
+            reading: SkillLevel::D4_2,
+            persuasion: SkillLevel::D4_2,
+            intimidation: SkillLevel::D4_2,
+            climbing: if race == Race::Gazan {
+                SkillLevel::D6
+            } else {
+                SkillLevel::D4_2
+            },
+        }
+    }
+
     #[allow(dead_code)]
     pub fn get_skill(&self, skill: Skill) -> SkillLevel {
         match skill {

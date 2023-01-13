@@ -1,0 +1,26 @@
+[
+  {
+    "type": "item",
+    "id": "cloak",
+    "name": "Cloak",
+    "look_like": "cloak",
+    "mass": 100,
+    "is_wearable": true
+  },
+  {
+    "type": "item",
+    "id": "hat",
+    "name": "Hat",
+    "look_like": "hat",
+    "mass": 50,
+    "is_wearable": true
+  },
+  {
+    "type": "item",
+    "id": "rags",
+    "name": "Dirty rags",
+    "look_like": "rags",
+    "mass": 100,
+    "is_wearable": true
+  }
+]

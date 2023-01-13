@@ -12,7 +12,7 @@ use crate::{
     app::App,
     assets::Assets,
     colors::Colors,
-    game::{map::ItemView, Action, ActionType, World},
+    game::{Action, ActionType, World},
     ui::{GameLog, Label, Position, SomeUISprites, SomeUISpritesMut, UiSprite, Vertical},
 };
 
@@ -59,7 +59,7 @@ impl GameScene {
                 .player()
                 .wield
                 .first()
-                .map_or("empty".to_string(), Item::name),
+                .map_or("empty", Item::name),
             app.assets.fonts.default.clone(),
             Colors::WHITE_SMOKE,
             Position::by_left_top(65.0, 40.0),
@@ -137,7 +137,8 @@ impl GameScene {
             .player()
             .wield
             .first()
-            .map_or("empty".to_string(), Item::name);
+            .map_or("empty", |i| i.name())
+            .to_string();
         let window_size = self.window_size;
         self.current_time_label()
             .update(current_time, ctx, window_size);

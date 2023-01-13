@@ -5,7 +5,7 @@ use std::collections::HashSet;
 use rand::Rng;
 
 use super::{
-    item::{Item, ItemInteract},
+    items::Item,
     terrain::{Terrain, TerrainInteract},
     terrains::{Dirt, DirtVariant},
 };
@@ -73,7 +73,7 @@ impl Tile {
             return true;
         }
 
-        self.items.iter().any(ItemInteract::is_readable)
+        self.items.iter().any(Item::is_readable)
     }
 
     pub fn read(&self) -> String {
@@ -86,7 +86,7 @@ impl Tile {
             .iter()
             .rev()
             .filter(|i| i.is_readable())
-            .map(ItemInteract::read)
+            .map(|i| i.read().unwrap().to_string())
             .next()
             .unwrap_or_else(|| "You can't find anything to read here.".to_string())
     }

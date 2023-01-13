@@ -3,11 +3,7 @@ use tetra::{graphics::Color, input::Key, Context};
 
 use crate::{
     colors::Colors,
-    game::{
-        actions::implements::Dig,
-        map::{ItemInteract, ItemQuality, TerrainInteract},
-        World,
-    },
+    game::{actions::implements::Dig, map::TerrainInteract, ItemQuality, World},
     input,
 };
 

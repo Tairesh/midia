@@ -1,9 +1,13 @@
+use std::collections::HashMap;
+
 use enum_iterator::{next_cycle, previous_cycle, Sequence};
 use rand::distributions::{Distribution, Standard};
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 
+use crate::game::savage::Skill;
 use crate::game::traits::Name;
+use crate::game::SkillLevel;
 
 #[derive(Serialize, Deserialize, Debug, Copy, Clone)]
 pub enum Race {
@@ -22,6 +26,14 @@ pub enum Race {
 impl Race {
     pub fn has_fur(self) -> bool {
         matches!(self, Race::Gazan | Race::Lagnam)
+    }
+
+    pub fn free_skills(self) -> HashMap<Skill, SkillLevel> {
+        HashMap::from_iter(match self {
+            Race::Gazan => vec![(Skill::Climbing, SkillLevel::D6)],
+            Race::Totik => vec![(Skill::Swimming, SkillLevel::D6)],
+            _ => vec![],
+        })
     }
 }
 

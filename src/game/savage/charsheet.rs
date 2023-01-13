@@ -1,3 +1,6 @@
+use crate::game::races::Race;
+use crate::game::{Dice, SkillLevel};
+
 use super::{Attributes, Skills};
 
 #[derive(serde::Serialize, serde::Deserialize, Default, Debug, Clone)]
@@ -14,31 +17,21 @@ impl CharSheet {
         }
     }
 
-    pub fn calc_skill_points(&self) -> u8 {
+    pub fn calc_skill_points(&self, race: Race) -> u8 {
         let mut skill_points = 15;
-
-        let agility = self.attributes.agility;
-        skill_points -= self.skills.athletics as u8 + (self.skills.athletics - agility);
-        skill_points -= self.skills.fighting as u8 + (self.skills.fighting - agility);
-        skill_points -= self.skills.shooting as u8 + (self.skills.shooting - agility);
-        skill_points -= self.skills.stealth as u8 + (self.skills.stealth - agility);
-        skill_points -= self.skills.thievery as u8 + (self.skills.thievery - agility);
-        skill_points -= self.skills.swimming as u8 + (self.skills.swimming - agility);
-
-        let smarts = self.attributes.smarts;
-        skill_points -= self.skills.gambling as u8 + (self.skills.gambling - smarts);
-        skill_points -= self.skills.notice as u8 + (self.skills.notice - smarts);
-        skill_points -= self.skills.survival as u8 + (self.skills.survival - smarts);
-        skill_points -= self.skills.healing as u8 + (self.skills.healing - smarts);
-        skill_points -= self.skills.repair as u8 + (self.skills.repair - smarts);
-        skill_points -= self.skills.reading as u8 + (self.skills.reading - smarts);
-
-        let spirit = self.attributes.spirit;
-        skill_points -= self.skills.persuasion as u8 + (self.skills.persuasion - spirit);
-        skill_points -= self.skills.intimidation as u8 + (self.skills.intimidation - spirit);
-
-        let strength = self.attributes.strength;
-        skill_points -= self.skills.climbing as u8 + (self.skills.climbing - strength);
+        for (attr, skill, value) in self.skills.get_skills_by_attributes() {
+            let mut attr_value = self.attributes.get_attribute(attr);
+            let mut base_value = SkillLevel::D4_2;
+            if let Some(&free_skill_level) = race.free_skills().get(&skill) {
+                if value == free_skill_level {
+                    continue;
+                }
+                attr_value = Dice::max(free_skill_level.into(), attr_value);
+                base_value = free_skill_level;
+            }
+            skill_points -=
+                (value as u8 - base_value as u8) + value.steps_above_attr(attr_value).max(0) as u8;
+        }
 
         skill_points
     }

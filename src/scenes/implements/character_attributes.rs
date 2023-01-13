@@ -103,8 +103,10 @@ impl CharacterAttributes {
             ButtonEvent::Next as u8,
             "Create character",
         );
-        // TODO: races traits and skills
-        let char_sheet = CharSheet::default();
+        let mut char_sheet = CharSheet::default();
+        for (skill, level) in personality.appearance.race.free_skills() {
+            char_sheet.skills.set_skill(skill, level);
+        }
 
         Self {
             sprites: [
@@ -964,7 +966,9 @@ impl CharacterAttributes {
 
     fn update_points(&mut self, ctx: &mut Context) {
         let attributes_points = self.attributes_points;
-        let skills_points = self.char_sheet.calc_skill_points();
+        let skills_points = self
+            .char_sheet
+            .calc_skill_points(self.personality.appearance.race);
         self.skills_points = skills_points;
 
         let window_size = self.window_size;

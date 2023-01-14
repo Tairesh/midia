@@ -5,3 +5,22 @@
 "dependencies":
   - "/Cargo.toml"
 
+"ci":
+  - ".github/workflows/**/*"
+  - ".github/labeler.yml"
+  - ".github/dependabot.yml"
+
+"rust":
+  - "/src/**/*"
+  - "/tests/**/*"
+  - "/examples/**/*"
+  - "/benches/**/*"
+  - "/build.rs"
+  - "/Cargo.toml"
+  - "/Cargo.lock"
+  - "/rust-toolchain"
+  - "/rustfmt.toml"
+  - "/.cargo/**/*"
+
+"JSON":
+  - '**/*.json'

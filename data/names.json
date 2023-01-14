@@ -6,34 +6,155 @@
       "gazan": {
         "m": [
           "Dragan",
-          "Yasma"
+          "Yasma",
+          "Gelvir",
+          "Dugor",
+          "Krugg",
+          "Lifr",
+          "Shargo",
+          "Ilka",
+          "Vesna",
+          "Yazor",
+          "Forast",
+          "Ertat",
+          "Kyroi",
+          "Resintar",
+          "Vezkris",
+          "Kolor",
+          "Ghunamof",
+          "Catchlin",
+          "Lessmar"
         ],
         "f": [
-          "Dooka"
+          "Dooka",
+          "Minara",
+          "Belolin",
+          "Mukara",
+          "Kroshma",
+          "Drolka",
+          "Vishina",
+          "Kilaka",
+          "Mucha"
         ],
         "u": []
       },
       "lagnam": {
         "m": [
-          "Grem"
+          "Grem",
+          "Daz",
+          "Mad",
+          "Glur",
+          "Ga"
+          "Gru",
+          "Dr",
+          "Irt",
+          "Gah",
+          "Ros",
+          "Rash",
+          "Gyn",
+          "Ruck",
+          "Dum",
+          "Gir",
+          "Darr",
+          "Raak",
+          "Drash"
         ],
         "f": [
-          "Test"
+          "Tirt",
+          "Junra",
+          "Mur",
+          "Ru",
+          "Art",
+          "Ir",
+          "Kura",
+          "Gara",
+          "Gum",
+          "Du",
+          "Jab"
         ],
         "u": []
       },
       "nyarnik": {
         "m": [
-          "Mnerk"
+          "Mnerk",
+          "Kasu",
+          "Shork",
+          "Jazor",
+          "Jrim",
+          "Gluran",
+          "Rufan",
+          "Kubab",
+          "Murak",
+          "Kashma",
+          "Filir",
+          "Ginius",
+          "Sarin",
+          "Dvalir",
+          "Himly",
+          "Vosad",
+          "Digna",
+          "Tatar"
         ],
         "f": [
-          "Shasha"
+          "Shasha",
+          "Sur",
+          "Sarma",
+          "Filma",
+          "Misur",
+          "Chompa",
+          "Gompa",
+          "Krompa",
+          "Shocka",
+          "Glump",
+          "Noota",
+          "Bopa",
+          "Tatan"
         ],
         "u": []
       },
       "totik": {
-        "m": [],
-        "f": [],
+        "m": [
+          "Mucken",
+          "Zuch",
+          "Suh",
+          "Mokr",
+          "Artr",
+          "Arat",
+          "Yhen",
+          "Kart",
+          "Geppa",
+          "Froka",
+          "Vadjut",
+          "Akeb",
+          "Osir",
+          "Bulk",
+          "Gulp",
+          "Tarha",
+          "Kamap",
+          "Horat",
+          "Horta",
+          "Shomp",
+          "Shomk",
+          "Chomp",
+          "Bilma"
+        ],
+        "f": [
+          "Gump",
+          "Shlop",
+          "Blub",
+          "Momk",
+          "Shoha",
+          "Araka",
+          "Sholit",
+          "Sobha",
+          "Kosh",
+          "Diud",
+          "Muc",
+          "Kmeck",
+          "Shot",
+          "Lure",
+          "Lurp"
+        ],
         "u": []
       }
     }

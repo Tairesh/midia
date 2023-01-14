@@ -1,6 +1,8 @@
 use enum_dispatch::enum_dispatch;
 
-use super::implements::{Digging, Dropping, Examining, Observing, Reading, Walking, Wielding};
+use super::implements::{
+    Closing, Digging, Dropping, Examining, Observing, Opening, Reading, Walking, Wielding,
+};
 
 #[enum_dispatch(GameModeImpl)]
 pub enum GameMode {
@@ -11,4 +13,6 @@ pub enum GameMode {
     Digging,
     Observing,
     Reading,
+    Opening,
+    Closing,
 }

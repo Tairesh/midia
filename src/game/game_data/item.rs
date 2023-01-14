@@ -26,6 +26,7 @@ pub enum ItemSpecial {
     Mass,
     Readable,
     Colored,
+    Container,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

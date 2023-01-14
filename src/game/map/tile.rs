@@ -69,11 +69,7 @@ impl Tile {
     }
 
     pub fn is_readable(&self) -> bool {
-        if self.terrain.is_readable() {
-            return true;
-        }
-
-        self.items.iter().any(Item::is_readable)
+        self.terrain.is_readable() || self.items.iter().any(Item::is_readable)
     }
 
     pub fn read(&self) -> String {

@@ -419,12 +419,14 @@ pub mod tests {
     };
 
     pub fn prepare_world() -> World {
+        let mut player = tester_girl();
+        player.is_player = true;
         World::new(
             Meta::new("test", "test"),
             GameView::default(),
             Log::new(),
             vec![Avatar::dressed_default(
-                tester_girl(),
+                player,
                 CharSheet::default(Race::Gazan),
                 Point::new(0, 0),
             )],

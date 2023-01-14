@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use tetra::graphics::Color;
 
+use crate::game::Item;
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Named {
     pub name: String,
@@ -24,3 +26,8 @@ pub struct LookLike {
 // TODO: slots and stuff
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Wearable {}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Container {
+    pub items: Vec<Item>,
+}

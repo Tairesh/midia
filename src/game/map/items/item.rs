@@ -5,17 +5,18 @@ use std::collections::HashSet;
 use serde::{Deserialize, Serialize};
 use tetra::graphics::Color;
 
-use crate::game::game_data::{ItemPrototype, ItemQuality, ItemSpecial, ItemTag};
+use crate::game::game_data::{ItemPrototype, ItemQuality, ItemTag};
 
-use super::specials::{Colored, LookLike, Named, Readable};
+use super::specials::{Colored, Container, LookLike, Named, Readable};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Item {
     pub proto: ItemPrototype,
-    pub named: Option<Named>,
-    pub colored: Option<Colored>,
-    pub readable: Option<Readable>,
-    pub look_like: Option<LookLike>,
+    named: Option<Named>,
+    colored: Option<Colored>,
+    readable: Option<Readable>,
+    look_like: Option<LookLike>,
+    container: Option<Container>,
 }
 
 impl Item {
@@ -26,6 +27,7 @@ impl Item {
             colored: None,
             readable: None,
             look_like: None,
+            container: None,
         }
     }
 
@@ -49,6 +51,13 @@ impl Item {
     pub fn with_look_like(mut self, look_like: impl Into<String>) -> Self {
         self.look_like = Some(LookLike {
             look_like: look_like.into(),
+        });
+        self
+    }
+
+    pub fn with_container(mut self, items: impl Into<Vec<Item>>) -> Self {
+        self.container = Some(Container {
+            items: items.into(),
         });
         self
     }
@@ -85,6 +94,10 @@ impl Item {
         &self.proto.look_like
     }
 
+    pub fn container(&mut self) -> Option<&mut Container> {
+        self.container.as_mut()
+    }
+
     pub fn qualities(&self) -> &HashSet<ItemQuality> {
         &self.proto.qualities
     }
@@ -97,16 +110,16 @@ impl Item {
         self.proto.mass
     }
 
-    pub fn two_handed_tool(&self) -> bool {
-        self.proto.two_handed_tool
+    pub fn two_handed(&self) -> bool {
+        self.proto.two_handed_tool || self.mass() > 5000
     }
 
     pub fn is_tool(&self) -> bool {
-        self.proto.tags.contains(&ItemTag::Tool)
+        self.tags().contains(&ItemTag::Tool)
     }
 
     pub fn is_weapon(&self) -> bool {
-        self.proto.tags.contains(&ItemTag::Weapon)
+        self.tags().contains(&ItemTag::Weapon)
     }
 
     pub fn tool_or_weapon(&self) -> bool {
@@ -118,11 +131,15 @@ impl Item {
     }
 
     pub fn is_readable(&self) -> bool {
-        self.proto.specials.contains(&ItemSpecial::Readable)
+        self.readable.is_some()
     }
 
     pub fn is_book(&self) -> bool {
-        self.proto.tags.contains(&ItemTag::Book)
+        self.tags().contains(&ItemTag::Book)
+    }
+
+    pub fn is_container(&self) -> bool {
+        self.container.is_some()
     }
 
     pub fn drop_time(&self) -> f32 {
@@ -137,4 +154,20 @@ impl Item {
 }
 
 #[cfg(test)]
-mod tests {}
+mod tests {
+    use crate::game::map::items::helpers::{axe, backpack};
+
+    #[test]
+    fn test_backpack() {
+        let mut backpack = backpack();
+        assert_eq!(backpack.name(), "leather backpack");
+        if let Some(container) = backpack.container() {
+            assert_eq!(container.items.len(), 0);
+            let axe = axe();
+            container.items.push(axe);
+            assert_eq!(container.items.len(), 1);
+        } else {
+            panic!("backpack is not a container");
+        }
+    }
+}

@@ -30,3 +30,8 @@ pub fn random_book() -> Item {
         .with_named("strange book")
         .with_readable("Lore of the Midia")
 }
+
+pub fn backpack() -> Item {
+    let game_data = GameData::instance();
+    Item::new(game_data.items.get("backpack").cloned().unwrap()).with_container(Vec::new())
+}

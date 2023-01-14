@@ -13,7 +13,7 @@ pub struct LogEvent {
 }
 
 impl LogEvent {
-    pub fn new<S: Into<String>>(msg: S, pos: Point, category: LogCategory) -> Self {
+    pub fn new(msg: impl Into<String>, pos: Point, category: LogCategory) -> Self {
         Self {
             msg: msg.into(),
             pos,

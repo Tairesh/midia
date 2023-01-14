@@ -22,5 +22,16 @@
     "look_like": "rags",
     "mass": 100,
     "is_wearable": true
+  },
+  {
+    "type": "item",
+    "id": "backpack",
+    "name": "leather backpack",
+    "look_like": "backpack",
+    "mass": 100,
+    "is_wearable": true,
+    "item_specials": [
+      "CONTAINER"
+    ]
   }
 ]

@@ -15,7 +15,7 @@ use crate::{
 
 use super::super::{
     super::{implements::GameScene, Scene, SomeTransitions, Transition},
-    implements::{Digging, Dropping, Examining, Observing, Reading, Wielding},
+    implements::{Closing, Digging, Dropping, Examining, Observing, Opening, Reading, Wielding},
     GameModeImpl,
 };
 
@@ -78,6 +78,12 @@ impl GameModeImpl for Walking {
             None
         } else if input::is_key_with_mod_pressed(ctx, (Key::R, KeyModifier::Shift)) {
             game.push_mode(Reading::new().into());
+            None
+        } else if input::is_key_with_mod_pressed(ctx, Key::O) {
+            game.push_mode(Opening::new().into());
+            None
+        } else if input::is_key_with_mod_pressed(ctx, Key::C) {
+            game.push_mode(Closing::new().into());
             None
             // } else if input::is_key_with_mod_pressed(ctx, (Key::Num2, KeyModifier::Shift)) {
             //     Some(vec![Transition::Push(Scene::BodyView(0))])

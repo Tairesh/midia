@@ -2,7 +2,7 @@ use enum_dispatch::enum_dispatch;
 
 use super::{
     super::{Avatar, World},
-    implements::{Dig, Drop, Read, Skip, Walk, Wield},
+    implements::{Close, Dig, Drop, Open, Read, Skip, Walk, Wield},
     Action, ActionImpl, ActionPossibility,
 };
 
@@ -15,6 +15,8 @@ pub enum ActionType {
     Drop,
     Dig,
     Read,
+    Open,
+    Close,
 }
 
 #[cfg(test)]
@@ -24,13 +26,13 @@ mod tests {
     use super::{
         super::super::{
             map::{
-                items::helpers::{axe, shovel},
-                terrains::{Boulder, BoulderSize, Dirt},
-                Terrain,
+                items::helpers::{axe, random_book, shovel},
+                terrains::{Boulder, BoulderSize, Chest, Dirt},
+                Terrain, TerrainInteract,
             },
             world::tests::{add_npc, prepare_world},
         },
-        Action, Dig, Drop, Skip, Walk, Wield,
+        Action, Close, Dig, Drop, Open, Read, Skip, Walk, Wield,
     };
 
     #[test]
@@ -216,6 +218,76 @@ mod tests {
 
     #[test]
     fn test_reading() {
-        // TODO
+        let mut world = prepare_world();
+        world.map().get_tile_mut(Point::new(1, 0)).items.clear();
+        world
+            .map()
+            .get_tile_mut(Point::new(1, 0))
+            .items
+            .push(random_book());
+
+        let typ = Read {
+            dir: Direction::East,
+        };
+        if let Ok(action) = Action::new(0, typ.into(), &world) {
+            world.player_mut().action = Some(action);
+            while world.player().action.is_some() {
+                world.tick();
+            }
+        } else {
+            panic!("Cannot read");
+        }
+
+        assert!(world.log().new_events()[0].msg.contains("book is called"));
+    }
+
+    #[test]
+    fn test_opening() {
+        let mut world = prepare_world();
+        world.map().get_tile_mut(Point::new(1, 0)).terrain = Chest::new(Vec::new(), false).into();
+
+        let typ = Open {
+            dir: Direction::East,
+        };
+        if let Ok(action) = Action::new(0, typ.into(), &world) {
+            world.player_mut().action = Some(action);
+            while world.player().action.is_some() {
+                world.tick();
+            }
+        } else {
+            panic!("Cannot open");
+        }
+
+        assert!(world.log().new_events()[0].msg.contains("opened"));
+        assert!(world
+            .map()
+            .get_tile(Point::new(1, 0))
+            .terrain
+            .can_be_closed());
+    }
+
+    #[test]
+    fn test_closing() {
+        let mut world = prepare_world();
+        world.map().get_tile_mut(Point::new(1, 0)).terrain = Chest::new(Vec::new(), true).into();
+
+        let typ = Close {
+            dir: Direction::East,
+        };
+        if let Ok(action) = Action::new(0, typ.into(), &world) {
+            world.player_mut().action = Some(action);
+            while world.player().action.is_some() {
+                world.tick();
+            }
+        } else {
+            panic!("Cannot close");
+        }
+
+        assert!(world.log().new_events()[0].msg.contains("closed"));
+        assert!(world
+            .map()
+            .get_tile(Point::new(1, 0))
+            .terrain
+            .can_be_opened());
     }
 }

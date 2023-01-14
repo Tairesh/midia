@@ -2,7 +2,7 @@ use enum_dispatch::enum_dispatch;
 use serde::{Deserialize, Serialize};
 
 use super::{
-    terrains::{Boulder, Dirt, Grass, Pit, Tree},
+    terrains::{Boulder, Chest, Dirt, Grass, Pit, Tree},
     Item, Passage,
 };
 
@@ -17,6 +17,7 @@ pub enum Terrain {
     Boulder,
     Pit,
     Tree,
+    Chest,
 }
 
 #[enum_dispatch(Terrain)]
@@ -49,6 +50,18 @@ pub trait TerrainInteract {
     }
     /// Can put items on this tile
     fn can_stock_items(&self) -> bool;
+    fn can_be_opened(&self) -> bool {
+        false
+    }
+    fn can_be_closed(&self) -> bool {
+        false
+    }
+    fn open(&self) -> Terrain {
+        unimplemented!()
+    }
+    fn close(&self) -> Terrain {
+        unimplemented!()
+    }
 }
 
 #[cfg(test)]

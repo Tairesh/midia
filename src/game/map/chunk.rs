@@ -4,10 +4,10 @@ use std::hash::{Hash, Hasher};
 use arrayvec::ArrayVec;
 use rand::{distributions::Standard, rngs::StdRng, Rng, SeedableRng};
 
-use crate::game::map::items::helpers::{axe, cloak, hat, random_book, shovel};
+use crate::game::map::items::helpers::{axe, backpack, cloak, hat, random_book, shovel};
 
 use super::{
-    terrains::{Boulder, Dirt, Grass, Tree},
+    terrains::{Boulder, Chest, Dirt, Grass, Tree},
     ChunkPos, Tile,
 };
 
@@ -40,6 +40,8 @@ impl Chunk {
         for _ in 0..Chunk::USIZE {
             tiles.push(Tile::new(if rng.gen_bool(0.005) {
                 Tree::new(rng.sample(Standard)).into()
+            } else if rng.gen_bool(0.003) {
+                Chest::new(vec![random_book(), axe()], false).into()
             } else if rng.gen_bool(0.01) {
                 Boulder::new(rng.sample(Standard)).into()
             } else if rng.gen_bool(0.5) {
@@ -73,12 +75,13 @@ impl Chunk {
                 .get_mut(pos)
                 .unwrap()
                 .items
-                .push(match rng.gen_range(0..5) {
+                .push(match rng.gen_range(0..6) {
                     0 => cloak(),
                     1 => hat(),
                     2 => axe(),
                     3 => shovel(),
                     4 => random_book(),
+                    5 => backpack(),
                     _ => unreachable!(),
                 });
         }

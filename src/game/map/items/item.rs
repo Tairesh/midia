@@ -118,7 +118,11 @@ impl Item {
     }
 
     pub fn is_readable(&self) -> bool {
-        self.proto.specials.contains(&ItemSpecial::Read)
+        self.proto.specials.contains(&ItemSpecial::Readable)
+    }
+
+    pub fn is_book(&self) -> bool {
+        self.proto.tags.contains(&ItemTag::Book)
     }
 
     pub fn drop_time(&self) -> f32 {

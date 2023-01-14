@@ -6,7 +6,7 @@ use rand::Rng;
 
 use super::{
     items::Item,
-    terrain::{Terrain, TerrainInteract},
+    terrain::{Terrain, TerrainInteract, TerrainView},
     terrains::{Dirt, DirtVariant},
 };
 
@@ -79,14 +79,30 @@ impl Tile {
     pub fn read(&self) -> String {
         // TODO: probably we shouldn't read only first occurrence
         if self.terrain.is_readable() {
-            return self.terrain.read();
+            return format!(
+                "Text on this {} says «{}»",
+                self.terrain.name(),
+                self.terrain.read()
+            );
         }
 
         self.items
             .iter()
             .rev()
             .filter(|i| i.is_readable())
-            .map(|i| i.read().unwrap().to_string())
+            .map(|i| {
+                if let Some(text) = i.read() {
+                    if i.is_book() {
+                        format!("This {} is called «{text}»", i.name())
+                    } else {
+                        format!("Text on this {} says «{text}»", i.name())
+                    }
+                } else if i.is_book() {
+                    format!("This {} has no title on the cover", i.name())
+                } else {
+                    format!("This {} is unreadable", i.name())
+                }
+            })
             .next()
             .unwrap_or_else(|| "You can't find anything to read here.".to_string())
     }

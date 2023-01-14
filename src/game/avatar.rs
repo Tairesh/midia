@@ -43,10 +43,14 @@ impl Avatar {
     }
 
     pub fn name_for_actions(&self) -> String {
-        if self.personality.is_player {
+        if self.is_player() {
             "You".to_string()
         } else {
             self.personality.mind.name.clone()
         }
+    }
+
+    pub fn is_player(&self) -> bool {
+        self.personality.is_player
     }
 }

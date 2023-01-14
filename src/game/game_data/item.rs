@@ -24,7 +24,7 @@ pub enum ItemSpecial {
     Named,
     LookLike,
     Mass,
-    Read,
+    Readable,
     Colored,
 }
 

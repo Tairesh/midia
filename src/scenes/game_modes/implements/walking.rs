@@ -39,10 +39,12 @@ impl Default for Walking {
 
 impl GameModeImpl for Walking {
     fn update(&mut self, ctx: &mut Context, game: &mut GameScene) -> SomeTransitions {
-        if input::is_mouse_scrolled_down(ctx) {
+        if input::is_mouse_scrolled_down(ctx)
+            || input::is_key_with_mod_pressed(ctx, (Key::Z, KeyModifier::Shift))
+        {
             game.world.borrow_mut().game_view.zoom.dec();
             None
-        } else if input::is_mouse_scrolled_up(ctx) {
+        } else if input::is_mouse_scrolled_up(ctx) || input::is_key_with_mod_pressed(ctx, Key::Z) {
             game.world.borrow_mut().game_view.zoom.inc();
             None
         } else if input::is_key_pressed(ctx, Key::Escape) {

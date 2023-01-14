@@ -134,7 +134,7 @@ mod tests {
             "id": "book",
             "name": "Book",
             "look_like": "book",
-            "specials": [ "READ", "NAMED", "COLORED" ],
+            "specials": [ "READABLE", "NAMED", "COLORED" ],
             "mass": 100
           }
         ]
@@ -144,7 +144,7 @@ mod tests {
         assert!(matches!(slice[0], DataEntity::Item(..)));
         if let DataEntity::Item(item) = &slice[0] {
             assert_eq!(item.id, "book");
-            assert!(item.specials.contains(&ItemSpecial::Read));
+            assert!(item.specials.contains(&ItemSpecial::Readable));
             assert!(item.specials.contains(&ItemSpecial::Named));
             assert!(item.specials.contains(&ItemSpecial::Colored));
         } else {

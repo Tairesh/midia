@@ -6,7 +6,7 @@
     "look_like": "book",
     "mass": 100,
     "specials": [
-      "READ",
+      "READABLE",
       "NAMED",
       "COLORED"
     ],

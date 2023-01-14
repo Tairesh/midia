@@ -58,8 +58,8 @@ impl GameData {
                     self.add_entity(entity);
                 }
             } else {
-                // TODO: skip invalid files instead of panicking
-                panic!("Failed to load file: {path:?}, {result:?}");
+                // TODO: implement logging
+                println!("Failed to load file: {path:?}, {result:?}");
             }
         }
     }

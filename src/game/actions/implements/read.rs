@@ -28,11 +28,13 @@ impl ActionImpl for Read {
         }
     }
     fn on_finish(&self, action: &Action, world: &mut World) {
-        let pos = action.owner(world).pos + self.dir;
-        world.log().push(LogEvent::new(
-            format!("You read: «{}»", world.map().get_tile(pos).read()),
-            pos,
-            LogCategory::Success,
-        ));
+        if action.owner(world).is_player() {
+            let pos = action.owner(world).pos + self.dir;
+            world.log().push(LogEvent::new(
+                world.map().get_tile(pos).read(),
+                pos,
+                LogCategory::Success,
+            ));
+        }
     }
 }

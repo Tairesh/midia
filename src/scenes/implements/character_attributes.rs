@@ -2,13 +2,16 @@ use std::collections::HashMap;
 use std::path::Path;
 
 use geometry::Point;
-use tetra::graphics::Color;
 use tetra::{Context, Event};
 
 use crate::{
     app::App,
+    assets::Assets,
     colors::Colors,
-    game::{races::Personality, traits::Name, Avatar, CharSheet, Dice, SkillLevel, World},
+    game::{
+        races::Personality, traits::Name, Attribute, Avatar, CharSheet, Dice, Skill, SkillLevel,
+        World,
+    },
     savefile::{self, Meta},
     scenes::{
         helpers::{
@@ -22,12 +25,6 @@ use crate::{
         Vertical,
     },
 };
-
-const AGILITY_COLOR: Color = Colors::LIME_GREEN;
-const SMARTS_COLOR: Color = Colors::LIGHT_SKY_BLUE;
-const SPIRIT_COLOR: Color = Colors::LIGHT_GOLDEN_ROD_YELLOW;
-const STRENGTH_COLOR: Color = Colors::ORANGE_RED;
-const VIGOR_COLOR: Color = Colors::VIOLET;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 enum ButtonEvent {
@@ -75,6 +72,40 @@ enum ButtonEvent {
     Next,
 }
 
+impl From<Attribute> for ButtonEvent {
+    fn from(attr: Attribute) -> Self {
+        match attr {
+            Attribute::Agility => Self::AgilityMinus,
+            Attribute::Smarts => Self::SmartsMinus,
+            Attribute::Spirit => Self::SpiritMinus,
+            Attribute::Strength => Self::StrengthMinus,
+            Attribute::Vigor => Self::VigorMinus,
+        }
+    }
+}
+
+impl From<Skill> for ButtonEvent {
+    fn from(skill: Skill) -> Self {
+        match skill {
+            Skill::Athletics => Self::AthleticsMinus,
+            Skill::Fighting => Self::FightingMinus,
+            Skill::Shooting => Self::ShootingMinus,
+            Skill::Stealth => Self::StealthMinus,
+            Skill::Thievery => Self::ThieveryMinus,
+            Skill::Swimming => Self::SwimmingMinus,
+            Skill::Gambling => Self::GamblingMinus,
+            Skill::Survival => Self::SurvivalMinus,
+            Skill::Healing => Self::HealingMinus,
+            Skill::Notice => Self::NoticeMinus,
+            Skill::Repair => Self::RepairMinus,
+            Skill::Reading => Self::ReadingMinus,
+            Skill::Intimidation => Self::IntimidationMinus,
+            Skill::Persuasion => Self::PersuasionMinus,
+            Skill::Climbing => Self::ClimbingMinus,
+        }
+    }
+}
+
 impl From<u8> for ButtonEvent {
     fn from(n: u8) -> Self {
         unsafe { std::mem::transmute(n) }
@@ -88,7 +119,123 @@ pub struct CharacterAttributes {
     attributes_points: u8,
     skills_points: u8,
     window_size: (i32, i32),
-    sprites: [Box<dyn UiSprite>; 93],
+    sprites: Vec<Box<dyn UiSprite>>,
+}
+
+fn attribute_sprites(
+    assets: &Assets,
+    attr: Attribute,
+    dice: Dice,
+    i: usize,
+) -> [Box<dyn UiSprite>; 5] {
+    let y = 130.0;
+    let x = -450.0 + i as f32 * 225.0;
+    let minus = ButtonEvent::from(attr) as u8;
+    let plus = minus + 1;
+    [
+        Box::new(Alert::passive(
+            200.0,
+            140.0,
+            assets.alert.clone(),
+            Position {
+                x: Horizontal::AtWindowCenterByCenter { offset: x },
+                y: Vertical::ByTop { y },
+            },
+        )),
+        decorative_label(
+            attr.name(),
+            assets,
+            Position {
+                x: Horizontal::AtWindowCenterByCenter { offset: x },
+                y: Vertical::ByTop { y: y + 30.0 },
+            },
+            attr.color(),
+        ),
+        icon_minus(
+            assets,
+            Position {
+                x: Horizontal::AtWindowCenterByCenter { offset: x - 55.0 },
+                y: Vertical::ByCenter { y: y + 100.0 },
+            },
+            minus,
+        ),
+        decorative_label(
+            dice.name(),
+            assets,
+            Position {
+                x: Horizontal::AtWindowCenterByCenter { offset: x },
+                y: Vertical::ByCenter { y: y + 100.0 },
+            },
+            attr.color(),
+        ),
+        icon_plus(
+            assets,
+            Position {
+                x: Horizontal::AtWindowCenterByCenter { offset: x + 55.0 },
+                y: Vertical::ByCenter { y: y + 100.0 },
+            },
+            plus,
+        ),
+    ]
+}
+
+fn skill_sprites(
+    assets: &Assets,
+    attr: Attribute,
+    skill: Skill,
+    level: SkillLevel,
+    i: usize,
+) -> [Box<dyn UiSprite>; 4] {
+    let j = i % 5;
+    let i = i / 5;
+    let x = -520.0 + i as f32 * 345.0;
+    let y = 415.0 + j as f32 * 50.0;
+    let offset_for_third_col = if i == 2 { 50.0 } else { 0.0 };
+
+    let minus = ButtonEvent::from(skill) as u8;
+    let plus = minus + 1;
+    [
+        colored_label(
+            skill.name(),
+            assets,
+            Position {
+                x: Horizontal::AtWindowCenterByLeft { offset: x },
+                y: Vertical::ByCenter { y },
+            },
+            attr.color(),
+        ),
+        icon_minus(
+            assets,
+            Position {
+                x: Horizontal::AtWindowCenterByCenter {
+                    offset: x + 160.0 + offset_for_third_col,
+                },
+                y: Vertical::ByCenter { y },
+            },
+            minus,
+        ),
+        colored_label(
+            level.name(),
+            assets,
+            Position {
+                x: Horizontal::AtWindowCenterByCenter {
+                    offset: x + 220.0 + offset_for_third_col,
+                },
+                y: Vertical::ByCenter { y },
+            },
+            attr.color(),
+        ),
+        icon_plus(
+            assets,
+            Position {
+                x: Horizontal::AtWindowCenterByCenter {
+                    offset: x + 280.0 + offset_for_third_col,
+                },
+                y: Vertical::ByCenter { y },
+            },
+            plus,
+        ),
+    ]
 }
 
 impl CharacterAttributes {
@@ -96,778 +243,75 @@ impl CharacterAttributes {
     #[allow(clippy::too_many_lines)]
     pub fn new(path: &Path, personality: Personality, app: &App, ctx: &mut Context) -> Self {
         let meta = savefile::load(path).unwrap();
-        let (back_btn, randomize_btn, next_btn) = back_randomize_next(
+        let char_sheet = CharSheet::default(personality.appearance.race);
+
+        let mut sprites: Vec<Box<dyn UiSprite>> = vec![
+            bg(&app.assets),
+            title(
+                format!("Choose attributes & skills of {}", personality.mind.name),
+                &app.assets,
+            ),
+        ];
+        for (i, (attr, dice)) in char_sheet
+            .attributes
+            .get_attributes()
+            .into_iter()
+            .enumerate()
+        {
+            sprites.extend(attribute_sprites(&app.assets, attr, dice, i));
+        }
+
+        sprites.push(decorative_label(
+            "Attributes' points left: 5",
+            &app.assets,
+            Position::horizontal_center(0.0, Vertical::ByTop { y: 95.0 }),
+            Colors::DARK_BROWN,
+        ));
+        sprites.push(decorative_label(
+            "Skills' points left: 15",
+            &app.assets,
+            Position::horizontal_center(0.0, Vertical::ByCenter { y: 320.0 }),
+            Colors::DARK_BROWN,
+        ));
+        sprites.push(Box::new(Alert::passive(
+            1100.0,
+            285.0,
+            app.assets.alert.clone(),
+            Position::horizontal_center(0.0, Vertical::ByTop { y: 370.0 }),
+        )));
+
+        for (i, (attr, skill, level)) in char_sheet
+            .skills
+            .get_skills_by_attributes()
+            .into_iter()
+            .enumerate()
+        {
+            sprites.extend(skill_sprites(&app.assets, attr, skill, level, i));
+        }
+
+        sprites.push(decorative_label(
+            "Parry: 0",
+            &app.assets,
+            Position::horizontal_center(-200.0, Vertical::ByCenter { y: 350.0 }),
+            Colors::DARK_GREEN,
+        ));
+        sprites.push(decorative_label(
+            "Toughness: 0",
+            &app.assets,
+            Position::horizontal_center(200.0, Vertical::ByCenter { y: 350.0 }),
+            Colors::DARK_RED,
+        ));
+
+        sprites.extend(back_randomize_next(
             &app.assets,
             ctx,
             ButtonEvent::Randomize as u8,
             ButtonEvent::Next as u8,
             "Create character",
-        );
-        let mut char_sheet = CharSheet::default(personality.appearance.race);
-        for (skill, level) in personality.appearance.race.free_skills() {
-            char_sheet.skills.set_skill(skill, level);
-        }
+        ));
 
         Self {
-            sprites: [
-                bg(&app.assets),
-                title(
-                    format!("Choose attributes & skills of {}", personality.mind.name),
-                    &app.assets,
-                ),
-                Box::new(Alert::passive(
-                    200.0,
-                    150.0,
-                    app.assets.alert.clone(),
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: -450.0 },
-                        y: Vertical::ByTop { y: 170.0 },
-                    },
-                )),
-                decorative_label(
-                    "Agility",
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: -450.0 },
-                        y: Vertical::ByTop { y: 200.0 },
-                    },
-                    AGILITY_COLOR,
-                ),
-                icon_minus(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: -505.0 },
-                        y: Vertical::ByCenter { y: 270.0 },
-                    },
-                    ButtonEvent::AgilityMinus as u8,
-                ),
-                decorative_label(
-                    char_sheet.attributes.agility.name(),
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: -450.0 },
-                        y: Vertical::ByCenter { y: 270.0 },
-                    },
-                    AGILITY_COLOR,
-                ),
-                icon_plus(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: -395.0 },
-                        y: Vertical::ByCenter { y: 270.0 },
-                    },
-                    ButtonEvent::AgilityPlus as u8,
-                ),
-                Box::new(Alert::passive(
-                    200.0,
-                    150.0,
-                    app.assets.alert.clone(),
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: -225.0 },
-                        y: Vertical::ByTop { y: 170.0 },
-                    },
-                )),
-                decorative_label(
-                    "Smarts",
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: -225.0 },
-                        y: Vertical::ByTop { y: 200.0 },
-                    },
-                    SMARTS_COLOR,
-                ),
-                icon_minus(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: -280.0 },
-                        y: Vertical::ByCenter { y: 270.0 },
-                    },
-                    ButtonEvent::SmartsMinus as u8,
-                ),
-                decorative_label(
-                    char_sheet.attributes.smarts.name(),
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: -225.0 },
-                        y: Vertical::ByCenter { y: 270.0 },
-                    },
-                    SMARTS_COLOR,
-                ),
-                icon_plus(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: -170.0 },
-                        y: Vertical::ByCenter { y: 270.0 },
-                    },
-                    ButtonEvent::SmartsPlus as u8,
-                ),
-                Box::new(Alert::passive(
-                    200.0,
-                    150.0,
-                    app.assets.alert.clone(),
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 0.0 },
-                        y: Vertical::ByTop { y: 170.0 },
-                    },
-                )),
-                decorative_label(
-                    "Spirit",
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 0.0 },
-                        y: Vertical::ByTop { y: 200.0 },
-                    },
-                    SPIRIT_COLOR,
-                ),
-                icon_minus(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: -55.0 },
-                        y: Vertical::ByCenter { y: 270.0 },
-                    },
-                    ButtonEvent::SpiritMinus as u8,
-                ),
-                decorative_label(
-                    char_sheet.attributes.spirit.name(),
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 0.0 },
-                        y: Vertical::ByCenter { y: 270.0 },
-                    },
-                    SPIRIT_COLOR,
-                ),
-                icon_plus(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 55.0 },
-                        y: Vertical::ByCenter { y: 270.0 },
-                    },
-                    ButtonEvent::SpiritPlus as u8,
-                ),
-                Box::new(Alert::passive(
-                    200.0,
-                    150.0,
-                    app.assets.alert.clone(),
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 225.0 },
-                        y: Vertical::ByTop { y: 170.0 },
-                    },
-                )),
-                decorative_label(
-                    "Strength",
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 225.0 },
-                        y: Vertical::ByTop { y: 200.0 },
-                    },
-                    STRENGTH_COLOR,
-                ),
-                icon_minus(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 170.0 },
-                        y: Vertical::ByCenter { y: 270.0 },
-                    },
-                    ButtonEvent::StrengthMinus as u8,
-                ),
-                decorative_label(
-                    char_sheet.attributes.strength.name(),
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 225.0 },
-                        y: Vertical::ByCenter { y: 270.0 },
-                    },
-                    STRENGTH_COLOR,
-                ),
-                icon_plus(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 280.0 },
-                        y: Vertical::ByCenter { y: 270.0 },
-                    },
-                    ButtonEvent::StrengthPlus as u8,
-                ),
-                Box::new(Alert::passive(
-                    200.0,
-                    150.0,
-                    app.assets.alert.clone(),
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 450.0 },
-                        y: Vertical::ByTop { y: 170.0 },
-                    },
-                )),
-                decorative_label(
-                    "Vigor",
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 450.0 },
-                        y: Vertical::ByTop { y: 200.0 },
-                    },
-                    VIGOR_COLOR,
-                ),
-                icon_minus(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 395.0 },
-                        y: Vertical::ByCenter { y: 270.0 },
-                    },
-                    ButtonEvent::VigorMinus as u8,
-                ),
-                decorative_label(
-                    char_sheet.attributes.vigor.name(),
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 450.0 },
-                        y: Vertical::ByCenter { y: 270.0 },
-                    },
-                    VIGOR_COLOR,
-                ),
-                icon_plus(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 505.0 },
-                        y: Vertical::ByCenter { y: 270.0 },
-                    },
-                    ButtonEvent::VigorPlus as u8,
-                ),
-                decorative_label(
-                    "Attributes' points left: 5",
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 0.0 },
-                        y: Vertical::ByCenter { y: 150.0 },
-                    },
-                    Colors::DARK_BROWN,
-                ),
-                decorative_label(
-                    "Skills' points left: 15",
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 0.0 },
-                        y: Vertical::ByCenter { y: 350.0 },
-                    },
-                    Colors::DARK_BROWN,
-                ),
-                Box::new(Alert::passive(
-                    1100.0,
-                    285.0,
-                    app.assets.alert.clone(),
-                    Position::horizontal_center(0.0, Vertical::ByTop { y: 370.0 }),
-                )),
-                colored_label(
-                    "Athletics:",
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByLeft { offset: -520.0 },
-                        y: Vertical::ByCenter { y: 415.0 },
-                    },
-                    AGILITY_COLOR,
-                ),
-                icon_minus(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: -360.0 },
-                        y: Vertical::ByCenter { y: 415.0 },
-                    },
-                    ButtonEvent::AthleticsMinus as u8,
-                ),
-                colored_label(
-                    char_sheet.skills.athletics.name(),
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: -300.0 },
-                        y: Vertical::ByCenter { y: 415.0 },
-                    },
-                    AGILITY_COLOR,
-                ),
-                icon_plus(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: -240.0 },
-                        y: Vertical::ByCenter { y: 415.0 },
-                    },
-                    ButtonEvent::AthleticsPlus as u8,
-                ),
-                colored_label(
-                    "Fighting:",
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByLeft { offset: -520.0 },
-                        y: Vertical::ByCenter { y: 465.0 },
-                    },
-                    AGILITY_COLOR,
-                ),
-                icon_minus(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: -360.0 },
-                        y: Vertical::ByCenter { y: 465.0 },
-                    },
-                    ButtonEvent::FightingMinus as u8,
-                ),
-                colored_label(
-                    char_sheet.skills.fighting.name(),
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: -300.0 },
-                        y: Vertical::ByCenter { y: 465.0 },
-                    },
-                    AGILITY_COLOR,
-                ),
-                icon_plus(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: -240.0 },
-                        y: Vertical::ByCenter { y: 465.0 },
-                    },
-                    ButtonEvent::FightingPlus as u8,
-                ),
-                colored_label(
-                    "Shooting:",
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByLeft { offset: -520.0 },
-                        y: Vertical::ByCenter { y: 515.0 },
-                    },
-                    AGILITY_COLOR,
-                ),
-                icon_minus(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: -360.0 },
-                        y: Vertical::ByCenter { y: 515.0 },
-                    },
-                    ButtonEvent::ShootingMinus as u8,
-                ),
-                colored_label(
-                    char_sheet.skills.shooting.name(),
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: -300.0 },
-                        y: Vertical::ByCenter { y: 515.0 },
-                    },
-                    AGILITY_COLOR,
-                ),
-                icon_plus(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: -240.0 },
-                        y: Vertical::ByCenter { y: 515.0 },
-                    },
-                    ButtonEvent::ShootingPlus as u8,
-                ),
-                colored_label(
-                    "Stealth:",
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByLeft { offset: -520.0 },
-                        y: Vertical::ByCenter { y: 565.0 },
-                    },
-                    AGILITY_COLOR,
-                ),
-                icon_minus(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: -360.0 },
-                        y: Vertical::ByCenter { y: 565.0 },
-                    },
-                    ButtonEvent::StealthMinus as u8,
-                ),
-                colored_label(
-                    char_sheet.skills.stealth.name(),
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: -300.0 },
-                        y: Vertical::ByCenter { y: 565.0 },
-                    },
-                    AGILITY_COLOR,
-                ),
-                icon_plus(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: -240.0 },
-                        y: Vertical::ByCenter { y: 565.0 },
-                    },
-                    ButtonEvent::StealthPlus as u8,
-                ),
-                colored_label(
-                    "Thievery:",
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByLeft { offset: -520.0 },
-                        y: Vertical::ByCenter { y: 615.0 },
-                    },
-                    AGILITY_COLOR,
-                ),
-                icon_minus(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: -360.0 },
-                        y: Vertical::ByCenter { y: 615.0 },
-                    },
-                    ButtonEvent::ThieveryMinus as u8,
-                ),
-                colored_label(
-                    char_sheet.skills.thievery.name(),
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: -300.0 },
-                        y: Vertical::ByCenter { y: 615.0 },
-                    },
-                    AGILITY_COLOR,
-                ),
-                icon_plus(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: -240.0 },
-                        y: Vertical::ByCenter { y: 615.0 },
-                    },
-                    ButtonEvent::ThieveryPlus as u8,
-                ),
-                colored_label(
-                    "Swimming:",
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByLeft { offset: -180.0 },
-                        y: Vertical::ByCenter { y: 415.0 },
-                    },
-                    AGILITY_COLOR,
-                ),
-                icon_minus(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: -20.0 },
-                        y: Vertical::ByCenter { y: 415.0 },
-                    },
-                    ButtonEvent::SwimmingMinus as u8,
-                ),
-                colored_label(
-                    char_sheet.skills.swimming.name(),
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 40.0 },
-                        y: Vertical::ByCenter { y: 415.0 },
-                    },
-                    AGILITY_COLOR,
-                ),
-                icon_plus(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 100.0 },
-                        y: Vertical::ByCenter { y: 415.0 },
-                    },
-                    ButtonEvent::SwimmingPlus as u8,
-                ),
-                colored_label(
-                    "Gambling:",
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByLeft { offset: -180.0 },
-                        y: Vertical::ByCenter { y: 465.0 },
-                    },
-                    SMARTS_COLOR,
-                ),
-                icon_minus(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: -20.0 },
-                        y: Vertical::ByCenter { y: 465.0 },
-                    },
-                    ButtonEvent::GamblingMinus as u8,
-                ),
-                colored_label(
-                    char_sheet.skills.gambling.name(),
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 40.0 },
-                        y: Vertical::ByCenter { y: 465.0 },
-                    },
-                    SMARTS_COLOR,
-                ),
-                icon_plus(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 100.0 },
-                        y: Vertical::ByCenter { y: 465.0 },
-                    },
-                    ButtonEvent::GamblingPlus as u8,
-                ),
-                colored_label(
-                    "Notice:",
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByLeft { offset: -180.0 },
-                        y: Vertical::ByCenter { y: 515.0 },
-                    },
-                    SMARTS_COLOR,
-                ),
-                icon_minus(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: -20.0 },
-                        y: Vertical::ByCenter { y: 515.0 },
-                    },
-                    ButtonEvent::NoticeMinus as u8,
-                ),
-                colored_label(
-                    char_sheet.skills.notice.name(),
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 40.0 },
-                        y: Vertical::ByCenter { y: 515.0 },
-                    },
-                    SMARTS_COLOR,
-                ),
-                icon_plus(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 100.0 },
-                        y: Vertical::ByCenter { y: 515.0 },
-                    },
-                    ButtonEvent::NoticePlus as u8,
-                ),
-                colored_label(
-                    "Survival:",
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByLeft { offset: -180.0 },
-                        y: Vertical::ByCenter { y: 565.0 },
-                    },
-                    SMARTS_COLOR,
-                ),
-                icon_minus(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: -20.0 },
-                        y: Vertical::ByCenter { y: 565.0 },
-                    },
-                    ButtonEvent::SurvivalMinus as u8,
-                ),
-                colored_label(
-                    char_sheet.skills.survival.name(),
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 40.0 },
-                        y: Vertical::ByCenter { y: 565.0 },
-                    },
-                    SMARTS_COLOR,
-                ),
-                icon_plus(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 100.0 },
-                        y: Vertical::ByCenter { y: 565.0 },
-                    },
-                    ButtonEvent::SurvivalPlus as u8,
-                ),
-                colored_label(
-                    "Healing:",
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByLeft { offset: -180.0 },
-                        y: Vertical::ByCenter { y: 615.0 },
-                    },
-                    SMARTS_COLOR,
-                ),
-                icon_minus(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: -20.0 },
-                        y: Vertical::ByCenter { y: 615.0 },
-                    },
-                    ButtonEvent::HealingMinus as u8,
-                ),
-                colored_label(
-                    char_sheet.skills.healing.name(),
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 40.0 },
-                        y: Vertical::ByCenter { y: 615.0 },
-                    },
-                    SMARTS_COLOR,
-                ),
-                icon_plus(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 100.0 },
-                        y: Vertical::ByCenter { y: 615.0 },
-                    },
-                    ButtonEvent::HealingPlus as u8,
-                ),
-                colored_label(
-                    "Repair:",
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByLeft { offset: 170.0 },
-                        y: Vertical::ByCenter { y: 415.0 },
-                    },
-                    SMARTS_COLOR,
-                ),
-                icon_minus(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 380.0 },
-                        y: Vertical::ByCenter { y: 415.0 },
-                    },
-                    ButtonEvent::RepairMinus as u8,
-                ),
-                colored_label(
-                    char_sheet.skills.repair.name(),
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 440.0 },
-                        y: Vertical::ByCenter { y: 415.0 },
-                    },
-                    SMARTS_COLOR,
-                ),
-                icon_plus(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 500.0 },
-                        y: Vertical::ByCenter { y: 415.0 },
-                    },
-                    ButtonEvent::RepairPlus as u8,
-                ),
-                colored_label(
-                    "Reading:",
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByLeft { offset: 170.0 },
-                        y: Vertical::ByCenter { y: 465.0 },
-                    },
-                    SMARTS_COLOR,
-                ),
-                icon_minus(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 380.0 },
-                        y: Vertical::ByCenter { y: 465.0 },
-                    },
-                    ButtonEvent::ReadingMinus as u8,
-                ),
-                colored_label(
-                    char_sheet.skills.reading.name(),
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 440.0 },
-                        y: Vertical::ByCenter { y: 465.0 },
-                    },
-                    SMARTS_COLOR,
-                ),
-                icon_plus(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 500.0 },
-                        y: Vertical::ByCenter { y: 465.0 },
-                    },
-                    ButtonEvent::ReadingPlus as u8,
-                ),
-                colored_label(
-                    "Persuasion:",
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByLeft { offset: 170.0 },
-                        y: Vertical::ByCenter { y: 515.0 },
-                    },
-                    SPIRIT_COLOR,
-                ),
-                icon_minus(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 380.0 },
-                        y: Vertical::ByCenter { y: 515.0 },
-                    },
-                    ButtonEvent::PersuasionMinus as u8,
-                ),
-                colored_label(
-                    char_sheet.skills.persuasion.name(),
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 440.0 },
-                        y: Vertical::ByCenter { y: 515.0 },
-                    },
-                    SPIRIT_COLOR,
-                ),
-                icon_plus(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 500.0 },
-                        y: Vertical::ByCenter { y: 515.0 },
-                    },
-                    ButtonEvent::PersuasionPlus as u8,
-                ),
-                colored_label(
-                    "Intimidation:",
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByLeft { offset: 170.0 },
-                        y: Vertical::ByCenter { y: 565.0 },
-                    },
-                    SPIRIT_COLOR,
-                ),
-                icon_minus(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 380.0 },
-                        y: Vertical::ByCenter { y: 565.0 },
-                    },
-                    ButtonEvent::IntimidationMinus as u8,
-                ),
-                colored_label(
-                    char_sheet.skills.intimidation.name(),
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 440.0 },
-                        y: Vertical::ByCenter { y: 565.0 },
-                    },
-                    SPIRIT_COLOR,
-                ),
-                icon_plus(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 500.0 },
-                        y: Vertical::ByCenter { y: 565.0 },
-                    },
-                    ButtonEvent::IntimidationPlus as u8,
-                ),
-                colored_label(
-                    "Climbing:",
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByLeft { offset: 170.0 },
-                        y: Vertical::ByCenter { y: 615.0 },
-                    },
-                    STRENGTH_COLOR,
-                ),
-                icon_minus(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 380.0 },
-                        y: Vertical::ByCenter { y: 615.0 },
-                    },
-                    ButtonEvent::ClimbingMinus as u8,
-                ),
-                colored_label(
-                    char_sheet.skills.climbing.name(),
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 440.0 },
-                        y: Vertical::ByCenter { y: 615.0 },
-                    },
-                    STRENGTH_COLOR,
-                ),
-                icon_plus(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 500.0 },
-                        y: Vertical::ByCenter { y: 615.0 },
-                    },
-                    ButtonEvent::ClimbingPlus as u8,
-                ),
-                back_btn,
-                randomize_btn,
-                next_btn,
-            ],
+            sprites,
             attributes_points: 5,
             skills_points: 15,
             window_size: app.window_size,
@@ -943,6 +387,12 @@ impl CharacterAttributes {
     fn climbing_label(&mut self) -> &mut Label {
         self.sprites[88].as_label().unwrap()
     }
+    fn parry_label(&mut self) -> &mut Label {
+        self.sprites[90].as_label().unwrap()
+    }
+    fn toughness_label(&mut self) -> &mut Label {
+        self.sprites[91].as_label().unwrap()
+    }
 
     fn set_buttons_disabled(&mut self, sprites: &[usize]) {
         for &i in sprites {
@@ -965,13 +415,21 @@ impl CharacterAttributes {
     }
 
     fn update_points(&mut self, ctx: &mut Context) {
+        self.char_sheet
+            .recalculate(self.personality.appearance.race);
         let attributes_points = self.attributes_points;
         let skills_points = self
             .char_sheet
             .calc_skill_points(self.personality.appearance.race);
         self.skills_points = skills_points;
+        let parry = self.char_sheet.parry;
+        let toughness = self.char_sheet.toughness;
 
         let window_size = self.window_size;
+        self.parry_label()
+            .update(format!("Parry: {parry}"), ctx, window_size);
+        self.toughness_label()
+            .update(format!("Toughness: {toughness}"), ctx, window_size);
         self.attributes_points_label().update(
             format!("Attributes' points left: {attributes_points}"),
             ctx,

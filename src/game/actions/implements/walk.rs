@@ -31,20 +31,9 @@ impl ActionImpl for Walk {
             return No(format!("{} is on the way", unit.name_for_actions()));
         }
         Yes({
-            let k_diagonal = match self.dir {
-                Direction::NorthEast
-                | Direction::SouthEast
-                | Direction::SouthWest
-                | Direction::NorthWest => SQRT_2,
-                _ => 1.0,
-            };
-            let k_age = match actor.personality.appearance.age {
-                0 => 100.0,
-                1..=3 => 10.0,
-                4..=10 => 3.0,
-                11.. => 1.0,
-            };
-            let k = k_diagonal * k_age;
+            let k_diagonal = if self.dir.is_diagonal() { SQRT_2 } else { 1.0 };
+            let k_appearance = actor.personality.appearance.walk_koeff();
+            let k = k_diagonal * k_appearance;
             if let Passable(pass_time) = tile.terrain.passage() {
                 f32::round(pass_time * k) as u32
             } else {

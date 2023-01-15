@@ -30,7 +30,7 @@ impl CreateWorld {
     pub fn new(app: &App, ctx: &mut Context) -> Self {
         let mut rng = thread_rng();
 
-        let (back_btn, randomize_btn, create_btn) = back_randomize_next(
+        let [back_btn, randomize_btn, create_btn] = back_randomize_next(
             &app.assets,
             ctx,
             RANDOMIZE_EVENT,

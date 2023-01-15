@@ -67,7 +67,7 @@ impl CreateCharacter {
         let meta = savefile::load(path).unwrap();
         let fur_color = FurColor::Gray;
 
-        let (back_btn, randomize_btn, next_btn) = back_randomize_next(
+        let [back_btn, randomize_btn, next_btn] = back_randomize_next(
             &app.assets,
             ctx,
             ButtonEvent::Randomize as u8,

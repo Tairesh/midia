@@ -4,6 +4,7 @@ use tetra::{
     Context, Event,
 };
 
+use crate::ui::UiSprite;
 use crate::{
     assets::Assets,
     colors::Colors,
@@ -36,7 +37,7 @@ pub(crate) fn title(title: impl Into<String>, assets: &Assets) -> Box<Label> {
         title,
         assets.fonts.title.clone(),
         Colors::DARK_BROWN,
-        Position::horizontal_center(0.0, Vertical::ByTop { y: 90.0 }),
+        Position::horizontal_center(0.0, Vertical::ByTop { y: 50.0 }),
     ))
 }
 
@@ -45,7 +46,7 @@ pub(crate) fn subtitle(subtitle: impl Into<String>, assets: &Assets) -> Box<Labe
         subtitle,
         assets.fonts.subtitle.clone(),
         Colors::DARK_BROWN,
-        Position::horizontal_center(0.0, Vertical::ByTop { y: 130.0 }),
+        Position::horizontal_center(0.0, Vertical::ByTop { y: 95.0 }),
     ))
 }
 
@@ -160,7 +161,7 @@ pub(crate) fn back_randomize_next(
     randomize: u8,
     next: u8,
     next_text: &str,
-) -> (Box<Button>, Box<Button>, Box<Button>) {
+) -> [Box<dyn UiSprite>; 3] {
     let mut randomize_btn = randomize_btn(assets, Position::center(), randomize);
     let randomize_btn_size = randomize_btn.calc_size(ctx);
 
@@ -186,7 +187,7 @@ pub(crate) fn back_randomize_next(
         y,
     ));
 
-    (back_btn, randomize_btn, next_btn)
+    [back_btn, randomize_btn, next_btn]
 }
 
 pub(crate) fn icon_left(assets: &Assets, position: Position, custom_event: u8) -> Box<Button> {

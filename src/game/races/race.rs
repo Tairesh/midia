@@ -32,6 +32,21 @@ impl Race {
         })
     }
 
+    pub fn toughness_bonus(self) -> i8 {
+        match self {
+            Race::Nyarnik => 2,
+            _ => 0,
+        }
+    }
+
+    pub fn walk_koeff(self) -> f32 {
+        match self {
+            Race::Nyarnik => 1.2,
+            Race::Lagnam => 0.8,
+            _ => 1.0,
+        }
+    }
+
     pub fn iterator() -> impl Iterator<Item = Race> {
         [
             Self::Gazan,

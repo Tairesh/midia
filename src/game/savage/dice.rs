@@ -215,6 +215,17 @@ impl Name for SkillLevel {
 }
 
 impl SkillLevel {
+    pub fn value(self) -> u8 {
+        match self {
+            SkillLevel::D4_2 => 2,
+            SkillLevel::D4 => 4,
+            SkillLevel::D6 => 6,
+            SkillLevel::D8 => 8,
+            SkillLevel::D10 => 10,
+            SkillLevel::D12 => 12,
+        }
+    }
+
     pub fn roll(self) -> u8 {
         DiceWithModifier::from(self).roll()
     }

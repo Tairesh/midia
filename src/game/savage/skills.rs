@@ -50,7 +50,6 @@ impl Skills {
         }
     }
 
-    #[allow(dead_code)]
     pub fn get_skill(&self, skill: Skill) -> SkillLevel {
         match skill {
             Skill::Athletics => self.athletics,
@@ -71,6 +70,7 @@ impl Skills {
         }
     }
 
+    #[allow(dead_code)]
     pub fn set_skill(&mut self, skill: Skill, level: SkillLevel) {
         match skill {
             Skill::Athletics => self.athletics = level,
@@ -92,23 +92,9 @@ impl Skills {
     }
 
     pub fn get_skills_by_attributes(&self) -> Vec<(Attribute, Skill, SkillLevel)> {
-        vec![
-            (Attribute::Agility, Skill::Athletics, self.athletics),
-            (Attribute::Agility, Skill::Fighting, self.fighting),
-            (Attribute::Agility, Skill::Shooting, self.shooting),
-            (Attribute::Agility, Skill::Stealth, self.stealth),
-            (Attribute::Agility, Skill::Thievery, self.thievery),
-            (Attribute::Agility, Skill::Swimming, self.swimming),
-            (Attribute::Smarts, Skill::Gambling, self.gambling),
-            (Attribute::Smarts, Skill::Notice, self.notice),
-            (Attribute::Smarts, Skill::Survival, self.survival),
-            (Attribute::Smarts, Skill::Healing, self.healing),
-            (Attribute::Smarts, Skill::Repair, self.repair),
-            (Attribute::Smarts, Skill::Reading, self.reading),
-            (Attribute::Spirit, Skill::Persuasion, self.persuasion),
-            (Attribute::Spirit, Skill::Intimidation, self.intimidation),
-            (Attribute::Strength, Skill::Climbing, self.climbing),
-        ]
+        Skill::iterator()
+            .map(|skill| (skill.attribute(), skill, self.get_skill(skill)))
+            .collect()
     }
 }
 
@@ -129,4 +115,66 @@ pub enum Skill {
     Persuasion,
     Intimidation,
     Climbing,
+}
+
+impl Skill {
+    pub fn name(self) -> &'static str {
+        match self {
+            Self::Athletics => "Athletics",
+            Self::Fighting => "Fighting",
+            Self::Shooting => "Shooting",
+            Self::Stealth => "Stealth",
+            Self::Thievery => "Thievery",
+            Self::Swimming => "Swimming",
+            Self::Gambling => "Gambling",
+            Self::Notice => "Notice",
+            Self::Survival => "Survival",
+            Self::Healing => "Healing",
+            Self::Repair => "Repair",
+            Self::Reading => "Reading",
+            Self::Persuasion => "Persuasion",
+            Self::Intimidation => "Intimidation",
+            Self::Climbing => "Climbing",
+        }
+    }
+
+    pub fn attribute(self) -> Attribute {
+        match self {
+            Self::Athletics
+            | Self::Fighting
+            | Self::Shooting
+            | Self::Stealth
+            | Self::Thievery
+            | Self::Swimming => Attribute::Agility,
+            Self::Gambling
+            | Self::Notice
+            | Self::Survival
+            | Self::Healing
+            | Self::Repair
+            | Self::Reading => Attribute::Smarts,
+            Self::Persuasion | Self::Intimidation => Attribute::Spirit,
+            Self::Climbing => Attribute::Strength,
+        }
+    }
+
+    pub fn iterator() -> impl Iterator<Item = Skill> {
+        [
+            Skill::Athletics,
+            Skill::Fighting,
+            Skill::Shooting,
+            Skill::Stealth,
+            Skill::Thievery,
+            Skill::Swimming,
+            Skill::Gambling,
+            Skill::Notice,
+            Skill::Survival,
+            Skill::Healing,
+            Skill::Repair,
+            Skill::Reading,
+            Skill::Persuasion,
+            Skill::Intimidation,
+            Skill::Climbing,
+        ]
+        .into_iter()
+    }
 }

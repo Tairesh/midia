@@ -3,25 +3,43 @@ use crate::game::{Dice, SkillLevel};
 
 use super::{Attributes, Skills};
 
+fn calc_parry(skills: &Skills) -> u8 {
+    2 + skills.fighting.value() / 2
+}
+
+fn calc_toughness(race: Race, attributes: &Attributes) -> u8 {
+    (2 + attributes.vigor.value() as i8 / 2 + race.toughness_bonus()).max(0) as u8
+}
+
 #[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
 pub struct CharSheet {
     pub attributes: Attributes,
     pub skills: Skills,
+    pub parry: u8,
+    pub toughness: u8,
 }
 
 impl CharSheet {
     pub fn default(race: Race) -> Self {
+        let attributes = Attributes::default();
+        let skills = Skills::default(race);
         Self {
-            attributes: Attributes::default(),
-            skills: Skills::default(race),
+            parry: calc_parry(&skills),
+            toughness: calc_toughness(race, &attributes),
+            attributes,
+            skills,
         }
     }
 
     pub fn random(race: Race) -> Self {
+        let attributes = Attributes::random();
+        // TODO: randomize skills
+        let skills = Skills::default(race);
         Self {
-            attributes: Attributes::random(),
-            // TODO: randomize skills
-            skills: Skills::default(race),
+            parry: calc_parry(&skills),
+            toughness: calc_toughness(race, &attributes),
+            attributes,
+            skills,
         }
     }
 
@@ -42,5 +60,10 @@ impl CharSheet {
         }
 
         skill_points.max(0) as u8
+    }
+
+    pub fn recalculate(&mut self, race: Race) {
+        self.parry = calc_parry(&self.skills);
+        self.toughness = calc_toughness(race, &self.attributes);
     }
 }

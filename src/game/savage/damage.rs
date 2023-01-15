@@ -27,3 +27,13 @@ impl Damage {
         result.max(0) as u8
     }
 }
+
+impl Default for Damage {
+    fn default() -> Self {
+        Self {
+            dices: vec![],
+            attribute: Some(Attribute::Strength),
+            modifier: -2,
+        }
+    }
+}

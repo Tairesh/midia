@@ -33,18 +33,17 @@ impl Wield {
         }
     }
 
-    pub fn switch_sides(&mut self) {
+    pub fn switch_sides(&mut self) -> bool {
         if self.items.len() == 2 {
             self.items.swap(0, 1);
+            true
+        } else {
+            false
         }
     }
 
     pub fn names(&self) -> String {
-        let names = self
-            .items
-            .iter()
-            .map(|i| format!("a {}", i.name()))
-            .collect::<Vec<String>>();
+        let names = self.items.iter().map(Item::name).collect::<Vec<&str>>();
         if names.is_empty() {
             "nothing".to_string()
         } else {

@@ -2,8 +2,10 @@ use std::collections::VecDeque;
 
 use geometry::Vec2;
 use tetra::graphics::text::{Font, Text};
-use tetra::graphics::{Color, DrawParams};
+use tetra::graphics::{Color, DrawParams, Rectangle};
 use tetra::Context;
+
+use crate::colors::Colors;
 
 #[derive(Debug)]
 pub struct LogMessageText {
@@ -20,6 +22,19 @@ impl LogMessageText {
     }
 
     pub fn draw(&mut self, position: Vec2, ctx: &mut Context) {
+        let text_bounds = self.text.get_bounds(ctx).unwrap();
+        tetra::graphics::set_scissor(
+            ctx,
+            Rectangle::new(
+                position.x.round() as i32,
+                position.y.round() as i32,
+                text_bounds.width.round() as i32,
+                text_bounds.height.round() as i32,
+            ),
+        );
+        tetra::graphics::clear(ctx, Colors::BLACK);
+        tetra::graphics::reset_scissor(ctx);
+
         self.text
             .draw(ctx, DrawParams::new().position(position).color(self.color));
     }

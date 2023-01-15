@@ -16,7 +16,9 @@ use crate::{
 
 use super::super::{
     super::{implements::GameScene, Scene, SomeTransitions, Transition},
-    implements::{Closing, Digging, Dropping, Examining, Observing, Opening, Reading, Wielding},
+    implements::{
+        Closing, Digging, Dropping, Examining, ForceAttack, Observing, Opening, Reading, Wielding,
+    },
     GameModeImpl,
 };
 
@@ -87,34 +89,20 @@ impl GameModeImpl for Walking {
         } else if input::is_key_with_mod_pressed(ctx, Key::C) {
             game.push_mode(Closing::new().into());
             None
-        } else if input::is_key_with_mod_pressed(ctx, Key::S) {
-            let world = game.world.borrow();
-            let player = world.player();
-            if let Some(weapon) = player.wield.get_item() {
-                if let Some(melee_damage) = &weapon.proto.melee_damage {
-                    game.log.log(
-                        format!(
-                            "You swing your {} in distance {} with {} damage and {} penetration.",
-                            weapon.proto.name,
-                            melee_damage.distance,
-                            melee_damage.damage.roll(&player.char_sheet),
-                            melee_damage.penetration
-                        ),
-                        Colors::WHITE_SMOKE,
-                    );
-                }
-            }
+        } else if input::is_key_with_mod_pressed(ctx, (Key::A, KeyModifier::Ctrl)) {
+            game.push_mode(ForceAttack::new().into());
             None
         } else if input::is_key_with_mod_pressed(ctx, (Key::X, KeyModifier::Shift)) {
-            game.world.borrow_mut().player_mut().wield.switch_sides();
-            game.log.log(
-                format!(
-                    "You switch {} in your hands.",
-                    game.world.borrow().player().wield.names()
-                ),
-                Colors::WHITE_SMOKE,
-            );
-            game.update_ui(ctx);
+            if game.world.borrow_mut().player_mut().wield.switch_sides() {
+                game.log.log(
+                    format!(
+                        "You switch {} in your hands.",
+                        game.world.borrow().player().wield.names()
+                    ),
+                    Colors::WHITE_SMOKE,
+                );
+                game.update_ui(ctx);
+            }
             None
         } else if input::is_key_with_mod_pressed(ctx, Key::I) {
             // TODO: inventory game scene

@@ -137,6 +137,10 @@ impl DiceWithModifier {
     pub fn roll_wild(self) -> u8 {
         (self.0.roll_wild() as i8 + self.1).max(1) as u8
     }
+
+    pub fn value(self) -> u8 {
+        (self.0.value() as i8 + self.1).max(0) as u8
+    }
 }
 
 impl From<DiceWithModifier> for String {

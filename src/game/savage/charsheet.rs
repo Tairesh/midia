@@ -1,14 +1,6 @@
 use crate::game::races::Race;
 
-use super::{Attribute, Attributes, DiceWithModifier, Skills, Wound};
-
-fn calc_parry(skills: &Skills) -> u8 {
-    2 + skills.fighting.value() / 2
-}
-
-fn calc_toughness(race: Race, attributes: &Attributes) -> u8 {
-    (2 + attributes.vigor.value() as i8 / 2 + race.toughness_bonus()).max(0) as u8
-}
+use super::{Attribute, Attributes, DiceWithModifier, Skill, Skills, Wound};
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
 pub struct CharSheet {
@@ -17,22 +9,16 @@ pub struct CharSheet {
     pub attributes: Attributes,
     pub skills: Skills,
     pub wounds: Vec<Wound>,
-    pub parry: u8,
-    pub toughness: u8,
 }
 
 impl CharSheet {
     pub fn new(race: Race, age: u8, attributes: Attributes, skills: Skills) -> Self {
-        let parry = calc_parry(&skills);
-        let toughness = calc_toughness(race, &attributes);
         Self {
             race,
             age,
             attributes,
             skills,
             wounds: vec![],
-            parry,
-            toughness,
         }
     }
 
@@ -50,9 +36,14 @@ impl CharSheet {
         self.skills.calc_skill_points(&self.attributes, self.race)
     }
 
-    pub fn recalculate(&mut self) {
-        self.parry = calc_parry(&self.skills);
-        self.toughness = calc_toughness(self.race, &self.attributes);
+    pub fn parry(&self) -> u8 {
+        2 + self.get_skill_with_modifiers(Skill::Fighting).value() / 2
+    }
+
+    pub fn toughness(&self) -> u8 {
+        (2 + self.get_attribute_with_modifiers(Attribute::Vigor).value() as i8 / 2
+            + self.race.toughness_bonus())
+        .max(0) as u8
     }
 
     pub fn walk_koeff(&self) -> f32 {
@@ -73,7 +64,6 @@ impl CharSheet {
         k_age * k_wounds * self.race.walk_koeff()
     }
 
-    #[allow(dead_code)]
     pub fn get_attribute_with_modifiers(&self, attribute: Attribute) -> DiceWithModifier {
         let mut value = self.attributes.get_attribute(attribute);
         match attribute {
@@ -100,5 +90,9 @@ impl CharSheet {
             Attribute::Spirit => {}
         }
         value.into()
+    }
+
+    pub fn get_skill_with_modifiers(&self, skill: Skill) -> DiceWithModifier {
+        self.skills.get_skill(skill).into()
     }
 }

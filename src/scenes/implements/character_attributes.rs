@@ -414,12 +414,11 @@ impl CharacterAttributes {
     }
 
     fn update_points(&mut self, ctx: &mut Context) {
-        self.char_sheet.recalculate();
         let attributes_points = self.attributes_points;
         let skills_points = self.char_sheet.calc_skill_points();
         self.skills_points = skills_points;
-        let parry = self.char_sheet.parry;
-        let toughness = self.char_sheet.toughness;
+        let parry = self.char_sheet.parry();
+        let toughness = self.char_sheet.toughness();
 
         let window_size = self.window_size;
         self.parry_label()

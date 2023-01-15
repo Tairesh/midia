@@ -3,6 +3,7 @@
 use geometry::{Point, TwoDimDirection};
 
 use crate::game::map::items::helpers::{cloak, hat};
+use crate::game::BodySlot;
 
 use super::{races::Personality, savage::CharSheet, Action, Item};
 
@@ -52,5 +53,55 @@ impl Avatar {
 
     pub fn is_player(&self) -> bool {
         self.personality.is_player
+    }
+
+    pub fn armor(&self, slot: BodySlot) -> u8 {
+        self.wear.iter().map(|item| item.armor(slot)).sum()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use geometry::Point;
+
+    use crate::game::races::tests::personality::tester_girl;
+    use crate::game::races::Race;
+    use crate::game::BodySlot;
+
+    use super::{Avatar, CharSheet};
+
+    #[test]
+    fn test_npc_name() {
+        let npc = Avatar::new(
+            tester_girl(),
+            CharSheet::default(Race::Gazan, 15),
+            Point::new(0, 0),
+        );
+
+        assert_eq!(npc.name_for_actions(), "Dooka");
+    }
+
+    #[test]
+    fn test_player_name() {
+        let mut personality = tester_girl();
+        personality.is_player = true;
+        let player = Avatar::new(
+            personality,
+            CharSheet::default(Race::Gazan, 15),
+            Point::new(0, 0),
+        );
+
+        assert_eq!(player.name_for_actions(), "You");
+    }
+
+    #[test]
+    fn test_armor() {
+        let avatar = Avatar::dressed_default(
+            tester_girl(),
+            CharSheet::default(Race::Gazan, 15),
+            Point::new(0, 0),
+        );
+
+        assert_eq!(avatar.armor(BodySlot::Torso), 1);
     }
 }

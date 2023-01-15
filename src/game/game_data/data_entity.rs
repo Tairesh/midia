@@ -13,9 +13,9 @@ pub enum DataEntity {
 
 #[cfg(test)]
 mod tests {
-    use crate::game::races::{Race, Sex};
+    use crate::game::races::{BodySlot, Race, Sex};
 
-    use super::super::item::{ItemQuality, ItemSpecial, ItemTag};
+    use super::super::item::{ItemQuality, ItemSpecial, ItemTag, WearLayer};
     use super::DataEntity;
 
     fn check_shovel(shovel: &DataEntity) {
@@ -147,6 +147,48 @@ mod tests {
             assert!(item.specials.contains(&ItemSpecial::Readable));
             assert!(item.specials.contains(&ItemSpecial::Named));
             assert!(item.specials.contains(&ItemSpecial::Colored));
+        } else {
+            panic!("Expected DataEntity::Item, got {:?}", slice[0]);
+        }
+    }
+
+    #[test]
+    fn test_deserialize_cloak() {
+        let json = r#"
+        [
+          {
+            "type": "item",
+            "id": "cloak",
+            "name": "cloak",
+            "look_like": "cloak",
+            "mass": 100,
+            "wearable": [
+              [ "torso", "OUTER", 1 ],
+              [ "left_arm", "OUTER", 1 ],
+              [ "right_arm", "OUTER", 1 ],
+              [ "left_leg", "OUTER", 1 ],
+              [ "right_leg", "OUTER", 1 ]
+            ]
+          }
+        ]
+        "#;
+
+        let data: Vec<DataEntity> = serde_json::from_str(json).unwrap();
+        let slice = data.as_slice();
+        assert!(matches!(slice[0], DataEntity::Item(..)));
+        if let DataEntity::Item(item) = &slice[0] {
+            assert_eq!(item.id, "cloak");
+            assert!(item.wearable.is_some());
+            if let Some(wearable) = &item.wearable {
+                assert_eq!(wearable.len(), 5);
+                assert!(wearable.contains(&(BodySlot::Torso, WearLayer::Outer, 1)));
+                assert!(wearable.contains(&(BodySlot::LeftArm, WearLayer::Outer, 1)));
+                assert!(wearable.contains(&(BodySlot::RightArm, WearLayer::Outer, 1)));
+                assert!(wearable.contains(&(BodySlot::LeftLeg, WearLayer::Outer, 1)));
+                assert!(wearable.contains(&(BodySlot::RightLeg, WearLayer::Outer, 1)));
+            } else {
+                panic!("Expected wearable!");
+            }
         } else {
             panic!("Expected DataEntity::Item, got {:?}", slice[0]);
         }

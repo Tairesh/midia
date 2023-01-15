@@ -5,7 +5,7 @@ use std::collections::HashSet;
 use serde::{Deserialize, Serialize};
 use tetra::graphics::Color;
 
-use crate::game::game_data::{ItemPrototype, ItemQuality, ItemTag};
+use crate::game::{BodySlot, ItemPrototype, ItemQuality, ItemTag, WearLayer};
 
 use super::specials::{Colored, Container, LookLike, Named, Readable};
 
@@ -127,7 +127,29 @@ impl Item {
     }
 
     pub fn is_wearable(&self) -> bool {
-        self.proto.is_wearable
+        self.proto.wearable.is_some()
+    }
+
+    pub fn wear_slots(&self) -> Option<HashSet<BodySlot>> {
+        self.proto
+            .wearable
+            .as_ref()
+            .map(|w| w.iter().map(|(s, _, _)| *s).collect())
+    }
+
+    pub fn wear_layers(&self) -> Option<HashSet<WearLayer>> {
+        self.proto
+            .wearable
+            .as_ref()
+            .map(|w| w.iter().map(|(_, l, _)| *l).collect())
+    }
+
+    pub fn armor(&self, slot: BodySlot) -> u8 {
+        self.proto.wearable.as_ref().map_or(0, |w| {
+            w.iter()
+                .find(|(s, _, _)| *s == slot)
+                .map_or(0, |(_, _, a)| *a)
+        })
     }
 
     pub fn is_readable(&self) -> bool {

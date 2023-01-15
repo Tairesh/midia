@@ -137,7 +137,7 @@ pub mod tests {
                 sex: Sex::Female,
             },
             Mind {
-                name: "Tester Girl".to_string(),
+                name: "Dooka".to_string(),
                 gender: Gender::Female,
                 main_hand: MainHand::Left,
                 alive: true,

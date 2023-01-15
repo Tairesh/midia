@@ -5,7 +5,33 @@
     "name": "cloak",
     "look_like": "cloak",
     "mass": 100,
-    "is_wearable": true
+    "wearable": [
+      [
+        "torso",
+        "OUTER",
+        1
+      ],
+      [
+        "left_arm",
+        "OUTER",
+        1
+      ],
+      [
+        "right_arm",
+        "OUTER",
+        1
+      ],
+      [
+        "left_leg",
+        "OUTER",
+        1
+      ],
+      [
+        "right_leg",
+        "OUTER",
+        1
+      ]
+    ]
   },
   {
     "type": "item",
@@ -13,7 +39,13 @@
     "name": "strange hat",
     "look_like": "hat",
     "mass": 50,
-    "is_wearable": true
+    "wearable": [
+      [
+        "head",
+        "OUTER",
+        1
+      ]
+    ]
   },
   {
     "type": "item",
@@ -21,7 +53,33 @@
     "name": "dirty rags",
     "look_like": "rags",
     "mass": 100,
-    "is_wearable": true
+    "wearable": [
+      [
+        "torso",
+        "OUTER",
+        1
+      ],
+      [
+        "left_arm",
+        "OUTER",
+        1
+      ],
+      [
+        "right_arm",
+        "OUTER",
+        1
+      ],
+      [
+        "left_leg",
+        "OUTER",
+        1
+      ],
+      [
+        "right_leg",
+        "OUTER",
+        1
+      ]
+    ]
   },
   {
     "type": "item",
@@ -29,7 +87,13 @@
     "name": "leather backpack",
     "look_like": "backpack",
     "mass": 100,
-    "is_wearable": true,
+    "wearable": [
+      [
+        "torso",
+        "CLIPPED",
+        1
+      ]
+    ],
     "item_specials": [
       "CONTAINER"
     ]

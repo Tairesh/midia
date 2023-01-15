@@ -9,6 +9,7 @@ use tetra::{
 use crate::{
     colors::Colors,
     game::actions::implements::{Drop, Skip, Walk},
+    game::BodySlot,
     input,
     settings::Settings,
 };
@@ -97,8 +98,9 @@ impl GameModeImpl for Walking {
                 .iter()
                 .map(|i| i.name().to_string())
                 .collect();
+            let armor = game.world.borrow().player().armor(BodySlot::Torso);
             game.log.log(
-                format!("You wear: {}", items.join(", ")),
+                format!("You wear: {}, armor value is {armor}", items.join(", ")),
                 Colors::WHITE_SMOKE,
             );
             None

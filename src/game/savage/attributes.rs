@@ -1,13 +1,14 @@
 use rand::distributions::Standard;
 use rand::prelude::Distribution;
 use rand::Rng;
+use serde::{Deserialize, Serialize};
 use tetra::graphics::Color;
 
 use crate::colors::Colors;
 
 use super::Dice;
 
-#[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Attributes {
     /// Physical precision and speed
     pub agility: Dice,
@@ -73,7 +74,8 @@ impl Default for Attributes {
     }
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
+#[derive(Serialize, Deserialize, Debug, Copy, Clone, Eq, PartialEq, Hash)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum Attribute {
     Agility,
     Smarts,

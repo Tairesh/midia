@@ -39,6 +39,8 @@ impl Default for Walking {
 }
 
 impl GameModeImpl for Walking {
+    // TODO: refactor this method
+    #[allow(clippy::too_many_lines)]
     fn update(&mut self, ctx: &mut Context, game: &mut GameScene) -> SomeTransitions {
         if input::is_mouse_scrolled_down(ctx)
             || input::is_key_with_mod_pressed(ctx, (Key::Z, KeyModifier::Shift))
@@ -86,8 +88,25 @@ impl GameModeImpl for Walking {
         } else if input::is_key_with_mod_pressed(ctx, Key::C) {
             game.push_mode(Closing::new().into());
             None
-            // } else if input::is_key_with_mod_pressed(ctx, (Key::Num2, KeyModifier::Shift)) {
-            //     Some(vec![Transition::Push(Scene::BodyView(0))])
+        } else if input::is_key_with_mod_pressed(ctx, Key::S) {
+            let world = game.world.borrow();
+            let player = world.player();
+            let weapon = player.wield.first();
+            if let Some(weapon) = weapon {
+                if let Some(melee_damage) = &weapon.proto.melee_damage {
+                    game.log.log(
+                        format!(
+                            "You swing your {} in distance {} with {} damage and {} penetration.",
+                            weapon.proto.name,
+                            melee_damage.distance,
+                            melee_damage.damage.roll(&player.char_sheet),
+                            melee_damage.penetration
+                        ),
+                        Colors::WHITE_SMOKE,
+                    );
+                }
+            }
+            None
         } else if input::is_key_with_mod_pressed(ctx, Key::I) {
             // TODO: inventory game scene
             let items: Vec<String> = game

@@ -2,21 +2,11 @@ use std::ops::{Add, AddAssign, Sub, SubAssign};
 
 use enum_iterator::{next, previous, Sequence};
 use rand::Rng;
+use serde::{Deserialize, Serialize};
 
 use crate::game::traits::Name;
 
-#[derive(
-    serde::Serialize,
-    serde::Deserialize,
-    Sequence,
-    Debug,
-    Copy,
-    Clone,
-    Eq,
-    PartialEq,
-    Ord,
-    PartialOrd,
-)]
+#[derive(Serialize, Deserialize, Sequence, Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd)]
 pub enum Dice {
     D4,
     D6,
@@ -118,7 +108,7 @@ impl SubAssign<i8> for Dice {
     }
 }
 
-#[derive(serde::Serialize, serde::Deserialize, Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Copy, Clone, Eq, PartialEq)]
 pub struct DiceWithModifier(Dice, i8);
 
 impl DiceWithModifier {
@@ -159,18 +149,7 @@ impl From<Dice> for DiceWithModifier {
     }
 }
 
-#[derive(
-    serde::Serialize,
-    serde::Deserialize,
-    Sequence,
-    Debug,
-    Copy,
-    Clone,
-    Eq,
-    PartialEq,
-    Ord,
-    PartialOrd,
-)]
+#[derive(Serialize, Deserialize, Sequence, Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd)]
 pub enum SkillLevel {
     D4_2,
     D4,

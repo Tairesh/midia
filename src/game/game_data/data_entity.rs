@@ -2,6 +2,7 @@ use serde::Deserialize;
 
 use super::{item::ItemPrototype, names_pack::NamesPack};
 
+#[allow(clippy::large_enum_variant)]
 #[derive(Deserialize, Debug)]
 #[serde(tag = "type")]
 #[serde(rename_all = "snake_case")]
@@ -14,6 +15,7 @@ pub enum DataEntity {
 #[cfg(test)]
 mod tests {
     use crate::game::races::{BodySlot, Race, Sex};
+    use crate::game::{Attribute, Dice};
 
     use super::super::item::{ItemQuality, ItemSpecial, ItemTag, WearLayer};
     use super::DataEntity;
@@ -188,6 +190,62 @@ mod tests {
                 assert!(wearable.contains(&(BodySlot::RightLeg, WearLayer::Outer, 1)));
             } else {
                 panic!("Expected wearable!");
+            }
+        } else {
+            panic!("Expected DataEntity::Item, got {:?}", slice[0]);
+        }
+    }
+
+    #[test]
+    fn test_deserialize_knife() {
+        let json = r#"
+        [
+          {
+            "type": "item",
+            "id": "knife",
+            "name": "knife",
+            "look_like": "knife",
+            "tags": [
+              "TOOL",
+              "WEAPON"
+            ],
+            "qualities": [
+              "BUTCH",
+              "CUT"
+            ],
+            "mass": 100,
+            "two_handed_tool": false,
+            "melee_damage": {
+              "moves": 10,
+              "damage": {
+                "attribute": "STRENGTH",
+                "dices": [ "D4" ]
+              }
+            }
+          }
+      ]
+      "#;
+
+        let data: Vec<DataEntity> = serde_json::from_str(json).unwrap();
+        let slice = data.as_slice();
+        assert!(matches!(slice[0], DataEntity::Item(..)));
+        if let DataEntity::Item(item) = &slice[0] {
+            assert_eq!(item.id, "knife");
+            assert!(item.tags.contains(&ItemTag::Tool));
+            assert!(item.tags.contains(&ItemTag::Weapon));
+            assert!(item.qualities.contains(&ItemQuality::Butch));
+            assert!(item.qualities.contains(&ItemQuality::Cut));
+            assert!(item.melee_damage.is_some());
+            if let Some(melee_damage) = &item.melee_damage {
+                assert_eq!(melee_damage.moves, 10);
+                assert_eq!(melee_damage.damage.attribute, Some(Attribute::Strength));
+                assert_eq!(melee_damage.damage.dices.len(), 1);
+                assert_eq!(melee_damage.damage.dices[0], Dice::D4);
+                assert_eq!(melee_damage.damage.modifier, 0);
+                assert_eq!(melee_damage.penetration, 0);
+                assert_eq!(melee_damage.distance, 0);
+            } else {
+                panic!("Expected melee_damage!");
             }
         } else {
             panic!("Expected DataEntity::Item, got {:?}", slice[0]);

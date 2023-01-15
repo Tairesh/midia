@@ -3,6 +3,7 @@ use std::collections::HashSet;
 use serde::{Deserialize, Serialize};
 
 use crate::game::races::BodySlot;
+use crate::game::savage::Damage;
 
 #[derive(Serialize, Deserialize, Debug, Hash, Eq, PartialEq, Copy, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
@@ -41,6 +42,16 @@ pub enum WearLayer {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct MeleeDamageValue {
+    pub moves: u8,
+    pub damage: Damage,
+    #[serde(default)]
+    pub distance: u8,
+    #[serde(default)]
+    pub penetration: u8,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ItemPrototype {
     pub id: String,
     pub name: String,
@@ -57,4 +68,6 @@ pub struct ItemPrototype {
     pub two_handed_tool: bool,
     #[serde(default)]
     pub wearable: Option<HashSet<(BodySlot, WearLayer, u8)>>,
+    #[serde(default)]
+    pub melee_damage: Option<MeleeDamageValue>,
 }

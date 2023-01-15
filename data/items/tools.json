@@ -11,7 +11,17 @@
       "DIG"
     ],
     "mass": 2000,
-    "two_handed_tool": true
+    "two_handed_tool": true,
+    "melee_damage": {
+      "moves": 50,
+      "damage": {
+        "attribute": "STRENGTH",
+        "dices": [
+          "D6"
+        ],
+        "modifier": -1
+      }
+    }
   },
   {
     "type": "item",
@@ -25,7 +35,16 @@
     "qualities": [
       "BUTCH"
     ],
-    "mass": 1000
+    "mass": 1000,
+    "melee_damage": {
+      "moves": 20,
+      "damage": {
+        "attribute": "STRENGTH",
+        "dices": [
+          "D8"
+        ]
+      }
+    }
   },
   {
     "type": "item",
@@ -41,6 +60,15 @@
       "CUT"
     ],
     "mass": 100,
-    "two_handed_tool": false
+    "two_handed_tool": false,
+    "melee_damage": {
+      "moves": 10,
+      "damage": {
+        "attribute": "STRENGTH",
+        "dices": [
+          "D4"
+        ]
+      }
+    }
   }
 ]

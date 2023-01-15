@@ -123,13 +123,6 @@ impl Attribute {
 
 impl Distribution<Attribute> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Attribute {
-        match rng.gen::<u8>() % 5 {
-            0 => Attribute::Agility,
-            1 => Attribute::Smarts,
-            2 => Attribute::Spirit,
-            3 => Attribute::Strength,
-            4 => Attribute::Vigor,
-            _ => unreachable!(),
-        }
+        unsafe { std::mem::transmute(rng.gen::<u8>() % Attribute::iterator().count() as u8) }
     }
 }

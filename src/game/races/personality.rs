@@ -20,19 +20,6 @@ pub struct Appearance {
     pub sex: Sex,
 }
 
-impl Appearance {
-    pub fn walk_koeff(&self) -> f32 {
-        // TODO: write tests for moving for different races and ages
-        let k_age = match self.age {
-            0 => 100.0,
-            1..=3 => 10.0,
-            4..=10 => 3.0,
-            11.. => 1.0,
-        };
-        k_age * self.race.walk_koeff()
-    }
-}
-
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Mind {
     #[serde(rename = "n")]

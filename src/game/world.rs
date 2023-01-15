@@ -86,7 +86,7 @@ impl World {
                     alive: true,
                 },
             ),
-            CharSheet::default(Race::Gazan),
+            CharSheet::default(Race::Gazan, 25),
             Point::new(0, -5),
         ));
         self.add_unit(Avatar::new(
@@ -105,7 +105,7 @@ impl World {
                     alive: true,
                 },
             ),
-            CharSheet::default(Race::Nyarnik),
+            CharSheet::default(Race::Nyarnik, 22),
             Point::new(-3, -5),
         ));
         self.add_unit(Avatar::new(
@@ -124,7 +124,7 @@ impl World {
                     alive: true,
                 },
             ),
-            CharSheet::default(Race::Gazan),
+            CharSheet::default(Race::Gazan, 20),
             Point::new(3, -5),
         ));
         self.add_unit(Avatar::new(
@@ -143,7 +143,7 @@ impl World {
                     alive: true,
                 },
             ),
-            CharSheet::default(Race::Lagnam),
+            CharSheet::default(Race::Lagnam, 25),
             Point::new(6, -5),
         ));
         self.add_unit(Avatar::new(
@@ -151,18 +151,18 @@ impl World {
                 false,
                 Appearance {
                     race: Race::Totik,
-                    age: 20,
+                    age: 29,
                     fur_color: None,
                     sex: Sex::Male,
                 },
                 Mind {
-                    name: "Unnamed totik".to_string(),
+                    name: "Suh".to_string(),
                     gender: Gender::Male,
                     main_hand: MainHand::Right,
                     alive: true,
                 },
             ),
-            CharSheet::default(Race::Totik),
+            CharSheet::default(Race::Totik, 29),
             Point::new(-6, -5),
         ));
 
@@ -427,7 +427,7 @@ pub mod tests {
             Log::new(),
             vec![Avatar::dressed_default(
                 player,
-                CharSheet::default(Race::Gazan),
+                CharSheet::default(Race::Gazan, 25),
                 Point::new(0, 0),
             )],
             HashMap::new(),
@@ -435,7 +435,11 @@ pub mod tests {
     }
 
     pub fn add_npc(world: &mut World, pos: Point) -> usize {
-        world.add_unit(Avatar::new(old_queer(), CharSheet::default(Race::Bug), pos))
+        world.add_unit(Avatar::new(
+            old_queer(),
+            CharSheet::default(Race::Bug, 99),
+            pos,
+        ))
     }
 
     #[test]

@@ -117,7 +117,7 @@ pub struct CharacterAttributes {
     personality: Personality,
     char_sheet: CharSheet,
     attributes_points: u8,
-    skills_points: u8,
+    skills_points: i8,
     window_size: (i32, i32),
     sprites: Vec<Box<dyn UiSprite>>,
 }
@@ -239,11 +239,10 @@ fn skill_sprites(
 }
 
 impl CharacterAttributes {
-    // TODO: refactor and delete this allow
-    #[allow(clippy::too_many_lines)]
     pub fn new(path: &Path, personality: Personality, app: &App, ctx: &mut Context) -> Self {
         let meta = savefile::load(path).unwrap();
-        let char_sheet = CharSheet::default(personality.appearance.race);
+        let char_sheet =
+            CharSheet::default(personality.appearance.race, personality.appearance.age);
 
         let mut sprites: Vec<Box<dyn UiSprite>> = vec![
             bg(&app.assets),
@@ -299,7 +298,7 @@ impl CharacterAttributes {
             "Toughness: 0",
             &app.assets,
             Position::horizontal_center(200.0, Vertical::ByCenter { y: 350.0 }),
-            Colors::DARK_RED,
+            Colors::DARK_VIOLET,
         ));
 
         sprites.extend(back_randomize_next(
@@ -415,12 +414,9 @@ impl CharacterAttributes {
     }
 
     fn update_points(&mut self, ctx: &mut Context) {
-        self.char_sheet
-            .recalculate(self.personality.appearance.race);
+        self.char_sheet.recalculate();
         let attributes_points = self.attributes_points;
-        let skills_points = self
-            .char_sheet
-            .calc_skill_points(self.personality.appearance.race);
+        let skills_points = self.char_sheet.calc_skill_points();
         self.skills_points = skills_points;
         let parry = self.char_sheet.parry;
         let toughness = self.char_sheet.toughness;
@@ -515,9 +511,15 @@ impl CharacterAttributes {
     }
 
     fn randomize(&mut self, ctx: &mut Context) -> SomeTransitions {
-        self.char_sheet = CharSheet::random(self.personality.appearance.race);
+        self.char_sheet = CharSheet::random(
+            self.personality.appearance.race,
+            self.personality.appearance.age,
+        );
         self.attributes_points = 0;
         let window_size = self.window_size;
+
+        // TODO: refactor this
+
         let agility = self.char_sheet.attributes.agility.name();
         let smarts = self.char_sheet.attributes.smarts.name();
         let spirit = self.char_sheet.attributes.spirit.name();
@@ -528,6 +530,39 @@ impl CharacterAttributes {
         self.spirit_label().update(spirit, ctx, window_size);
         self.strength_label().update(strength, ctx, window_size);
         self.vigor_label().update(vigor, ctx, window_size);
+
+        let athletics = self.char_sheet.skills.athletics.name();
+        let fighting = self.char_sheet.skills.fighting.name();
+        let shooting = self.char_sheet.skills.shooting.name();
+        let stealth = self.char_sheet.skills.stealth.name();
+        let thievery = self.char_sheet.skills.thievery.name();
+        let swimming = self.char_sheet.skills.swimming.name();
+        let gambling = self.char_sheet.skills.gambling.name();
+        let notice = self.char_sheet.skills.notice.name();
+        let survival = self.char_sheet.skills.survival.name();
+        let healing = self.char_sheet.skills.healing.name();
+        let repair = self.char_sheet.skills.repair.name();
+        let reading = self.char_sheet.skills.reading.name();
+        let persuasion = self.char_sheet.skills.persuasion.name();
+        let intimidation = self.char_sheet.skills.intimidation.name();
+        let climbing = self.char_sheet.skills.climbing.name();
+        self.athletics_label().update(athletics, ctx, window_size);
+        self.fighting_label().update(fighting, ctx, window_size);
+        self.shooting_label().update(shooting, ctx, window_size);
+        self.stealth_label().update(stealth, ctx, window_size);
+        self.thievery_label().update(thievery, ctx, window_size);
+        self.swimming_label().update(swimming, ctx, window_size);
+        self.gambling_label().update(gambling, ctx, window_size);
+        self.notice_label().update(notice, ctx, window_size);
+        self.survival_label().update(survival, ctx, window_size);
+        self.healing_label().update(healing, ctx, window_size);
+        self.repair_label().update(repair, ctx, window_size);
+        self.reading_label().update(reading, ctx, window_size);
+        self.persuasion_label().update(persuasion, ctx, window_size);
+        self.intimidation_label()
+            .update(intimidation, ctx, window_size);
+        self.climbing_label().update(climbing, ctx, window_size);
+
         self.update_points(ctx);
         None
     }
@@ -691,13 +726,13 @@ impl SceneImpl for CharacterAttributes {
                     && self.char_sheet.skills.athletics > SkillLevel::D4_2
                 {
                     self.skills_points += cost_minus;
-                    self.char_sheet.skills.athletics -= cost_minus as i8;
+                    self.char_sheet.skills.athletics -= 1;
                 } else if event == ButtonEvent::AthleticsPlus
                     && self.skills_points >= cost_plus
                     && self.char_sheet.skills.athletics < SkillLevel::D12
                 {
                     self.skills_points -= cost_plus;
-                    self.char_sheet.skills.athletics += cost_plus as i8;
+                    self.char_sheet.skills.athletics += 1;
                 }
 
                 let dice_name = self.char_sheet.skills.athletics.name();
@@ -725,13 +760,13 @@ impl SceneImpl for CharacterAttributes {
                     && self.char_sheet.skills.fighting > SkillLevel::D4_2
                 {
                     self.skills_points += cost_minus;
-                    self.char_sheet.skills.fighting -= cost_minus as i8;
+                    self.char_sheet.skills.fighting -= 1;
                 } else if event == ButtonEvent::FightingPlus
                     && self.skills_points >= cost_plus
                     && self.char_sheet.skills.fighting < SkillLevel::D12
                 {
                     self.skills_points -= cost_plus;
-                    self.char_sheet.skills.fighting += cost_plus as i8;
+                    self.char_sheet.skills.fighting += 1;
                 }
 
                 let dice_name = self.char_sheet.skills.fighting.name();
@@ -759,13 +794,13 @@ impl SceneImpl for CharacterAttributes {
                     && self.char_sheet.skills.shooting > SkillLevel::D4_2
                 {
                     self.skills_points += cost_minus;
-                    self.char_sheet.skills.shooting -= cost_minus as i8;
+                    self.char_sheet.skills.shooting -= 1;
                 } else if event == ButtonEvent::ShootingPlus
                     && self.skills_points >= cost_plus
                     && self.char_sheet.skills.shooting < SkillLevel::D12
                 {
                     self.skills_points -= cost_plus;
-                    self.char_sheet.skills.shooting += cost_plus as i8;
+                    self.char_sheet.skills.shooting += 1;
                 }
 
                 let dice_name = self.char_sheet.skills.shooting.name();
@@ -792,13 +827,13 @@ impl SceneImpl for CharacterAttributes {
                     && self.char_sheet.skills.stealth > SkillLevel::D4_2
                 {
                     self.skills_points += cost_minus;
-                    self.char_sheet.skills.stealth -= cost_minus as i8;
+                    self.char_sheet.skills.stealth -= 1;
                 } else if event == ButtonEvent::StealthPlus
                     && self.skills_points >= cost_plus
                     && self.char_sheet.skills.stealth < SkillLevel::D12
                 {
                     self.skills_points -= cost_plus;
-                    self.char_sheet.skills.stealth += cost_plus as i8;
+                    self.char_sheet.skills.stealth += 1;
                 }
 
                 let dice_name = self.char_sheet.skills.stealth.name();
@@ -826,13 +861,13 @@ impl SceneImpl for CharacterAttributes {
                     && self.char_sheet.skills.thievery > SkillLevel::D4_2
                 {
                     self.skills_points += cost_minus;
-                    self.char_sheet.skills.thievery -= cost_minus as i8;
+                    self.char_sheet.skills.thievery -= 1;
                 } else if event == ButtonEvent::ThieveryPlus
                     && self.skills_points >= cost_plus
                     && self.char_sheet.skills.thievery < SkillLevel::D12
                 {
                     self.skills_points -= cost_plus;
-                    self.char_sheet.skills.thievery += cost_plus as i8;
+                    self.char_sheet.skills.thievery += 1;
                 }
 
                 let dice_name = self.char_sheet.skills.thievery.name();
@@ -860,13 +895,13 @@ impl SceneImpl for CharacterAttributes {
                     && self.char_sheet.skills.swimming > SkillLevel::D4_2
                 {
                     self.skills_points += cost_minus;
-                    self.char_sheet.skills.swimming -= cost_minus as i8;
+                    self.char_sheet.skills.swimming -= 1;
                 } else if event == ButtonEvent::SwimmingPlus
                     && self.skills_points >= cost_plus
                     && self.char_sheet.skills.swimming < SkillLevel::D12
                 {
                     self.skills_points -= cost_plus;
-                    self.char_sheet.skills.swimming += cost_plus as i8;
+                    self.char_sheet.skills.swimming += 1;
                 }
 
                 let dice_name = self.char_sheet.skills.swimming.name();
@@ -893,13 +928,13 @@ impl SceneImpl for CharacterAttributes {
                     && self.char_sheet.skills.gambling > SkillLevel::D4_2
                 {
                     self.skills_points += cost_minus;
-                    self.char_sheet.skills.gambling -= cost_minus as i8;
+                    self.char_sheet.skills.gambling -= 1;
                 } else if event == ButtonEvent::GamblingPlus
                     && self.skills_points >= cost_plus
                     && self.char_sheet.skills.gambling < SkillLevel::D12
                 {
                     self.skills_points -= cost_plus;
-                    self.char_sheet.skills.gambling += cost_plus as i8;
+                    self.char_sheet.skills.gambling += 1;
                 }
 
                 let dice_name = self.char_sheet.skills.gambling.name();
@@ -925,13 +960,13 @@ impl SceneImpl for CharacterAttributes {
                     && self.char_sheet.skills.notice > SkillLevel::D4_2
                 {
                     self.skills_points += cost_minus;
-                    self.char_sheet.skills.notice -= cost_minus as i8;
+                    self.char_sheet.skills.notice -= 1;
                 } else if event == ButtonEvent::NoticePlus
                     && self.skills_points >= cost_plus
                     && self.char_sheet.skills.notice < SkillLevel::D12
                 {
                     self.skills_points -= cost_plus;
-                    self.char_sheet.skills.notice += cost_plus as i8;
+                    self.char_sheet.skills.notice += 1;
                 }
 
                 let dice_name = self.char_sheet.skills.notice.name();
@@ -958,13 +993,13 @@ impl SceneImpl for CharacterAttributes {
                     && self.char_sheet.skills.survival > SkillLevel::D4_2
                 {
                     self.skills_points += cost_minus;
-                    self.char_sheet.skills.survival -= cost_minus as i8;
+                    self.char_sheet.skills.survival -= 1;
                 } else if event == ButtonEvent::SurvivalPlus
                     && self.skills_points >= cost_plus
                     && self.char_sheet.skills.survival < SkillLevel::D12
                 {
                     self.skills_points -= cost_plus;
-                    self.char_sheet.skills.survival += cost_plus as i8;
+                    self.char_sheet.skills.survival += 1;
                 }
 
                 let dice_name = self.char_sheet.skills.survival.name();
@@ -990,13 +1025,13 @@ impl SceneImpl for CharacterAttributes {
                     && self.char_sheet.skills.healing > SkillLevel::D4_2
                 {
                     self.skills_points += cost_minus;
-                    self.char_sheet.skills.healing -= cost_minus as i8;
+                    self.char_sheet.skills.healing -= 1;
                 } else if event == ButtonEvent::HealingPlus
                     && self.skills_points >= cost_plus
                     && self.char_sheet.skills.healing < SkillLevel::D12
                 {
                     self.skills_points -= cost_plus;
-                    self.char_sheet.skills.healing += cost_plus as i8;
+                    self.char_sheet.skills.healing += 1;
                 }
 
                 let dice_name = self.char_sheet.skills.healing.name();
@@ -1022,13 +1057,13 @@ impl SceneImpl for CharacterAttributes {
                     && self.char_sheet.skills.repair > SkillLevel::D4_2
                 {
                     self.skills_points += cost_minus;
-                    self.char_sheet.skills.repair -= cost_minus as i8;
+                    self.char_sheet.skills.repair -= 1;
                 } else if event == ButtonEvent::RepairPlus
                     && self.skills_points >= cost_plus
                     && self.char_sheet.skills.repair < SkillLevel::D12
                 {
                     self.skills_points -= cost_plus;
-                    self.char_sheet.skills.repair += cost_plus as i8;
+                    self.char_sheet.skills.repair += 1;
                 }
 
                 let dice_name = self.char_sheet.skills.repair.name();
@@ -1054,13 +1089,13 @@ impl SceneImpl for CharacterAttributes {
                     && self.char_sheet.skills.reading > SkillLevel::D4_2
                 {
                     self.skills_points += cost_minus;
-                    self.char_sheet.skills.reading -= cost_minus as i8;
+                    self.char_sheet.skills.reading -= 1;
                 } else if event == ButtonEvent::ReadingPlus
                     && self.skills_points >= cost_plus
                     && self.char_sheet.skills.reading < SkillLevel::D12
                 {
                     self.skills_points -= cost_plus;
-                    self.char_sheet.skills.reading += cost_plus as i8;
+                    self.char_sheet.skills.reading += 1;
                 }
 
                 let dice_name = self.char_sheet.skills.reading.name();
@@ -1088,13 +1123,13 @@ impl SceneImpl for CharacterAttributes {
                     && self.char_sheet.skills.persuasion > SkillLevel::D4_2
                 {
                     self.skills_points += cost_minus;
-                    self.char_sheet.skills.persuasion -= cost_minus as i8;
+                    self.char_sheet.skills.persuasion -= 1;
                 } else if event == ButtonEvent::PersuasionPlus
                     && self.skills_points >= cost_plus
                     && self.char_sheet.skills.persuasion < SkillLevel::D12
                 {
                     self.skills_points -= cost_plus;
-                    self.char_sheet.skills.persuasion += cost_plus as i8;
+                    self.char_sheet.skills.persuasion += 1;
                 }
 
                 let dice_name = self.char_sheet.skills.persuasion.name();
@@ -1122,13 +1157,13 @@ impl SceneImpl for CharacterAttributes {
                     && self.char_sheet.skills.intimidation > SkillLevel::D4_2
                 {
                     self.skills_points += cost_minus;
-                    self.char_sheet.skills.intimidation -= cost_minus as i8;
+                    self.char_sheet.skills.intimidation -= 1;
                 } else if event == ButtonEvent::IntimidationPlus
                     && self.skills_points >= cost_plus
                     && self.char_sheet.skills.intimidation < SkillLevel::D12
                 {
                     self.skills_points -= cost_plus;
-                    self.char_sheet.skills.intimidation += cost_plus as i8;
+                    self.char_sheet.skills.intimidation += 1;
                 }
 
                 let dice_name = self.char_sheet.skills.intimidation.name();
@@ -1157,13 +1192,13 @@ impl SceneImpl for CharacterAttributes {
                     && self.char_sheet.skills.climbing > SkillLevel::D4_2
                 {
                     self.skills_points += cost_minus;
-                    self.char_sheet.skills.climbing -= cost_minus as i8;
+                    self.char_sheet.skills.climbing -= 1;
                 } else if event == ButtonEvent::ClimbingPlus
                     && self.skills_points >= cost_plus
                     && self.char_sheet.skills.climbing < SkillLevel::D12
                 {
                     self.skills_points -= cost_plus;
-                    self.char_sheet.skills.climbing += cost_plus as i8;
+                    self.char_sheet.skills.climbing += 1;
                 }
 
                 let dice_name = self.char_sheet.skills.climbing.name();

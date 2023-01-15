@@ -1,4 +1,9 @@
+use rand::distributions::{Distribution, Standard};
+use rand::Rng;
+
 use crate::game::races::Race;
+use crate::game::savage::Attributes;
+use crate::game::Dice;
 
 use super::{Attribute, SkillLevel};
 
@@ -50,6 +55,24 @@ impl Skills {
         }
     }
 
+    pub fn random(attributes: &Attributes, race: Race) -> Self {
+        let mut skills = Self::default(race);
+
+        let mut points = skills.calc_skill_points(attributes, race);
+        while points > 0 {
+            let random_skill = rand::thread_rng().gen::<Skill>();
+            skills.set_skill(random_skill, skills.get_skill(random_skill) + 1);
+
+            points = skills.calc_skill_points(attributes, race);
+            if points < 0 {
+                skills.set_skill(random_skill, skills.get_skill(random_skill) - 1);
+                points = skills.calc_skill_points(attributes, race);
+            }
+        }
+
+        skills
+    }
+
     pub fn get_skill(&self, skill: Skill) -> SkillLevel {
         match skill {
             Skill::Athletics => self.athletics,
@@ -70,7 +93,6 @@ impl Skills {
         }
     }
 
-    #[allow(dead_code)]
     pub fn set_skill(&mut self, skill: Skill, level: SkillLevel) {
         match skill {
             Skill::Athletics => self.athletics = level,
@@ -95,6 +117,25 @@ impl Skills {
         Skill::iterator()
             .map(|skill| (skill.attribute(), skill, self.get_skill(skill)))
             .collect()
+    }
+
+    pub fn calc_skill_points(&self, attributes: &Attributes, race: Race) -> i8 {
+        let mut skill_points = 15;
+        for (attr, skill, value) in self.get_skills_by_attributes() {
+            let mut attr_value = attributes.get_attribute(attr);
+            let mut base_value = SkillLevel::D4_2;
+            if let Some(&free_skill_level) = race.free_skills().get(&skill) {
+                if value == free_skill_level {
+                    continue;
+                }
+                attr_value = Dice::max(free_skill_level.into(), attr_value);
+                base_value = free_skill_level;
+            }
+            skill_points -=
+                (value as i8 - base_value as i8) + value.steps_above_attr(attr_value).max(0);
+        }
+
+        skill_points
     }
 }
 
@@ -176,5 +217,11 @@ impl Skill {
             Skill::Climbing,
         ]
         .into_iter()
+    }
+}
+
+impl Distribution<Skill> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Skill {
+        unsafe { std::mem::transmute(rng.gen::<u8>() % Skill::iterator().count() as u8) }
     }
 }

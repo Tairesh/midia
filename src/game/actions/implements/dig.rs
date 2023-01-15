@@ -28,11 +28,7 @@ impl ActionImpl for Dig {
                 No(format!("You can't dig {}", tile.terrain.name()))
             };
         }
-        if !actor
-            .wield
-            .iter()
-            .any(|i| i.qualities().contains(&ItemQuality::Dig))
-        {
+        if !actor.wield.has_quality(ItemQuality::Dig) {
             return No("You need a shovel to dig!".to_string());
         }
 

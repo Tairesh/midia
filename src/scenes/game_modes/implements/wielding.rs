@@ -45,13 +45,12 @@ impl GameModeImpl for Wielding {
     }
 
     fn can_push(&self, world: &World) -> Result<(), String> {
-        // TODO: hands counting
-        if world.player().wield.is_empty() {
+        if world.player().wield.has_free_space() {
             Ok(())
         } else {
             Err(format!(
                 "You already have {} in hands",
-                world.player().wield.last().unwrap().name()
+                world.player().wield.names()
             ))
         }
     }

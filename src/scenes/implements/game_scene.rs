@@ -6,13 +6,12 @@ use geometry::{Direction, Point, TwoDimDirection, Vec2};
 use tetra::graphics::Color;
 use tetra::Context;
 
-use crate::game::Item;
-use crate::scenes::map_view;
 use crate::{
     app::App,
     assets::Assets,
     colors::Colors,
     game::{Action, ActionType, World},
+    scenes::map_view,
     ui::{GameLog, Label, Position, SomeUISprites, SomeUISpritesMut, UiSprite, Vertical},
 };
 
@@ -54,12 +53,7 @@ impl GameScene {
             Position::by_left_top(5.0, 40.0),
         ));
         let hands_display = Box::new(Label::new(
-            world
-                .borrow()
-                .player()
-                .wield
-                .first()
-                .map_or("empty", Item::name),
+            world.borrow().player().wield.names(),
             app.assets.fonts.default.clone(),
             Colors::WHITE_SMOKE,
             Position::by_left_top(65.0, 40.0),
@@ -130,20 +124,8 @@ impl GameScene {
         for event in self.world.borrow().log().new_events() {
             self.log.log(event.msg.as_str(), event.category.into());
         }
-        let current_time = format!("{}", self.world.borrow().meta.current_tick);
-        let hands_display = self
-            .world
-            .borrow()
-            .player()
-            .wield
-            .first()
-            .map_or("empty", |i| i.name())
-            .to_string();
-        let window_size = self.window_size;
-        self.current_time_label()
-            .update(current_time, ctx, window_size);
-        self.hands_display_label()
-            .update(hands_display, ctx, window_size);
+
+        self.update_ui(ctx);
     }
 
     fn hands_display_label(&mut self) -> &mut Label {
@@ -156,6 +138,16 @@ impl GameScene {
 
     fn cursors(&self) -> Vec<(Point, Color)> {
         self.current_mode().borrow().cursors(&self.world.borrow())
+    }
+
+    pub fn update_ui(&mut self, ctx: &mut Context) {
+        let current_time = format!("{}", self.world.borrow().meta.current_tick);
+        let hands_display = self.world.borrow().player().wield.names();
+        let window_size = self.window_size;
+        self.current_time_label()
+            .update(current_time, ctx, window_size);
+        self.hands_display_label()
+            .update(hands_display, ctx, window_size);
     }
 }
 

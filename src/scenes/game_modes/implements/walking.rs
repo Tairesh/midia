@@ -58,7 +58,6 @@ impl GameModeImpl for Walking {
         } else if input::is_key_with_mod_pressed(ctx, Key::D) {
             game.try_start_action(
                 Drop {
-                    item_id: 0,
                     dir: Direction::Here,
                 }
                 .into(),
@@ -91,8 +90,7 @@ impl GameModeImpl for Walking {
         } else if input::is_key_with_mod_pressed(ctx, Key::S) {
             let world = game.world.borrow();
             let player = world.player();
-            let weapon = player.wield.first();
-            if let Some(weapon) = weapon {
+            if let Some(weapon) = player.wield.get_item() {
                 if let Some(melee_damage) = &weapon.proto.melee_damage {
                     game.log.log(
                         format!(
@@ -106,6 +104,17 @@ impl GameModeImpl for Walking {
                     );
                 }
             }
+            None
+        } else if input::is_key_with_mod_pressed(ctx, (Key::X, KeyModifier::Shift)) {
+            game.world.borrow_mut().player_mut().wield.switch_sides();
+            game.log.log(
+                format!(
+                    "You switch {} in your hands.",
+                    game.world.borrow().player().wield.names()
+                ),
+                Colors::WHITE_SMOKE,
+            );
+            game.update_ui(ctx);
             None
         } else if input::is_key_with_mod_pressed(ctx, Key::I) {
             // TODO: inventory game scene

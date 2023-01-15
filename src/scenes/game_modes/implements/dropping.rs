@@ -59,7 +59,7 @@ impl GameModeImpl for Dropping {
             self.selected = Some(dir);
             game.try_rotate_player(dir);
         } else if let Some(dir) = self.selected {
-            game.try_start_action(Drop { item_id: 0, dir }.into());
+            game.try_start_action(Drop { dir }.into());
             game.modes.pop();
         }
         None

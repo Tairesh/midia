@@ -146,10 +146,58 @@ mod tests {
         );
         world.tick();
 
-        assert_eq!(Point::new(0, 0), world.player().pos);
-        assert_eq!(1, world.player().wield.len());
-        let item = world.player().wield.first().unwrap();
+        let item = world.player().wield.get_item().unwrap();
         assert_eq!(item.proto.id, axe().proto.id);
+        assert_eq!(0, world.map().get_tile(Point::new(1, 0)).items.len());
+    }
+
+    #[test]
+    fn test_wielding_two_handed_items() {
+        let mut world = prepare_world();
+        world.player_mut().wield.wield(shovel());
+
+        world.map().get_tile_mut(Point::new(1, 0)).items.clear();
+        world.map().get_tile_mut(Point::new(1, 0)).items.push(axe());
+        assert!(Action::new(
+            0,
+            Wield {
+                dir: Direction::East,
+            }
+            .into(),
+            &world,
+        )
+        .is_err());
+    }
+
+    #[test]
+    fn test_wielding_one_handed_items() {
+        let mut world = prepare_world();
+        world.player_mut().wield.wield(axe());
+
+        world.map().get_tile_mut(Point::new(1, 0)).items.clear();
+        world
+            .map()
+            .get_tile_mut(Point::new(1, 0))
+            .items
+            .push(random_book());
+
+        world.player_mut().action = Some(
+            Action::new(
+                0,
+                Wield {
+                    dir: Direction::East,
+                }
+                .into(),
+                &world,
+            )
+            .unwrap(),
+        );
+        world.tick();
+
+        let item = world.player().wield.get_item().unwrap();
+        assert_eq!(item.proto.id, random_book().proto.id);
+        assert_eq!(0, world.map().get_tile(Point::new(1, 0)).items.len());
+        assert!(!world.player().wield.has_free_space());
     }
 
     #[test]
@@ -168,13 +216,12 @@ mod tests {
         world.map().get_tile_mut(Point::new(0, 0)).terrain = Dirt::default().into();
         world.map().get_tile_mut(Point::new(0, 0)).items.clear();
         world.player_mut().wield.clear();
-        world.player_mut().wield.push(axe());
+        world.player_mut().wield.wield(axe());
 
         world.player_mut().action = Some(
             Action::new(
                 0,
                 Drop {
-                    item_id: 0,
                     dir: Direction::Here,
                 }
                 .into(),
@@ -185,7 +232,7 @@ mod tests {
         world.tick();
 
         assert_eq!(Point::new(0, 0), world.player().pos);
-        assert_eq!(0, world.player().wield.len());
+        assert!(world.player().wield.is_empty());
         let mut map = world.map();
         assert_eq!(1, map.get_tile(Point::new(0, 0)).items.len());
         let item = map.get_tile(Point::new(0, 0)).items.first().unwrap();
@@ -203,7 +250,7 @@ mod tests {
         };
         assert!(Action::new(0, typ.into(), &world).is_err());
 
-        world.player_mut().wield.push(shovel());
+        world.player_mut().wield.wield(shovel());
         world.player_mut().action = Some(Action::new(0, typ.into(), &world).unwrap());
         while world.player().action.is_some() {
             world.tick();

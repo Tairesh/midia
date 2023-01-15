@@ -130,7 +130,9 @@ pub fn draw_unit(
         draw_params = draw_params.color(fur_color.into());
     }
     tileset.draw_region(ctx, avatar.personality.appearance.race.name(), draw_params);
-    if let Some(item) = avatar.wield.get(0) {
+
+    // TODO: draw both items
+    if let Some(item) = avatar.wield.get_item() {
         let (offset_x, offset_y) = (
             if !rotate || matches!(avatar.vision, TwoDimDirection::East) {
                 5.0

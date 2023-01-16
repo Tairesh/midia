@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use geometry::Point;
 
 use super::LogCategory;
@@ -19,5 +21,25 @@ impl LogEvent {
             pos,
             category,
         }
+    }
+
+    pub fn debug(msg: impl Into<String>, pos: Point) -> Self {
+        Self::new(msg, pos, LogCategory::Debug)
+    }
+
+    pub fn info(msg: impl Into<String>, pos: Point) -> Self {
+        Self::new(msg, pos, LogCategory::Info)
+    }
+
+    pub fn warning(msg: impl Into<String>, pos: Point) -> Self {
+        Self::new(msg, pos, LogCategory::Warning)
+    }
+
+    pub fn danger(msg: impl Into<String>, pos: Point) -> Self {
+        Self::new(msg, pos, LogCategory::Danger)
+    }
+
+    pub fn success(msg: impl Into<String>, pos: Point) -> Self {
+        Self::new(msg, pos, LogCategory::Success)
     }
 }

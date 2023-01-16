@@ -159,7 +159,7 @@ impl Focus for Image {}
 impl UiSprite for Image {}
 
 pub struct TilesetSprite {
-    name: &'static str,
+    name: String,
     scale: Vec2,
     tileset: Rc<Tileset>,
     position: Position,
@@ -170,14 +170,14 @@ pub struct TilesetSprite {
 
 impl TilesetSprite {
     pub fn new(
-        name: &'static str,
+        name: impl Into<String>,
         tileset: Rc<Tileset>,
         position: Position,
         scale: f32,
         color: Option<Color>,
     ) -> Self {
         TilesetSprite {
-            name,
+            name: name.into(),
             scale: Vec2::new(scale, scale),
             tileset,
             position,
@@ -187,8 +187,8 @@ impl TilesetSprite {
         }
     }
 
-    pub fn set_name(&mut self, name: &'static str) {
-        self.name = name;
+    pub fn set_name(&mut self, name: impl Into<String>) {
+        self.name = name.into();
     }
 
     pub fn remove_color(&mut self) {
@@ -205,7 +205,7 @@ impl Draw for TilesetSprite {
         if let Some(color) = self.color {
             params = params.color(color);
         }
-        self.tileset.draw_region(ctx, self.name, params);
+        self.tileset.draw_region(ctx, &self.name, params);
     }
 
     fn visible(&self) -> bool {
@@ -227,7 +227,7 @@ impl Positionate for TilesetSprite {
     }
 
     fn calc_size(&mut self, _ctx: &mut Context) -> Vec2 {
-        let size = Tileset::get_size(self.name);
+        let size = Tileset::get_size(&self.name);
         size * self.scale
     }
 

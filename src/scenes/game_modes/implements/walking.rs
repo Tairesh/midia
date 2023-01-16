@@ -8,8 +8,10 @@ use tetra::{
 
 use crate::{
     colors::Colors,
-    game::actions::implements::{Drop, Skip, Walk},
-    game::BodySlot,
+    game::{
+        actions::implements::{Drop, Skip, Walk},
+        BodySlot, LogEvent,
+    },
     input,
     settings::Settings,
 };
@@ -94,7 +96,8 @@ impl GameModeImpl for Walking {
             None
         } else if input::is_key_with_mod_pressed(ctx, (Key::X, KeyModifier::Shift)) {
             game.world.borrow_mut().player_mut().wield.swap_items();
-            game.log.log("You swap your hands", Colors::WHITE_SMOKE);
+            let event = LogEvent::info("You swap your hands", game.world.borrow().player().pos);
+            game.world.borrow_mut().log().push(event);
             game.update_ui(ctx);
             None
         } else if input::is_key_with_mod_pressed(ctx, Key::I) {

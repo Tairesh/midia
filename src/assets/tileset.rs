@@ -83,18 +83,17 @@ impl Tileset {
         })
     }
 
-    pub fn get_size(name: &'static str) -> Vec2 {
+    pub fn get_size(name: &str) -> Vec2 {
         REGIONS
             .get(name)
-            .map(|r| Vec2::new(r.width, r.height))
-            .unwrap_or_default()
+            .map_or(Vec2::new(10.0, 10.0), |r| Vec2::new(r.width, r.height))
     }
 
     pub fn draw_region<P: Into<DrawParams>>(&self, ctx: &mut Context, name: &str, params: P) {
         let region = REGIONS
             .get(name)
             .copied()
-            .unwrap_or_else(|| Rectangle::new(30.0, 90.0, 10.0, 10.0));
+            .unwrap_or_else(|| Rectangle::new(80.0, 0.0, 10.0, 10.0));
         self.texture.draw_region(ctx, region, params);
     }
 }

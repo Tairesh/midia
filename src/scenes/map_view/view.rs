@@ -11,7 +11,7 @@ use crate::game::map::TerrainView;
 use crate::game::traits::Name;
 use crate::game::{Avatar, World};
 
-// TODO: refactor this to small functions
+// TODO: refactor this shit
 
 pub fn draw(
     ctx: &mut Context,
@@ -22,56 +22,60 @@ pub fn draw(
     cursors: Vec<(Point, Color)>,
 ) {
     tetra::graphics::clear(ctx, Colors::BLACK);
-    let (width, height) = (window_size.0 as f32, window_size.1 as f32);
-
     let world = world.borrow();
+
     let scale = world.game_view.zoom.as_scale();
     let zoom = world.game_view.zoom.as_view();
     let tile_size = assets.tileset.tile_size as f32 * zoom;
-    let window_size_in_tiles = (
-        (width / tile_size).ceil() as i32,
-        (height / tile_size).ceil() as i32,
+
+    let (width, height) = (
+        window_size.0 / tile_size as i32,
+        window_size.1 / tile_size as i32,
     );
-    let center = Vec2::new(
-        (width / 2.0 - tile_size / 2.0).round(),
-        (height / 2.0 - tile_size / 2.0).round(),
-    );
+    let center = Vec2::new(window_size.0 as f32, window_size.1 as f32) / 2.0
+        - Vec2::new(tile_size, tile_size) / 2.0;
     let center_tile = world.player().pos + shift_of_view;
-    let left_top = center_tile + (-window_size_in_tiles.0 / 2, -window_size_in_tiles.1 / 2);
-    let right_bottom = center_tile + (window_size_in_tiles.0 / 2, window_size_in_tiles.1 / 2);
-    world.map().load_tiles_between(left_top, right_bottom);
-    for (pos, tile) in world.map().tiles_between(left_top, right_bottom) {
+
+    let left_top = center_tile + (-width / 2, -height / 2);
+    let right_bottom = center_tile + (width / 2, height / 2);
+
+    let mut map = world.map();
+    map.load_tiles_between(left_top, right_bottom);
+
+    let tiles = map.tiles_between(left_top, right_bottom);
+    for &(pos, tile) in &tiles {
         if !world.is_visible(pos) {
             continue; // TODO: TileView struct for remembering unseen tiles
         }
-        let dx = pos.x - center_tile.x;
-        let dy = pos.y - center_tile.y;
+        let delta = Vec2::from(pos - center_tile);
+
         let this_tile_size = Tileset::get_size(tile.terrain.looks_like());
         let asset_tile_size = assets.tileset.tile_size as f32;
-        let x_correction = -(this_tile_size.x - asset_tile_size) / 2.0 * zoom;
-        let y_correction = -(this_tile_size.y - asset_tile_size) * zoom;
-        let params = DrawParams::new()
-            .position(Vec2::new(
-                (center.x + dx as f32 * tile_size + x_correction).round(),
-                (center.y + dy as f32 * tile_size + y_correction).round(),
-            ))
-            .scale(scale);
+        let correction = Vec2::new(
+            -(this_tile_size.x - asset_tile_size) / 2.0 * zoom,
+            -(this_tile_size.y - asset_tile_size) * zoom,
+        );
+        let position = center + delta * tile_size + correction;
+
+        let params = DrawParams::new().position(position).scale(scale);
         assets
             .tileset
             .draw_region(ctx, tile.terrain.looks_like(), params.clone());
         if let Some(item) = tile.top_item() {
-            let item_params = params.clone().color(item.color());
             assets
                 .tileset
-                .draw_region(ctx, item.look_like(), item_params);
+                .draw_region(ctx, item.look_like(), params.clone().color(item.color()));
             if tile.items.len() > 1 {
                 assets.tileset.draw_region(ctx, "highlight", params);
             }
         }
-        let position = Vec2::new(
-            center.x + dx as f32 * tile_size,
-            center.y + dy as f32 * tile_size,
-        );
+    }
+    for &(pos, tile) in &tiles {
+        if !world.is_visible(pos) {
+            continue;
+        }
+
+        let position = center + Vec2::from(pos - center_tile) * tile_size;
         for i in tile.units.iter().copied() {
             draw_unit(
                 ctx,
@@ -83,11 +87,13 @@ pub fn draw(
             );
         }
     }
+
     // if world.player().action.is_some() {
     //     self.draw_action_loader(ctx, center);
     // } else {
     //     self.action_text = None;
     // }
+
     let cursor_mesh = Mesh::rectangle(
         ctx,
         ShapeStyle::Stroke(1.0),

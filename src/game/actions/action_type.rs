@@ -2,7 +2,7 @@ use enum_dispatch::enum_dispatch;
 
 use super::{
     super::{Avatar, World},
-    implements::{Close, Dig, Drop, Open, Read, Skip, Walk, Wield},
+    implements::{Close, Dig, Drop, Open, Read, Skip, Walk, Wear, Wield},
     Action, ActionImpl, ActionPossibility,
 };
 
@@ -17,6 +17,7 @@ pub enum ActionType {
     Read,
     Open,
     Close,
+    Wear,
 }
 
 #[cfg(test)]
@@ -26,13 +27,13 @@ mod tests {
     use super::{
         super::super::{
             map::{
-                items::helpers::{axe, random_book, shovel},
+                items::helpers::{axe, cloak, random_book, shovel},
                 terrains::{Boulder, BoulderSize, Chest, Dirt},
                 Terrain, TerrainInteract,
             },
             world::tests::{add_npc, prepare_world},
         },
-        Action, Close, Dig, Drop, Open, Read, Skip, Walk, Wield,
+        Action, Close, Dig, Drop, Open, Read, Skip, Walk, Wear, Wield,
     };
 
     #[test]
@@ -342,5 +343,39 @@ mod tests {
             .get_tile(Point::new(1, 0))
             .terrain
             .can_be_opened());
+    }
+
+    #[test]
+    fn test_wear() {
+        let mut world = prepare_world();
+        world.player_mut().wield.wield(cloak());
+        world.player_mut().wear.clear();
+
+        if let Ok(action) = Action::new(0, Wear {}.into(), &world) {
+            world.player_mut().action = Some(action);
+            while world.player().action.is_some() {
+                world.tick();
+            }
+        } else {
+            panic!("Cannot wear");
+        }
+
+        assert!(world.log().new_events()[0].msg.contains("wear cloak"));
+        assert!(world.player().wield.is_empty());
+        assert!(world
+            .player()
+            .wear
+            .iter()
+            .any(|i| i.proto.id == cloak().proto.id));
+    }
+
+    #[test]
+    fn test_wear_invalid_items() {
+        let mut world = prepare_world();
+        world.player_mut().wield.clear();
+        assert!(Action::new(0, Wear {}.into(), &world).is_err());
+
+        world.player_mut().wield.wield(axe());
+        assert!(Action::new(0, Wear {}.into(), &world).is_err());
     }
 }

@@ -5,6 +5,7 @@ pub use open::Open;
 pub use read::Read;
 pub use skip::Skip;
 pub use walk::Walk;
+pub use wear::Wear;
 pub use wield::Wield;
 
 mod close;
@@ -14,4 +15,5 @@ mod open;
 mod read;
 mod skip;
 mod walk;
+mod wear;
 mod wield;

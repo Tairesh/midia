@@ -9,7 +9,7 @@ use tetra::{
 use crate::{
     colors::Colors,
     game::{
-        actions::implements::{Drop, Skip, Walk},
+        actions::implements::{Drop, Skip, Walk, Wear},
         BodySlot, LogEvent,
     },
     input,
@@ -19,7 +19,8 @@ use crate::{
 use super::super::{
     super::{implements::GameScene, Scene, SomeTransitions, Transition},
     implements::{
-        Closing, Digging, Dropping, Examining, ForceAttack, Observing, Opening, Reading, Wielding,
+        Closing, Digging, Dropping, Examining, ForceAttack, Observing, Opening, Reading,
+        WieldingFromGround,
     },
     GameModeImpl,
 };
@@ -70,13 +71,13 @@ impl GameModeImpl for Walking {
         } else if input::is_key_with_mod_pressed(ctx, (Key::D, KeyModifier::Shift)) {
             game.push_mode(Dropping::new().into());
             None
-        } else if input::is_key_with_mod_pressed(ctx, Key::W) {
-            game.push_mode(Wielding::new().into());
+        } else if input::is_key_with_mod_pressed(ctx, Key::G) {
+            game.push_mode(WieldingFromGround::new().into());
             None
         } else if input::is_key_with_mod_pressed(ctx, (Key::C, KeyModifier::Shift)) {
             game.log.clear();
             None
-        } else if input::is_key_with_mod_pressed(ctx, Key::G) {
+        } else if input::is_key_with_mod_pressed(ctx, (Key::G, KeyModifier::Shift)) {
             game.push_mode(Digging::new().into());
             None
         } else if input::is_key_with_mod_pressed(ctx, Key::X) {
@@ -93,6 +94,9 @@ impl GameModeImpl for Walking {
             None
         } else if input::is_key_with_mod_pressed(ctx, (Key::A, KeyModifier::Ctrl)) {
             game.push_mode(ForceAttack::new().into());
+            None
+        } else if input::is_key_with_mod_pressed(ctx, (Key::W, KeyModifier::Shift)) {
+            game.try_start_action(Wear {}.into());
             None
         } else if input::is_key_with_mod_pressed(ctx, (Key::X, KeyModifier::Shift)) {
             game.world.borrow_mut().player_mut().wield.swap_items();

@@ -9,7 +9,7 @@ use super::{
     super::{implements::GameScene, SomeTransitions},
     implements::{
         Closing, Digging, Dropping, Examining, ForceAttack, Observing, Opening, Reading, Walking,
-        Wielding,
+        WieldingFromGround,
     },
     GameMode,
 };

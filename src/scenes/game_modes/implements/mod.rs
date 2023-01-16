@@ -7,7 +7,7 @@ pub use observing::Observing;
 pub use opening::Opening;
 pub use reading::Reading;
 pub use walking::Walking;
-pub use wielding::Wielding;
+pub use wielding_from_ground::WieldingFromGround;
 
 mod closing;
 mod digging;
@@ -18,4 +18,4 @@ mod observing;
 mod opening;
 mod reading;
 mod walking;
-mod wielding;
+mod wielding_from_ground;

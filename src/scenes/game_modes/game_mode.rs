@@ -2,14 +2,14 @@ use enum_dispatch::enum_dispatch;
 
 use super::implements::{
     Closing, Digging, Dropping, Examining, ForceAttack, Observing, Opening, Reading, Walking,
-    Wielding,
+    WieldingFromGround,
 };
 
 #[enum_dispatch(GameModeImpl)]
 pub enum GameMode {
     Walking,
     Examining,
-    Wielding,
+    WieldingFromGround,
     Dropping,
     Digging,
     Observing,

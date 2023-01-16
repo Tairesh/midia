@@ -12,23 +12,23 @@ use super::super::{
     GameModeImpl,
 };
 
-pub struct Wielding {
+pub struct WieldingFromGround {
     selected: Option<Direction>,
 }
 
-impl Wielding {
+impl WieldingFromGround {
     pub fn new() -> Self {
         Self { selected: None }
     }
 }
 
-impl Default for Wielding {
+impl Default for WieldingFromGround {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl GameModeImpl for Wielding {
+impl GameModeImpl for WieldingFromGround {
     fn cursors(&self, world: &World) -> Vec<(Point, Color)> {
         if let Some(selected) = self.selected {
             vec![(selected.into(), Colors::LIME)]

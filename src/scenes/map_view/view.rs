@@ -132,7 +132,7 @@ pub fn draw_unit(
     tileset.draw_region(ctx, avatar.personality.appearance.race.name(), draw_params);
 
     // TODO: draw both items
-    if let Some(item) = avatar.wield.get_item() {
+    if let Some(item) = avatar.wield.active_hand() {
         let (offset_x, offset_y) = (
             if !rotate || matches!(avatar.vision, TwoDimDirection::East) {
                 5.0

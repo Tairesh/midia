@@ -10,7 +10,7 @@ use crate::{
     app::App,
     assets::Assets,
     colors::Colors,
-    game::{Action, ActionType, World},
+    game::{Action, ActionType, MainHand, World},
     scenes::map_view,
     ui::{GameLog, Label, Position, SomeUISprites, SomeUISpritesMut, UiSprite, Vertical},
 };
@@ -21,7 +21,7 @@ use super::super::{
 };
 
 pub struct GameScene {
-    sprites: [Box<dyn UiSprite>; 4],
+    sprites: [Box<dyn UiSprite>; 6],
     pub world: Rc<RefCell<World>>,
     pub modes: Vec<Rc<RefCell<GameMode>>>,
     pub log: GameLog,
@@ -33,33 +33,69 @@ pub struct GameScene {
 impl GameScene {
     pub fn new(app: &App) -> Self {
         let world = app.get_world();
+        let world_borrow = world.borrow();
+        let player = world_borrow.player();
         let name_label = Box::new(Label::new(
-            world.borrow().player().personality.mind.name.as_str(),
+            player.personality.mind.name.as_str(),
             app.assets.fonts.header.clone(),
             Colors::WHITE_SMOKE,
             Position::by_left_top(55.0, 8.0),
         ));
         // TODO: custom calendar
         let current_time_label = Box::new(Label::new(
-            format!("{}", world.borrow().meta.current_tick),
+            format!("{}", world_borrow.meta.current_tick),
             app.assets.fonts.default.clone(),
             Colors::WHITE_SMOKE,
             Position::horizontal_center(0.0, Vertical::ByTop { y: 5.0 }),
         ));
-        let hands_label = Box::new(Label::new(
-            "Hands:",
+        let main_hand_label = Box::new(Label::new(
+            match player.personality.mind.main_hand {
+                MainHand::Left => "Left hand:",
+                _ => "Right hand:",
+            },
             app.assets.fonts.default.clone(),
-            Colors::WHITE_SMOKE,
+            Colors::LIME,
             Position::by_left_top(5.0, 40.0),
         ));
-        let hands_display = Box::new(Label::new(
-            world.borrow().player().wield.names(),
+        let main_hand_display = Box::new(Label::new(
+            player
+                .wield
+                .main_hand(player.personality.mind.main_hand)
+                .map_or("nothing", |i| i.name()),
+            app.assets.fonts.default.clone(),
+            Colors::LIME,
+            Position::by_left_top(110.0, 40.0),
+        ));
+        let second_hand_label = Box::new(Label::new(
+            match player.personality.mind.main_hand {
+                MainHand::Left => "Right hand:",
+                _ => "Left hand:",
+            },
             app.assets.fonts.default.clone(),
             Colors::WHITE_SMOKE,
-            Position::by_left_top(65.0, 40.0),
+            Position::by_left_top(5.0, 60.0),
         ));
+        let second_hand_display = Box::new(Label::new(
+            player
+                .wield
+                .second_hand(player.personality.mind.main_hand)
+                .map_or("nothing", |i| i.name()),
+            app.assets.fonts.default.clone(),
+            Colors::WHITE_SMOKE,
+            Position::by_left_top(110.0, 60.0),
+        ));
+        // TODO: items icons
+
+        drop(world_borrow);
         Self {
-            sprites: [name_label, hands_label, hands_display, current_time_label],
+            sprites: [
+                name_label,
+                main_hand_label,
+                main_hand_display,
+                current_time_label,
+                second_hand_label,
+                second_hand_display,
+            ],
             modes: vec![Rc::new(RefCell::new(Walking::new().into()))],
             log: GameLog::new(app.assets.fonts.default.font.clone()),
             shift_of_view: Point::default(),
@@ -128,8 +164,12 @@ impl GameScene {
         self.update_ui(ctx);
     }
 
-    fn hands_display_label(&mut self) -> &mut Label {
+    fn main_hand_display_label(&mut self) -> &mut Label {
         self.sprites[2].as_label().unwrap()
+    }
+
+    fn second_hand_display_label(&mut self) -> &mut Label {
+        self.sprites[5].as_label().unwrap()
     }
 
     fn current_time_label(&mut self) -> &mut Label {
@@ -141,13 +181,30 @@ impl GameScene {
     }
 
     pub fn update_ui(&mut self, ctx: &mut Context) {
-        let current_time = format!("{}", self.world.borrow().meta.current_tick);
-        let hands_display = self.world.borrow().player().wield.names();
+        let world = self.world.borrow();
+        let current_time = format!("{}", world.meta.current_tick);
+        let main_hand_item_name = world
+            .player()
+            .wield
+            .main_hand(world.player().personality.mind.main_hand)
+            .map_or("nothing", |i| i.name())
+            .to_string();
+        let second_hand_item_name = world
+            .player()
+            .wield
+            .second_hand(world.player().personality.mind.main_hand)
+            .map_or("nothing", |i| i.name())
+            .to_string();
+
+        drop(world);
+
         let window_size = self.window_size;
         self.current_time_label()
             .update(current_time, ctx, window_size);
-        self.hands_display_label()
-            .update(hands_display, ctx, window_size);
+        self.main_hand_display_label()
+            .update(main_hand_item_name, ctx, window_size);
+        self.second_hand_display_label()
+            .update(second_hand_item_name, ctx, window_size);
     }
 }
 

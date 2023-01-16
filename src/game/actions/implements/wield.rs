@@ -16,22 +16,11 @@ pub struct Wield {
 
 impl ActionImpl for Wield {
     fn is_possible(&self, actor: &Avatar, world: &World) -> ActionPossibility {
-        if !actor.wield.has_free_space() {
-            return No(format!(
-                "You already have {} in hands",
-                world.player().wield.names()
-            ));
-        }
         let pos = actor.pos + self.dir;
         if let Some(item) = world.map().get_tile(pos).items.last() {
-            if actor.wield.can_wield(item) {
-                Yes(item.wield_time().round() as u32)
-            } else {
-                No(format!(
-                    "You can't wield {} with {}",
-                    item.name(),
-                    actor.wield.names()
-                ))
+            match world.player().wield.can_wield(item.is_two_handed()) {
+                Ok(_) => Yes(item.wield_time().round() as u32),
+                Err(e) => No(e),
             }
         } else {
             No("There is nothing to pick up".to_string())
@@ -46,8 +35,13 @@ impl ActionImpl for Wield {
             action.owner_mut(world).wield.wield(item);
             world.log().push(LogEvent::new(
                 format!(
-                    "{} wield the {}",
+                    "{} wield{} the {}",
                     action.owner(world).name_for_actions(),
+                    if action.owner(world).is_player() {
+                        ""
+                    } else {
+                        "s"
+                    },
                     name
                 ),
                 pos,

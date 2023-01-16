@@ -27,7 +27,7 @@ impl ActionImpl for Drop {
             return No(format!("You can't put items on {}", tile.terrain.name()));
         }
 
-        if let Some(item) = actor.wield.get_item() {
+        if let Some(item) = actor.wield.active_hand() {
             let k = if matches!(self.dir, Direction::Here) {
                 1.0
             } else {
@@ -41,7 +41,7 @@ impl ActionImpl for Drop {
 
     fn on_finish(&self, action: &Action, world: &mut World) {
         let owner = action.owner_mut(world);
-        let item = owner.wield.take_item().unwrap();
+        let item = owner.wield.take_from_active_hand().unwrap();
         let owner = action.owner(world);
         let pos = owner.pos + self.dir;
         let name = item.name().to_string();

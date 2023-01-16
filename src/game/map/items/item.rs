@@ -110,7 +110,7 @@ impl Item {
         self.proto.mass
     }
 
-    pub fn two_handed(&self) -> bool {
+    pub fn is_two_handed(&self) -> bool {
         self.proto.two_handed_tool || self.mass() > 5000
     }
 

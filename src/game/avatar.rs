@@ -1,77 +1,13 @@
 #![allow(dead_code)]
 
-use std::collections::VecDeque;
-
 use geometry::{Point, TwoDimDirection};
 
 use super::{
     map::items::helpers::{cloak, hat},
-    races::Personality,
+    races::{MainHand, Personality},
     savage::CharSheet,
-    Action, BodySlot, Item, ItemQuality,
+    Action, BodySlot, Item, Wield,
 };
-
-#[derive(serde::Serialize, serde::Deserialize, Debug, Default)]
-pub struct Wield {
-    items: VecDeque<Item>,
-}
-
-impl Wield {
-    pub fn is_empty(&self) -> bool {
-        self.items.is_empty()
-    }
-
-    pub fn has_free_space(&self) -> bool {
-        self.is_empty() || (self.items.len() < 2 && !self.items[0].two_handed())
-    }
-
-    pub fn can_wield(&self, item: &Item) -> bool {
-        if item.two_handed() {
-            self.is_empty()
-        } else {
-            self.has_free_space()
-        }
-    }
-
-    pub fn switch_sides(&mut self) -> bool {
-        if self.items.len() == 2 {
-            self.items.swap(0, 1);
-            true
-        } else {
-            false
-        }
-    }
-
-    pub fn names(&self) -> String {
-        let names = self.items.iter().map(Item::name).collect::<Vec<&str>>();
-        if names.is_empty() {
-            "nothing".to_string()
-        } else {
-            names.join(" and ")
-        }
-    }
-
-    pub fn has_quality(&self, quality: ItemQuality) -> bool {
-        self.items.iter().any(|i| i.qualities().contains(&quality))
-    }
-
-    pub fn get_item(&self) -> Option<&Item> {
-        self.items.get(0)
-    }
-
-    pub fn take_item(&mut self) -> Option<Item> {
-        self.items.pop_front()
-    }
-
-    pub fn wield(&mut self, item: Item) {
-        self.items.push_front(item);
-    }
-
-    #[cfg(test)]
-    pub fn clear(&mut self) {
-        self.items.clear();
-    }
-}
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct Avatar {
@@ -79,7 +15,6 @@ pub struct Avatar {
     pub pos: Point,
     pub action: Option<Action>,
     pub vision: TwoDimDirection,
-    // TODO: custom struct with hands counter and methods to return names and icons for UI
     pub wield: Wield,
     // TODO: custom struct with layers for dress and methods to return names and icons for UI
     pub wear: Vec<Item>,
@@ -91,13 +26,13 @@ pub struct Avatar {
 impl Avatar {
     pub fn new(personality: Personality, char_sheet: CharSheet, pos: Point) -> Self {
         Avatar {
-            personality,
-            pos,
             action: None,
             vision: TwoDimDirection::East,
-            wield: Wield::default(),
+            wield: Wield::new(!matches!(personality.mind.main_hand, MainHand::Left)),
             wear: Vec::new(),
+            personality,
             char_sheet,
+            pos,
         }
     }
 

@@ -3,8 +3,9 @@ pub use avatar::Avatar;
 pub use game_data::{GameData, ItemPrototype, ItemQuality, ItemSpecial, ItemTag, WearLayer};
 pub use log::Log;
 pub use map::{Chunk, ChunkPos, Item, Map, Terrain, TerrainInteract, TerrainView, Tile, TilePos};
-pub use races::BodySlot;
+pub use races::{BodySlot, MainHand};
 pub use savage::{Attribute, CharSheet, Damage, Dice, DiceWithModifier, Skill, SkillLevel};
+pub use wield::Wield;
 pub use world::World;
 
 pub mod actions;
@@ -15,4 +16,5 @@ pub mod map;
 pub mod races;
 mod savage;
 pub mod traits;
+mod wield;
 pub mod world;

@@ -50,21 +50,22 @@ impl GameModeImpl for ForceAttack {
         } else if let Some(_point) = self.target {
             let world = game.world.borrow();
             let player = world.player();
-            let (weapon_name, damage, penetration) = if let Some(weapon) = player.wield.get_item() {
-                if let Some(melee_damage) = &weapon.proto.melee_damage {
-                    (
-                        weapon.name(),
-                        melee_damage.damage.roll(&player.char_sheet),
-                        melee_damage.penetration,
-                    )
+            let (weapon_name, damage, penetration) =
+                if let Some(weapon) = player.wield.active_hand() {
+                    if let Some(melee_damage) = &weapon.proto.melee_damage {
+                        (
+                            weapon.name(),
+                            melee_damage.damage.roll(&player.char_sheet),
+                            melee_damage.penetration,
+                        )
+                    } else {
+                        let default_damage = Damage::default();
+                        (weapon.name(), default_damage.roll(&player.char_sheet), 0)
+                    }
                 } else {
                     let default_damage = Damage::default();
-                    (weapon.name(), default_damage.roll(&player.char_sheet), 0)
-                }
-            } else {
-                let default_damage = Damage::default();
-                ("fists", default_damage.roll(&player.char_sheet), 0)
-            };
+                    ("fists", default_damage.roll(&player.char_sheet), 0)
+                };
 
             game.log.log(
                 format!(

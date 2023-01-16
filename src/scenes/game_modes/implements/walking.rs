@@ -93,16 +93,9 @@ impl GameModeImpl for Walking {
             game.push_mode(ForceAttack::new().into());
             None
         } else if input::is_key_with_mod_pressed(ctx, (Key::X, KeyModifier::Shift)) {
-            if game.world.borrow_mut().player_mut().wield.switch_sides() {
-                game.log.log(
-                    format!(
-                        "You switch {} in your hands.",
-                        game.world.borrow().player().wield.names()
-                    ),
-                    Colors::WHITE_SMOKE,
-                );
-                game.update_ui(ctx);
-            }
+            game.world.borrow_mut().player_mut().wield.swap_items();
+            game.log.log("You swap your hands", Colors::WHITE_SMOKE);
+            game.update_ui(ctx);
             None
         } else if input::is_key_with_mod_pressed(ctx, Key::I) {
             // TODO: inventory game scene

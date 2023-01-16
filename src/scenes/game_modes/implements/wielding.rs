@@ -45,14 +45,7 @@ impl GameModeImpl for Wielding {
     }
 
     fn can_push(&self, world: &World) -> Result<(), String> {
-        if world.player().wield.has_free_space() {
-            Ok(())
-        } else {
-            Err(format!(
-                "You already have {} in hands",
-                world.player().wield.names()
-            ))
-        }
+        world.player().wield.can_wield(false)
     }
 
     fn update(&mut self, ctx: &mut Context, game: &mut GameScene) -> SomeTransitions {

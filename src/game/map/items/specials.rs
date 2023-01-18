@@ -19,8 +19,8 @@ pub struct Readable {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct LookLike {
-    pub look_like: String,
+pub struct LooksLike {
+    pub looks_like: String,
 }
 
 // TODO: slots and stuff

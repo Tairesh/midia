@@ -84,7 +84,7 @@ impl Default for MeleeDamageValue {
 pub struct ItemPrototype {
     pub id: String,
     pub name: String,
-    pub look_like: String,
+    pub looks_like: String,
     // in grams
     pub mass: u32,
     #[serde(default)]

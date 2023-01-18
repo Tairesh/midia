@@ -58,13 +58,13 @@ mod tests {
 
     #[test]
     fn test_deserialize_different_types() {
-        let json = r#"
+        static JSON: &str = r#"
         [
           {
             "type": "item",
             "id": "shovel",
             "name": "Shovel",
-            "look_like": "shovel",
+            "looks_like": "shovel",
             "tags": [ "TOOL" ],
             "qualities": [
               "DIG"
@@ -110,7 +110,7 @@ mod tests {
           }
         ]
         "#;
-        let data: Vec<DataEntity> = serde_json::from_str(json).unwrap();
+        let data: Vec<DataEntity> = serde_json::from_str(JSON).unwrap();
         let slice = data.as_slice();
         check_shovel(&slice[0]);
         check_namepack(&slice[1]);
@@ -118,13 +118,13 @@ mod tests {
 
     #[test]
     fn test_deserialize_shovel() {
-        let json = r#"
+        static JSON: &str = r#"
         [
           {
             "type": "item",
             "id": "shovel",
             "name": "Shovel",
-            "look_like": "shovel",
+            "looks_like": "shovel",
             "tags": [ "TOOL" ],
             "qualities": [
               "DIG"
@@ -144,26 +144,26 @@ mod tests {
           }
         ]
         "#;
-        let data: Vec<DataEntity> = serde_json::from_str(json).unwrap();
+        let data: Vec<DataEntity> = serde_json::from_str(JSON).unwrap();
         let slice = data.as_slice();
         check_shovel(&slice[0]);
     }
 
     #[test]
     fn test_deserialize_book() {
-        let json = r#"
+        static JSON: &str = r#"
         [
           {
             "type": "item",
             "id": "book",
             "name": "Book",
-            "look_like": "book",
+            "looks_like": "book",
             "specials": [ "READABLE", "NAMED", "COLORED" ],
             "mass": 100
           }
         ]
         "#;
-        let data: Vec<DataEntity> = serde_json::from_str(json).unwrap();
+        let data: Vec<DataEntity> = serde_json::from_str(JSON).unwrap();
         let slice = data.as_slice();
         assert!(matches!(slice[0], DataEntity::Item(..)));
         if let DataEntity::Item(item) = &slice[0] {
@@ -178,13 +178,13 @@ mod tests {
 
     #[test]
     fn test_deserialize_cloak() {
-        let json = r#"
+        static JSON: &str = r#"
         [
           {
             "type": "item",
             "id": "cloak",
             "name": "cloak",
-            "look_like": "cloak",
+            "looks_like": "cloak",
             "mass": 100,
             "wearable": [
               [ "torso", "OUTER", 1 ],
@@ -197,7 +197,7 @@ mod tests {
         ]
         "#;
 
-        let data: Vec<DataEntity> = serde_json::from_str(json).unwrap();
+        let data: Vec<DataEntity> = serde_json::from_str(JSON).unwrap();
         let slice = data.as_slice();
         assert!(matches!(slice[0], DataEntity::Item(..)));
         if let DataEntity::Item(item) = &slice[0] {
@@ -220,13 +220,13 @@ mod tests {
 
     #[test]
     fn test_deserialize_knife() {
-        let json = r#"
+        static JSON: &str = r#"
         [
           {
             "type": "item",
             "id": "knife",
             "name": "knife",
-            "look_like": "knife",
+            "looks_like": "knife",
             "tags": [
               "TOOL",
               "WEAPON"
@@ -248,7 +248,7 @@ mod tests {
       ]
       "#;
 
-        let data: Vec<DataEntity> = serde_json::from_str(json).unwrap();
+        let data: Vec<DataEntity> = serde_json::from_str(JSON).unwrap();
         let slice = data.as_slice();
         assert!(matches!(slice[0], DataEntity::Item(..)));
         if let DataEntity::Item(item) = &slice[0] {

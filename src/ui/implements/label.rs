@@ -158,7 +158,7 @@ impl ItemDisplay {
         position: Position,
     ) -> Self {
         let (name, looks_like) = if let Some(item) = item {
-            (item.name(), item.look_like())
+            (item.name(), item.looks_like())
         } else {
             ("(empty)", "")
         };
@@ -177,7 +177,7 @@ impl ItemDisplay {
 
     pub fn set_item(&mut self, item: Option<&Item>, ctx: &mut Context, window_size: (i32, i32)) {
         let (name, looks_like) = if let Some(item) = item {
-            (item.name(), Some(item.look_like()))
+            (item.name(), Some(item.looks_like()))
         } else {
             ("(empty)", None)
         };

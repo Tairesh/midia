@@ -7,7 +7,7 @@ use tetra::graphics::Color;
 
 use crate::game::{BodySlot, ItemPrototype, ItemQuality, ItemTag, MeleeDamageValue, WearLayer};
 
-use super::specials::{Colored, Container, LookLike, Named, Readable};
+use super::specials::{Colored, Container, LooksLike, Named, Readable};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Item {
@@ -15,7 +15,7 @@ pub struct Item {
     named: Option<Named>,
     colored: Option<Colored>,
     readable: Option<Readable>,
-    look_like: Option<LookLike>,
+    looks_like: Option<LooksLike>,
     container: Option<Container>,
 }
 
@@ -26,7 +26,7 @@ impl Item {
             named: None,
             colored: None,
             readable: None,
-            look_like: None,
+            looks_like: None,
             container: None,
         }
     }
@@ -48,9 +48,9 @@ impl Item {
         self
     }
 
-    pub fn with_look_like(mut self, look_like: impl Into<String>) -> Self {
-        self.look_like = Some(LookLike {
-            look_like: look_like.into(),
+    pub fn with_looks_like(mut self, looks_like: impl Into<String>) -> Self {
+        self.looks_like = Some(LooksLike {
+            looks_like: looks_like.into(),
         });
         self
     }
@@ -86,12 +86,12 @@ impl Item {
         None
     }
 
-    pub fn look_like(&self) -> &str {
-        if let Some(look_like) = &self.look_like {
-            return &look_like.look_like;
+    pub fn looks_like(&self) -> &str {
+        if let Some(looks_like) = &self.looks_like {
+            return &looks_like.looks_like;
         }
 
-        &self.proto.look_like
+        &self.proto.looks_like
     }
 
     pub fn container(&mut self) -> Option<&mut Container> {

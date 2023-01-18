@@ -64,7 +64,7 @@ pub fn draw(
         if let Some(item) = tile.top_item() {
             assets
                 .tileset
-                .draw_region(ctx, item.look_like(), params.clone().color(item.color()));
+                .draw_region(ctx, item.looks_like(), params.clone().color(item.color()));
             if tile.items.len() > 1 {
                 assets.tileset.draw_region(ctx, "highlight", params);
             }
@@ -153,7 +153,7 @@ pub fn draw_unit(
         );
         tileset.draw_region(
             ctx,
-            item.look_like(),
+            item.looks_like(),
             DrawParams::new()
                 .position(position + Vec2::new(offset_x, offset_y))
                 .color(item.color())

@@ -66,7 +66,7 @@ impl GameScene {
         ));
         let main_hand = player.wield.main_hand(player.personality.mind.main_hand);
         let main_hand_image = Box::new(TilesetSprite::new(
-            main_hand.map_or("empty", Item::look_like),
+            main_hand.map_or("empty", Item::looks_like),
             app.assets.tileset.clone(),
             Position {
                 x: Horizontal::ByLeft { x: 105.0 },
@@ -107,7 +107,7 @@ impl GameScene {
             },
         ));
         let second_hand_image = Box::new(TilesetSprite::new(
-            second_hand.map_or("empty", Item::look_like),
+            second_hand.map_or("empty", Item::looks_like),
             app.assets.tileset.clone(),
             Position {
                 x: Horizontal::ByLeft { x: 105.0 },
@@ -233,13 +233,13 @@ impl GameScene {
         let player = world.player();
         let main_hand_item = player.wield.main_hand(player.personality.mind.main_hand);
         let main_hand_item_name = main_hand_item.map_or("nothing", Item::name).to_string();
-        let main_hand_item_sprite = main_hand_item.map_or("empty", Item::look_like).to_string();
+        let main_hand_item_sprite = main_hand_item.map_or("empty", Item::looks_like).to_string();
         let main_hand_item_color = main_hand_item.map(Item::color).unwrap_or_default();
 
         let second_hand_item = player.wield.second_hand(player.personality.mind.main_hand);
         let second_hand_item_name = second_hand_item.map_or("nothing", Item::name).to_string();
         let second_hand_item_sprite = second_hand_item
-            .map_or("empty", Item::look_like)
+            .map_or("empty", Item::looks_like)
             .to_string();
         let second_hand_item_color = second_hand_item.map(Item::color).unwrap_or_default();
 

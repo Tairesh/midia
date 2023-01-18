@@ -3,7 +3,7 @@
     "type": "item",
     "id": "shovel",
     "name": "shovel",
-    "look_like": "shovel",
+    "looks_like": "shovel",
     "tags": [
       "TOOL"
     ],
@@ -27,7 +27,7 @@
     "type": "item",
     "id": "axe",
     "name": "axe",
-    "look_like": "axe",
+    "looks_like": "axe",
     "tags": [
       "TOOL",
       "WEAPON"
@@ -50,7 +50,7 @@
     "type": "item",
     "id": "knife",
     "name": "knife",
-    "look_like": "knife",
+    "looks_like": "knife",
     "tags": [
       "TOOL",
       "WEAPON"

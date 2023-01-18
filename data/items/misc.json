@@ -3,7 +3,7 @@
     "type": "item",
     "id": "book",
     "name": "book",
-    "look_like": "book",
+    "looks_like": "book",
     "mass": 100,
     "specials": [
       "READABLE",

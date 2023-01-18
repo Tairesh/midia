@@ -3,7 +3,7 @@
     "type": "item",
     "id": "cloak",
     "name": "cloak",
-    "look_like": "cloak",
+    "looks_like": "cloak",
     "mass": 100,
     "wearable": [
       [
@@ -37,7 +37,7 @@
     "type": "item",
     "id": "hat",
     "name": "strange hat",
-    "look_like": "hat",
+    "looks_like": "hat",
     "mass": 50,
     "wearable": [
       [
@@ -51,7 +51,7 @@
     "type": "item",
     "id": "rags",
     "name": "dirty rags",
-    "look_like": "rags",
+    "looks_like": "rags",
     "mass": 100,
     "wearable": [
       [
@@ -85,7 +85,7 @@
     "type": "item",
     "id": "backpack",
     "name": "leather backpack",
-    "look_like": "backpack",
+    "looks_like": "backpack",
     "mass": 100,
     "wearable": [
       [

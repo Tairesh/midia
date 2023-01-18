@@ -42,7 +42,7 @@ pub fn dead_body(unit: &Avatar) -> Item {
     Item::new(ItemPrototype {
         id: "corpse".to_string(),
         name: format!("dead {}", unit.personality.age_name()),
-        look_like: "corpse".to_string(),
+        looks_like: "corpse".to_string(),
         mass: unit.personality.appearance.body_mass(),
         tags: HashSet::from([ItemTag::Corpse]),
         qualities: HashSet::default(),

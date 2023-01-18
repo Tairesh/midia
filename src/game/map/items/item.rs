@@ -5,7 +5,7 @@ use std::collections::HashSet;
 use serde::{Deserialize, Serialize};
 use tetra::graphics::Color;
 
-use crate::game::{BodySlot, ItemPrototype, ItemQuality, ItemTag, WearLayer};
+use crate::game::{BodySlot, ItemPrototype, ItemQuality, ItemTag, MeleeDamageValue, WearLayer};
 
 use super::specials::{Colored, Container, LookLike, Named, Readable};
 
@@ -172,6 +172,20 @@ impl Item {
     pub fn wield_time(&self) -> f32 {
         // 100 grams per tick
         self.mass() as f32 / 100.0
+    }
+
+    pub fn attack_time(&self) -> f32 {
+        // 100 grams per tick
+        self.mass() as f32 / 100.0
+    }
+
+    pub fn melee_damage(&self) -> MeleeDamageValue {
+        // TODO: check for minimum strength
+        if let Some(damage) = &self.proto.melee_damage {
+            return damage.clone();
+        }
+
+        MeleeDamageValue::item(self)
     }
 }
 

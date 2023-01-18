@@ -55,7 +55,7 @@ impl Dice {
     }
 
     /// Roll a dice that explodes on the maximum value.
-    pub fn roll_wild(self) -> u8 {
+    pub fn roll_explosive(self) -> u8 {
         let mut total = 0u8;
         let mut roll = self.roll();
         while roll == self.value() {
@@ -124,12 +124,24 @@ impl DiceWithModifier {
         (self.0.roll() as i8 + self.1).max(1) as u8
     }
 
-    pub fn roll_wild(self) -> u8 {
-        (self.0.roll_wild() as i8 + self.1).max(1) as u8
+    pub fn roll_explosive(self) -> u8 {
+        (self.0.roll_explosive() as i8 + self.1).max(1) as u8
     }
 
     pub fn value(self) -> u8 {
         (self.0.value() as i8 + self.1).max(0) as u8
+    }
+
+    pub fn with_modifier(self, modifier: i8) -> Self {
+        DiceWithModifier(self.0, self.1 + modifier)
+    }
+
+    pub fn dice(self) -> Dice {
+        self.0
+    }
+
+    pub fn modifier(self) -> i8 {
+        self.1
     }
 }
 
@@ -213,8 +225,8 @@ impl SkillLevel {
         DiceWithModifier::from(self).roll()
     }
 
-    pub fn roll_wild(self) -> u8 {
-        DiceWithModifier::from(self).roll_wild()
+    pub fn roll_explosive(self) -> u8 {
+        DiceWithModifier::from(self).roll_explosive()
     }
 
     pub fn next(self) -> Option<Self> {

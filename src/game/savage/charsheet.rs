@@ -1,4 +1,5 @@
 use crate::game::races::Race;
+use crate::game::{Dice, HitResult};
 
 use super::{Attribute, Attributes, DiceWithModifier, Skill, Skills, Wound};
 
@@ -9,6 +10,8 @@ pub struct CharSheet {
     pub attributes: Attributes,
     pub skills: Skills,
     pub wounds: Vec<Wound>,
+    pub shock: bool,
+    pub last_shock_out_roll: u128,
 }
 
 impl CharSheet {
@@ -19,6 +22,8 @@ impl CharSheet {
             attributes,
             skills,
             wounds: vec![],
+            shock: false,
+            last_shock_out_roll: 0,
         }
     }
 
@@ -60,8 +65,9 @@ impl CharSheet {
                 k_wounds *= 0.75;
             }
         }
+        let k_shock = if self.shock { 0.5 } else { 1.0 };
 
-        k_age * k_wounds * self.race.walk_koeff()
+        k_age * k_wounds * k_shock * self.race.walk_koeff()
     }
 
     pub fn get_attribute_with_modifiers(&self, attribute: Attribute) -> DiceWithModifier {
@@ -89,10 +95,42 @@ impl CharSheet {
             }
             Attribute::Spirit => {}
         }
+        value -= self.wounds.len() as i8;
         value.into()
     }
 
     pub fn get_skill_with_modifiers(&self, skill: Skill) -> DiceWithModifier {
-        self.skills.get_skill(skill).into()
+        DiceWithModifier::from(self.skills.get_skill(skill))
+            .with_modifier(-(self.wounds.len() as i8))
+    }
+
+    pub fn apply_hit(&mut self, mut hit: HitResult, current_tick: u128) {
+        if hit.causes.shock {
+            self.shock = true;
+            self.last_shock_out_roll = current_tick;
+        }
+        self.wounds.append(&mut hit.causes.wounds);
+    }
+
+    pub fn can_try_to_shock_out(&self, current_tick: u128) -> bool {
+        self.shock && (current_tick - self.last_shock_out_roll) >= 10
+    }
+
+    pub fn try_to_shock_out(&mut self, current_tick: u128, is_wild_card: bool) -> bool {
+        self.last_shock_out_roll = current_tick;
+        let mut roll = self
+            .get_attribute_with_modifiers(Attribute::Spirit)
+            .roll_explosive();
+        if is_wild_card {
+            let wild_roll =
+                DiceWithModifier::new(Dice::D6, -(self.wounds.len() as i8)).roll_explosive();
+            roll = roll.max(wild_roll);
+        }
+        if roll >= 4 {
+            self.shock = false;
+            true
+        } else {
+            false
+        }
     }
 }

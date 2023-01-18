@@ -4,13 +4,14 @@ use std::convert::TryFrom;
 
 use geometry::{Direction, Point, TwoDimDirection};
 
-use crate::savefile::{self, GameView, Meta, SaveError};
+use crate::game::LogEvent;
 
 use super::{
+    super::savefile::{self, GameView, Meta, SaveError},
     map::{field_of_view_set, Fov, TerrainView},
     races::{Appearance, FurColor, Gender, MainHand, Mind, Personality, Race, Sex},
     savage::CharSheet,
-    Action, Avatar, Chunk, ChunkPos, Log, Map, TilePos,
+    Action, Avatar, Chunk, ChunkPos, HitResult, Log, Map, TilePos,
 };
 
 // TODO: weather and outside lighting system
@@ -370,6 +371,41 @@ impl World {
     pub const BUBBLE_SQUARE_RADIUS: u32 = 128 * 128;
     pub const SPEND_LIMIT: u32 = 100; // TODO: probably it should be about 10-50
 
+    /// Shocked units trying to get out of the shock
+    fn shock_out(&mut self) {
+        for unit in self.loaded_units.clone() {
+            let current_tick = self.meta.current_tick;
+            if self
+                .get_unit(unit)
+                .char_sheet
+                .can_try_to_shock_out(current_tick)
+            {
+                // TODO: is_wild_card
+                let is_wild_card = self.get_unit(unit).is_player();
+                if self
+                    .get_unit_mut(unit)
+                    .char_sheet
+                    .try_to_shock_out(current_tick, is_wild_card)
+                {
+                    self.log().push(LogEvent::info(
+                        format!(
+                            "{} is out of the shock!",
+                            self.get_unit(unit).name_for_actions()
+                        ),
+                        self.get_unit(unit).pos,
+                    ));
+                }
+            }
+        }
+    }
+
+    // TODO: move this to units struct
+    pub fn apply_damage(&mut self, unit_id: usize, hit: HitResult) {
+        let current_tick = self.meta.current_tick;
+        let unit = self.get_unit_mut(unit_id);
+        unit.char_sheet.apply_hit(hit, current_tick);
+    }
+
     pub fn tick(&mut self) {
         self.act();
 
@@ -379,7 +415,9 @@ impl World {
             spend += 1;
             self.act();
 
-            // TODO: npcs AI
+            self.shock_out();
+
+            // TODO: npcs AI for loaded units only
             // let mut unit_wants_actions = HashMap::new();
             // for (unit_id, unit) in self.units.iter_mut().skip(1).enumerate() {
             //     if unit.action.is_none() {

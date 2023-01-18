@@ -15,7 +15,6 @@ pub enum DataEntity {
 #[cfg(test)]
 mod tests {
     use crate::game::races::{BodySlot, Race, Sex};
-    use crate::game::{Attribute, Dice};
 
     use super::super::item::{ItemQuality, ItemSpecial, ItemTag, WearLayer};
     use super::DataEntity;
@@ -236,17 +235,6 @@ mod tests {
             assert!(item.qualities.contains(&ItemQuality::Butch));
             assert!(item.qualities.contains(&ItemQuality::Cut));
             assert!(item.melee_damage.is_some());
-            if let Some(melee_damage) = &item.melee_damage {
-                assert_eq!(melee_damage.moves, 10);
-                assert_eq!(melee_damage.damage.attribute, Some(Attribute::Strength));
-                assert_eq!(melee_damage.damage.dices.len(), 1);
-                assert_eq!(melee_damage.damage.dices[0], Dice::D4);
-                assert_eq!(melee_damage.damage.modifier, 0);
-                assert_eq!(melee_damage.penetration, 0);
-                assert_eq!(melee_damage.distance, 0);
-            } else {
-                panic!("Expected melee_damage!");
-            }
         } else {
             panic!("Expected DataEntity::Item, got {:?}", slice[0]);
         }

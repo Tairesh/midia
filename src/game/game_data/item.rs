@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::game::races::BodySlot;
 use crate::game::savage::Damage;
+use crate::game::Item;
 
 #[derive(Serialize, Deserialize, Debug, Hash, Eq, PartialEq, Copy, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
@@ -49,6 +50,33 @@ pub struct MeleeDamageValue {
     pub distance: u8,
     #[serde(default)]
     pub penetration: u8,
+    // TODO: fighting modifier
+    // TODO: minumum strength
+    // TODO: defense modifier
+}
+
+impl MeleeDamageValue {
+    /// Attack with item
+    pub fn item(item: &Item) -> Self {
+        Self {
+            moves: item.attack_time().round() as u8,
+            damage: Damage::default(),
+            distance: 0,
+            penetration: 0,
+        }
+    }
+}
+
+impl Default for MeleeDamageValue {
+    /// Attack with fists
+    fn default() -> Self {
+        Self {
+            moves: 0,
+            damage: Damage::default(),
+            distance: 0,
+            penetration: 0,
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

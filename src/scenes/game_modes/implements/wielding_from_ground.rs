@@ -3,7 +3,7 @@ use tetra::{graphics::Color, input::Key, Context};
 
 use crate::{
     colors::Colors,
-    game::{actions::implements::Wield, World},
+    game::{actions::implements::WieldFromGround, World},
     input,
 };
 
@@ -55,7 +55,7 @@ impl GameModeImpl for WieldingFromGround {
             self.selected = Some(dir);
             game.try_rotate_player(dir);
         } else if let Some(dir) = self.selected {
-            game.try_start_action(Wield { dir }.into());
+            game.try_start_action(WieldFromGround { dir }.into());
             game.modes.pop();
         }
         None

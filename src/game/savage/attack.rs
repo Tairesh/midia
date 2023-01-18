@@ -46,6 +46,14 @@ impl HitResult {
     pub fn new(params: HitParams, causes: HitCauses) -> Self {
         Self { params, causes }
     }
+
+    #[cfg(test)]
+    pub fn ultra_damage() -> Self {
+        Self::new(
+            HitParams::new(100, 100, true),
+            HitCauses::random_wounds(true, 4),
+        )
+    }
 }
 
 // TODO: attack terrains and items

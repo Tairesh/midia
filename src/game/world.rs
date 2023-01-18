@@ -21,7 +21,7 @@ const VISION_RANGE: i32 = 64;
 pub struct World {
     pub meta: Meta,
     pub game_view: GameView,
-    units: Vec<Avatar>,
+    units: HashMap<usize, Avatar>,
     // TODO: move units to separate struct probably
     loaded_units: HashSet<usize>,
     map: RefCell<Map>,
@@ -36,7 +36,7 @@ impl World {
         meta: Meta,
         game_view: GameView,
         log: Log,
-        units: Vec<Avatar>,
+        units: HashMap<usize, Avatar>,
         chunks: HashMap<ChunkPos, Chunk>,
     ) -> Self {
         let changed = chunks.keys().copied().collect();
@@ -64,15 +64,17 @@ impl World {
             meta,
             GameView::default(),
             Log::new(),
-            vec![avatar],
+            HashMap::from([(0, avatar)]),
             HashMap::new(),
         )
     }
 
     /// Calls one time after world is created
+    #[allow(clippy::too_many_lines)]
     pub fn init(mut self) -> Self {
         // TODO: don't forget to remove
         self.add_unit(Avatar::new(
+            1,
             Personality::new(
                 false,
                 Appearance {
@@ -92,6 +94,7 @@ impl World {
             Point::new(0, -5),
         ));
         self.add_unit(Avatar::new(
+            2,
             Personality::new(
                 false,
                 Appearance {
@@ -111,6 +114,7 @@ impl World {
             Point::new(-3, -5),
         ));
         self.add_unit(Avatar::new(
+            3,
             Personality::new(
                 false,
                 Appearance {
@@ -130,6 +134,7 @@ impl World {
             Point::new(3, -5),
         ));
         self.add_unit(Avatar::new(
+            4,
             Personality::new(
                 false,
                 Appearance {
@@ -149,6 +154,7 @@ impl World {
             Point::new(6, -5),
         ));
         self.add_unit(Avatar::new(
+            5,
             Personality::new(
                 false,
                 Appearance {
@@ -167,8 +173,28 @@ impl World {
             CharSheet::default(true, Race::Totik, 29),
             Point::new(-6, -5),
         ));
+        self.add_unit(Avatar::new(
+            6,
+            Personality::new(
+                false,
+                Appearance {
+                    race: Race::Bug,
+                    age: 99,
+                    fur_color: None,
+                    sex: Sex::Undefined,
+                },
+                Mind {
+                    name: "bug".to_string(),
+                    gender: Gender::Custom("bug".to_string()),
+                    main_hand: MainHand::Right,
+                    alive: true,
+                },
+            ),
+            CharSheet::default(false, Race::Bug, 99),
+            Point::new(0, 5),
+        ));
 
-        self.units.iter().enumerate().for_each(|(i, unit)| {
+        self.units.iter().for_each(|(&i, unit)| {
             self.map.borrow_mut().get_tile_mut(unit.pos).on_step(i);
         });
         self
@@ -197,7 +223,7 @@ impl World {
                 .map_err(SaveError::from)?
                 .as_str(),
         );
-        for unit in &self.units {
+        for unit in self.units.values() {
             data.push('\n');
             data.push_str(
                 serde_json::to_string(unit)
@@ -242,11 +268,11 @@ impl World {
     }
 
     pub fn get_unit(&self, unit_id: usize) -> &Avatar {
-        self.units.get(unit_id).unwrap()
+        self.units.get(&unit_id).unwrap()
     }
 
     pub fn get_unit_mut(&mut self, unit_id: usize) -> &mut Avatar {
-        self.units.get_mut(unit_id).unwrap()
+        self.units.get_mut(&unit_id).unwrap()
     }
 
     pub fn player(&self) -> &Avatar {
@@ -258,11 +284,11 @@ impl World {
     }
 
     pub fn move_avatar(&mut self, unit_id: usize, dir: Direction) {
-        let mut pos = self.units.get(unit_id).unwrap().pos;
+        let mut pos = self.get_unit(unit_id).pos;
         let (old_chunk, _) = pos.to_chunk();
         self.map().get_tile_mut(pos).off_step(unit_id);
         pos += dir;
-        if let Some(unit) = self.units.get_mut(unit_id) {
+        if let Some(unit) = self.units.get_mut(&unit_id) {
             unit.pos = pos;
             if let Ok(dir) = TwoDimDirection::try_from(dir) {
                 unit.vision = dir;
@@ -315,7 +341,7 @@ impl World {
                     .iter()
                     .copied()
                     .map(|i| {
-                        let unit = self.units.get(i).unwrap();
+                        let unit = self.get_unit(i);
                         (if multiline { " - " } else { "" }).to_string()
                             + unit.name_for_actions().as_str()
                     })
@@ -332,22 +358,29 @@ impl World {
         let actions: Vec<Action> = self
             .units
             .iter()
-            .rev()
-            .filter(|u| u.action.is_some())
-            .map(|u| u.action.as_ref().unwrap().clone())
+            .filter(|(_, u)| u.action.is_some())
+            .map(|(_, u)| u.action.as_ref().unwrap().clone())
             .collect();
         for action in actions {
             action.act(self);
             if self.meta.current_tick >= action.finish {
-                self.get_unit_mut(action.owner).action = None;
+                if let Some(unit) = self.units.get_mut(&action.owner) {
+                    unit.action = None;
+                }
             }
         }
     }
 
     #[allow(dead_code)]
+    pub fn next_unit_id(&self) -> usize {
+        self.units.keys().copied().max().unwrap_or(0) + 1
+    }
+
+    #[allow(dead_code)]
     pub fn add_unit(&mut self, unit: Avatar) -> usize {
         let pos = unit.pos;
-        self.units.push(unit);
+        self.units
+            .insert(self.units.keys().copied().max().unwrap_or(0) + 1, unit);
         self.load_units();
         let new_id = self.units.len() - 1;
         self.map().get_tile_mut(pos).units.insert(new_id);
@@ -358,7 +391,7 @@ impl World {
     fn load_units(&mut self) {
         self.loaded_units.clear();
         let center = self.player().pos;
-        for (i, unit) in self.units.iter().enumerate() {
+        for (&i, unit) in &self.units {
             let pos = unit.pos;
             let dist = pos.square_distance(center);
             if dist <= Self::BUBBLE_SQUARE_RADIUS {
@@ -399,8 +432,20 @@ impl World {
     // TODO: move this to units struct
     pub fn apply_damage(&mut self, unit_id: usize, hit: HitResult) {
         let current_tick = self.meta.current_tick;
-        let unit = self.get_unit_mut(unit_id);
-        unit.char_sheet.apply_hit(hit, current_tick);
+        let pos = self.get_unit(unit_id).pos;
+        let items_dropped = self.get_unit_mut(unit_id).apply_hit(hit, current_tick);
+        for item in items_dropped {
+            self.map().get_tile_mut(pos).items.push(item);
+        }
+
+        if self.get_unit(unit_id).char_sheet.is_dead() {
+            self.log().push(LogEvent::danger(
+                format!("{} is dead!", self.get_unit(unit_id).name_for_actions()),
+                pos,
+            ));
+            self.map().get_tile_mut(pos).units.remove(&unit_id);
+            self.loaded_units.remove(&unit_id);
+        }
     }
 
     pub fn tick(&mut self) {
@@ -415,22 +460,7 @@ impl World {
 
             self.shock_out();
 
-            // TODO: npcs AI for loaded units only
-            // let mut unit_wants_actions = HashMap::new();
-            // for (unit_id, unit) in self.units.iter_mut().skip(1).enumerate() {
-            //     if unit.action.is_none() {
-            //         if let Some(brain) = &mut unit.ai {
-            //             brain.plan();
-            //             if let Some(action_type) = brain.action() {
-            //                 // +1 is because we skipped first one in enumeration
-            //                 unit_wants_actions.insert(unit_id + 1, action_type);
-            //             }
-            //         }
-            //     }
-            // }
-            // for (unit_id, typ) in unit_wants_actions {
-            //     self.units.get_mut(unit_id).unwrap().action = Action::new(unit_id, typ, self).ok();
-            // }
+            // TODO: npcs AI for loaded units
         }
     }
 }
@@ -461,17 +491,22 @@ pub mod tests {
             Meta::new("test", "test"),
             GameView::default(),
             Log::new(),
-            vec![Avatar::dressed_default(
-                player,
-                CharSheet::default(true, Race::Gazan, 25),
-                Point::new(0, 0),
-            )],
+            HashMap::from([(
+                0,
+                Avatar::dressed_default(
+                    0,
+                    player,
+                    CharSheet::default(true, Race::Gazan, 25),
+                    Point::new(0, 0),
+                ),
+            )]),
             HashMap::new(),
         )
     }
 
     pub fn add_npc(world: &mut World, pos: Point) -> usize {
         world.add_unit(Avatar::new(
+            world.next_unit_id(),
             old_bugger(),
             CharSheet::default(false, Race::Bug, 99),
             pos,
@@ -495,19 +530,19 @@ pub mod tests {
         )
         .unwrap();
         let length = action.length;
-        if let Some(npc) = world.units.get_mut(1) {
+        if let Some(npc) = world.units.get_mut(&1) {
             npc.action = Some(action);
         } else {
             unreachable!();
         }
         assert_eq!(Point::new(0, 0), world.player().pos);
-        assert_eq!(Point::new(1, 0), world.units.get(1).unwrap().pos);
+        assert_eq!(Point::new(1, 0), world.units.get(&1).unwrap().pos);
         for _ in 0..length {
             world.player_mut().action = Some(Action::new(0, Skip {}.into(), &world).unwrap());
             world.tick();
         }
         assert_eq!(Point::new(0, 0), world.player().pos);
-        assert_eq!(Point::new(2, 0), world.units.get(1).unwrap().pos)
+        assert_eq!(Point::new(2, 0), world.units.get(&1).unwrap().pos)
     }
 
     #[test]

@@ -3,14 +3,15 @@
 use geometry::{Point, TwoDimDirection};
 
 use super::{
-    map::items::helpers::{cloak, hat},
+    map::items::helpers::{cloak, dead_body, hat},
     races::{MainHand, Personality},
     savage::CharSheet,
-    Action, BodySlot, Item, Wield,
+    Action, BodySlot, HitResult, Item, Wield,
 };
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct Avatar {
+    pub id: usize,
     pub personality: Personality,
     pub pos: Point,
     pub action: Option<Action>,
@@ -24,8 +25,9 @@ pub struct Avatar {
 }
 
 impl Avatar {
-    pub fn new(personality: Personality, char_sheet: CharSheet, pos: Point) -> Self {
+    pub fn new(id: usize, personality: Personality, char_sheet: CharSheet, pos: Point) -> Self {
         Avatar {
+            id,
             action: None,
             vision: TwoDimDirection::East,
             wield: Wield::new(!matches!(personality.mind.main_hand, MainHand::Left)),
@@ -37,16 +39,21 @@ impl Avatar {
     }
 
     // TODO: remove this and select dress in create character scene
-    pub fn dressed_default(personality: Personality, char_sheet: CharSheet, pos: Point) -> Self {
+    pub fn dressed_default(
+        id: usize,
+        personality: Personality,
+        char_sheet: CharSheet,
+        pos: Point,
+    ) -> Self {
         Self {
             wear: vec![hat(), cloak()],
-            ..Self::new(personality, char_sheet, pos)
+            ..Self::new(id, personality, char_sheet, pos)
         }
     }
 
     pub fn name_for_actions(&self) -> String {
         if self.is_player() {
-            "You".to_string()
+            "you".to_string()
         } else {
             self.personality.mind.name.clone()
         }
@@ -67,21 +74,47 @@ impl Avatar {
             self.personality.mind.gender.pronounce()
         }
     }
+
+    pub fn apply_hit(&mut self, hit: HitResult, current_tick: u128) -> Vec<Item> {
+        self.char_sheet.apply_hit(hit, current_tick);
+
+        // TODO: drop weapons if arm is wounded
+
+        if self.char_sheet.is_dead() {
+            self.action = None;
+            self.personality.mind.alive = false;
+
+            let mut items = Vec::new();
+            items.append(&mut self.wear);
+            if let Some(item) = self.wield.take_from_active_hand() {
+                items.push(item);
+            }
+            if let Some(item) = self.wield.take_from_off_hand() {
+                items.push(item);
+            }
+            items.push(dead_body(self));
+            items
+        } else {
+            Vec::new()
+        }
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use geometry::Point;
 
+    use crate::game::map::items::helpers::axe;
     use crate::game::races::tests::personality::tester_girl;
     use crate::game::races::Race;
-    use crate::game::BodySlot;
+    use crate::game::{BodySlot, HitResult};
 
     use super::{Avatar, CharSheet};
 
     #[test]
     fn test_npc_name() {
         let npc = Avatar::new(
+            0,
             tester_girl(),
             CharSheet::default(true, Race::Gazan, 15),
             Point::new(0, 0),
@@ -95,22 +128,41 @@ mod tests {
         let mut personality = tester_girl();
         personality.is_player = true;
         let player = Avatar::new(
+            0,
             personality,
             CharSheet::default(true, Race::Gazan, 15),
             Point::new(0, 0),
         );
 
-        assert_eq!(player.name_for_actions(), "You");
+        assert_eq!(player.name_for_actions(), "you");
     }
 
     #[test]
     fn test_armor() {
         let avatar = Avatar::dressed_default(
+            0,
             tester_girl(),
             CharSheet::default(true, Race::Gazan, 15),
             Point::new(0, 0),
         );
 
         assert_eq!(avatar.armor(BodySlot::Torso), 1);
+    }
+
+    #[test]
+    fn test_die() {
+        let mut avatar = Avatar::dressed_default(
+            0,
+            tester_girl(),
+            CharSheet::default(false, Race::Gazan, 15),
+            Point::new(0, 0),
+        );
+        avatar.wield.wield(axe());
+        let items = avatar.apply_hit(HitResult::ultra_damage(), 0);
+        assert_eq!(items.len(), 4);
+        assert_eq!(items[0].name(), "strange hat");
+        assert_eq!(items[1].name(), "cloak");
+        assert_eq!(items[2].name(), "axe");
+        assert_eq!(items[3].name(), "dead gazan girl");
     }
 }

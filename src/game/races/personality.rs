@@ -20,6 +20,25 @@ pub struct Appearance {
     pub sex: Sex,
 }
 
+impl Appearance {
+    pub fn body_mass(&self) -> u32 {
+        let k_age = match self.age {
+            0 => 0.05,
+            1..=3 => 0.1,
+            4..=6 => 0.3,
+            7..=13 => 0.5,
+            14..=16 => 0.8,
+            17.. => 1.0,
+        };
+        let k_sex = match self.sex {
+            Sex::Female => 0.8,
+            _ => 1.0,
+        };
+
+        (self.race.body_mass() as f32 * k_age * k_sex).round() as u32
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Mind {
     #[serde(rename = "n")]

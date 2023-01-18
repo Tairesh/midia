@@ -18,6 +18,10 @@ pub struct Dig {
 
 impl ActionImpl for Dig {
     fn is_possible(&self, actor: &Avatar, world: &World) -> ActionPossibility {
+        if actor.char_sheet.shock {
+            return No("You are in shock".to_string());
+        }
+
         let pos = actor.pos + self.dir;
         let mut map = world.map();
         let tile = map.get_tile(pos);

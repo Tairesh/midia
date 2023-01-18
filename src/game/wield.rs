@@ -70,6 +70,10 @@ impl Wield {
         self.items[1 - self.active_hand_index()].as_ref()
     }
 
+    pub fn take_from_off_hand(&mut self) -> Option<Item> {
+        self.items[1 - self.active_hand_index()].take()
+    }
+
     pub fn can_wield(&self, two_handed: bool) -> Result<(), String> {
         if let Some(item) = self.active_hand() {
             return Err(format!("You already have {} in main hand", item.name(),));

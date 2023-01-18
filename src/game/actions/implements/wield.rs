@@ -10,12 +10,16 @@ use super::super::{
 };
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Copy, Clone)]
-pub struct Wield {
+pub struct WieldFromGround {
     pub dir: Direction,
 }
 
-impl ActionImpl for Wield {
+impl ActionImpl for WieldFromGround {
     fn is_possible(&self, actor: &Avatar, world: &World) -> ActionPossibility {
+        if actor.char_sheet.shock {
+            return No("You are in shock".to_string());
+        }
+
         let pos = actor.pos + self.dir;
         if let Some(item) = world.map().get_tile(pos).items.last() {
             match world.player().wield.can_wield(item.is_two_handed()) {
@@ -59,7 +63,7 @@ mod tests {
     use crate::game::world::tests::prepare_world;
     use crate::game::Action;
 
-    use super::Wield;
+    use super::WieldFromGround;
 
     #[test]
     fn test_wielding() {
@@ -73,7 +77,7 @@ mod tests {
         world.player_mut().action = Some(
             Action::new(
                 0,
-                Wield {
+                WieldFromGround {
                     dir: Direction::East,
                 }
                 .into(),
@@ -99,7 +103,7 @@ mod tests {
         world.map().get_tile_mut(Point::new(1, 0)).items.push(axe());
         assert!(Action::new(
             0,
-            Wield {
+            WieldFromGround {
                 dir: Direction::East,
             }
             .into(),
@@ -127,7 +131,7 @@ mod tests {
         world.player_mut().action = Some(
             Action::new(
                 0,
-                Wield {
+                WieldFromGround {
                     dir: Direction::East,
                 }
                 .into(),

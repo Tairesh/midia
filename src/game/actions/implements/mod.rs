@@ -7,7 +7,7 @@ pub use read::Read;
 pub use skip::Skip;
 pub use walk::Walk;
 pub use wear::Wear;
-pub use wield::Wield;
+pub use wield::WieldFromGround;
 
 mod close;
 mod dig;

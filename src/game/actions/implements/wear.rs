@@ -11,6 +11,10 @@ pub struct Wear {}
 
 impl ActionImpl for Wear {
     fn is_possible(&self, actor: &Avatar, _world: &World) -> ActionPossibility {
+        if actor.char_sheet.shock {
+            return No("You are in shock".to_string());
+        }
+
         if let Some(item) = actor.wield.active_hand() {
             if item.is_wearable() {
                 Yes(1)

@@ -1,5 +1,7 @@
+use std::collections::HashSet;
+
 use crate::colors::Colors;
-use crate::game::GameData;
+use crate::game::{Avatar, GameData, ItemPrototype, ItemTag};
 
 use super::Item;
 
@@ -34,4 +36,19 @@ pub fn random_book() -> Item {
 pub fn backpack() -> Item {
     let game_data = GameData::instance();
     Item::new(game_data.items.get("backpack").cloned().unwrap()).with_container(Vec::new())
+}
+
+pub fn dead_body(unit: &Avatar) -> Item {
+    Item::new(ItemPrototype {
+        id: "corpse".to_string(),
+        name: format!("dead {}", unit.personality.age_name()),
+        look_like: "corpse".to_string(),
+        mass: unit.personality.appearance.body_mass(),
+        tags: HashSet::from([ItemTag::Corpse]),
+        qualities: HashSet::default(),
+        specials: HashSet::default(),
+        two_handed_tool: false,
+        wearable: None,
+        melee_damage: None,
+    })
 }

@@ -574,6 +574,7 @@ impl CharacterAttributes {
         // TODO: traits, skills, etc.
         // TODO: find available starting pos in the world
         let avatar = Avatar::dressed_default(
+            0,
             self.personality.clone(),
             self.char_sheet.clone(),
             Point::new(0, 0),

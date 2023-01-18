@@ -126,6 +126,11 @@ impl CharSheet {
         self.wounds.append(&mut hit.causes.wounds);
     }
 
+    pub fn is_dead(&self) -> bool {
+        let wounds_limit = if self.wild_card { 3 } else { 0 };
+        self.wounds.len() > wounds_limit
+    }
+
     pub fn can_try_to_shock_out(&self, current_tick: u128) -> bool {
         self.shock && (current_tick - self.last_shock_out_roll) >= 10
     }

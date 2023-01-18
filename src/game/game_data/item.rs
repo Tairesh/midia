@@ -12,6 +12,7 @@ pub enum ItemTag {
     Tool,
     Weapon,
     Book,
+    Corpse,
 }
 
 #[derive(Serialize, Deserialize, Debug, Hash, Eq, PartialEq, Copy, Clone)]

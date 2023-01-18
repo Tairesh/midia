@@ -2,7 +2,8 @@ use geometry::Point;
 
 use super::super::{
     super::{melee_attack, Action, AttackResult, Avatar, LogEvent, World, Wound},
-    ActionImpl, ActionPossibility,
+    ActionImpl,
+    ActionPossibility::{self, No, Yes},
 };
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Copy, Clone)]
@@ -18,18 +19,22 @@ impl MeleeAttack {
 
 impl ActionImpl for MeleeAttack {
     fn is_possible(&self, actor: &Avatar, _world: &World) -> ActionPossibility {
+        if actor.char_sheet.shock {
+            return No("You are in shock".to_string());
+        }
+
         let distance = (actor.pos.distance(self.target).floor() - 1.0) as u8;
         let weapon = actor.wield.active_hand();
         let weapon_moves = weapon.map_or(10, |w| w.melee_damage().moves);
         if distance > 0 {
             let weapon_distance = weapon.map_or(0, |w| w.melee_damage().distance);
             if distance > weapon_distance {
-                ActionPossibility::No("You can't reach the target from this distance".to_string())
+                No("You can't reach the target from this distance".to_string())
             } else {
-                ActionPossibility::Yes(weapon_moves as u32)
+                Yes(weapon_moves as u32)
             }
         } else {
-            ActionPossibility::Yes(weapon_moves as u32)
+            Yes(weapon_moves as u32)
         }
     }
 
@@ -70,8 +75,9 @@ impl ActionImpl for MeleeAttack {
                         message.push_str(" No effect.");
                     } else {
                         if damage.causes.shock {
-                            message
-                                .push_str(format!(" {} is stunned.", unit.pronounce().0).as_str());
+                            message.push_str(
+                                format!(" {} is stunned.", unit.name_for_actions()).as_str(),
+                            );
                         }
                         if !damage.causes.wounds.is_empty() {
                             message.push_str(&format!(

@@ -58,6 +58,17 @@ impl Race {
         .iter()
         .copied()
     }
+
+    // in grams
+    pub fn body_mass(self) -> u32 {
+        match self {
+            Race::Gazan => 75_000,
+            Race::Nyarnik => 70_000,
+            Race::Totik => 60_000,
+            Race::Lagnam => 65_000,
+            Race::Bug => 50_000,
+        }
+    }
 }
 
 impl From<Race> for &str {
@@ -67,7 +78,7 @@ impl From<Race> for &str {
             Race::Nyarnik => "nyarnik",
             Race::Totik => "totik",
             Race::Lagnam => "lagnam",
-            Race::Bug => "Bug",
+            Race::Bug => "bug",
         }
     }
 }

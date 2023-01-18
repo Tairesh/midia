@@ -5,8 +5,10 @@ use std::convert::TryFrom;
 use geometry::{Direction, Point, TwoDimDirection};
 
 use super::{
-    super::savefile::{self, GameView, Meta, SaveError},
-    lang,
+    super::{
+        lang,
+        savefile::{self, GameView, Meta, SaveError},
+    },
     map::{field_of_view_set, Fov, TerrainView},
     races::{Appearance, FurColor, Gender, MainHand, Mind, Personality, Race, Sex},
     savage::CharSheet,
@@ -86,7 +88,7 @@ impl World {
                     alive: true,
                 },
             ),
-            CharSheet::default(Race::Gazan, 25),
+            CharSheet::default(true, Race::Gazan, 25),
             Point::new(0, -5),
         ));
         self.add_unit(Avatar::new(
@@ -105,7 +107,7 @@ impl World {
                     alive: true,
                 },
             ),
-            CharSheet::default(Race::Nyarnik, 22),
+            CharSheet::default(true, Race::Nyarnik, 22),
             Point::new(-3, -5),
         ));
         self.add_unit(Avatar::new(
@@ -124,7 +126,7 @@ impl World {
                     alive: true,
                 },
             ),
-            CharSheet::default(Race::Gazan, 20),
+            CharSheet::default(true, Race::Gazan, 20),
             Point::new(3, -5),
         ));
         self.add_unit(Avatar::new(
@@ -143,7 +145,7 @@ impl World {
                     alive: true,
                 },
             ),
-            CharSheet::default(Race::Lagnam, 25),
+            CharSheet::default(true, Race::Lagnam, 25),
             Point::new(6, -5),
         ));
         self.add_unit(Avatar::new(
@@ -162,7 +164,7 @@ impl World {
                     alive: true,
                 },
             ),
-            CharSheet::default(Race::Totik, 29),
+            CharSheet::default(true, Race::Totik, 29),
             Point::new(-6, -5),
         ));
 
@@ -378,22 +380,18 @@ impl World {
                 .get_unit(unit)
                 .char_sheet
                 .can_try_to_shock_out(current_tick)
-            {
-                // TODO: is_wild_card
-                let is_wild_card = self.get_unit(unit).is_player();
-                if self
+                && self
                     .get_unit_mut(unit)
                     .char_sheet
-                    .try_to_shock_out(current_tick, is_wild_card)
-                {
-                    self.log().push(LogEvent::info(
-                        format!(
-                            "{} is out of the shock!",
-                            self.get_unit(unit).name_for_actions()
-                        ),
-                        self.get_unit(unit).pos,
-                    ));
-                }
+                    .try_to_shock_out(current_tick)
+            {
+                self.log().push(LogEvent::info(
+                    format!(
+                        "{} is out of the shock!",
+                        self.get_unit(unit).name_for_actions()
+                    ),
+                    self.get_unit(unit).pos,
+                ));
             }
         }
     }
@@ -448,7 +446,7 @@ pub mod tests {
             actions::implements::{Skip, Walk},
             map::terrains::{Boulder, BoulderSize, Dirt},
             races::{
-                tests::personality::{old_queer, tester_girl},
+                tests::personality::{old_bugger, tester_girl},
                 Race,
             },
         },
@@ -465,7 +463,7 @@ pub mod tests {
             Log::new(),
             vec![Avatar::dressed_default(
                 player,
-                CharSheet::default(Race::Gazan, 25),
+                CharSheet::default(true, Race::Gazan, 25),
                 Point::new(0, 0),
             )],
             HashMap::new(),
@@ -474,8 +472,8 @@ pub mod tests {
 
     pub fn add_npc(world: &mut World, pos: Point) -> usize {
         world.add_unit(Avatar::new(
-            old_queer(),
-            CharSheet::default(Race::Bug, 99),
+            old_bugger(),
+            CharSheet::default(false, Race::Bug, 99),
             pos,
         ))
     }

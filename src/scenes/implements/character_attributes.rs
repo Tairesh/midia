@@ -241,8 +241,11 @@ fn skill_sprites(
 impl CharacterAttributes {
     pub fn new(path: &Path, personality: Personality, app: &App, ctx: &mut Context) -> Self {
         let meta = savefile::load(path).unwrap();
-        let char_sheet =
-            CharSheet::default(personality.appearance.race, personality.appearance.age);
+        let char_sheet = CharSheet::default(
+            true,
+            personality.appearance.race,
+            personality.appearance.age,
+        );
 
         let mut sprites: Vec<Box<dyn UiSprite>> = vec![
             bg(&app.assets),
@@ -511,6 +514,7 @@ impl CharacterAttributes {
 
     fn randomize(&mut self, ctx: &mut Context) -> SomeTransitions {
         self.char_sheet = CharSheet::random(
+            true,
             self.personality.appearance.race,
             self.personality.appearance.age,
         );

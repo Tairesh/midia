@@ -145,7 +145,7 @@ pub mod tests {
         )
     }
 
-    pub fn old_queer() -> Personality {
+    pub fn old_bugger() -> Personality {
         Personality::new(
             false,
             Appearance {

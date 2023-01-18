@@ -83,7 +83,7 @@ mod tests {
     fn test_npc_name() {
         let npc = Avatar::new(
             tester_girl(),
-            CharSheet::default(Race::Gazan, 15),
+            CharSheet::default(true, Race::Gazan, 15),
             Point::new(0, 0),
         );
 
@@ -96,7 +96,7 @@ mod tests {
         personality.is_player = true;
         let player = Avatar::new(
             personality,
-            CharSheet::default(Race::Gazan, 15),
+            CharSheet::default(true, Race::Gazan, 15),
             Point::new(0, 0),
         );
 
@@ -107,7 +107,7 @@ mod tests {
     fn test_armor() {
         let avatar = Avatar::dressed_default(
             tester_girl(),
-            CharSheet::default(Race::Gazan, 15),
+            CharSheet::default(true, Race::Gazan, 15),
             Point::new(0, 0),
         );
 

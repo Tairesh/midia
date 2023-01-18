@@ -13,22 +13,24 @@ pub fn a(word: impl Into<String>) -> String {
         && !WORDS_WITH_U_OR_O.iter().any(|w| word.starts_with(w)))
         || WORDS_WITH_SILENT_H.iter().any(|w| word.starts_with(w))
     {
-        format!("an {}", word)
+        format!("an {word}")
     } else {
-        format!("a {}", word)
+        format!("a {word}")
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use test_case::test_case;
+
     use super::a;
 
-    #[test]
-    fn test_a() {
-        assert_eq!("a cat", a("cat"));
-        assert_eq!("an axe", a("axe"));
-        assert_eq!("an hour", a("hour"));
-        assert_eq!("an honest man", a("honest man"));
-        assert_eq!("a unit", a("unit"));
+    #[test_case("cat", "a cat")]
+    #[test_case("axe", "an axe")]
+    #[test_case("hour", "an hour")]
+    #[test_case("honest man", "an honest man")]
+    #[test_case("unit", "a unit")]
+    fn test_a(word: &str, result: &str) {
+        assert_eq!(a(word), result);
     }
 }

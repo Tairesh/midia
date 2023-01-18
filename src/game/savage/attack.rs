@@ -56,8 +56,7 @@ pub fn melee_attack(attacker: &Avatar, defender: &Avatar) -> AttackResult {
     let hit_dice = attacker
         .char_sheet
         .get_skill_with_modifiers(Skill::Fighting);
-    let hit_roll = if attacker.is_player() {
-        // TODO: wild dice for important NPCs, add is_wild_card to Avatar or CharSheet
+    let hit_roll = if attacker.char_sheet.wild_card {
         let wild_dice = DiceWithModifier::new(Dice::D6, hit_dice.modifier());
         u8::max(hit_dice.roll(), wild_dice.roll_explosive())
     } else {

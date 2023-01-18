@@ -5,18 +5,30 @@ use super::{Attribute, Attributes, DiceWithModifier, Skill, Skills, Wound};
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
 pub struct CharSheet {
+    #[serde(default)]
+    pub wild_card: bool,
     pub race: Race,
     pub age: u8,
     pub attributes: Attributes,
     pub skills: Skills,
     pub wounds: Vec<Wound>,
+    #[serde(default)]
     pub shock: bool,
+    #[serde(default)]
     pub last_shock_out_roll: u128,
+    // TODO: add death checks
 }
 
 impl CharSheet {
-    pub fn new(race: Race, age: u8, attributes: Attributes, skills: Skills) -> Self {
+    pub fn new(
+        wild_card: bool,
+        race: Race,
+        age: u8,
+        attributes: Attributes,
+        skills: Skills,
+    ) -> Self {
         Self {
+            wild_card,
             race,
             age,
             attributes,
@@ -27,14 +39,16 @@ impl CharSheet {
         }
     }
 
-    pub fn default(race: Race, age: u8) -> Self {
-        Self::new(race, age, Attributes::default(), Skills::default(race))
+    pub fn default(wild_card: bool, race: Race, age: u8) -> Self {
+        let attributes = Attributes::default();
+        let skills = Skills::default(race);
+        Self::new(wild_card, race, age, attributes, skills)
     }
 
-    pub fn random(race: Race, age: u8) -> Self {
+    pub fn random(wild_card: bool, race: Race, age: u8) -> Self {
         let attributes = Attributes::random();
         let skills = Skills::random(&attributes, race);
-        Self::new(race, age, attributes, skills)
+        Self::new(wild_card, race, age, attributes, skills)
     }
 
     pub fn calc_skill_points(&self) -> i8 {
@@ -116,12 +130,12 @@ impl CharSheet {
         self.shock && (current_tick - self.last_shock_out_roll) >= 10
     }
 
-    pub fn try_to_shock_out(&mut self, current_tick: u128, is_wild_card: bool) -> bool {
+    pub fn try_to_shock_out(&mut self, current_tick: u128) -> bool {
         self.last_shock_out_roll = current_tick;
         let mut roll = self
             .get_attribute_with_modifiers(Attribute::Spirit)
             .roll_explosive();
-        if is_wild_card {
+        if self.wild_card {
             let wild_roll =
                 DiceWithModifier::new(Dice::D6, -(self.wounds.len() as i8)).roll_explosive();
             roll = roll.max(wild_roll);

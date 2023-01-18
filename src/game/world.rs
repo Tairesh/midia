@@ -76,7 +76,6 @@ impl World {
         self.add_unit(Avatar::new(
             1,
             Personality::new(
-                false,
                 Appearance {
                     race: Race::Gazan,
                     age: 25,
@@ -87,7 +86,6 @@ impl World {
                     name: "Dragan".to_string(),
                     gender: Gender::Male,
                     main_hand: MainHand::Right,
-                    alive: true,
                 },
             ),
             CharSheet::default(true, Race::Gazan, 25),
@@ -96,7 +94,6 @@ impl World {
         self.add_unit(Avatar::new(
             2,
             Personality::new(
-                false,
                 Appearance {
                     race: Race::Nyarnik,
                     age: 22,
@@ -107,7 +104,6 @@ impl World {
                     name: "Shasha".to_string(),
                     gender: Gender::Female,
                     main_hand: MainHand::Left,
-                    alive: true,
                 },
             ),
             CharSheet::default(true, Race::Nyarnik, 22),
@@ -116,10 +112,9 @@ impl World {
         self.add_unit(Avatar::new(
             3,
             Personality::new(
-                false,
                 Appearance {
                     race: Race::Gazan,
-                    age: 20,
+                    age: 22,
                     fur_color: Some(FurColor::Ginger),
                     sex: Sex::Male,
                 },
@@ -127,7 +122,6 @@ impl World {
                     name: "Yasma".to_string(),
                     gender: Gender::Male,
                     main_hand: MainHand::Right,
-                    alive: true,
                 },
             ),
             CharSheet::default(true, Race::Gazan, 20),
@@ -136,7 +130,6 @@ impl World {
         self.add_unit(Avatar::new(
             4,
             Personality::new(
-                false,
                 Appearance {
                     race: Race::Lagnam,
                     age: 25,
@@ -147,7 +140,6 @@ impl World {
                     name: "Grem".to_string(),
                     gender: Gender::Male,
                     main_hand: MainHand::Right,
-                    alive: true,
                 },
             ),
             CharSheet::default(true, Race::Lagnam, 25),
@@ -156,7 +148,6 @@ impl World {
         self.add_unit(Avatar::new(
             5,
             Personality::new(
-                false,
                 Appearance {
                     race: Race::Totik,
                     age: 29,
@@ -167,7 +158,6 @@ impl World {
                     name: "Suh".to_string(),
                     gender: Gender::Male,
                     main_hand: MainHand::Right,
-                    alive: true,
                 },
             ),
             CharSheet::default(true, Race::Totik, 29),
@@ -176,7 +166,6 @@ impl World {
         self.add_unit(Avatar::new(
             6,
             Personality::new(
-                false,
                 Appearance {
                     race: Race::Bug,
                     age: 99,
@@ -187,7 +176,6 @@ impl World {
                     name: "bug".to_string(),
                     gender: Gender::Custom("bug".to_string()),
                     main_hand: MainHand::Right,
-                    alive: true,
                 },
             ),
             CharSheet::default(false, Race::Bug, 99),
@@ -392,12 +380,14 @@ impl World {
         self.loaded_units.clear();
         let center = self.player().pos;
         for (&i, unit) in &self.units {
+            if unit.char_sheet.is_dead() {
+                continue;
+            }
+
             let pos = unit.pos;
             let dist = pos.square_distance(center);
             if dist <= Self::BUBBLE_SQUARE_RADIUS {
                 self.loaded_units.insert(i);
-            } else {
-                self.loaded_units.remove(&i);
             }
         }
     }
@@ -485,8 +475,6 @@ pub mod tests {
     };
 
     pub fn prepare_world() -> World {
-        let mut player = tester_girl();
-        player.is_player = true;
         World::new(
             Meta::new("test", "test"),
             GameView::default(),
@@ -495,7 +483,7 @@ pub mod tests {
                 0,
                 Avatar::dressed_default(
                     0,
-                    player,
+                    tester_girl(),
                     CharSheet::default(true, Race::Gazan, 25),
                     Point::new(0, 0),
                 ),

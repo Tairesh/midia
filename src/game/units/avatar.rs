@@ -2,7 +2,7 @@
 
 use geometry::{Point, TwoDimDirection};
 
-use super::{
+use super::super::{
     map::items::helpers::{cloak, dead_body, hat},
     races::{MainHand, Personality},
     savage::CharSheet,
@@ -60,7 +60,7 @@ impl Avatar {
     }
 
     pub fn is_player(&self) -> bool {
-        self.personality.is_player
+        self.id == 0
     }
 
     pub fn armor(&self, slot: BodySlot) -> u8 {
@@ -82,7 +82,6 @@ impl Avatar {
 
         if self.char_sheet.is_dead() {
             self.action = None;
-            self.personality.mind.alive = false;
 
             let mut items = Vec::new();
             items.append(&mut self.wear);
@@ -114,7 +113,7 @@ mod tests {
     #[test]
     fn test_npc_name() {
         let npc = Avatar::new(
-            0,
+            1,
             tester_girl(),
             CharSheet::default(true, Race::Gazan, 15),
             Point::new(0, 0),
@@ -125,11 +124,9 @@ mod tests {
 
     #[test]
     fn test_player_name() {
-        let mut personality = tester_girl();
-        personality.is_player = true;
         let player = Avatar::new(
             0,
-            personality,
+            tester_girl(),
             CharSheet::default(true, Race::Gazan, 15),
             Point::new(0, 0),
         );

@@ -47,15 +47,11 @@ pub struct Mind {
     pub gender: Gender,
     #[serde(rename = "m")]
     pub main_hand: MainHand,
-    #[serde(rename = "l")]
-    pub alive: bool,
     // TODO: profession
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Personality {
-    #[serde(rename = "p")]
-    pub is_player: bool,
     #[serde(rename = "a")]
     pub appearance: Appearance,
     #[serde(rename = "m")]
@@ -63,15 +59,11 @@ pub struct Personality {
 }
 
 impl Personality {
-    pub fn new(is_player: bool, appearance: Appearance, mind: Mind) -> Self {
-        Self {
-            is_player,
-            appearance,
-            mind,
-        }
+    pub fn new(appearance: Appearance, mind: Mind) -> Self {
+        Self { appearance, mind }
     }
 
-    pub fn random<R: Rng + ?Sized>(rng: &mut R, is_player: bool, alive: bool) -> Personality {
+    pub fn random<R: Rng + ?Sized>(rng: &mut R, is_player: bool) -> Personality {
         let gender = rng.sample(Standard);
         let sex = Sex::from(&gender);
         let game_data = GameData::instance();
@@ -91,7 +83,6 @@ impl Personality {
             .cloned()
             .unwrap_or_default();
         Personality::new(
-            is_player,
             Appearance {
                 age: rng.gen_range(0..=99),
                 fur_color: if race.has_fur() {
@@ -106,7 +97,6 @@ impl Personality {
                 name,
                 gender,
                 main_hand: rng.sample(Standard),
-                alive,
             },
         )
     }
@@ -132,11 +122,10 @@ pub fn age_name(appearance: &Appearance) -> String {
         }
         16.. => {
             race_name
-                + " "
                 + match appearance.sex {
-                    Sex::Male => "man",
-                    Sex::Female => "woman",
-                    Sex::Undefined => "person",
+                    Sex::Male => " man",
+                    Sex::Female => " woman",
+                    Sex::Undefined => "",
                 }
         }
     }
@@ -148,7 +137,6 @@ pub mod tests {
 
     pub fn tester_girl() -> Personality {
         Personality::new(
-            false,
             Appearance {
                 race: Race::Gazan,
                 age: 15,
@@ -159,14 +147,12 @@ pub mod tests {
                 name: "Dooka".to_string(),
                 gender: Gender::Female,
                 main_hand: MainHand::Left,
-                alive: true,
             },
         )
     }
 
     pub fn old_bugger() -> Personality {
         Personality::new(
-            false,
             Appearance {
                 race: Race::Bug,
                 age: 99,
@@ -177,7 +163,6 @@ pub mod tests {
                 name: "Old Queer".to_string(),
                 gender: Gender::Custom("X".to_string()),
                 main_hand: MainHand::Ambidexter,
-                alive: true,
             },
         )
     }

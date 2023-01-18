@@ -375,7 +375,7 @@ impl CreateCharacter {
 
     fn randomize(&mut self, ctx: &mut Context) {
         let mut rng = rand::thread_rng();
-        let character = Personality::random(&mut rng, true, true);
+        let character = Personality::random(&mut rng, true);
         self.gender_input().set_value(character.mind.gender);
         self.name_input().set_value(character.mind.name);
         self.age_input()
@@ -412,7 +412,6 @@ impl CreateCharacter {
             let age = self.age_input().value().parse::<u8>().unwrap();
             let race = Race::from(self.race);
             let character = Personality::new(
-                true,
                 Appearance {
                     fur_color: self.fur_color,
                     sex: Sex::from(&gender),
@@ -423,7 +422,6 @@ impl CreateCharacter {
                     name,
                     gender,
                     main_hand: self.main_hand,
-                    alive: true,
                 },
             );
             Some(vec![Transition::Push(Scene::CharacterAttributes(

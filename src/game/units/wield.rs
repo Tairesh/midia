@@ -1,4 +1,4 @@
-use super::{Item, ItemQuality, MainHand};
+use super::super::{Item, ItemQuality, MainHand};
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Default)]
 pub struct Wield {

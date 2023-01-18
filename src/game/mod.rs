@@ -7,7 +7,7 @@ pub use savage::{
     melee_attack, AttackResult, Attribute, CharSheet, Damage, Dice, DiceWithModifier, HitResult,
     Skill, SkillLevel, Wound,
 };
-pub use units::{Avatar, Wield};
+pub use units::{Avatar, Wear, Wield};
 pub use world::World;
 
 pub mod actions;

@@ -5,33 +5,19 @@
     "name": "cloak",
     "looks_like": "cloak",
     "mass": 100,
-    "wearable": [
-      [
-        "torso",
-        "OUTER",
-        1
-      ],
-      [
-        "left_arm",
-        "OUTER",
-        1
-      ],
-      [
-        "right_arm",
-        "OUTER",
-        1
-      ],
-      [
-        "left_leg",
-        "OUTER",
-        1
-      ],
-      [
-        "right_leg",
-        "OUTER",
-        1
+    "wearable": {
+      "layer": "OUTER",
+      "armor": 1,
+      "variants": [
+        [
+          "torso",
+          "left_arm",
+          "right_arm",
+          "left_leg",
+          "right_leg"
+        ]
       ]
-    ]
+    }
   },
   {
     "type": "item",
@@ -39,13 +25,15 @@
     "name": "strange hat",
     "looks_like": "hat",
     "mass": 50,
-    "wearable": [
-      [
-        "head",
-        "OUTER",
-        1
+    "wearable": {
+      "layer": "OUTER",
+      "armor": 1,
+      "variants": [
+        [
+          "head"
+        ]
       ]
-    ]
+    }
   },
   {
     "type": "item",
@@ -53,33 +41,19 @@
     "name": "dirty rags",
     "looks_like": "rags",
     "mass": 100,
-    "wearable": [
-      [
-        "torso",
-        "OUTER",
-        1
-      ],
-      [
-        "left_arm",
-        "OUTER",
-        1
-      ],
-      [
-        "right_arm",
-        "OUTER",
-        1
-      ],
-      [
-        "left_leg",
-        "OUTER",
-        1
-      ],
-      [
-        "right_leg",
-        "OUTER",
-        1
+    "wearable": {
+      "layer": "OUTER",
+      "armor": 1,
+      "variants": [
+        [
+          "torso",
+          "left_arm",
+          "right_arm",
+          "left_leg",
+          "right_leg"
+        ]
       ]
-    ]
+    }
   },
   {
     "type": "item",
@@ -87,12 +61,33 @@
     "name": "leather backpack",
     "looks_like": "backpack",
     "mass": 100,
-    "wearable": [
-      [
-        "torso",
-        "CLIPPED",
-        1
+    "wearable": {
+      "layer": "CLIPPED",
+      "armor": 1,
+      "variants": [
+        [
+          "torso"
+        ]
       ]
-    ]
+    }
+  },
+  {
+    "type": "item",
+    "id": "leather_oversleeve",
+    "name": "leather oversleeve",
+    "looks_like": "leather_oversleeve",
+    "mass": 20,
+    "wearable": {
+      "layer": "CLIPPED",
+      "armor": 1,
+      "variants": [
+        [
+          "left_arm"
+        ],
+        [
+          "right_arm"
+        ]
+      ]
+    }
   }
 ]

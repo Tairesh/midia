@@ -1,5 +1,7 @@
 #![windows_subsystem = "windows"]
 
+extern crate core;
+
 mod app;
 mod assets;
 mod colors;

@@ -6,6 +6,7 @@ use super::super::{
     ActionPossibility::{self, No, Yes},
 };
 
+// TODO: variants
 #[derive(serde::Serialize, serde::Deserialize, Debug, Copy, Clone)]
 pub struct Wear {}
 
@@ -16,8 +17,14 @@ impl ActionImpl for Wear {
         }
 
         if let Some(item) = actor.wield.active_hand() {
-            if item.is_wearable() {
-                Yes(1)
+            if let Some(wearable) = &item.proto.wearable {
+                for variant in 0..wearable.variants.len() {
+                    if actor.wear.can_add(item, variant) {
+                        return Yes(10);
+                    }
+                }
+
+                No(format!("You can't wear  the {}.", item.name()))
             } else {
                 No(format!("You can't wear the {}.", item.name()))
             }
@@ -38,7 +45,13 @@ impl ActionImpl for Wear {
                 ),
                 owner.pos,
             ));
-            action.owner_mut(world).wear.push(item);
+            // TODO: use variant
+            for variant in 0..item.proto.wearable.as_ref().unwrap().variants.len() {
+                if owner.wear.can_add(&item, variant) {
+                    action.owner_mut(world).wear.add(item, 0);
+                    break;
+                }
+            }
         }
     }
 }

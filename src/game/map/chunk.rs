@@ -4,7 +4,9 @@ use std::hash::{Hash, Hasher};
 use arrayvec::ArrayVec;
 use rand::{distributions::Standard, rngs::StdRng, Rng, SeedableRng};
 
-use crate::game::map::items::helpers::{axe, backpack, cloak, hat, random_book, shovel};
+use crate::game::map::items::helpers::{
+    axe, backpack, cloak, hat, oversleeve, rags, random_book, shovel,
+};
 
 use super::{
     terrains::{Boulder, Chest, Dirt, Grass, Tree},
@@ -75,13 +77,15 @@ impl Chunk {
                 .get_mut(pos)
                 .unwrap()
                 .items
-                .push(match rng.gen_range(0..6) {
+                .push(match rng.gen_range(0..8) {
                     0 => cloak(),
                     1 => hat(),
                     2 => axe(),
                     3 => shovel(),
                     4 => random_book(),
                     5 => backpack(),
+                    6 => oversleeve(),
+                    7 => rags(),
                     _ => unreachable!(),
                 });
         }

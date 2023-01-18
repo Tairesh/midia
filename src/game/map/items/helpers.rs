@@ -10,6 +10,11 @@ pub fn cloak() -> Item {
     Item::new(game_data.items.get("cloak").cloned().unwrap())
 }
 
+pub fn rags() -> Item {
+    let game_data = GameData::instance();
+    Item::new(game_data.items.get("rags").cloned().unwrap())
+}
+
 pub fn hat() -> Item {
     let game_data = GameData::instance();
     Item::new(game_data.items.get("hat").cloned().unwrap())
@@ -36,6 +41,11 @@ pub fn random_book() -> Item {
 pub fn backpack() -> Item {
     let game_data = GameData::instance();
     Item::new(game_data.items.get("backpack").cloned().unwrap()).with_container(Vec::new())
+}
+
+pub fn oversleeve() -> Item {
+    let game_data = GameData::instance();
+    Item::new(game_data.items.get("leather_oversleeve").cloned().unwrap())
 }
 
 pub fn dead_body(unit: &Avatar) -> Item {

@@ -53,6 +53,7 @@ static REGIONS: phf::Map<&'static str, Rectangle> = phf::phf_map! {
     "opened_chest" => Rectangle::new(20.0, 60.0, 10.0, 10.0),
     "corpse" => Rectangle::new(30.0, 60.0, 10.0, 10.0),
     "flesh" => Rectangle::new(40.0, 60.0, 10.0, 10.0),
+    "leather_oversleeve" => Rectangle::new(50.0, 60.0, 10.0, 10.0),
     "shovel" => Rectangle::new(0.0, 70.0, 10.0, 10.0),
     "knife" => Rectangle::new(10.0, 70.0, 10.0, 10.0),
     "axe" => Rectangle::new(20.0, 70.0, 10.0, 10.0),

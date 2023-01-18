@@ -29,7 +29,7 @@ mod tests {
             assert_eq!(1, item.qualities.len());
             assert!(item.qualities.contains(&ItemQuality::Dig));
             assert_eq!(true, item.two_handed_tool);
-            assert_eq!(None, item.wearable);
+            assert!(item.wearable.is_none());
             assert!(item.melee_damage.is_some());
         } else {
             panic!("Expected DataEntity::Item, got {:?}", shovel);
@@ -158,13 +158,11 @@ mod tests {
             "name": "cloak",
             "looks_like": "cloak",
             "mass": 100,
-            "wearable": [
-              [ "torso", "OUTER", 1 ],
-              [ "left_arm", "OUTER", 1 ],
-              [ "right_arm", "OUTER", 1 ],
-              [ "left_leg", "OUTER", 1 ],
-              [ "right_leg", "OUTER", 1 ]
-            ]
+            "wearable": {
+                "layer": "OUTER",
+                "armor": 1,
+                "variants": [[ "torso", "left_arm", "right_arm", "left_leg", "right_leg" ]]
+            }
           }
         ]
         "#;
@@ -176,12 +174,19 @@ mod tests {
             assert_eq!(item.id, "cloak");
             assert!(item.wearable.is_some());
             if let Some(wearable) = &item.wearable {
-                assert_eq!(wearable.len(), 5);
-                assert!(wearable.contains(&(BodySlot::Torso, WearLayer::Outer, 1)));
-                assert!(wearable.contains(&(BodySlot::LeftArm, WearLayer::Outer, 1)));
-                assert!(wearable.contains(&(BodySlot::RightArm, WearLayer::Outer, 1)));
-                assert!(wearable.contains(&(BodySlot::LeftLeg, WearLayer::Outer, 1)));
-                assert!(wearable.contains(&(BodySlot::RightLeg, WearLayer::Outer, 1)));
+                assert_eq!(wearable.armor, 1);
+                assert_eq!(wearable.layer, WearLayer::Outer);
+                assert_eq!(wearable.variants.len(), 1);
+                if let Some(variant) = wearable.variants.iter().next() {
+                    assert_eq!(variant.len(), 5);
+                    assert!(variant.contains(&BodySlot::Torso));
+                    assert!(variant.contains(&BodySlot::LeftArm));
+                    assert!(variant.contains(&BodySlot::RightArm));
+                    assert!(variant.contains(&BodySlot::LeftLeg));
+                    assert!(variant.contains(&BodySlot::RightLeg));
+                } else {
+                    panic!("Expected variant!");
+                }
             } else {
                 panic!("Expected wearable!");
             }

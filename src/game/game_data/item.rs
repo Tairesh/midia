@@ -71,6 +71,13 @@ impl Default for MeleeDamageValue {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct WearableValue {
+    pub layer: WearLayer,
+    pub armor: u8,
+    pub variants: Vec<HashSet<BodySlot>>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ItemPrototype {
     pub id: String,
     pub name: String,
@@ -84,7 +91,7 @@ pub struct ItemPrototype {
     #[serde(default)]
     pub two_handed_tool: bool,
     #[serde(default)]
-    pub wearable: Option<HashSet<(BodySlot, WearLayer, u8)>>,
+    pub wearable: Option<WearableValue>,
     #[serde(default)]
     pub melee_damage: Option<MeleeDamageValue>,
 }

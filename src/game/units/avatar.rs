@@ -6,7 +6,7 @@ use super::super::{
     map::items::helpers::{cloak, dead_body, hat},
     races::{MainHand, Personality},
     savage::CharSheet,
-    Action, BodySlot, HitResult, Item, Wield,
+    Action, BodySlot, HitResult, Item, Wear, Wield,
 };
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
@@ -18,7 +18,7 @@ pub struct Avatar {
     pub vision: TwoDimDirection,
     pub wield: Wield,
     // TODO: custom struct with layers for dress and methods to return names and icons for UI
-    pub wear: Vec<Item>,
+    pub wear: Wear,
     pub char_sheet: CharSheet,
     // TODO: stamina
     // TODO: traits
@@ -31,7 +31,7 @@ impl Avatar {
             action: None,
             vision: TwoDimDirection::East,
             wield: Wield::new(!matches!(personality.mind.main_hand, MainHand::Left)),
-            wear: Vec::new(),
+            wear: Wear::new(),
             personality,
             char_sheet,
             pos,
@@ -45,8 +45,11 @@ impl Avatar {
         char_sheet: CharSheet,
         pos: Point,
     ) -> Self {
+        let mut wear = Wear::new();
+        wear.add(hat(), 0);
+        wear.add(cloak(), 0);
         Self {
-            wear: vec![hat(), cloak()],
+            wear,
             ..Self::new(id, personality, char_sheet, pos)
         }
     }
@@ -64,7 +67,11 @@ impl Avatar {
     }
 
     pub fn armor(&self, slot: BodySlot) -> u8 {
-        self.wear.iter().map(|item| item.armor(slot)).sum()
+        self.wear
+            .get_items_by_slot(slot)
+            .into_iter()
+            .map(Item::armor)
+            .sum()
     }
 
     pub fn pronounce(&self) -> (&str, &str, &str) {
@@ -84,7 +91,7 @@ impl Avatar {
             self.action = None;
 
             let mut items = Vec::new();
-            items.append(&mut self.wear);
+            items.append(&mut self.wear.take_all());
             if let Some(item) = self.wield.take_from_active_hand() {
                 items.push(item);
             }
@@ -103,7 +110,7 @@ impl Avatar {
 mod tests {
     use geometry::Point;
 
-    use crate::game::map::items::helpers::axe;
+    use crate::game::map::items::helpers::{axe, cloak};
     use crate::game::races::tests::personality::tester_girl;
     use crate::game::races::Race;
     use crate::game::{BodySlot, HitResult};
@@ -136,30 +143,31 @@ mod tests {
 
     #[test]
     fn test_armor() {
-        let avatar = Avatar::dressed_default(
+        let mut avatar = Avatar::new(
             0,
             tester_girl(),
             CharSheet::default(true, Race::Gazan, 15),
             Point::new(0, 0),
         );
+        avatar.wear.add(cloak(), 0);
 
         assert_eq!(avatar.armor(BodySlot::Torso), 1);
     }
 
     #[test]
     fn test_die() {
-        let mut avatar = Avatar::dressed_default(
+        let mut avatar = Avatar::new(
             0,
             tester_girl(),
             CharSheet::default(false, Race::Gazan, 15),
             Point::new(0, 0),
         );
         avatar.wield.wield(axe());
+        avatar.wear.add(cloak(), 0);
         let items = avatar.apply_hit(HitResult::ultra_damage(), 0);
-        assert_eq!(items.len(), 4);
-        assert_eq!(items[0].name(), "strange hat");
-        assert_eq!(items[1].name(), "cloak");
-        assert_eq!(items[2].name(), "axe");
-        assert_eq!(items[3].name(), "dead gazan girl");
+        assert_eq!(items.len(), 3);
+        assert!(items.iter().any(|i| i.name() == "cloak"));
+        assert!(items.iter().any(|i| i.name() == "axe"));
+        assert_eq!(items[2].name(), "dead gazan girl");
     }
 }

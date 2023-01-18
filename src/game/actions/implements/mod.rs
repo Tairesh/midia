@@ -1,6 +1,7 @@
 pub use close::Close;
 pub use dig::Dig;
 pub use drop::Drop;
+pub use melee_attack::MeleeAttack;
 pub use open::Open;
 pub use read::Read;
 pub use skip::Skip;
@@ -11,6 +12,7 @@ pub use wield::Wield;
 mod close;
 mod dig;
 mod drop;
+mod melee_attack;
 mod open;
 mod read;
 mod skip;

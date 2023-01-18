@@ -71,7 +71,7 @@ impl Default for MeleeDamageValue {
     /// Attack with fists
     fn default() -> Self {
         Self {
-            moves: 0,
+            moves: 10,
             damage: Damage::default(),
             distance: 0,
             penetration: 0,

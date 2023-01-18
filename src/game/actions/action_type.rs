@@ -2,7 +2,7 @@ use enum_dispatch::enum_dispatch;
 
 use super::{
     super::{Avatar, World},
-    implements::{Close, Dig, Drop, Open, Read, Skip, Walk, Wear, Wield},
+    implements::{Close, Dig, Drop, MeleeAttack, Open, Read, Skip, Walk, Wear, Wield},
     Action, ActionImpl, ActionPossibility,
 };
 
@@ -18,10 +18,12 @@ pub enum ActionType {
     Open,
     Close,
     Wear,
+    MeleeAttack,
 }
 
 #[cfg(test)]
 mod tests {
+    // TODO: move tests to actions implements
     use geometry::{Direction, Point};
 
     use super::{

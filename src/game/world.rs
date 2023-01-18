@@ -407,6 +407,7 @@ impl World {
     }
 
     pub fn tick(&mut self) {
+        // TODO: test some zero-ticks actions
         self.act();
 
         let mut spend = 0;

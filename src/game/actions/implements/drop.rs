@@ -24,7 +24,10 @@ impl ActionImpl for Drop {
         let mut map = world.map();
         let tile = map.get_tile(pos);
         if !tile.terrain.can_stock_items() {
-            return No(format!("You can't put items on {}", tile.terrain.name()));
+            return No(format!(
+                "You can't put items on the {}",
+                tile.terrain.name()
+            ));
         }
 
         if let Some(item) = actor.wield.active_hand() {
@@ -35,7 +38,7 @@ impl ActionImpl for Drop {
             };
             Yes((item.drop_time() * k).round() as u32)
         } else {
-            No("Item doesn't exists".to_string())
+            No("[DEBUG] Item doesn't exists".to_string())
         }
     }
 
@@ -51,5 +54,45 @@ impl ActionImpl for Drop {
             pos,
             LogCategory::Info,
         ));
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use geometry::{Direction, Point};
+
+    use crate::game::map::{items::helpers::axe, terrains::Dirt};
+    use crate::game::world::tests::prepare_world;
+    use crate::game::Action;
+
+    use super::Drop;
+
+    #[test]
+    fn test_dropping() {
+        let mut world = prepare_world();
+        world.map().get_tile_mut(Point::new(0, 0)).terrain = Dirt::default().into();
+        world.map().get_tile_mut(Point::new(0, 0)).items.clear();
+        world.player_mut().wield.clear();
+        world.player_mut().wield.wield(axe());
+
+        world.player_mut().action = Some(
+            Action::new(
+                0,
+                Drop {
+                    dir: Direction::Here,
+                }
+                .into(),
+                &world,
+            )
+            .unwrap(),
+        );
+        world.tick();
+
+        assert_eq!(Point::new(0, 0), world.player().pos);
+        assert!(world.player().wield.is_empty());
+        let mut map = world.map();
+        assert_eq!(1, map.get_tile(Point::new(0, 0)).items.len());
+        let item = map.get_tile(Point::new(0, 0)).items.first().unwrap();
+        assert_eq!(item.proto.id, axe().proto.id);
     }
 }

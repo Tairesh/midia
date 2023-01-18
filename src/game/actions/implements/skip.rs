@@ -12,3 +12,21 @@ impl ActionImpl for Skip {
         Yes(1)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::game::world::tests::prepare_world;
+    use crate::game::Action;
+
+    use super::Skip;
+
+    #[test]
+    fn test_skipping_time() {
+        let mut world = prepare_world();
+
+        assert_eq!(0, world.meta.current_tick);
+        world.player_mut().action = Some(Action::new(0, Skip {}.into(), &world).unwrap());
+        world.tick();
+        assert_eq!(1, world.meta.current_tick);
+    }
+}

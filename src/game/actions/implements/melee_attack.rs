@@ -54,10 +54,11 @@ impl ActionImpl for MeleeAttack {
             match attack {
                 AttackResult::Hit(damage) => {
                     let mut message = format!(
-                        "{} attack{} {} with {weapon_name} and deal {} damage with {} penetration.",
+                        "{} attack{} {} with {} {weapon_name} and deal {} damage with {} penetration.",
                         owner.name_for_actions(),
                         if owner.is_player() { "" } else { "s" },
                         unit.name_for_actions(),
+                        owner.pronounce().2,
                         damage.params.damage,
                         damage.params.penetration,
                     );
@@ -69,9 +70,8 @@ impl ActionImpl for MeleeAttack {
                         message.push_str(" No effect.");
                     } else {
                         if damage.causes.shock {
-                            message.push_str(
-                                format!(" {} is stunned.", unit.name_for_actions()).as_str(),
-                            );
+                            message
+                                .push_str(format!(" {} is stunned.", unit.pronounce().0).as_str());
                         }
                         if !damage.causes.wounds.is_empty() {
                             message.push_str(&format!(
@@ -94,10 +94,11 @@ impl ActionImpl for MeleeAttack {
                 AttackResult::Miss => {
                     world.log().push(LogEvent::warning(
                         format!(
-                            "{} attack{} {} with {weapon_name} and miss.",
+                            "{} attack{} {} with {} {weapon_name} and miss.",
                             owner.name_for_actions(),
                             if owner.is_player() { "" } else { "s" },
                             unit.name_for_actions(),
+                            owner.pronounce().2,
                         ),
                         self.target,
                     ));
@@ -107,9 +108,10 @@ impl ActionImpl for MeleeAttack {
             // TODO: attack terrains and items
             world.log().push(LogEvent::info(
                 format!(
-                    "{} swing{} in the air with {weapon_name}.",
+                    "{} swing{} in the air with {} {weapon_name}.",
                     owner.name_for_actions(),
-                    if owner.is_player() { "" } else { "s" }
+                    if owner.is_player() { "" } else { "s" },
+                    owner.pronounce().2,
                 ),
                 self.target,
             ));
@@ -143,8 +145,8 @@ mod tests {
         let mut log = world.log();
         let event = &log.new_events()[0];
         assert!(
-            event.msg.contains("with fists"),
-            "msg \"{}\" doesn't contains \"with fists\"",
+            event.msg.contains("with your fists"),
+            "msg \"{}\" doesn't contains \"with your fists\"",
             event.msg
         );
     }
@@ -165,8 +167,8 @@ mod tests {
         let mut log = world.log();
         let event = &log.new_events()[0];
         assert!(
-            event.msg.contains("with axe"),
-            "msg \"{}\" doesn't contains \"with axe\"",
+            event.msg.contains("with your axe"),
+            "msg \"{}\" doesn't contains \"with your axe\"",
             event.msg
         );
     }

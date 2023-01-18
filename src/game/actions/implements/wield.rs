@@ -50,3 +50,96 @@ impl ActionImpl for Wield {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use geometry::{Direction, Point};
+
+    use crate::game::map::items::helpers::{axe, random_book, shovel};
+    use crate::game::world::tests::prepare_world;
+    use crate::game::Action;
+
+    use super::Wield;
+
+    #[test]
+    fn test_wielding() {
+        let mut world = prepare_world();
+        world.map().get_tile_mut(Point::new(1, 0)).items.clear();
+        world.map().get_tile_mut(Point::new(1, 0)).items.push(axe());
+
+        assert!(world.player().wield.is_empty());
+        assert_eq!(0, world.meta.current_tick);
+
+        world.player_mut().action = Some(
+            Action::new(
+                0,
+                Wield {
+                    dir: Direction::East,
+                }
+                .into(),
+                &world,
+            )
+            .unwrap(),
+        );
+        world.tick();
+
+        let item = world.player().wield.active_hand().unwrap();
+        assert_eq!(item.proto.id, axe().proto.id);
+        assert_eq!(0, world.map().get_tile(Point::new(1, 0)).items.len());
+    }
+
+    #[test]
+    fn test_wielding_two_handed_items() {
+        let mut world = prepare_world();
+        world.player_mut().wield.wield(shovel());
+        world.player_mut().wield.swap_items();
+        assert!(world.player().wield.can_wield(false).is_err());
+
+        world.map().get_tile_mut(Point::new(1, 0)).items.clear();
+        world.map().get_tile_mut(Point::new(1, 0)).items.push(axe());
+        assert!(Action::new(
+            0,
+            Wield {
+                dir: Direction::East,
+            }
+            .into(),
+            &world,
+        )
+        .is_err());
+    }
+
+    #[test]
+    fn test_wielding_one_handed_items() {
+        let mut world = prepare_world();
+        world.player_mut().wield.wield(axe());
+        assert!(world.player().wield.can_wield(false).is_err());
+        world.player_mut().wield.swap_items();
+        assert!(world.player().wield.can_wield(true).is_err());
+        assert!(world.player().wield.can_wield(false).is_ok());
+
+        world.map().get_tile_mut(Point::new(1, 0)).items.clear();
+        world
+            .map()
+            .get_tile_mut(Point::new(1, 0))
+            .items
+            .push(random_book());
+
+        world.player_mut().action = Some(
+            Action::new(
+                0,
+                Wield {
+                    dir: Direction::East,
+                }
+                .into(),
+                &world,
+            )
+            .unwrap(),
+        );
+        world.tick();
+
+        let item = world.player().wield.active_hand().unwrap();
+        assert_eq!(item.proto.id, random_book().proto.id);
+        assert_eq!(0, world.map().get_tile(Point::new(1, 0)).items.len());
+        assert!(world.player().wield.can_wield(false).is_err());
+    }
+}

@@ -4,14 +4,13 @@ use std::convert::TryFrom;
 
 use geometry::{Direction, Point, TwoDimDirection};
 
-use crate::game::LogEvent;
-
 use super::{
     super::savefile::{self, GameView, Meta, SaveError},
+    lang,
     map::{field_of_view_set, Fov, TerrainView},
     races::{Appearance, FurColor, Gender, MainHand, Mind, Personality, Race, Sex},
     savage::CharSheet,
-    Action, Avatar, Chunk, ChunkPos, HitResult, Log, Map, TilePos,
+    Action, Avatar, Chunk, ChunkPos, HitResult, Log, LogEvent, Map, TilePos,
 };
 
 // TODO: weather and outside lighting system
@@ -284,7 +283,7 @@ impl World {
     pub fn this_is(&self, pos: Point, multiline: bool) -> String {
         let mut map = self.map();
         let tile = map.get_tile(pos);
-        let mut this_is = format!("This is a {}.", tile.terrain.name());
+        let mut this_is = format!("This is {}.", lang::a(tile.terrain.name()));
         if multiline {
             this_is = this_is.replace(". ", ".\n");
         }

@@ -16,6 +16,7 @@ pub use world::World;
 pub mod actions;
 mod avatar;
 mod game_data;
+pub mod lang;
 mod log;
 pub mod map;
 pub mod races;

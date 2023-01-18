@@ -38,3 +38,39 @@ impl ActionImpl for Read {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use geometry::{Direction, Point};
+
+    use crate::game::map::items::helpers::random_book;
+    use crate::game::world::tests::prepare_world;
+    use crate::game::Action;
+
+    use super::Read;
+
+    #[test]
+    fn test_reading() {
+        let mut world = prepare_world();
+        world.map().get_tile_mut(Point::new(1, 0)).items.clear();
+        world
+            .map()
+            .get_tile_mut(Point::new(1, 0))
+            .items
+            .push(random_book());
+
+        let typ = Read {
+            dir: Direction::East,
+        };
+        if let Ok(action) = Action::new(0, typ.into(), &world) {
+            world.player_mut().action = Some(action);
+            while world.player().action.is_some() {
+                world.tick();
+            }
+        } else {
+            panic!("Cannot read");
+        }
+
+        assert!(world.log().new_events()[0].msg.contains("book is called"));
+    }
+}

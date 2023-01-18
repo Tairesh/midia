@@ -59,6 +59,14 @@ impl Avatar {
     pub fn armor(&self, slot: BodySlot) -> u8 {
         self.wear.iter().map(|item| item.armor(slot)).sum()
     }
+
+    pub fn pronounce(&self) -> (&str, &str, &str) {
+        if self.is_player() {
+            ("you", "you", "your")
+        } else {
+            self.personality.mind.gender.pronounce()
+        }
+    }
 }
 
 #[cfg(test)]

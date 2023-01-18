@@ -29,6 +29,9 @@ mod tests {
             assert_eq!(1, item.qualities.len());
             assert!(item.qualities.contains(&ItemQuality::Dig));
             assert_eq!(0, item.specials.len());
+            assert_eq!(true, item.two_handed_tool);
+            assert_eq!(None, item.wearable);
+            assert!(item.melee_damage.is_some());
         } else {
             panic!("Expected DataEntity::Item, got {:?}", shovel);
         }
@@ -67,7 +70,17 @@ mod tests {
               "DIG"
             ],
             "mass": 2000,
-            "two_handed_tool": true
+            "two_handed_tool": true,
+            "melee_damage": {
+              "moves": 50,
+              "damage": {
+                "attribute": "STRENGTH",
+                "dices": [
+                  "D6"
+                ],
+                "modifier": -1
+              }
+            }
           },
           {
             "type": "names_pack",
@@ -117,7 +130,17 @@ mod tests {
               "DIG"
             ],
             "mass": 2000,
-            "two_handed_tool": true
+            "two_handed_tool": true,
+            "melee_damage": {
+              "moves": 50,
+              "damage": {
+                "attribute": "STRENGTH",
+                "dices": [
+                  "D6"
+                ],
+                "modifier": -1
+              }
+            }
           }
         ]
         "#;

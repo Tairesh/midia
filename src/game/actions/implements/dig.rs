@@ -25,7 +25,7 @@ impl ActionImpl for Dig {
             return if let Terrain::Pit(..) = tile.terrain {
                 No("You can't dig a hole in a hole".to_string())
             } else {
-                No(format!("You can't dig {}", tile.terrain.name()))
+                No(format!("You can't dig the {}", tile.terrain.name()))
             };
         }
         if !actor.wield.has_quality(ItemQuality::Dig) {
@@ -67,6 +67,41 @@ impl ActionImpl for Dig {
             format!("{} dug a hole", action.owner(world).name_for_actions()),
             pos,
             LogCategory::Info,
+        ));
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use geometry::{Direction, Point};
+
+    use crate::game::map::{items::helpers::shovel, terrains::Dirt, Terrain};
+    use crate::game::world::tests::prepare_world;
+    use crate::game::Action;
+
+    use super::Dig;
+
+    #[test]
+    fn test_digging() {
+        let mut world = prepare_world();
+        world.player_mut().wield.clear();
+        world.map().get_tile_mut(Point::new(1, 0)).terrain = Dirt::default().into();
+
+        let typ = Dig {
+            dir: Direction::East,
+        };
+        assert!(Action::new(0, typ.into(), &world).is_err());
+
+        world.player_mut().wield.wield(shovel());
+        world.player_mut().action = Some(Action::new(0, typ.into(), &world).unwrap());
+        while world.player().action.is_some() {
+            world.tick();
+        }
+
+        assert_eq!(Point::new(0, 0), world.player().pos);
+        assert!(matches!(
+            world.map().get_tile(Point::new(1, 0)).terrain,
+            Terrain::Pit(..)
         ));
     }
 }

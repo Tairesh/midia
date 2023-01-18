@@ -21,11 +21,7 @@ impl ActionImpl for Close {
         let tile = map.get_tile(pos);
 
         if !tile.terrain.can_be_closed() {
-            return No(format!(
-                "{} can't close the {}",
-                actor.name_for_actions(),
-                tile.terrain.name()
-            ));
+            return No(format!("You can't close the {}", tile.terrain.name()));
         }
 
         Yes(50)
@@ -51,5 +47,41 @@ impl ActionImpl for Close {
 
         drop(map);
         world.calc_fov();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use geometry::{Direction, Point};
+
+    use crate::game::map::{terrains::Chest, TerrainInteract};
+    use crate::game::world::tests::prepare_world;
+    use crate::game::Action;
+
+    use super::Close;
+
+    #[test]
+    fn test_closing() {
+        let mut world = prepare_world();
+        world.map().get_tile_mut(Point::new(1, 0)).terrain = Chest::new(Vec::new(), true).into();
+
+        let typ = Close {
+            dir: Direction::East,
+        };
+        if let Ok(action) = Action::new(0, typ.into(), &world) {
+            world.player_mut().action = Some(action);
+            while world.player().action.is_some() {
+                world.tick();
+            }
+        } else {
+            panic!("Cannot close");
+        }
+
+        assert!(world.log().new_events()[0].msg.contains("closed"));
+        assert!(world
+            .map()
+            .get_tile(Point::new(1, 0))
+            .terrain
+            .can_be_opened());
     }
 }

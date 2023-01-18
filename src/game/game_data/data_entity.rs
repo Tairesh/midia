@@ -16,7 +16,7 @@ pub enum DataEntity {
 mod tests {
     use crate::game::races::{BodySlot, Race, Sex};
 
-    use super::super::item::{ItemQuality, ItemSpecial, ItemTag, WearLayer};
+    use super::super::item::{ItemQuality, ItemTag, WearLayer};
     use super::DataEntity;
 
     fn check_shovel(shovel: &DataEntity) {
@@ -28,7 +28,6 @@ mod tests {
             assert!(item.tags.contains(&ItemTag::Tool));
             assert_eq!(1, item.qualities.len());
             assert!(item.qualities.contains(&ItemQuality::Dig));
-            assert_eq!(0, item.specials.len());
             assert_eq!(true, item.two_handed_tool);
             assert_eq!(None, item.wearable);
             assert!(item.melee_damage.is_some());
@@ -147,33 +146,6 @@ mod tests {
         let data: Vec<DataEntity> = serde_json::from_str(JSON).unwrap();
         let slice = data.as_slice();
         check_shovel(&slice[0]);
-    }
-
-    #[test]
-    fn test_deserialize_book() {
-        static JSON: &str = r#"
-        [
-          {
-            "type": "item",
-            "id": "book",
-            "name": "Book",
-            "looks_like": "book",
-            "specials": [ "READABLE", "NAMED", "COLORED" ],
-            "mass": 100
-          }
-        ]
-        "#;
-        let data: Vec<DataEntity> = serde_json::from_str(JSON).unwrap();
-        let slice = data.as_slice();
-        assert!(matches!(slice[0], DataEntity::Item(..)));
-        if let DataEntity::Item(item) = &slice[0] {
-            assert_eq!(item.id, "book");
-            assert!(item.specials.contains(&ItemSpecial::Readable));
-            assert!(item.specials.contains(&ItemSpecial::Named));
-            assert!(item.specials.contains(&ItemSpecial::Colored));
-        } else {
-            panic!("Expected DataEntity::Item, got {:?}", slice[0]);
-        }
     }
 
     #[test]

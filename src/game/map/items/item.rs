@@ -7,15 +7,15 @@ use tetra::graphics::Color;
 
 use crate::game::{BodySlot, ItemPrototype, ItemQuality, ItemTag, MeleeDamageValue, WearLayer};
 
-use super::specials::{Colored, Container, LooksLike, Named, Readable};
+use super::container::Container;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Item {
     pub proto: ItemPrototype,
-    named: Option<Named>,
-    colored: Option<Colored>,
-    readable: Option<Readable>,
-    looks_like: Option<LooksLike>,
+    named: Option<String>,
+    colored: Option<Color>,
+    readable: Option<String>,
+    looks_like: Option<String>,
     container: Option<Container>,
 }
 
@@ -32,26 +32,22 @@ impl Item {
     }
 
     pub fn with_named(mut self, name: impl Into<String>) -> Self {
-        self.named = Some(Named { name: name.into() });
+        self.named = Some(name.into());
         self
     }
 
     pub fn with_colored(mut self, color: impl Into<Color>) -> Self {
-        self.colored = Some(Colored {
-            color: color.into(),
-        });
+        self.colored = Some(color.into());
         self
     }
 
     pub fn with_readable(mut self, text: impl Into<String>) -> Self {
-        self.readable = Some(Readable { text: text.into() });
+        self.readable = Some(text.into());
         self
     }
 
     pub fn with_looks_like(mut self, looks_like: impl Into<String>) -> Self {
-        self.looks_like = Some(LooksLike {
-            looks_like: looks_like.into(),
-        });
+        self.looks_like = Some(looks_like.into());
         self
     }
 
@@ -64,15 +60,15 @@ impl Item {
 
     pub fn name(&self) -> &str {
         if let Some(named) = &self.named {
-            return &named.name;
+            return named;
         }
 
         &self.proto.name
     }
 
     pub fn color(&self) -> Color {
-        if let Some(colored) = &self.colored {
-            return colored.color;
+        if let &Some(color) = &self.colored {
+            return color;
         }
 
         Color::WHITE
@@ -80,7 +76,7 @@ impl Item {
 
     pub fn read(&self) -> Option<&str> {
         if let Some(readable) = &self.readable {
-            return Some(&readable.text);
+            return Some(readable);
         }
 
         None
@@ -88,7 +84,7 @@ impl Item {
 
     pub fn looks_like(&self) -> &str {
         if let Some(looks_like) = &self.looks_like {
-            return &looks_like.looks_like;
+            return looks_like;
         }
 
         &self.proto.looks_like

@@ -6,6 +6,7 @@ use crate::game::races::BodySlot;
 use crate::game::savage::Damage;
 use crate::game::Item;
 
+// TODO: do we really need tags?
 #[derive(Serialize, Deserialize, Debug, Hash, Eq, PartialEq, Copy, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum ItemTag {
@@ -21,17 +22,6 @@ pub enum ItemQuality {
     Dig,
     Butch,
     Cut,
-}
-
-#[derive(Serialize, Deserialize, Debug, Hash, Eq, PartialEq, Copy, Clone)]
-#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-pub enum ItemSpecial {
-    Named,
-    LookLike,
-    Mass,
-    Readable,
-    Colored,
-    Container,
 }
 
 #[derive(Serialize, Deserialize, Debug, Hash, Eq, PartialEq, Copy, Clone)]
@@ -91,8 +81,6 @@ pub struct ItemPrototype {
     pub tags: HashSet<ItemTag>,
     #[serde(default)]
     pub qualities: HashSet<ItemQuality>,
-    #[serde(default)]
-    pub specials: HashSet<ItemSpecial>,
     #[serde(default)]
     pub two_handed_tool: bool,
     #[serde(default)]

@@ -46,7 +46,6 @@ pub fn dead_body(unit: &Avatar) -> Item {
         mass: unit.personality.appearance.body_mass(),
         tags: HashSet::from([ItemTag::Corpse]),
         qualities: HashSet::default(),
-        specials: HashSet::default(),
         two_handed_tool: false,
         wearable: None,
         melee_damage: None,

@@ -5,11 +5,6 @@
     "name": "book",
     "looks_like": "book",
     "mass": 100,
-    "specials": [
-      "READABLE",
-      "NAMED",
-      "COLORED"
-    ],
     "tags": [
       "BOOK"
     ]

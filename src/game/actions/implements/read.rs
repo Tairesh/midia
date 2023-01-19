@@ -3,7 +3,7 @@ use geometry::Direction;
 use super::super::{
     super::{
         log::{LogCategory, LogEvent},
-        Avatar, World,
+        Avatar, Skill, World,
     },
     Action, ActionImpl,
     ActionPossibility::{self, No, Yes},
@@ -11,7 +11,23 @@ use super::super::{
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Copy, Clone)]
 pub struct Read {
-    pub dir: Direction,
+    dir: Direction,
+    reading_roll: u8,
+}
+
+impl Read {
+    pub fn new(dir: Direction, avatar: &Avatar) -> Self {
+        let reading_roll = avatar
+            .char_sheet
+            .get_skill_with_modifiers(Skill::Reading)
+            .roll_explosive();
+        Self { dir, reading_roll }
+    }
+
+    #[cfg(test)]
+    pub fn new_test(dir: Direction, reading_roll: u8) -> Self {
+        Self { dir, reading_roll }
+    }
 }
 
 impl ActionImpl for Read {
@@ -22,11 +38,16 @@ impl ActionImpl for Read {
 
         let pos = actor.pos + self.dir;
         let mut map = world.map();
-        // TODO: check skill of reading, and probably even another languages
         let tile = map.get_tile(pos);
         if tile.is_readable() {
             // Every character takes one tick to read, wow!
-            Yes(tile.read().len() as u32)
+            let reading_time = tile.read().len() as f32;
+            match self.reading_roll {
+                0..=1 => No("You tried to read it but failed".to_string()),
+                2..=3 => Yes((reading_time * 2.0).round() as u32),
+                4..=7 => Yes(reading_time.round() as u32),
+                8.. => Yes((reading_time * 0.5).round() as u32),
+            }
         } else {
             No("There is nothing to read".to_string())
         }
@@ -63,9 +84,7 @@ mod tests {
             .items
             .push(random_book());
 
-        let typ = Read {
-            dir: Direction::East,
-        };
+        let typ = Read::new_test(Direction::East, 4);
         if let Ok(action) = Action::new(0, typ.into(), &world) {
             world.player_mut().action = Some(action);
             while world.player().action.is_some() {
@@ -76,5 +95,19 @@ mod tests {
         }
 
         assert!(world.log().new_events()[0].msg.contains("book is called"));
+    }
+
+    #[test]
+    fn test_cant_read() {
+        let world = prepare_world();
+        world.map().get_tile_mut(Point::new(1, 0)).items.clear();
+        world
+            .map()
+            .get_tile_mut(Point::new(1, 0))
+            .items
+            .push(random_book());
+
+        let typ = Read::new_test(Direction::East, 1);
+        assert!(Action::new(0, typ.into(), &world).is_err());
     }
 }

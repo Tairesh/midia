@@ -4,9 +4,45 @@ use crate::game::CharSheet;
 
 use super::{Attribute, Dice};
 
+#[derive(Serialize, Deserialize, Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd)]
+pub enum DamageDice {
+    #[serde(rename = "D4/2")]
+    D4Half,
+    D4,
+    #[serde(rename = "D6/2")]
+    D6Half,
+    D6,
+    #[serde(rename = "D8/2")]
+    D8Half,
+    D8,
+    #[serde(rename = "D10/2")]
+    D10Half,
+    D10,
+    #[serde(rename = "D12/2")]
+    D12Half,
+    D12,
+}
+
+impl DamageDice {
+    pub fn roll_explosive(self) -> u8 {
+        match self {
+            DamageDice::D4Half => Dice::D4.roll_explosive() / 2,
+            DamageDice::D4 => Dice::D4.roll_explosive(),
+            DamageDice::D6Half => Dice::D6.roll_explosive() / 2,
+            DamageDice::D6 => Dice::D6.roll_explosive(),
+            DamageDice::D8Half => Dice::D8.roll_explosive() / 2,
+            DamageDice::D8 => Dice::D8.roll_explosive(),
+            DamageDice::D10Half => Dice::D10.roll_explosive() / 2,
+            DamageDice::D10 => Dice::D10.roll_explosive(),
+            DamageDice::D12Half => Dice::D12.roll_explosive() / 2,
+            DamageDice::D12 => Dice::D12.roll_explosive(),
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Damage {
-    dices: Vec<Dice>,
+    dices: Vec<DamageDice>,
     #[serde(default)]
     attribute: Option<Attribute>,
     #[serde(default)]

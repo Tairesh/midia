@@ -16,14 +16,14 @@ pub enum DataEntity {
 mod tests {
     use crate::game::races::{BodySlot, Race, Sex};
 
-    use super::super::item::{ItemQuality, ItemTag, WearLayer};
+    use super::super::item::{ItemQuality, ItemSize, ItemTag, WearLayer};
     use super::DataEntity;
 
     fn check_shovel(shovel: &DataEntity) {
         if let DataEntity::Item(item) = shovel {
             assert_eq!("shovel", item.id);
             assert_eq!("Shovel", item.name);
-            assert_eq!(2000, item.mass);
+            assert_eq!(ItemSize::Medium, item.size);
             assert_eq!(1, item.tags.len());
             assert!(item.tags.contains(&ItemTag::Tool));
             assert_eq!(1, item.qualities.len());
@@ -68,7 +68,7 @@ mod tests {
             "qualities": [
               "DIG"
             ],
-            "mass": 2000,
+            "size": "MEDIUM",
             "two_handed_tool": true,
             "melee_damage": {
               "moves": 50,
@@ -128,7 +128,7 @@ mod tests {
             "qualities": [
               "DIG"
             ],
-            "mass": 2000,
+            "size": "MEDIUM",
             "two_handed_tool": true,
             "melee_damage": {
               "moves": 50,
@@ -157,7 +157,7 @@ mod tests {
             "id": "cloak",
             "name": "cloak",
             "looks_like": "cloak",
-            "mass": 100,
+            "size": "SMALL",
             "wearable": {
                 "layer": "OUTER",
                 "armor": 1,
@@ -212,7 +212,7 @@ mod tests {
               "BUTCH",
               "CUT"
             ],
-            "mass": 100,
+            "size": "SMALL",
             "two_handed_tool": false,
             "melee_damage": {
               "moves": 10,

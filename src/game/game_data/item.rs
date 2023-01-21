@@ -23,7 +23,7 @@ pub enum ItemQuality {
     Cut,
 }
 
-#[derive(Serialize, Deserialize, Debug, Hash, Eq, PartialEq, Copy, Clone)]
+#[derive(Serialize, Deserialize, Debug, Hash, Eq, PartialEq, Copy, Clone, Ord, PartialOrd)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum WearLayer {
     Inner,
@@ -62,13 +62,26 @@ pub struct WearableValue {
     pub variants: Vec<HashSet<BodySlot>>,
 }
 
+#[derive(Serialize, Deserialize, Debug, Hash, Eq, PartialEq, Copy, Clone, Ord, PartialOrd)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum ItemSize {
+    Tiny,
+    // like a coin
+    Small,
+    // like a dagger
+    Medium,
+    // like a sword
+    Large,
+    // like a polearm
+    Huge, // like a boulder
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ItemPrototype {
     pub id: String,
     pub name: String,
     pub looks_like: String,
-    // in grams
-    pub mass: u32,
+    pub size: ItemSize,
     #[serde(default)]
     pub tags: HashSet<ItemTag>,
     #[serde(default)]

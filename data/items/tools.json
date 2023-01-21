@@ -10,7 +10,7 @@
     "qualities": [
       "DIG"
     ],
-    "mass": 2000,
+    "size": "MEDIUM",
     "two_handed_tool": true,
     "melee_damage": {
       "damage": {
@@ -34,7 +34,7 @@
     "qualities": [
       "BUTCH"
     ],
-    "mass": 1000,
+    "size": "MEDIUM",
     "melee_damage": {
       "damage": {
         "attribute": "STRENGTH",
@@ -57,7 +57,7 @@
       "BUTCH",
       "CUT"
     ],
-    "mass": 100,
+    "size": "SMALL",
     "two_handed_tool": false,
     "melee_damage": {
       "damage": {

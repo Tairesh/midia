@@ -4,7 +4,7 @@
     "id": "book",
     "name": "book",
     "looks_like": "book",
-    "mass": 100,
+    "size": "SMALL",
     "tags": [
       "BOOK"
     ]

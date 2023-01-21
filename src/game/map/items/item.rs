@@ -5,7 +5,7 @@ use std::collections::HashSet;
 use serde::{Deserialize, Serialize};
 use tetra::graphics::Color;
 
-use crate::game::{ItemPrototype, ItemQuality, ItemTag, MeleeDamageValue};
+use crate::game::{ItemPrototype, ItemQuality, ItemSize, ItemTag, MeleeDamageValue};
 
 use super::container::Container;
 
@@ -102,12 +102,12 @@ impl Item {
         &self.proto.tags
     }
 
-    pub fn mass(&self) -> u32 {
-        self.proto.mass
+    pub fn size(&self) -> ItemSize {
+        self.proto.size
     }
 
     pub fn is_two_handed(&self) -> bool {
-        self.proto.two_handed_tool || self.mass() > 5000
+        self.proto.two_handed_tool || self.size() >= ItemSize::Medium
     }
 
     pub fn is_tool(&self) -> bool {
@@ -143,13 +143,20 @@ impl Item {
     }
 
     pub fn drop_time(&self) -> f32 {
-        // 1000 grams per tick
-        self.mass() as f32 / 1000.0
+        match self.size() {
+            ItemSize::Huge => 10.0,
+            _ => 1.0,
+        }
     }
 
     pub fn wield_time(&self) -> f32 {
-        // 100 grams per tick
-        self.mass() as f32 / 100.0
+        match self.size() {
+            ItemSize::Tiny => 1.0,
+            ItemSize::Small => 5.0,
+            ItemSize::Medium => 10.0,
+            ItemSize::Large => 20.0,
+            ItemSize::Huge => 50.0,
+        }
     }
 
     pub fn melee_damage(&self) -> MeleeDamageValue {

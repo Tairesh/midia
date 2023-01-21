@@ -24,7 +24,10 @@ impl ActionImpl for Wear {
                     }
                 }
 
-                No(format!("You can't wear  the {}.", item.name()))
+                No(format!(
+                    "You can't wear the {} with armor you already wearing.",
+                    item.name()
+                ))
             } else {
                 No(format!("You can't wear the {}.", item.name()))
             }

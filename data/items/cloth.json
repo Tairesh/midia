@@ -4,7 +4,7 @@
     "id": "cloak",
     "name": "cloak",
     "looks_like": "cloak",
-    "mass": 100,
+    "size": "SMALL",
     "wearable": {
       "layer": "OUTER",
       "armor": 1,
@@ -24,7 +24,7 @@
     "id": "hat",
     "name": "strange hat",
     "looks_like": "hat",
-    "mass": 50,
+    "size": "SMALL",
     "wearable": {
       "layer": "OUTER",
       "armor": 1,
@@ -40,7 +40,7 @@
     "id": "rags",
     "name": "dirty rags",
     "looks_like": "rags",
-    "mass": 100,
+    "size": "SMALL",
     "wearable": {
       "layer": "OUTER",
       "armor": 1,
@@ -60,7 +60,7 @@
     "id": "backpack",
     "name": "leather backpack",
     "looks_like": "backpack",
-    "mass": 100,
+    "size": "SMALL",
     "wearable": {
       "layer": "CLIPPED",
       "armor": 1,
@@ -76,7 +76,7 @@
     "id": "leather_oversleeve",
     "name": "leather oversleeve",
     "looks_like": "leather_oversleeve",
-    "mass": 20,
+    "size": "SMALL",
     "wearable": {
       "layer": "CLIPPED",
       "armor": 1,

@@ -115,7 +115,7 @@ mod tests {
     #[test]
     fn test_wielding_one_handed_items() {
         let mut world = prepare_world();
-        world.player_mut().wield.wield(axe());
+        world.player_mut().wield.wield(random_book());
         assert!(world.player().wield.can_wield(false).is_err());
         world.player_mut().wield.swap_items();
         assert!(world.player().wield.can_wield(true).is_err());

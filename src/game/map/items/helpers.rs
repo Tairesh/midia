@@ -1,10 +1,11 @@
 use std::collections::HashSet;
 
 use crate::colors::Colors;
-use crate::game::{Avatar, GameData, ItemPrototype, ItemTag};
+use crate::game::{Avatar, GameData, ItemPrototype, ItemSize, ItemTag};
 
 use super::Item;
 
+// TODO: remove this simple helpers and create GameData::create_item(proto: &str) method
 pub fn cloak() -> Item {
     let game_data = GameData::instance();
     Item::new(game_data.items.get("cloak").cloned().unwrap())
@@ -53,7 +54,7 @@ pub fn dead_body(unit: &Avatar) -> Item {
         id: "corpse".to_string(),
         name: format!("dead {}", unit.personality.age_name()),
         looks_like: "corpse".to_string(),
-        mass: unit.personality.appearance.body_mass(),
+        size: ItemSize::Huge,
         tags: HashSet::from([ItemTag::Corpse]),
         qualities: HashSet::default(),
         two_handed_tool: false,

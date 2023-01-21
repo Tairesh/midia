@@ -23,11 +23,11 @@ impl Wield {
     }
 
     pub fn left_hand(&self) -> Option<&Item> {
-        self.items[0].as_ref()
+        self.get_item(0)
     }
 
     pub fn right_hand(&self) -> Option<&Item> {
-        self.items[1].as_ref()
+        self.get_item(1)
     }
 
     pub fn main_hand(&self, main_hand: MainHand) -> Option<&Item> {
@@ -54,24 +54,42 @@ impl Wield {
         })
     }
 
-    fn active_hand_index(&self) -> usize {
-        self.active_hand.into()
-    }
-
     pub fn active_hand(&self) -> Option<&Item> {
-        self.items[self.active_hand_index()].as_ref()
+        self.get_item(self.active_hand_index())
     }
 
     pub fn take_from_active_hand(&mut self) -> Option<Item> {
-        self.items[self.active_hand_index()].take()
+        let i = self.active_hand_index();
+        if self.items[i].is_some() {
+            self.items[i].take()
+        } else if self.items[1 - i]
+            .as_ref()
+            .filter(|i| i.is_two_handed())
+            .is_some()
+        {
+            self.items[1 - i].take()
+        } else {
+            None
+        }
     }
 
     pub fn off_hand(&self) -> Option<&Item> {
-        self.items[1 - self.active_hand_index()].as_ref()
+        self.get_item(1 - self.active_hand_index())
     }
 
     pub fn take_from_off_hand(&mut self) -> Option<Item> {
-        self.items[1 - self.active_hand_index()].take()
+        let i = self.active_hand_index();
+        if self.items[1 - i].is_some() {
+            self.items[1 - i].take()
+        } else if self.items[i]
+            .as_ref()
+            .filter(|i| i.is_two_handed())
+            .is_some()
+        {
+            self.items[i].take()
+        } else {
+            None
+        }
     }
 
     pub fn can_wield(&self, two_handed: bool) -> Result<(), String> {
@@ -93,5 +111,17 @@ impl Wield {
     #[cfg(test)]
     pub fn clear(&mut self) {
         self.items.iter_mut().for_each(|i| *i = None);
+    }
+
+    fn active_hand_index(&self) -> usize {
+        self.active_hand.into()
+    }
+
+    fn get_item(&self, index: usize) -> Option<&Item> {
+        if let Some(item) = self.items[index].as_ref() {
+            Some(item)
+        } else {
+            self.items[1 - index].as_ref().filter(|i| i.is_two_handed())
+        }
     }
 }

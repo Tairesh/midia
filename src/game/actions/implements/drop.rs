@@ -17,7 +17,7 @@ pub struct Drop {
 
 impl ActionImpl for Drop {
     fn is_possible(&self, actor: &Avatar, world: &World) -> ActionPossibility {
-        if actor.wield.is_empty() {
+        if actor.wield.active_hand().is_none() {
             return No("You have nothing to drop".to_string());
         }
         let pos = actor.pos + self.dir;

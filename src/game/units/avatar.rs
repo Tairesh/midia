@@ -3,7 +3,7 @@
 use geometry::{Point, TwoDimDirection};
 
 use super::super::{
-    map::items::helpers::{cloak, dead_body, hat},
+    map::items::helpers::dead_body,
     races::{MainHand, Personality},
     Action, BodySlot, HitResult, Item, Wear, Wield,
 };
@@ -38,8 +38,8 @@ impl Avatar {
     // TODO: remove this and select dress in create character scene
     pub fn dressed_default(id: usize, personality: Personality, pos: Point) -> Self {
         let mut wear = Wear::new();
-        wear.add(hat(), 0);
-        wear.add(cloak(), 0);
+        wear.add(Item::new("hat"), 0);
+        wear.add(Item::new("cloak"), 0);
         Self {
             wear,
             ..Self::new(id, personality, pos)
@@ -106,9 +106,8 @@ impl Avatar {
 mod tests {
     use geometry::Point;
 
-    use crate::game::map::items::helpers::{axe, cloak};
     use crate::game::races::tests::personality::tester_girl;
-    use crate::game::{BodySlot, HitResult};
+    use crate::game::{BodySlot, HitResult, Item};
 
     use super::Avatar;
 
@@ -129,7 +128,7 @@ mod tests {
     #[test]
     fn test_armor() {
         let mut avatar = Avatar::new(0, tester_girl(), Point::new(0, 0));
-        avatar.wear.add(cloak(), 0);
+        avatar.wear.add(Item::new("cloak"), 0);
 
         assert_eq!(avatar.armor(BodySlot::Torso), 1);
     }
@@ -137,8 +136,8 @@ mod tests {
     #[test]
     fn test_die() {
         let mut avatar = Avatar::new(0, tester_girl(), Point::new(0, 0));
-        avatar.wield.wield(axe());
-        avatar.wear.add(cloak(), 0);
+        avatar.wield.wield(Item::new("stone_axe"));
+        avatar.wear.add(Item::new("cloak"), 0);
         let items = avatar.apply_hit(HitResult::ultra_damage(), 0);
         assert_eq!(items.len(), 3);
         assert!(items.iter().any(|i| i.name() == "cloak"));

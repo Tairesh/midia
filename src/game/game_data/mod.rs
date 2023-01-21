@@ -25,6 +25,18 @@ pub struct GameData {
 }
 
 impl GameData {
+    pub fn instance() -> &'static Self {
+        INSTANCE.get_or_init(Self::load)
+    }
+
+    pub fn get_item_prototype(&self, id: &str) -> &ItemPrototype {
+        if let Some(proto) = self.items.get(id) {
+            proto
+        } else {
+            panic!("No item prototype with id: {id}");
+        }
+    }
+
     fn load() -> Self {
         let mut data = Self {
             names: Race::iterator()
@@ -83,10 +95,6 @@ impl GameData {
                 }
             }
         }
-    }
-
-    pub fn instance() -> &'static Self {
-        INSTANCE.get_or_init(Self::load)
     }
 }
 

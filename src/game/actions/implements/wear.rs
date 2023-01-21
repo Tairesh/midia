@@ -17,7 +17,7 @@ impl ActionImpl for Wear {
         }
 
         if let Some(item) = actor.wield.active_hand() {
-            if let Some(wearable) = &item.proto.wearable {
+            if let Some(wearable) = &item.proto().wearable {
                 for variant in 0..wearable.variants.len() {
                     if actor.wear.can_add(item, variant) {
                         return Yes(10);
@@ -49,7 +49,7 @@ impl ActionImpl for Wear {
                 owner.pos,
             ));
             // TODO: use variant
-            for variant in 0..item.proto.wearable.as_ref().unwrap().variants.len() {
+            for variant in 0..item.proto().wearable.as_ref().unwrap().variants.len() {
                 if owner.wear.can_add(&item, variant) {
                     action.owner_mut(world).wear.add(item, 0);
                     break;
@@ -61,16 +61,15 @@ impl ActionImpl for Wear {
 
 #[cfg(test)]
 mod tests {
-    use crate::game::map::items::helpers::{axe, cloak};
     use crate::game::world::tests::prepare_world;
-    use crate::game::Action;
+    use crate::game::{Action, Item};
 
     use super::Wear;
 
     #[test]
     fn test_wear() {
         let mut world = prepare_world();
-        world.player_mut().wield.wield(cloak());
+        world.player_mut().wield.wield(Item::new("cloak"));
         world.player_mut().wear.clear();
 
         if let Ok(action) = Action::new(0, Wear {}.into(), &world) {
@@ -84,11 +83,7 @@ mod tests {
 
         assert!(world.log().new_events()[0].msg.contains("put on the cloak"));
         assert!(world.player().wield.is_empty());
-        assert!(world
-            .player()
-            .wear
-            .iter()
-            .any(|i| i.proto.id == cloak().proto.id));
+        assert!(world.player().wear.iter().any(|i| i.proto().id == "cloak"));
     }
 
     #[test]
@@ -97,7 +92,7 @@ mod tests {
         world.player_mut().wield.clear();
         assert!(Action::new(0, Wear {}.into(), &world).is_err());
 
-        world.player_mut().wield.wield(axe());
+        world.player_mut().wield.wield(Item::new("stone_axe"));
         assert!(Action::new(0, Wear {}.into(), &world).is_err());
     }
 }

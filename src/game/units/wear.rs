@@ -11,15 +11,15 @@ impl Wear {
     }
 
     pub fn can_add(&self, item: &Item, variant: usize) -> bool {
-        if let Some(wearable) = &item.proto.wearable {
+        if let Some(wearable) = &item.proto().wearable {
             let layer = wearable.layer;
             let slots = &wearable.variants[variant];
             !self
                 .items
                 .iter()
-                .filter(|(i, _)| i.proto.wearable.as_ref().unwrap().layer == layer)
+                .filter(|(i, _)| i.proto().wearable.as_ref().unwrap().layer == layer)
                 .any(|(i, v)| {
-                    let variant = &i.proto.wearable.as_ref().unwrap().variants[*v];
+                    let variant = &i.proto().wearable.as_ref().unwrap().variants[*v];
                     variant.iter().any(|s| slots.contains(s))
                 })
         } else {
@@ -43,7 +43,7 @@ impl Wear {
         self.items
             .iter()
             .filter(|(item, variant)| {
-                if let Some(wearable) = &item.proto.wearable {
+                if let Some(wearable) = &item.proto().wearable {
                     wearable.variants[*variant].contains(&slot)
                 } else {
                     false
@@ -61,37 +61,41 @@ impl Wear {
 
 #[cfg(test)]
 mod tests {
-    use crate::game::map::items::helpers::{backpack, cloak, hat, oversleeve, rags};
+    use crate::game::Item;
 
     use super::Wear;
 
     #[test]
     fn test_cant_wear_two_items_in_one_slot() {
         let mut wear = Wear::new();
-        wear.add(cloak(), 0);
-        assert!(!wear.can_add(&rags(), 0));
+        wear.add(Item::new("cloak"), 0);
+        assert!(!wear.can_add(&Item::new("rags"), 0));
     }
 
     #[test]
     fn test_can_wear_two_items_in_different_slots() {
         let mut wear = Wear::new();
-        wear.add(cloak(), 0);
-        assert!(wear.can_add(&hat(), 0));
+        wear.add(Item::new("cloak"), 0);
+        assert!(wear.can_add(&Item::new("hat"), 0));
     }
 
     #[test]
     fn test_can_wear_two_items_in_different_layers() {
         let mut wear = Wear::new();
-        wear.add(cloak(), 0);
-        assert!(wear.can_add(&backpack(), 0));
+        wear.add(Item::new("cloak"), 0);
+        assert!(wear.can_add(&Item::new("backpack"), 0));
     }
 
     #[test]
     fn test_can_wear_two_oversleeves_in_different_slots() {
         let mut wear = Wear::new();
-        wear.add(cloak(), 0);
-        assert!(wear.can_add(&oversleeve(), 0));
-        wear.add(oversleeve(), 0);
-        assert!(wear.can_add(&oversleeve(), 1));
+        wear.add(Item::new("cloak"), 0);
+        let oversleeve = Item::new("leather_oversleeve");
+        assert!(wear.can_add(&oversleeve, 0));
+        wear.add(oversleeve.clone(), 0);
+        assert!(wear.can_add(&oversleeve, 1));
+        wear.add(oversleeve.clone(), 1);
+        assert!(!wear.can_add(&oversleeve, 0));
+        assert!(!wear.can_add(&oversleeve, 1));
     }
 }

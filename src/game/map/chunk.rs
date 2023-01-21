@@ -4,13 +4,11 @@ use std::hash::{Hash, Hasher};
 use arrayvec::ArrayVec;
 use rand::{distributions::Standard, rngs::StdRng, Rng, SeedableRng};
 
-use crate::game::map::items::helpers::{
-    axe, backpack, cloak, hat, oversleeve, rags, random_book, shovel,
-};
+use crate::game::map::items::helpers::random_book;
 
 use super::{
     terrains::{Boulder, Chest, Dirt, Grass, Tree},
-    ChunkPos, Tile,
+    ChunkPos, Item, Tile,
 };
 
 #[derive(Hash)]
@@ -43,7 +41,7 @@ impl Chunk {
             tiles.push(Tile::new(if rng.gen_bool(0.005) {
                 Tree::new(rng.sample(Standard)).into()
             } else if rng.gen_bool(0.003) {
-                Chest::new(vec![random_book(), axe()], false).into()
+                Chest::new(vec![random_book(), Item::new("knife")], false).into()
             } else if rng.gen_bool(0.01) {
                 Boulder::new(rng.sample(Standard)).into()
             } else if rng.gen_bool(0.5) {
@@ -78,14 +76,14 @@ impl Chunk {
                 .unwrap()
                 .items
                 .push(match rng.gen_range(0..8) {
-                    0 => cloak(),
-                    1 => hat(),
-                    2 => axe(),
-                    3 => shovel(),
+                    0 => Item::new("cloak"),
+                    1 => Item::new("hat"),
+                    2 => Item::new("stone_axe"),
+                    3 => Item::new("shovel"),
                     4 => random_book(),
-                    5 => backpack(),
-                    6 => oversleeve(),
-                    7 => rags(),
+                    5 => Item::new("backpack").with_container(Vec::new()),
+                    6 => Item::new("leather_oversleeve"),
+                    7 => Item::new("rags"),
                     _ => unreachable!(),
                 });
         }

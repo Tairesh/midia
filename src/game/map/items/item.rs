@@ -5,13 +5,16 @@ use std::collections::HashSet;
 use serde::{Deserialize, Serialize};
 use tetra::graphics::Color;
 
-use crate::game::{ItemPrototype, ItemQuality, ItemSize, ItemTag, MeleeDamageValue};
+use crate::game::{GameData, ItemPrototype, ItemQuality, ItemSize, ItemTag, MeleeDamageValue};
 
 use super::container::Container;
 
+static CUSTOM_PROTO: &str = "custom";
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Item {
-    pub proto: ItemPrototype,
+    proto: String,
+    custom_proto: Option<ItemPrototype>,
     named: Option<String>,
     colored: Option<Color>,
     readable: Option<String>,
@@ -20,14 +23,36 @@ pub struct Item {
 }
 
 impl Item {
-    pub fn new(proto: ItemPrototype) -> Self {
+    pub fn new(proto: impl Into<String>) -> Self {
         Self {
-            proto,
+            proto: proto.into(),
+            custom_proto: None,
             named: None,
             colored: None,
             readable: None,
             looks_like: None,
             container: None,
+        }
+    }
+
+    pub fn custom(proto: ItemPrototype) -> Self {
+        Self {
+            proto: CUSTOM_PROTO.to_string(),
+            custom_proto: Some(proto),
+            named: None,
+            colored: None,
+            readable: None,
+            looks_like: None,
+            container: None,
+        }
+    }
+
+    pub fn proto(&self) -> &ItemPrototype {
+        if let Some(custom_proto) = &self.custom_proto {
+            custom_proto
+        } else {
+            let game_data = GameData::instance();
+            game_data.get_item_prototype(&self.proto)
         }
     }
 
@@ -63,7 +88,7 @@ impl Item {
             return named;
         }
 
-        &self.proto.name
+        &self.proto().name
     }
 
     pub fn color(&self) -> Color {
@@ -87,7 +112,7 @@ impl Item {
             return looks_like;
         }
 
-        &self.proto.looks_like
+        &self.proto().looks_like
     }
 
     pub fn container(&mut self) -> Option<&mut Container> {
@@ -95,19 +120,19 @@ impl Item {
     }
 
     pub fn qualities(&self) -> &HashSet<ItemQuality> {
-        &self.proto.qualities
+        &self.proto().qualities
     }
 
     pub fn tags(&self) -> &HashSet<ItemTag> {
-        &self.proto.tags
+        &self.proto().tags
     }
 
     pub fn size(&self) -> ItemSize {
-        self.proto.size
+        self.proto().size
     }
 
     pub fn is_two_handed(&self) -> bool {
-        self.proto.two_handed_tool || self.size() >= ItemSize::Medium
+        self.proto().two_handed_tool || self.size() >= ItemSize::Medium
     }
 
     pub fn is_tool(&self) -> bool {
@@ -123,11 +148,11 @@ impl Item {
     }
 
     pub fn is_wearable(&self) -> bool {
-        self.proto.wearable.is_some()
+        self.proto().wearable.is_some()
     }
 
     pub fn armor(&self) -> u8 {
-        self.proto.wearable.as_ref().map_or(0, |w| w.armor)
+        self.proto().wearable.as_ref().map_or(0, |w| w.armor)
     }
 
     pub fn is_readable(&self) -> bool {
@@ -161,7 +186,7 @@ impl Item {
 
     pub fn melee_damage(&self) -> MeleeDamageValue {
         // TODO: check for minimum strength
-        if let Some(damage) = &self.proto.melee_damage {
+        if let Some(damage) = &self.proto().melee_damage {
             return damage.clone();
         }
 
@@ -171,15 +196,15 @@ impl Item {
 
 #[cfg(test)]
 mod tests {
-    use crate::game::map::items::helpers::{axe, backpack};
+    use super::Item;
 
     #[test]
     fn test_backpack() {
-        let mut backpack = backpack();
+        let mut backpack = Item::new("backpack").with_container(vec![]);
         assert_eq!(backpack.name(), "leather backpack");
         if let Some(container) = backpack.container() {
             assert_eq!(container.items.len(), 0);
-            let axe = axe();
+            let axe = Item::new("axe");
             container.items.push(axe);
             assert_eq!(container.items.len(), 1);
         } else {

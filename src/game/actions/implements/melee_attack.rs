@@ -130,9 +130,8 @@ impl ActionImpl for MeleeAttack {
 mod tests {
     use geometry::Point;
 
-    use crate::game::map::items::helpers::axe;
     use crate::game::world::tests::{add_npc, prepare_world};
-    use crate::game::Action;
+    use crate::game::{Action, Item};
 
     use super::{MeleeAttack, MELEE_ATTACK_MOVES};
 
@@ -164,7 +163,7 @@ mod tests {
         assert_eq!(world.meta.current_tick, 0);
 
         add_npc(&mut world, Point::new(1, 0));
-        world.player_mut().wield.wield(axe());
+        world.player_mut().wield.wield(Item::new("stone_axe"));
 
         world.player_mut().action =
             Some(Action::new(0, MeleeAttack::new(Point::new(1, 0)).into(), &world).unwrap());

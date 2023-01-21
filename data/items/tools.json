@@ -24,7 +24,7 @@
   },
   {
     "type": "item",
-    "id": "axe",
+    "id": "stone_axe",
     "name": "stone axe",
     "looks_like": "axe",
     "tags": [

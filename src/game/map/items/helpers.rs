@@ -1,56 +1,19 @@
 use std::collections::HashSet;
 
 use crate::colors::Colors;
-use crate::game::{Avatar, GameData, ItemPrototype, ItemSize, ItemTag};
+use crate::game::{Avatar, ItemPrototype, ItemSize, ItemTag};
 
 use super::Item;
 
-// TODO: remove this simple helpers and create GameData::create_item(proto: &str) method
-pub fn cloak() -> Item {
-    let game_data = GameData::instance();
-    Item::new(game_data.items.get("cloak").cloned().unwrap())
-}
-
-pub fn rags() -> Item {
-    let game_data = GameData::instance();
-    Item::new(game_data.items.get("rags").cloned().unwrap())
-}
-
-pub fn hat() -> Item {
-    let game_data = GameData::instance();
-    Item::new(game_data.items.get("hat").cloned().unwrap())
-}
-
-pub fn axe() -> Item {
-    let game_data = GameData::instance();
-    Item::new(game_data.items.get("axe").cloned().unwrap())
-}
-
-pub fn shovel() -> Item {
-    let game_data = GameData::instance();
-    Item::new(game_data.items.get("shovel").cloned().unwrap())
-}
-
 pub fn random_book() -> Item {
-    let game_data = GameData::instance();
-    Item::new(game_data.items.get("book").cloned().unwrap())
+    Item::new("book")
         .with_colored(Colors::BLUE_VIOLET)
         .with_named("strange book")
         .with_readable("Lore of the Midia")
 }
 
-pub fn backpack() -> Item {
-    let game_data = GameData::instance();
-    Item::new(game_data.items.get("backpack").cloned().unwrap()).with_container(Vec::new())
-}
-
-pub fn oversleeve() -> Item {
-    let game_data = GameData::instance();
-    Item::new(game_data.items.get("leather_oversleeve").cloned().unwrap())
-}
-
 pub fn dead_body(unit: &Avatar) -> Item {
-    Item::new(ItemPrototype {
+    Item::custom(ItemPrototype {
         id: "corpse".to_string(),
         name: format!("dead {}", unit.personality.age_name()),
         looks_like: "corpse".to_string(),

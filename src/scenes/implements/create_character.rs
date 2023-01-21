@@ -5,6 +5,7 @@ use tetra::graphics::mesh::{BorderRadii, Mesh, ShapeStyle};
 use tetra::graphics::Rectangle;
 use tetra::{Context, Event};
 
+use crate::game::CharSheet;
 use crate::{
     app::App,
     colors::Colors,
@@ -375,7 +376,7 @@ impl CreateCharacter {
 
     fn randomize(&mut self, ctx: &mut Context) {
         let mut rng = rand::thread_rng();
-        let character = Personality::random(&mut rng, true);
+        let character = Personality::random(&mut rng, true, true, false);
         self.gender_input().set_value(character.mind.gender);
         self.name_input().set_value(character.mind.name);
         self.age_input()
@@ -423,6 +424,7 @@ impl CreateCharacter {
                     gender,
                     main_hand: self.main_hand,
                 },
+                CharSheet::default(true, race, age),
             );
             Some(vec![Transition::Push(Scene::CharacterAttributes(
                 self.meta.path.clone(),

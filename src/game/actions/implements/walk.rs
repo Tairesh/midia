@@ -32,7 +32,7 @@ impl ActionImpl for Walk {
         }
         Yes({
             let k_diagonal = if self.dir.is_diagonal() { SQRT_2 } else { 1.0 };
-            let k_character = actor.char_sheet.walk_koeff();
+            let k_character = actor.personality.char_sheet.walk_koeff();
             let k = k_diagonal * k_character;
             if let Passable(pass_time) = tile.terrain.passage() {
                 f32::round(pass_time * k) as u32

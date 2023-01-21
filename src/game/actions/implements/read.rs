@@ -18,6 +18,7 @@ pub struct Read {
 impl Read {
     pub fn new(dir: Direction, avatar: &Avatar) -> Self {
         let reading_roll = avatar
+            .personality
             .char_sheet
             .get_skill_with_modifiers(Skill::Reading)
             .roll_explosive();
@@ -32,7 +33,7 @@ impl Read {
 
 impl ActionImpl for Read {
     fn is_possible(&self, actor: &Avatar, world: &World) -> ActionPossibility {
-        if actor.char_sheet.shock {
+        if actor.personality.char_sheet.shock {
             return No("You are in shock".to_string());
         }
 

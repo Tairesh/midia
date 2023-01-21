@@ -23,11 +23,11 @@ pub struct Attributes {
 }
 
 impl Attributes {
-    pub fn random() -> Self {
+    pub fn random<R: Rng + ?Sized>(rng: &mut R) -> Self {
         let mut attributes = Self::default();
         let mut points = 5;
         while points > 0 {
-            let random_attr = rand::thread_rng().gen::<Attribute>();
+            let random_attr = rng.gen::<Attribute>();
             attributes.set_attribute(random_attr, attributes.get_attribute(random_attr) + 1);
             points -= 1;
         }

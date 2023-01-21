@@ -4,13 +4,15 @@ use std::convert::TryFrom;
 
 use geometry::{Direction, Point, TwoDimDirection};
 
+use crate::game::game_data::pregen;
+
 use super::{
     super::{
         lang,
         savefile::{self, GameView, Meta, SaveError},
     },
     map::{field_of_view_set, Fov, TerrainView},
-    races::{Appearance, FurColor, Gender, MainHand, Mind, Personality, Race, Sex},
+    races::{Appearance, Gender, MainHand, Mind, Personality, Race, Sex},
     savage::CharSheet,
     Action, Avatar, Chunk, ChunkPos, HitResult, Log, LogEvent, Map, TilePos,
 };
@@ -70,81 +72,12 @@ impl World {
     }
 
     /// Calls one time after world is created
-    #[allow(clippy::too_many_lines)]
     pub fn init(mut self) -> Self {
         // TODO: don't forget to remove
-        self.add_unit(Avatar::new(
-            1,
-            Personality::new(
-                Appearance {
-                    race: Race::Gazan,
-                    age: 25,
-                    fur_color: Some(FurColor::LightBrown),
-                    sex: Sex::Male,
-                },
-                Mind {
-                    name: "Dragan".to_string(),
-                    gender: Gender::Male,
-                    main_hand: MainHand::Right,
-                },
-            ),
-            CharSheet::default(true, Race::Gazan, 25),
-            Point::new(0, -5),
-        ));
-        self.add_unit(Avatar::new(
-            2,
-            Personality::new(
-                Appearance {
-                    race: Race::Nyarnik,
-                    age: 22,
-                    fur_color: None,
-                    sex: Sex::Female,
-                },
-                Mind {
-                    name: "Shasha".to_string(),
-                    gender: Gender::Female,
-                    main_hand: MainHand::Left,
-                },
-            ),
-            CharSheet::default(true, Race::Nyarnik, 22),
-            Point::new(-3, -5),
-        ));
-        self.add_unit(Avatar::new(
-            3,
-            Personality::new(
-                Appearance {
-                    race: Race::Gazan,
-                    age: 22,
-                    fur_color: Some(FurColor::Ginger),
-                    sex: Sex::Male,
-                },
-                Mind {
-                    name: "Yasma".to_string(),
-                    gender: Gender::Male,
-                    main_hand: MainHand::Right,
-                },
-            ),
-            CharSheet::default(true, Race::Gazan, 20),
-            Point::new(3, -5),
-        ));
-        self.add_unit(Avatar::new(
-            4,
-            Personality::new(
-                Appearance {
-                    race: Race::Lagnam,
-                    age: 25,
-                    fur_color: Some(FurColor::White),
-                    sex: Sex::Male,
-                },
-                Mind {
-                    name: "Grem".to_string(),
-                    gender: Gender::Male,
-                    main_hand: MainHand::Right,
-                },
-            ),
-            CharSheet::default(true, Race::Lagnam, 25),
-            Point::new(6, -5),
-        ));
+        self.add_unit(Avatar::new(1, pregen::npc::dragan(), Point::new(0, -5)));
+        self.add_unit(Avatar::new(2, pregen::npc::shasha(), Point::new(-3, -5)));
+        self.add_unit(Avatar::new(3, pregen::npc::yasma(), Point::new(3, -5)));
+        self.add_unit(Avatar::new(4, pregen::npc::grem(), Point::new(6, -5)));
         self.add_unit(Avatar::new(
             5,
             Personality::new(
@@ -159,8 +92,8 @@ impl World {
                     gender: Gender::Male,
                     main_hand: MainHand::Right,
                 },
+                CharSheet::default(true, Race::Totik, 29),
             ),
-            CharSheet::default(true, Race::Totik, 29),
             Point::new(-6, -5),
         ));
         self.add_unit(Avatar::new(
@@ -177,8 +110,8 @@ impl World {
                     gender: Gender::Custom("bug".to_string()),
                     main_hand: MainHand::Right,
                 },
+                CharSheet::default(false, Race::Bug, 99),
             ),
-            CharSheet::default(false, Race::Bug, 99),
             Point::new(0, 5),
         ));
 
@@ -380,7 +313,7 @@ impl World {
         self.loaded_units.clear();
         let center = self.player().pos;
         for (&i, unit) in &self.units {
-            if unit.char_sheet.is_dead() {
+            if unit.personality.char_sheet.is_dead() {
                 continue;
             }
 
@@ -401,10 +334,12 @@ impl World {
             let current_tick = self.meta.current_tick;
             if self
                 .get_unit(unit)
+                .personality
                 .char_sheet
                 .can_try_to_shock_out(current_tick)
                 && self
                     .get_unit_mut(unit)
+                    .personality
                     .char_sheet
                     .try_to_shock_out(current_tick)
             {
@@ -428,7 +363,7 @@ impl World {
             self.map().get_tile_mut(pos).items.push(item);
         }
 
-        if self.get_unit(unit_id).char_sheet.is_dead() {
+        if self.get_unit(unit_id).is_dead() {
             self.log().push(LogEvent::danger(
                 format!("{} is dead!", self.get_unit(unit_id).name_for_actions()),
                 pos,
@@ -465,13 +400,10 @@ pub mod tests {
         super::{
             actions::implements::{Skip, Walk},
             map::terrains::{Boulder, BoulderSize, Dirt},
-            races::{
-                tests::personality::{old_bugger, tester_girl},
-                Race,
-            },
+            races::tests::personality::{old_bugger, tester_girl},
         },
         savefile::{GameView, Meta},
-        Action, Avatar, CharSheet, Direction, Log, TerrainView, World,
+        Action, Avatar, Direction, Log, TerrainView, World,
     };
 
     pub fn prepare_world() -> World {
@@ -481,24 +413,14 @@ pub mod tests {
             Log::new(),
             HashMap::from([(
                 0,
-                Avatar::dressed_default(
-                    0,
-                    tester_girl(),
-                    CharSheet::default(true, Race::Gazan, 25),
-                    Point::new(0, 0),
-                ),
+                Avatar::dressed_default(0, tester_girl(), Point::new(0, 0)),
             )]),
             HashMap::new(),
         )
     }
 
     pub fn add_npc(world: &mut World, pos: Point) -> usize {
-        world.add_unit(Avatar::new(
-            world.next_unit_id(),
-            old_bugger(),
-            CharSheet::default(false, Race::Bug, 99),
-            pos,
-        ))
+        world.add_unit(Avatar::new(world.next_unit_id(), old_bugger(), pos))
     }
 
     #[test]

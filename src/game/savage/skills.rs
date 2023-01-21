@@ -55,12 +55,12 @@ impl Skills {
         }
     }
 
-    pub fn random(attributes: &Attributes, race: Race) -> Self {
+    pub fn random<R: Rng + ?Sized>(rng: &mut R, attributes: &Attributes, race: Race) -> Self {
         let mut skills = Self::default(race);
 
         let mut points = skills.calc_skill_points(attributes, race);
         while points > 0 {
-            let random_skill = rand::thread_rng().gen::<Skill>();
+            let random_skill = rng.gen::<Skill>();
             skills.set_skill(random_skill, skills.get_skill(random_skill) + 1);
 
             points = skills.calc_skill_points(attributes, race);

@@ -62,9 +62,10 @@ pub fn melee_attack(attacker: &Avatar, defender: &Avatar) -> AttackResult {
     let weapon = attacker.wield.active_hand();
     // TODO: add +1 to hit for every ally
     let hit_dice = attacker
+        .personality
         .char_sheet
         .get_skill_with_modifiers(Skill::Fighting);
-    let hit_roll = if attacker.char_sheet.wild_card {
+    let hit_roll = if attacker.personality.char_sheet.wild_card {
         let wild_dice = DiceWithModifier::new(Dice::D6, hit_dice.modifier());
         u8::max(hit_dice.roll(), wild_dice.roll_explosive())
     } else {
@@ -72,7 +73,7 @@ pub fn melee_attack(attacker: &Avatar, defender: &Avatar) -> AttackResult {
     };
     // TODO: Attack of unarmed enemy while attacker is armed causes +2 to Fighting skill rolls
 
-    let parry = defender.char_sheet.parry();
+    let parry = defender.personality.char_sheet.parry();
     if hit_roll >= parry {
         let delta = hit_roll - parry;
         let critical = delta >= 4;
@@ -82,10 +83,12 @@ pub fn melee_attack(attacker: &Avatar, defender: &Avatar) -> AttackResult {
         } else {
             MeleeDamageValue::default()
         };
-        let damage = damage_params.damage.roll(&attacker.char_sheet, critical);
+        let damage = damage_params
+            .damage
+            .roll(&attacker.personality.char_sheet, critical);
         let penetration = damage_params.penetration;
 
-        let toughness = defender.char_sheet.toughness();
+        let toughness = defender.personality.char_sheet.toughness();
         // TODO: attack random parts of the body
         let mut armor = defender.armor(BodySlot::Torso);
         armor = armor.saturating_sub(penetration);
@@ -95,7 +98,7 @@ pub fn melee_attack(attacker: &Avatar, defender: &Avatar) -> AttackResult {
         let mut wounds = 0;
         if total_damage > 0 {
             // add wound if target already shocked
-            if defender.char_sheet.shock {
+            if defender.personality.char_sheet.shock {
                 wounds += 1;
             }
             shock = true;

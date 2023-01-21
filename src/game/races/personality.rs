@@ -1,10 +1,8 @@
-use rand::distributions::Standard;
-use rand::seq::SliceRandom;
-use rand::Rng;
+use rand::{distributions::Standard, seq::SliceRandom, Rng};
 use serde::{Deserialize, Serialize};
 
 use super::{
-    super::{traits::Name, GameData},
+    super::{traits::Name, CharSheet, GameData},
     FurColor, Gender, MainHand, PlayableRace, Race, Sex,
 };
 
@@ -56,14 +54,25 @@ pub struct Personality {
     pub appearance: Appearance,
     #[serde(rename = "m")]
     pub mind: Mind,
+    #[serde(rename = "c")]
+    pub char_sheet: CharSheet,
 }
 
 impl Personality {
-    pub fn new(appearance: Appearance, mind: Mind) -> Self {
-        Self { appearance, mind }
+    pub fn new(appearance: Appearance, mind: Mind, char_sheet: CharSheet) -> Self {
+        Self {
+            appearance,
+            mind,
+            char_sheet,
+        }
     }
 
-    pub fn random<R: Rng + ?Sized>(rng: &mut R, is_player: bool) -> Personality {
+    pub fn random<R: Rng + ?Sized>(
+        rng: &mut R,
+        is_player: bool,
+        wild_card: bool,
+        random_char_sheet: bool,
+    ) -> Personality {
         let gender = rng.sample(Standard);
         let sex = Sex::from(&gender);
         let game_data = GameData::instance();
@@ -73,6 +82,7 @@ impl Personality {
         } else {
             rng.sample(Standard)
         };
+        let age = rng.gen_range(0..=99);
         let name = game_data
             .names
             .get(&race)
@@ -84,12 +94,12 @@ impl Personality {
             .unwrap_or_default();
         Personality::new(
             Appearance {
-                age: rng.gen_range(0..=99),
                 fur_color: if race.has_fur() {
                     Some(rng.sample(Standard))
                 } else {
                     None
                 },
+                age,
                 sex,
                 race,
             },
@@ -97,6 +107,11 @@ impl Personality {
                 name,
                 gender,
                 main_hand: rng.sample(Standard),
+            },
+            if random_char_sheet {
+                CharSheet::random(rng, wild_card, race, age)
+            } else {
+                CharSheet::default(wild_card, race, age)
             },
         )
     }
@@ -133,7 +148,7 @@ pub fn age_name(appearance: &Appearance) -> String {
 
 #[cfg(test)]
 pub mod tests {
-    use super::{Appearance, FurColor, Gender, MainHand, Mind, Personality, Race, Sex};
+    use super::{Appearance, CharSheet, FurColor, Gender, MainHand, Mind, Personality, Race, Sex};
 
     pub fn tester_girl() -> Personality {
         Personality::new(
@@ -148,6 +163,7 @@ pub mod tests {
                 gender: Gender::Female,
                 main_hand: MainHand::Left,
             },
+            CharSheet::default(true, Race::Gazan, 25),
         )
     }
 
@@ -164,6 +180,7 @@ pub mod tests {
                 gender: Gender::Custom("X".to_string()),
                 main_hand: MainHand::Ambidexter,
             },
+            CharSheet::default(false, Race::Bug, 99),
         )
     }
 

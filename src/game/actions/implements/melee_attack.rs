@@ -19,7 +19,7 @@ impl MeleeAttack {
 
 impl ActionImpl for MeleeAttack {
     fn is_possible(&self, actor: &Avatar, _world: &World) -> ActionPossibility {
-        if actor.char_sheet.shock {
+        if actor.personality.char_sheet.shock {
             return No("You are in shock".to_string());
         }
 

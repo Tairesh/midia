@@ -26,7 +26,7 @@ use crate::{
     },
 };
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 enum ButtonEvent {
     AgilityMinus,
     AgilityPlus,
@@ -115,7 +115,6 @@ impl From<u8> for ButtonEvent {
 pub struct CharacterAttributes {
     meta: Meta,
     personality: Personality,
-    char_sheet: CharSheet,
     attributes_points: u8,
     skills_points: i8,
     window_size: (i32, i32),
@@ -241,11 +240,6 @@ fn skill_sprites(
 impl CharacterAttributes {
     pub fn new(path: &Path, personality: Personality, app: &App, ctx: &mut Context) -> Self {
         let meta = savefile::load(path).unwrap();
-        let char_sheet = CharSheet::default(
-            true,
-            personality.appearance.race,
-            personality.appearance.age,
-        );
 
         let mut sprites: Vec<Box<dyn UiSprite>> = vec![
             bg(&app.assets),
@@ -254,7 +248,8 @@ impl CharacterAttributes {
                 &app.assets,
             ),
         ];
-        for (i, (attr, dice)) in char_sheet
+        for (i, (attr, dice)) in personality
+            .char_sheet
             .attributes
             .get_attributes()
             .into_iter()
@@ -282,7 +277,8 @@ impl CharacterAttributes {
             Position::horizontal_center(0.0, Vertical::ByTop { y: 370.0 }),
         )));
 
-        for (i, (attr, skill, level)) in char_sheet
+        for (i, (attr, skill, level)) in personality
+            .char_sheet
             .skills
             .get_skills_by_attributes()
             .into_iter()
@@ -319,75 +315,14 @@ impl CharacterAttributes {
             window_size: app.window_size,
             meta,
             personality,
-            char_sheet,
         }
     }
 
-    fn agility_label(&mut self) -> &mut Label {
-        self.sprites[5].as_label().unwrap()
-    }
-    fn smarts_label(&mut self) -> &mut Label {
-        self.sprites[10].as_label().unwrap()
-    }
-    fn spirit_label(&mut self) -> &mut Label {
-        self.sprites[15].as_label().unwrap()
-    }
-    fn strength_label(&mut self) -> &mut Label {
-        self.sprites[20].as_label().unwrap()
-    }
-    fn vigor_label(&mut self) -> &mut Label {
-        self.sprites[25].as_label().unwrap()
-    }
     fn attributes_points_label(&mut self) -> &mut Label {
         self.sprites[27].as_label().unwrap()
     }
     fn skills_points_label(&mut self) -> &mut Label {
         self.sprites[28].as_label().unwrap()
-    }
-    fn athletics_label(&mut self) -> &mut Label {
-        self.sprites[32].as_label().unwrap()
-    }
-    fn fighting_label(&mut self) -> &mut Label {
-        self.sprites[36].as_label().unwrap()
-    }
-    fn shooting_label(&mut self) -> &mut Label {
-        self.sprites[40].as_label().unwrap()
-    }
-    fn stealth_label(&mut self) -> &mut Label {
-        self.sprites[44].as_label().unwrap()
-    }
-    fn thievery_label(&mut self) -> &mut Label {
-        self.sprites[48].as_label().unwrap()
-    }
-    fn swimming_label(&mut self) -> &mut Label {
-        self.sprites[52].as_label().unwrap()
-    }
-    fn gambling_label(&mut self) -> &mut Label {
-        self.sprites[56].as_label().unwrap()
-    }
-    fn notice_label(&mut self) -> &mut Label {
-        self.sprites[60].as_label().unwrap()
-    }
-    fn survival_label(&mut self) -> &mut Label {
-        self.sprites[64].as_label().unwrap()
-    }
-    fn healing_label(&mut self) -> &mut Label {
-        self.sprites[68].as_label().unwrap()
-    }
-    fn repair_label(&mut self) -> &mut Label {
-        self.sprites[72].as_label().unwrap()
-    }
-    fn reading_label(&mut self) -> &mut Label {
-        self.sprites[76].as_label().unwrap()
-    }
-    fn persuasion_label(&mut self) -> &mut Label {
-        self.sprites[80].as_label().unwrap()
-    }
-    fn intimidation_label(&mut self) -> &mut Label {
-        self.sprites[84].as_label().unwrap()
-    }
-    fn climbing_label(&mut self) -> &mut Label {
-        self.sprites[88].as_label().unwrap()
     }
     fn parry_label(&mut self) -> &mut Label {
         self.sprites[90].as_label().unwrap()
@@ -418,10 +353,10 @@ impl CharacterAttributes {
 
     fn update_points(&mut self, ctx: &mut Context) {
         let attributes_points = self.attributes_points;
-        let skills_points = self.char_sheet.calc_skill_points();
+        let skills_points = self.personality.char_sheet.calc_skill_points();
         self.skills_points = skills_points;
-        let parry = self.char_sheet.parry();
-        let toughness = self.char_sheet.toughness();
+        let parry = self.personality.char_sheet.parry();
+        let toughness = self.personality.char_sheet.toughness();
 
         let window_size = self.window_size;
         self.parry_label()
@@ -439,27 +374,28 @@ impl CharacterAttributes {
             window_size,
         );
 
+        // TODO: refactor this
         if attributes_points == 0 {
             self.set_buttons_disabled(&[6, 11, 16, 21, 26]);
         } else {
             self.set_buttons_disabled_by_value(
                 HashMap::from_iter(vec![
-                    (6, self.char_sheet.attributes.agility),
-                    (11, self.char_sheet.attributes.smarts),
-                    (16, self.char_sheet.attributes.spirit),
-                    (21, self.char_sheet.attributes.strength),
-                    (26, self.char_sheet.attributes.vigor),
+                    (6, self.personality.char_sheet.attributes.agility),
+                    (11, self.personality.char_sheet.attributes.smarts),
+                    (16, self.personality.char_sheet.attributes.spirit),
+                    (21, self.personality.char_sheet.attributes.strength),
+                    (26, self.personality.char_sheet.attributes.vigor),
                 ]),
                 SkillLevel::D12,
             );
         }
         self.set_buttons_disabled_by_value(
-            HashMap::from_iter(vec![
-                (4, self.char_sheet.attributes.agility),
-                (9, self.char_sheet.attributes.smarts),
-                (14, self.char_sheet.attributes.spirit),
-                (19, self.char_sheet.attributes.strength),
-                (24, self.char_sheet.attributes.vigor),
+            HashMap::from_iter([
+                (4, self.personality.char_sheet.attributes.agility),
+                (9, self.personality.char_sheet.attributes.smarts),
+                (14, self.personality.char_sheet.attributes.spirit),
+                (19, self.personality.char_sheet.attributes.strength),
+                (24, self.personality.char_sheet.attributes.vigor),
             ]),
             SkillLevel::D4,
         );
@@ -470,50 +406,51 @@ impl CharacterAttributes {
             ]);
         } else {
             self.set_buttons_disabled_by_value(
-                HashMap::from_iter(vec![
-                    (33, self.char_sheet.skills.athletics),
-                    (37, self.char_sheet.skills.fighting),
-                    (41, self.char_sheet.skills.shooting),
-                    (45, self.char_sheet.skills.stealth),
-                    (49, self.char_sheet.skills.thievery),
-                    (53, self.char_sheet.skills.swimming),
-                    (57, self.char_sheet.skills.gambling),
-                    (61, self.char_sheet.skills.notice),
-                    (65, self.char_sheet.skills.survival),
-                    (69, self.char_sheet.skills.healing),
-                    (73, self.char_sheet.skills.repair),
-                    (77, self.char_sheet.skills.reading),
-                    (81, self.char_sheet.skills.persuasion),
-                    (85, self.char_sheet.skills.intimidation),
-                    (89, self.char_sheet.skills.climbing),
+                HashMap::from_iter([
+                    (33, self.personality.char_sheet.skills.athletics),
+                    (37, self.personality.char_sheet.skills.fighting),
+                    (41, self.personality.char_sheet.skills.shooting),
+                    (45, self.personality.char_sheet.skills.stealth),
+                    (49, self.personality.char_sheet.skills.thievery),
+                    (53, self.personality.char_sheet.skills.swimming),
+                    (57, self.personality.char_sheet.skills.gambling),
+                    (61, self.personality.char_sheet.skills.notice),
+                    (65, self.personality.char_sheet.skills.survival),
+                    (69, self.personality.char_sheet.skills.healing),
+                    (73, self.personality.char_sheet.skills.repair),
+                    (77, self.personality.char_sheet.skills.reading),
+                    (81, self.personality.char_sheet.skills.persuasion),
+                    (85, self.personality.char_sheet.skills.intimidation),
+                    (89, self.personality.char_sheet.skills.climbing),
                 ]),
                 SkillLevel::D12,
             );
         }
         self.set_buttons_disabled_by_value(
-            HashMap::from_iter(vec![
-                (31, self.char_sheet.skills.athletics),
-                (35, self.char_sheet.skills.fighting),
-                (39, self.char_sheet.skills.shooting),
-                (43, self.char_sheet.skills.stealth),
-                (47, self.char_sheet.skills.thievery),
-                (51, self.char_sheet.skills.swimming),
-                (55, self.char_sheet.skills.gambling),
-                (59, self.char_sheet.skills.notice),
-                (63, self.char_sheet.skills.survival),
-                (67, self.char_sheet.skills.healing),
-                (71, self.char_sheet.skills.repair),
-                (75, self.char_sheet.skills.reading),
-                (79, self.char_sheet.skills.persuasion),
-                (83, self.char_sheet.skills.intimidation),
-                (87, self.char_sheet.skills.climbing),
+            HashMap::from_iter([
+                (31, self.personality.char_sheet.skills.athletics),
+                (35, self.personality.char_sheet.skills.fighting),
+                (39, self.personality.char_sheet.skills.shooting),
+                (43, self.personality.char_sheet.skills.stealth),
+                (47, self.personality.char_sheet.skills.thievery),
+                (51, self.personality.char_sheet.skills.swimming),
+                (55, self.personality.char_sheet.skills.gambling),
+                (59, self.personality.char_sheet.skills.notice),
+                (63, self.personality.char_sheet.skills.survival),
+                (67, self.personality.char_sheet.skills.healing),
+                (71, self.personality.char_sheet.skills.repair),
+                (75, self.personality.char_sheet.skills.reading),
+                (79, self.personality.char_sheet.skills.persuasion),
+                (83, self.personality.char_sheet.skills.intimidation),
+                (87, self.personality.char_sheet.skills.climbing),
             ]),
             SkillLevel::D4_2,
         );
     }
 
     fn randomize(&mut self, ctx: &mut Context) -> SomeTransitions {
-        self.char_sheet = CharSheet::random(
+        self.personality.char_sheet = CharSheet::random(
+            &mut rand::thread_rng(),
             true,
             self.personality.appearance.race,
             self.personality.appearance.age,
@@ -521,50 +458,19 @@ impl CharacterAttributes {
         self.attributes_points = 0;
         let window_size = self.window_size;
 
-        // TODO: refactor this
-
-        let agility = self.char_sheet.attributes.agility.name();
-        let smarts = self.char_sheet.attributes.smarts.name();
-        let spirit = self.char_sheet.attributes.spirit.name();
-        let strength = self.char_sheet.attributes.strength.name();
-        let vigor = self.char_sheet.attributes.vigor.name();
-        self.agility_label().update(agility, ctx, window_size);
-        self.smarts_label().update(smarts, ctx, window_size);
-        self.spirit_label().update(spirit, ctx, window_size);
-        self.strength_label().update(strength, ctx, window_size);
-        self.vigor_label().update(vigor, ctx, window_size);
-
-        let athletics = self.char_sheet.skills.athletics.name();
-        let fighting = self.char_sheet.skills.fighting.name();
-        let shooting = self.char_sheet.skills.shooting.name();
-        let stealth = self.char_sheet.skills.stealth.name();
-        let thievery = self.char_sheet.skills.thievery.name();
-        let swimming = self.char_sheet.skills.swimming.name();
-        let gambling = self.char_sheet.skills.gambling.name();
-        let notice = self.char_sheet.skills.notice.name();
-        let survival = self.char_sheet.skills.survival.name();
-        let healing = self.char_sheet.skills.healing.name();
-        let repair = self.char_sheet.skills.repair.name();
-        let reading = self.char_sheet.skills.reading.name();
-        let persuasion = self.char_sheet.skills.persuasion.name();
-        let intimidation = self.char_sheet.skills.intimidation.name();
-        let climbing = self.char_sheet.skills.climbing.name();
-        self.athletics_label().update(athletics, ctx, window_size);
-        self.fighting_label().update(fighting, ctx, window_size);
-        self.shooting_label().update(shooting, ctx, window_size);
-        self.stealth_label().update(stealth, ctx, window_size);
-        self.thievery_label().update(thievery, ctx, window_size);
-        self.swimming_label().update(swimming, ctx, window_size);
-        self.gambling_label().update(gambling, ctx, window_size);
-        self.notice_label().update(notice, ctx, window_size);
-        self.survival_label().update(survival, ctx, window_size);
-        self.healing_label().update(healing, ctx, window_size);
-        self.repair_label().update(repair, ctx, window_size);
-        self.reading_label().update(reading, ctx, window_size);
-        self.persuasion_label().update(persuasion, ctx, window_size);
-        self.intimidation_label()
-            .update(intimidation, ctx, window_size);
-        self.climbing_label().update(climbing, ctx, window_size);
+        for (attribute, value) in self.personality.char_sheet.attributes.get_attributes() {
+            self.attribute_label(attribute)
+                .update(value.name(), ctx, window_size);
+        }
+        for (_, skill, value) in self
+            .personality
+            .char_sheet
+            .skills
+            .get_skills_by_attributes()
+        {
+            self.skill_label(skill)
+                .update(value.name(), ctx, window_size);
+        }
 
         self.update_points(ctx);
         None
@@ -573,12 +479,7 @@ impl CharacterAttributes {
     fn next(&self) -> Vec<Transition> {
         // TODO: traits, skills, etc.
         // TODO: find available starting pos in the world
-        let avatar = Avatar::dressed_default(
-            0,
-            self.personality.clone(),
-            self.char_sheet.clone(),
-            Point::new(0, 0),
-        );
+        let avatar = Avatar::dressed_default(0, self.personality.clone(), Point::new(0, 0));
         let mut world = World::create(self.meta.clone(), avatar).init();
         world.save();
 
@@ -586,6 +487,86 @@ impl CharacterAttributes {
             Transition::LoadWorld(self.meta.path.clone()),
             Transition::Replace(Scene::GameScene),
         ]
+    }
+
+    fn attribute_labels() -> HashMap<Attribute, usize> {
+        HashMap::from([
+            (Attribute::Agility, 5),
+            (Attribute::Smarts, 10),
+            (Attribute::Spirit, 15),
+            (Attribute::Strength, 20),
+            (Attribute::Vigor, 25),
+        ])
+    }
+
+    fn attribute_label(&mut self, attribute: Attribute) -> &mut Label {
+        let index = *Self::attribute_labels().get(&attribute).unwrap();
+        self.sprites[index].as_label().unwrap()
+    }
+
+    fn update_attribute_label(&mut self, attribute: Attribute, ctx: &mut Context) {
+        let dice_name = self.get_attribute(attribute).name();
+        let window_size = self.window_size;
+        self.attribute_label(attribute)
+            .update(dice_name, ctx, window_size);
+        self.update_points(ctx);
+    }
+
+    fn skill_labels() -> HashMap<Skill, usize> {
+        HashMap::from([
+            (Skill::Athletics, 32),
+            (Skill::Fighting, 36),
+            (Skill::Shooting, 40),
+            (Skill::Stealth, 44),
+            (Skill::Thievery, 48),
+            (Skill::Swimming, 52),
+            (Skill::Gambling, 56),
+            (Skill::Notice, 60),
+            (Skill::Survival, 64),
+            (Skill::Healing, 68),
+            (Skill::Repair, 72),
+            (Skill::Reading, 76),
+            (Skill::Persuasion, 80),
+            (Skill::Intimidation, 84),
+            (Skill::Climbing, 88),
+        ])
+    }
+
+    fn skill_label(&mut self, skill: Skill) -> &mut Label {
+        let index = *Self::skill_labels().get(&skill).unwrap();
+        self.sprites[index].as_label().unwrap()
+    }
+
+    fn update_skill_label(&mut self, skill: Skill, ctx: &mut Context) {
+        let skill_name = self.get_skill(skill).name();
+        let window_size = self.window_size;
+        self.skill_label(skill).update(skill_name, ctx, window_size);
+        self.update_points(ctx);
+    }
+
+    fn get_attribute(&self, attribute: Attribute) -> Dice {
+        self.personality
+            .char_sheet
+            .attributes
+            .get_attribute(attribute)
+    }
+
+    fn set_attribute(&mut self, attribute: Attribute, dice: Dice) {
+        self.personality
+            .char_sheet
+            .attributes
+            .set_attribute(attribute, dice);
+    }
+
+    fn get_skill(&self, skill: Skill) -> SkillLevel {
+        self.personality.char_sheet.skills.get_skill(skill)
+    }
+
+    fn set_skill(&mut self, skill: Skill, skill_level: SkillLevel) {
+        self.personality
+            .char_sheet
+            .skills
+            .set_skill(skill, skill_level);
     }
 }
 
@@ -611,608 +592,95 @@ impl SceneImpl for CharacterAttributes {
     }
 
     // TODO: refactor and delete this allow
-    #[allow(clippy::too_many_lines)]
     fn custom_event(&mut self, ctx: &mut Context, event: u8) -> SomeTransitions {
         let event = ButtonEvent::from(event);
+        let minus_attribute_events: HashMap<ButtonEvent, Attribute> = HashMap::from([
+            (ButtonEvent::AgilityMinus, Attribute::Agility),
+            (ButtonEvent::SmartsMinus, Attribute::Smarts),
+            (ButtonEvent::SpiritMinus, Attribute::Spirit),
+            (ButtonEvent::StrengthMinus, Attribute::Strength),
+            (ButtonEvent::VigorMinus, Attribute::Vigor),
+        ]);
+        let plus_attribute_events: HashMap<ButtonEvent, Attribute> = HashMap::from([
+            (ButtonEvent::AgilityPlus, Attribute::Agility),
+            (ButtonEvent::SmartsPlus, Attribute::Smarts),
+            (ButtonEvent::SpiritPlus, Attribute::Spirit),
+            (ButtonEvent::StrengthPlus, Attribute::Strength),
+            (ButtonEvent::VigorPlus, Attribute::Vigor),
+        ]);
+        let minus_skill_events: HashMap<ButtonEvent, Skill> = HashMap::from([
+            (ButtonEvent::AthleticsMinus, Skill::Athletics),
+            (ButtonEvent::FightingMinus, Skill::Fighting),
+            (ButtonEvent::ShootingMinus, Skill::Shooting),
+            (ButtonEvent::StealthMinus, Skill::Stealth),
+            (ButtonEvent::ThieveryMinus, Skill::Thievery),
+            (ButtonEvent::SwimmingMinus, Skill::Swimming),
+            (ButtonEvent::GamblingMinus, Skill::Gambling),
+            (ButtonEvent::NoticeMinus, Skill::Notice),
+            (ButtonEvent::SurvivalMinus, Skill::Survival),
+            (ButtonEvent::HealingMinus, Skill::Healing),
+            (ButtonEvent::RepairMinus, Skill::Repair),
+            (ButtonEvent::ReadingMinus, Skill::Reading),
+            (ButtonEvent::PersuasionMinus, Skill::Persuasion),
+            (ButtonEvent::IntimidationMinus, Skill::Intimidation),
+            (ButtonEvent::ClimbingMinus, Skill::Climbing),
+        ]);
+        let plus_skill_events: HashMap<ButtonEvent, Skill> = HashMap::from([
+            (ButtonEvent::AthleticsPlus, Skill::Athletics),
+            (ButtonEvent::FightingPlus, Skill::Fighting),
+            (ButtonEvent::ShootingPlus, Skill::Shooting),
+            (ButtonEvent::StealthPlus, Skill::Stealth),
+            (ButtonEvent::ThieveryPlus, Skill::Thievery),
+            (ButtonEvent::SwimmingPlus, Skill::Swimming),
+            (ButtonEvent::GamblingPlus, Skill::Gambling),
+            (ButtonEvent::NoticePlus, Skill::Notice),
+            (ButtonEvent::SurvivalPlus, Skill::Survival),
+            (ButtonEvent::HealingPlus, Skill::Healing),
+            (ButtonEvent::RepairPlus, Skill::Repair),
+            (ButtonEvent::ReadingPlus, Skill::Reading),
+            (ButtonEvent::PersuasionPlus, Skill::Persuasion),
+            (ButtonEvent::IntimidationPlus, Skill::Intimidation),
+            (ButtonEvent::ClimbingPlus, Skill::Climbing),
+        ]);
+
+        if let Some(&attribute) = minus_attribute_events.get(&event) {
+            let value = self.get_attribute(attribute);
+            if value > Dice::D4 {
+                self.attributes_points += 1;
+                self.set_attribute(attribute, value - 1);
+                self.update_attribute_label(attribute, ctx);
+            }
+        } else if let Some(&attribute) = plus_attribute_events.get(&event) {
+            let value = self.get_attribute(attribute);
+            if self.attributes_points > 0 && value < Dice::D12 {
+                self.attributes_points -= 1;
+                self.set_attribute(attribute, value + 1);
+                self.update_attribute_label(attribute, ctx);
+            }
+        } else if let Some(&skill) = minus_skill_events.get(&event) {
+            let value = self.get_skill(skill);
+            let attribute = self.get_attribute(skill.attribute());
+            let cost = if value > attribute.into() { 2 } else { 1 };
+            if value > SkillLevel::D4_2 {
+                self.skills_points += cost;
+                self.set_skill(skill, value - 1);
+                self.update_skill_label(skill, ctx);
+            }
+        } else if let Some(&skill) = plus_skill_events.get(&event) {
+            let value = self.get_skill(skill);
+            let attribute = self.get_attribute(skill.attribute());
+            let cost = if value >= attribute.into() { 2 } else { 1 };
+            if self.skills_points >= cost && value < SkillLevel::D12 {
+                self.skills_points -= cost;
+                self.set_skill(skill, value + 1);
+                self.update_skill_label(skill, ctx);
+            }
+        }
+
         match event {
-            ButtonEvent::AgilityMinus | ButtonEvent::AgilityPlus => {
-                if event == ButtonEvent::AgilityMinus
-                    && self.char_sheet.attributes.agility > Dice::D4
-                {
-                    self.attributes_points += 1;
-                    self.char_sheet.attributes.agility -= 1;
-                } else if event == ButtonEvent::AgilityPlus
-                    && self.attributes_points > 0
-                    && self.char_sheet.attributes.agility < Dice::D12
-                {
-                    self.attributes_points -= 1;
-                    self.char_sheet.attributes.agility += 1;
-                }
-
-                let dice_name = self.char_sheet.attributes.agility.name();
-                let window_size = self.window_size;
-                self.agility_label().update(dice_name, ctx, window_size);
-                self.update_points(ctx);
-                None
-            }
-            ButtonEvent::SmartsMinus | ButtonEvent::SmartsPlus => {
-                if event == ButtonEvent::SmartsMinus && self.char_sheet.attributes.smarts > Dice::D4
-                {
-                    self.attributes_points += 1;
-                    self.char_sheet.attributes.smarts -= 1;
-                } else if event == ButtonEvent::SmartsPlus
-                    && self.attributes_points > 0
-                    && self.char_sheet.attributes.smarts < Dice::D12
-                {
-                    self.attributes_points -= 1;
-                    self.char_sheet.attributes.smarts += 1;
-                }
-
-                let dice_name = self.char_sheet.attributes.smarts.name();
-                let window_size = self.window_size;
-                self.smarts_label().update(dice_name, ctx, window_size);
-                self.update_points(ctx);
-                None
-            }
-            ButtonEvent::SpiritMinus | ButtonEvent::SpiritPlus => {
-                if event == ButtonEvent::SpiritMinus && self.char_sheet.attributes.spirit > Dice::D4
-                {
-                    self.attributes_points += 1;
-                    self.char_sheet.attributes.spirit -= 1;
-                } else if event == ButtonEvent::SpiritPlus
-                    && self.attributes_points > 0
-                    && self.char_sheet.attributes.spirit < Dice::D12
-                {
-                    self.attributes_points -= 1;
-                    self.char_sheet.attributes.spirit += 1;
-                }
-
-                let dice_name = self.char_sheet.attributes.spirit.name();
-                let window_size = self.window_size;
-                self.spirit_label().update(dice_name, ctx, window_size);
-                self.update_points(ctx);
-                None
-            }
-            ButtonEvent::StrengthMinus | ButtonEvent::StrengthPlus => {
-                if event == ButtonEvent::StrengthMinus
-                    && self.char_sheet.attributes.strength > Dice::D4
-                {
-                    self.attributes_points += 1;
-                    self.char_sheet.attributes.strength -= 1;
-                } else if event == ButtonEvent::StrengthPlus
-                    && self.attributes_points > 0
-                    && self.char_sheet.attributes.strength < Dice::D12
-                {
-                    self.attributes_points -= 1;
-                    self.char_sheet.attributes.strength += 1;
-                }
-
-                let dice_name = self.char_sheet.attributes.strength.name();
-                let window_size = self.window_size;
-                self.strength_label().update(dice_name, ctx, window_size);
-                self.update_points(ctx);
-                None
-            }
-            ButtonEvent::VigorMinus | ButtonEvent::VigorPlus => {
-                if event == ButtonEvent::VigorMinus && self.char_sheet.attributes.vigor > Dice::D4 {
-                    self.attributes_points += 1;
-                    self.char_sheet.attributes.vigor -= 1;
-                } else if event == ButtonEvent::VigorPlus
-                    && self.attributes_points > 0
-                    && self.char_sheet.attributes.vigor < Dice::D12
-                {
-                    self.attributes_points -= 1;
-                    self.char_sheet.attributes.vigor += 1;
-                }
-
-                let dice_name = self.char_sheet.attributes.vigor.name();
-                let window_size = self.window_size;
-                self.vigor_label().update(dice_name, ctx, window_size);
-                self.update_points(ctx);
-                None
-            }
-            ButtonEvent::AthleticsMinus | ButtonEvent::AthleticsPlus => {
-                let cost_plus = if self.char_sheet.skills.athletics
-                    >= self.char_sheet.attributes.agility.into()
-                {
-                    2
-                } else {
-                    1
-                };
-                let cost_minus = if self.char_sheet.skills.athletics
-                    > self.char_sheet.attributes.agility.into()
-                {
-                    2
-                } else {
-                    1
-                };
-                if event == ButtonEvent::AthleticsMinus
-                    && self.char_sheet.skills.athletics > SkillLevel::D4_2
-                {
-                    self.skills_points += cost_minus;
-                    self.char_sheet.skills.athletics -= 1;
-                } else if event == ButtonEvent::AthleticsPlus
-                    && self.skills_points >= cost_plus
-                    && self.char_sheet.skills.athletics < SkillLevel::D12
-                {
-                    self.skills_points -= cost_plus;
-                    self.char_sheet.skills.athletics += 1;
-                }
-
-                let dice_name = self.char_sheet.skills.athletics.name();
-                let window_size = self.window_size;
-                self.athletics_label().update(dice_name, ctx, window_size);
-                self.update_points(ctx);
-                None
-            }
-            ButtonEvent::FightingMinus | ButtonEvent::FightingPlus => {
-                let cost_plus = if self.char_sheet.skills.fighting
-                    >= self.char_sheet.attributes.agility.into()
-                {
-                    2
-                } else {
-                    1
-                };
-                let cost_minus = if self.char_sheet.skills.fighting
-                    > self.char_sheet.attributes.agility.into()
-                {
-                    2
-                } else {
-                    1
-                };
-                if event == ButtonEvent::FightingMinus
-                    && self.char_sheet.skills.fighting > SkillLevel::D4_2
-                {
-                    self.skills_points += cost_minus;
-                    self.char_sheet.skills.fighting -= 1;
-                } else if event == ButtonEvent::FightingPlus
-                    && self.skills_points >= cost_plus
-                    && self.char_sheet.skills.fighting < SkillLevel::D12
-                {
-                    self.skills_points -= cost_plus;
-                    self.char_sheet.skills.fighting += 1;
-                }
-
-                let dice_name = self.char_sheet.skills.fighting.name();
-                let window_size = self.window_size;
-                self.fighting_label().update(dice_name, ctx, window_size);
-                self.update_points(ctx);
-                None
-            }
-            ButtonEvent::ShootingMinus | ButtonEvent::ShootingPlus => {
-                let cost_plus = if self.char_sheet.skills.shooting
-                    >= self.char_sheet.attributes.agility.into()
-                {
-                    2
-                } else {
-                    1
-                };
-                let cost_minus = if self.char_sheet.skills.shooting
-                    > self.char_sheet.attributes.agility.into()
-                {
-                    2
-                } else {
-                    1
-                };
-                if event == ButtonEvent::ShootingMinus
-                    && self.char_sheet.skills.shooting > SkillLevel::D4_2
-                {
-                    self.skills_points += cost_minus;
-                    self.char_sheet.skills.shooting -= 1;
-                } else if event == ButtonEvent::ShootingPlus
-                    && self.skills_points >= cost_plus
-                    && self.char_sheet.skills.shooting < SkillLevel::D12
-                {
-                    self.skills_points -= cost_plus;
-                    self.char_sheet.skills.shooting += 1;
-                }
-
-                let dice_name = self.char_sheet.skills.shooting.name();
-                let window_size = self.window_size;
-                self.shooting_label().update(dice_name, ctx, window_size);
-                self.update_points(ctx);
-                None
-            }
-            ButtonEvent::StealthMinus | ButtonEvent::StealthPlus => {
-                let cost_plus = if self.char_sheet.skills.stealth
-                    >= self.char_sheet.attributes.agility.into()
-                {
-                    2
-                } else {
-                    1
-                };
-                let cost_minus =
-                    if self.char_sheet.skills.stealth > self.char_sheet.attributes.agility.into() {
-                        2
-                    } else {
-                        1
-                    };
-                if event == ButtonEvent::StealthMinus
-                    && self.char_sheet.skills.stealth > SkillLevel::D4_2
-                {
-                    self.skills_points += cost_minus;
-                    self.char_sheet.skills.stealth -= 1;
-                } else if event == ButtonEvent::StealthPlus
-                    && self.skills_points >= cost_plus
-                    && self.char_sheet.skills.stealth < SkillLevel::D12
-                {
-                    self.skills_points -= cost_plus;
-                    self.char_sheet.skills.stealth += 1;
-                }
-
-                let dice_name = self.char_sheet.skills.stealth.name();
-                let window_size = self.window_size;
-                self.stealth_label().update(dice_name, ctx, window_size);
-                self.update_points(ctx);
-                None
-            }
-            ButtonEvent::ThieveryMinus | ButtonEvent::ThieveryPlus => {
-                let cost_plus = if self.char_sheet.skills.thievery
-                    >= self.char_sheet.attributes.agility.into()
-                {
-                    2
-                } else {
-                    1
-                };
-                let cost_minus = if self.char_sheet.skills.thievery
-                    > self.char_sheet.attributes.agility.into()
-                {
-                    2
-                } else {
-                    1
-                };
-                if event == ButtonEvent::ThieveryMinus
-                    && self.char_sheet.skills.thievery > SkillLevel::D4_2
-                {
-                    self.skills_points += cost_minus;
-                    self.char_sheet.skills.thievery -= 1;
-                } else if event == ButtonEvent::ThieveryPlus
-                    && self.skills_points >= cost_plus
-                    && self.char_sheet.skills.thievery < SkillLevel::D12
-                {
-                    self.skills_points -= cost_plus;
-                    self.char_sheet.skills.thievery += 1;
-                }
-
-                let dice_name = self.char_sheet.skills.thievery.name();
-                let window_size = self.window_size;
-                self.thievery_label().update(dice_name, ctx, window_size);
-                self.update_points(ctx);
-                None
-            }
-            ButtonEvent::SwimmingMinus | ButtonEvent::SwimmingPlus => {
-                let cost_plus = if self.char_sheet.skills.swimming
-                    >= self.char_sheet.attributes.agility.into()
-                {
-                    2
-                } else {
-                    1
-                };
-                let cost_minus = if self.char_sheet.skills.swimming
-                    > self.char_sheet.attributes.agility.into()
-                {
-                    2
-                } else {
-                    1
-                };
-                if event == ButtonEvent::SwimmingMinus
-                    && self.char_sheet.skills.swimming > SkillLevel::D4_2
-                {
-                    self.skills_points += cost_minus;
-                    self.char_sheet.skills.swimming -= 1;
-                } else if event == ButtonEvent::SwimmingPlus
-                    && self.skills_points >= cost_plus
-                    && self.char_sheet.skills.swimming < SkillLevel::D12
-                {
-                    self.skills_points -= cost_plus;
-                    self.char_sheet.skills.swimming += 1;
-                }
-
-                let dice_name = self.char_sheet.skills.swimming.name();
-                let window_size = self.window_size;
-                self.swimming_label().update(dice_name, ctx, window_size);
-                self.update_points(ctx);
-                None
-            }
-            ButtonEvent::GamblingMinus | ButtonEvent::GamblingPlus => {
-                let cost_plus = if self.char_sheet.skills.gambling
-                    >= self.char_sheet.attributes.smarts.into()
-                {
-                    2
-                } else {
-                    1
-                };
-                let cost_minus =
-                    if self.char_sheet.skills.gambling > self.char_sheet.attributes.smarts.into() {
-                        2
-                    } else {
-                        1
-                    };
-                if event == ButtonEvent::GamblingMinus
-                    && self.char_sheet.skills.gambling > SkillLevel::D4_2
-                {
-                    self.skills_points += cost_minus;
-                    self.char_sheet.skills.gambling -= 1;
-                } else if event == ButtonEvent::GamblingPlus
-                    && self.skills_points >= cost_plus
-                    && self.char_sheet.skills.gambling < SkillLevel::D12
-                {
-                    self.skills_points -= cost_plus;
-                    self.char_sheet.skills.gambling += 1;
-                }
-
-                let dice_name = self.char_sheet.skills.gambling.name();
-                let window_size = self.window_size;
-                self.gambling_label().update(dice_name, ctx, window_size);
-                self.update_points(ctx);
-                None
-            }
-            ButtonEvent::NoticeMinus | ButtonEvent::NoticePlus => {
-                let cost_plus =
-                    if self.char_sheet.skills.notice >= self.char_sheet.attributes.smarts.into() {
-                        2
-                    } else {
-                        1
-                    };
-                let cost_minus =
-                    if self.char_sheet.skills.notice > self.char_sheet.attributes.smarts.into() {
-                        2
-                    } else {
-                        1
-                    };
-                if event == ButtonEvent::NoticeMinus
-                    && self.char_sheet.skills.notice > SkillLevel::D4_2
-                {
-                    self.skills_points += cost_minus;
-                    self.char_sheet.skills.notice -= 1;
-                } else if event == ButtonEvent::NoticePlus
-                    && self.skills_points >= cost_plus
-                    && self.char_sheet.skills.notice < SkillLevel::D12
-                {
-                    self.skills_points -= cost_plus;
-                    self.char_sheet.skills.notice += 1;
-                }
-
-                let dice_name = self.char_sheet.skills.notice.name();
-                let window_size = self.window_size;
-                self.notice_label().update(dice_name, ctx, window_size);
-                self.update_points(ctx);
-                None
-            }
-            ButtonEvent::SurvivalMinus | ButtonEvent::SurvivalPlus => {
-                let cost_plus = if self.char_sheet.skills.survival
-                    >= self.char_sheet.attributes.smarts.into()
-                {
-                    2
-                } else {
-                    1
-                };
-                let cost_minus =
-                    if self.char_sheet.skills.survival > self.char_sheet.attributes.smarts.into() {
-                        2
-                    } else {
-                        1
-                    };
-                if event == ButtonEvent::SurvivalMinus
-                    && self.char_sheet.skills.survival > SkillLevel::D4_2
-                {
-                    self.skills_points += cost_minus;
-                    self.char_sheet.skills.survival -= 1;
-                } else if event == ButtonEvent::SurvivalPlus
-                    && self.skills_points >= cost_plus
-                    && self.char_sheet.skills.survival < SkillLevel::D12
-                {
-                    self.skills_points -= cost_plus;
-                    self.char_sheet.skills.survival += 1;
-                }
-
-                let dice_name = self.char_sheet.skills.survival.name();
-                let window_size = self.window_size;
-                self.survival_label().update(dice_name, ctx, window_size);
-                self.update_points(ctx);
-                None
-            }
-            ButtonEvent::HealingMinus | ButtonEvent::HealingPlus => {
-                let cost_plus =
-                    if self.char_sheet.skills.healing >= self.char_sheet.attributes.smarts.into() {
-                        2
-                    } else {
-                        1
-                    };
-                let cost_minus =
-                    if self.char_sheet.skills.healing > self.char_sheet.attributes.smarts.into() {
-                        2
-                    } else {
-                        1
-                    };
-                if event == ButtonEvent::HealingMinus
-                    && self.char_sheet.skills.healing > SkillLevel::D4_2
-                {
-                    self.skills_points += cost_minus;
-                    self.char_sheet.skills.healing -= 1;
-                } else if event == ButtonEvent::HealingPlus
-                    && self.skills_points >= cost_plus
-                    && self.char_sheet.skills.healing < SkillLevel::D12
-                {
-                    self.skills_points -= cost_plus;
-                    self.char_sheet.skills.healing += 1;
-                }
-
-                let dice_name = self.char_sheet.skills.healing.name();
-                let window_size = self.window_size;
-                self.healing_label().update(dice_name, ctx, window_size);
-                self.update_points(ctx);
-                None
-            }
-            ButtonEvent::RepairMinus | ButtonEvent::RepairPlus => {
-                let cost_plus =
-                    if self.char_sheet.skills.repair >= self.char_sheet.attributes.smarts.into() {
-                        2
-                    } else {
-                        1
-                    };
-                let cost_minus =
-                    if self.char_sheet.skills.repair > self.char_sheet.attributes.smarts.into() {
-                        2
-                    } else {
-                        1
-                    };
-                if event == ButtonEvent::RepairMinus
-                    && self.char_sheet.skills.repair > SkillLevel::D4_2
-                {
-                    self.skills_points += cost_minus;
-                    self.char_sheet.skills.repair -= 1;
-                } else if event == ButtonEvent::RepairPlus
-                    && self.skills_points >= cost_plus
-                    && self.char_sheet.skills.repair < SkillLevel::D12
-                {
-                    self.skills_points -= cost_plus;
-                    self.char_sheet.skills.repair += 1;
-                }
-
-                let dice_name = self.char_sheet.skills.repair.name();
-                let window_size = self.window_size;
-                self.repair_label().update(dice_name, ctx, window_size);
-                self.update_points(ctx);
-                None
-            }
-            ButtonEvent::ReadingMinus | ButtonEvent::ReadingPlus => {
-                let cost_plus =
-                    if self.char_sheet.skills.reading >= self.char_sheet.attributes.smarts.into() {
-                        2
-                    } else {
-                        1
-                    };
-                let cost_minus =
-                    if self.char_sheet.skills.reading > self.char_sheet.attributes.smarts.into() {
-                        2
-                    } else {
-                        1
-                    };
-                if event == ButtonEvent::ReadingMinus
-                    && self.char_sheet.skills.reading > SkillLevel::D4_2
-                {
-                    self.skills_points += cost_minus;
-                    self.char_sheet.skills.reading -= 1;
-                } else if event == ButtonEvent::ReadingPlus
-                    && self.skills_points >= cost_plus
-                    && self.char_sheet.skills.reading < SkillLevel::D12
-                {
-                    self.skills_points -= cost_plus;
-                    self.char_sheet.skills.reading += 1;
-                }
-
-                let dice_name = self.char_sheet.skills.reading.name();
-                let window_size = self.window_size;
-                self.reading_label().update(dice_name, ctx, window_size);
-                self.update_points(ctx);
-                None
-            }
-            ButtonEvent::PersuasionMinus | ButtonEvent::PersuasionPlus => {
-                let cost_plus = if self.char_sheet.skills.persuasion
-                    >= self.char_sheet.attributes.spirit.into()
-                {
-                    2
-                } else {
-                    1
-                };
-                let cost_minus = if self.char_sheet.skills.persuasion
-                    > self.char_sheet.attributes.spirit.into()
-                {
-                    2
-                } else {
-                    1
-                };
-                if event == ButtonEvent::PersuasionMinus
-                    && self.char_sheet.skills.persuasion > SkillLevel::D4_2
-                {
-                    self.skills_points += cost_minus;
-                    self.char_sheet.skills.persuasion -= 1;
-                } else if event == ButtonEvent::PersuasionPlus
-                    && self.skills_points >= cost_plus
-                    && self.char_sheet.skills.persuasion < SkillLevel::D12
-                {
-                    self.skills_points -= cost_plus;
-                    self.char_sheet.skills.persuasion += 1;
-                }
-
-                let dice_name = self.char_sheet.skills.persuasion.name();
-                let window_size = self.window_size;
-                self.persuasion_label().update(dice_name, ctx, window_size);
-                self.update_points(ctx);
-                None
-            }
-            ButtonEvent::IntimidationMinus | ButtonEvent::IntimidationPlus => {
-                let cost_plus = if self.char_sheet.skills.intimidation
-                    >= self.char_sheet.attributes.spirit.into()
-                {
-                    2
-                } else {
-                    1
-                };
-                let cost_minus = if self.char_sheet.skills.intimidation
-                    > self.char_sheet.attributes.spirit.into()
-                {
-                    2
-                } else {
-                    1
-                };
-                if event == ButtonEvent::IntimidationMinus
-                    && self.char_sheet.skills.intimidation > SkillLevel::D4_2
-                {
-                    self.skills_points += cost_minus;
-                    self.char_sheet.skills.intimidation -= 1;
-                } else if event == ButtonEvent::IntimidationPlus
-                    && self.skills_points >= cost_plus
-                    && self.char_sheet.skills.intimidation < SkillLevel::D12
-                {
-                    self.skills_points -= cost_plus;
-                    self.char_sheet.skills.intimidation += 1;
-                }
-
-                let dice_name = self.char_sheet.skills.intimidation.name();
-                let window_size = self.window_size;
-                self.intimidation_label()
-                    .update(dice_name, ctx, window_size);
-                self.update_points(ctx);
-                None
-            }
-            ButtonEvent::ClimbingMinus | ButtonEvent::ClimbingPlus => {
-                let cost_plus = if self.char_sheet.skills.climbing
-                    >= self.char_sheet.attributes.strength.into()
-                {
-                    2
-                } else {
-                    1
-                };
-                let cost_minus = if self.char_sheet.skills.climbing
-                    > self.char_sheet.attributes.strength.into()
-                {
-                    2
-                } else {
-                    1
-                };
-                if event == ButtonEvent::ClimbingMinus
-                    && self.char_sheet.skills.climbing > SkillLevel::D4_2
-                {
-                    self.skills_points += cost_minus;
-                    self.char_sheet.skills.climbing -= 1;
-                } else if event == ButtonEvent::ClimbingPlus
-                    && self.skills_points >= cost_plus
-                    && self.char_sheet.skills.climbing < SkillLevel::D12
-                {
-                    self.skills_points -= cost_plus;
-                    self.char_sheet.skills.climbing += 1;
-                }
-
-                let dice_name = self.char_sheet.skills.climbing.name();
-                let window_size = self.window_size;
-                self.climbing_label().update(dice_name, ctx, window_size);
-                self.update_points(ctx);
-                None
-            }
             ButtonEvent::Randomize => self.randomize(ctx),
             ButtonEvent::Next => Some(self.next()),
+            _ => None,
         }
     }
 }

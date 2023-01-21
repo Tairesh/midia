@@ -1,3 +1,5 @@
+use rand::Rng;
+
 use crate::game::races::Race;
 use crate::game::{Dice, HitResult};
 
@@ -45,9 +47,9 @@ impl CharSheet {
         Self::new(wild_card, race, age, attributes, skills)
     }
 
-    pub fn random(wild_card: bool, race: Race, age: u8) -> Self {
-        let attributes = Attributes::random();
-        let skills = Skills::random(&attributes, race);
+    pub fn random<R: Rng + ?Sized>(rng: &mut R, wild_card: bool, race: Race, age: u8) -> Self {
+        let attributes = Attributes::random(rng);
+        let skills = Skills::random(rng, &attributes, race);
         Self::new(wild_card, race, age, attributes, skills)
     }
 

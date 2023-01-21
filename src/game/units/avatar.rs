@@ -5,7 +5,6 @@ use geometry::{Point, TwoDimDirection};
 use super::super::{
     map::items::helpers::{cloak, dead_body, hat},
     races::{MainHand, Personality},
-    savage::CharSheet,
     Action, BodySlot, HitResult, Item, Wear, Wield,
 };
 
@@ -19,13 +18,12 @@ pub struct Avatar {
     pub wield: Wield,
     // TODO: custom struct with layers for dress and methods to return names and icons for UI
     pub wear: Wear,
-    pub char_sheet: CharSheet,
     // TODO: stamina
     // TODO: traits
 }
 
 impl Avatar {
-    pub fn new(id: usize, personality: Personality, char_sheet: CharSheet, pos: Point) -> Self {
+    pub fn new(id: usize, personality: Personality, pos: Point) -> Self {
         Avatar {
             id,
             action: None,
@@ -33,24 +31,18 @@ impl Avatar {
             wield: Wield::new(!matches!(personality.mind.main_hand, MainHand::Left)),
             wear: Wear::new(),
             personality,
-            char_sheet,
             pos,
         }
     }
 
     // TODO: remove this and select dress in create character scene
-    pub fn dressed_default(
-        id: usize,
-        personality: Personality,
-        char_sheet: CharSheet,
-        pos: Point,
-    ) -> Self {
+    pub fn dressed_default(id: usize, personality: Personality, pos: Point) -> Self {
         let mut wear = Wear::new();
         wear.add(hat(), 0);
         wear.add(cloak(), 0);
         Self {
             wear,
-            ..Self::new(id, personality, char_sheet, pos)
+            ..Self::new(id, personality, pos)
         }
     }
 
@@ -64,6 +56,10 @@ impl Avatar {
 
     pub fn is_player(&self) -> bool {
         self.id == 0
+    }
+
+    pub fn is_dead(&self) -> bool {
+        self.personality.char_sheet.is_dead()
     }
 
     pub fn armor(&self, slot: BodySlot) -> u8 {
@@ -83,11 +79,11 @@ impl Avatar {
     }
 
     pub fn apply_hit(&mut self, hit: HitResult, current_tick: u128) -> Vec<Item> {
-        self.char_sheet.apply_hit(hit, current_tick);
+        self.personality.char_sheet.apply_hit(hit, current_tick);
 
         // TODO: drop weapons if arm is wounded
 
-        if self.char_sheet.is_dead() {
+        if self.is_dead() {
             self.action = None;
 
             let mut items = Vec::new();
@@ -112,43 +108,27 @@ mod tests {
 
     use crate::game::map::items::helpers::{axe, cloak};
     use crate::game::races::tests::personality::tester_girl;
-    use crate::game::races::Race;
     use crate::game::{BodySlot, HitResult};
 
-    use super::{Avatar, CharSheet};
+    use super::Avatar;
 
     #[test]
     fn test_npc_name() {
-        let npc = Avatar::new(
-            1,
-            tester_girl(),
-            CharSheet::default(true, Race::Gazan, 15),
-            Point::new(0, 0),
-        );
+        let npc = Avatar::new(1, tester_girl(), Point::new(0, 0));
 
         assert_eq!(npc.name_for_actions(), "Dooka");
     }
 
     #[test]
     fn test_player_name() {
-        let player = Avatar::new(
-            0,
-            tester_girl(),
-            CharSheet::default(true, Race::Gazan, 15),
-            Point::new(0, 0),
-        );
+        let player = Avatar::new(0, tester_girl(), Point::new(0, 0));
 
         assert_eq!(player.name_for_actions(), "you");
     }
 
     #[test]
     fn test_armor() {
-        let mut avatar = Avatar::new(
-            0,
-            tester_girl(),
-            CharSheet::default(true, Race::Gazan, 15),
-            Point::new(0, 0),
-        );
+        let mut avatar = Avatar::new(0, tester_girl(), Point::new(0, 0));
         avatar.wear.add(cloak(), 0);
 
         assert_eq!(avatar.armor(BodySlot::Torso), 1);
@@ -156,12 +136,7 @@ mod tests {
 
     #[test]
     fn test_die() {
-        let mut avatar = Avatar::new(
-            0,
-            tester_girl(),
-            CharSheet::default(false, Race::Gazan, 15),
-            Point::new(0, 0),
-        );
+        let mut avatar = Avatar::new(0, tester_girl(), Point::new(0, 0));
         avatar.wield.wield(axe());
         avatar.wear.add(cloak(), 0);
         let items = avatar.apply_hit(HitResult::ultra_damage(), 0);

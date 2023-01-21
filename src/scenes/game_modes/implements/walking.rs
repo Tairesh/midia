@@ -115,8 +115,14 @@ impl GameModeImpl for Walking {
                 .map(|i| i.name().to_string())
                 .collect();
             let armor = game.world.borrow().player().armor(BodySlot::Torso);
-            let toughness = game.world.borrow().player().char_sheet.toughness();
-            let parry = game.world.borrow().player().char_sheet.parry();
+            let toughness = game
+                .world
+                .borrow()
+                .player()
+                .personality
+                .char_sheet
+                .toughness();
+            let parry = game.world.borrow().player().personality.char_sheet.parry();
             game.log.log(
                 format!(
                     "You wear: {}, armor value is {armor}, toughness: {toughness}, parry: {parry}",

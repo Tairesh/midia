@@ -42,7 +42,12 @@ impl ActionImpl for Close {
             pos,
             LogCategory::Info,
         ));
-        let new_terrain = tile.terrain.close();
+        let new_terrain = if tile.terrain.can_suck_items_on_close() {
+            tile.terrain
+                .close_and_suck_items(tile.items.drain(..).collect())
+        } else {
+            tile.terrain.close()
+        };
         tile.terrain = new_terrain;
 
         drop(map);

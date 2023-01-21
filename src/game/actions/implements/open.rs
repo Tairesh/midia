@@ -42,8 +42,9 @@ impl ActionImpl for Open {
             pos,
             LogCategory::Info,
         ));
-        let new_terrain = tile.terrain.open();
+        let (new_terrain, mut items) = tile.terrain.open();
         tile.terrain = new_terrain;
+        tile.items.append(&mut items);
 
         drop(map);
         world.calc_fov();

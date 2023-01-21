@@ -6,14 +6,14 @@ use super::super::{TerrainInteract, TerrainView};
 #[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
 pub struct Chest {
     #[serde(rename = "i")]
-    pub items: Vec<Item>,
+    items_inside: Vec<Item>,
     #[serde(rename = "o")]
-    pub open: bool,
+    open: bool,
 }
 
 impl Chest {
-    pub fn new(items: Vec<Item>, open: bool) -> Self {
-        Self { items, open }
+    pub fn new(items_inside: Vec<Item>, open: bool) -> Self {
+        Self { items_inside, open }
     }
 }
 
@@ -52,11 +52,18 @@ impl TerrainInteract for Chest {
         self.open
     }
 
-    fn open(&self) -> Terrain {
-        Chest::new(self.items.clone(), true).into()
+    fn can_suck_items_on_close(&self) -> bool {
+        true
     }
 
-    fn close(&self) -> Terrain {
-        Chest::new(self.items.clone(), false).into()
+    fn open(&self) -> (Terrain, Vec<Item>) {
+        (
+            Chest::new(Vec::new(), true).into(),
+            self.items_inside.clone(),
+        )
+    }
+
+    fn close_and_suck_items(&self, items: Vec<Item>) -> Terrain {
+        Chest::new(items, false).into()
     }
 }

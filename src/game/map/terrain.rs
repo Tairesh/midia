@@ -56,10 +56,16 @@ pub trait TerrainInteract {
     fn can_be_closed(&self) -> bool {
         false
     }
-    fn open(&self) -> Terrain {
+    fn can_suck_items_on_close(&self) -> bool {
+        false
+    }
+    fn open(&self) -> (Terrain, Vec<Item>) {
         unimplemented!()
     }
     fn close(&self) -> Terrain {
+        unimplemented!()
+    }
+    fn close_and_suck_items(&self, _items: Vec<Item>) -> Terrain {
         unimplemented!()
     }
 }

@@ -4,7 +4,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::game::races::BodySlot;
 use crate::game::savage::Damage;
-use crate::game::Item;
 
 // TODO: do we really need tags?
 #[derive(Serialize, Deserialize, Debug, Hash, Eq, PartialEq, Copy, Clone)]
@@ -35,7 +34,6 @@ pub enum WearLayer {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct MeleeDamageValue {
-    pub moves: u8,
     pub damage: Damage,
     #[serde(default)]
     pub distance: u8,
@@ -43,26 +41,13 @@ pub struct MeleeDamageValue {
     pub penetration: u8,
     // TODO: fighting modifier
     // TODO: minumum strength
-    // TODO: defense modifier
-}
-
-impl MeleeDamageValue {
-    /// Attack with item
-    pub fn item(item: &Item) -> Self {
-        Self {
-            moves: item.attack_time().round() as u8,
-            damage: Damage::default(),
-            distance: 0,
-            penetration: 0,
-        }
-    }
+    // TODO: parry modifier
 }
 
 impl Default for MeleeDamageValue {
     /// Attack with fists
     fn default() -> Self {
         Self {
-            moves: 10,
             damage: Damage::default(),
             distance: 0,
             penetration: 0,

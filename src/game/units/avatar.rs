@@ -142,7 +142,7 @@ mod tests {
         let items = avatar.apply_hit(HitResult::ultra_damage(), 0);
         assert_eq!(items.len(), 3);
         assert!(items.iter().any(|i| i.name() == "cloak"));
-        assert!(items.iter().any(|i| i.name() == "axe"));
+        assert!(items.iter().any(|i| i.name() == "stone axe"));
         assert_eq!(items[2].name(), "dead gazan girl");
     }
 }

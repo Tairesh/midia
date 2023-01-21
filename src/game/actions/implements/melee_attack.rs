@@ -6,6 +6,8 @@ use super::super::{
     ActionPossibility::{self, No, Yes},
 };
 
+static MELEE_ATTACK_MOVES: u32 = 10;
+
 #[derive(serde::Serialize, serde::Deserialize, Debug, Copy, Clone)]
 pub struct MeleeAttack {
     target: Point,
@@ -25,16 +27,15 @@ impl ActionImpl for MeleeAttack {
 
         let distance = (actor.pos.distance(self.target).floor() - 1.0) as u8;
         let weapon = actor.wield.active_hand();
-        let weapon_moves = weapon.map_or(10, |w| w.melee_damage().moves);
         if distance > 0 {
             let weapon_distance = weapon.map_or(0, |w| w.melee_damage().distance);
             if distance > weapon_distance {
                 No("You can't reach the target from this distance".to_string())
             } else {
-                Yes(weapon_moves as u32)
+                Yes(MELEE_ATTACK_MOVES)
             }
         } else {
-            Yes(weapon_moves as u32)
+            Yes(MELEE_ATTACK_MOVES)
         }
     }
 
@@ -133,7 +134,7 @@ mod tests {
     use crate::game::world::tests::{add_npc, prepare_world};
     use crate::game::Action;
 
-    use super::MeleeAttack;
+    use super::{MeleeAttack, MELEE_ATTACK_MOVES};
 
     #[test]
     fn test_melee_attack_with_fists() {
@@ -169,12 +170,12 @@ mod tests {
             Some(Action::new(0, MeleeAttack::new(Point::new(1, 0)).into(), &world).unwrap());
         world.tick();
 
-        assert_eq!(world.meta.current_tick, axe().melee_damage().moves as u128);
+        assert_eq!(world.meta.current_tick, MELEE_ATTACK_MOVES as u128);
         let mut log = world.log();
         let event = &log.new_events()[0];
         assert!(
-            event.msg.contains("with your axe"),
-            "msg \"{}\" doesn't contains \"with your axe\"",
+            event.msg.contains("with your stone axe"),
+            "msg \"{}\" doesn't contains \"with your stone axe\"",
             event.msg
         );
     }

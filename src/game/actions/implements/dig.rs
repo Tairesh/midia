@@ -49,29 +49,32 @@ impl ActionImpl for Dig {
     }
 
     fn on_finish(&self, action: &Action, world: &mut World) {
-        let pos = action.owner(world).pos + self.dir;
-        let items = world.map().get_tile_mut(pos).dig();
+        let owner = action.owner(world);
+        let pos = owner.pos + self.dir;
+        let mut map = world.map();
+        let tile = map.get_tile_mut(pos);
+        let (terrain, items) = tile.terrain.dig_result();
+        tile.terrain = terrain;
         if !items.is_empty() {
             let mut rng = rand::thread_rng();
             let places: Vec<Direction> = DIR8
                 .iter()
                 .copied()
-                .filter(|d| {
-                    (pos + *d != action.owner(world).pos)
-                        && world.map().get_tile(pos + *d).terrain.is_passable()
-                })
+                .filter(|d| (pos + *d != owner.pos) && map.get_tile(pos + *d).terrain.is_passable())
                 .collect();
             for item in items {
                 let delta = places.choose(&mut rng).copied().unwrap();
-                world.map().get_tile_mut(pos + delta).items.push(item);
+                map.get_tile_mut(pos + delta).items.push(item);
             }
         }
-        world.calc_fov();
+
+        drop(map);
         world.log().push(LogEvent::new(
-            format!("{} dug a hole", action.owner(world).name_for_actions()),
+            format!("{} dug a hole", owner.name_for_actions()),
             pos,
             LogCategory::Info,
         ));
+        world.calc_fov();
     }
 }
 

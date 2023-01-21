@@ -62,12 +62,6 @@ impl Tile {
         self.items.last()
     }
 
-    pub fn dig(&mut self) -> Vec<Item> {
-        let (terrain, items) = self.terrain.dig_result();
-        self.terrain = terrain;
-        items
-    }
-
     pub fn is_readable(&self) -> bool {
         self.terrain.is_readable() || self.items.iter().any(Item::is_readable)
     }

@@ -68,6 +68,9 @@ pub trait TerrainInteract {
     fn close_and_suck_items(&self, _items: Vec<Item>) -> Terrain {
         unimplemented!()
     }
+    fn on_step(&self) -> Option<Terrain> {
+        None
+    }
 }
 
 #[cfg(test)]

@@ -3,7 +3,10 @@ use rand::{
     Rng,
 };
 
-use super::super::{terrains::Pit, Item, Passage, Terrain, TerrainInteract, TerrainView};
+use super::super::{
+    terrains::{Dirt, DirtVariant, Pit},
+    Item, Passage, Terrain, TerrainInteract, TerrainView,
+};
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
 pub struct Grass {
@@ -119,6 +122,14 @@ impl TerrainInteract for Grass {
 
     fn can_stock_items(&self) -> bool {
         true
+    }
+
+    fn on_step(&self) -> Option<Terrain> {
+        if rand::thread_rng().gen_bool(0.1) {
+            Some(Dirt::new(rand::random::<DirtVariant>()).into())
+        } else {
+            None
+        }
     }
 }
 

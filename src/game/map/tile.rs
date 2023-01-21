@@ -2,12 +2,9 @@
 
 use std::collections::HashSet;
 
-use rand::Rng;
-
 use super::{
     items::Item,
     terrain::{Terrain, TerrainInteract, TerrainView},
-    terrains::{Dirt, DirtVariant},
 };
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
@@ -39,16 +36,8 @@ impl Tile {
     pub fn on_step(&mut self, unit_id: usize) {
         self.units.insert(unit_id);
         // TODO: (for future) footprints
-        if rand::thread_rng().gen_bool(0.1) {
-            match self.terrain {
-                Terrain::Grass(..) => {
-                    self.terrain = Dirt::new(rand::random::<DirtVariant>()).into();
-                }
-                Terrain::Dirt(..) => {
-                    self.terrain = Dirt::new(DirtVariant::Flat).into();
-                }
-                _ => {}
-            }
+        if let Some(new_terrain) = self.terrain.on_step() {
+            self.terrain = new_terrain;
         }
     }
 

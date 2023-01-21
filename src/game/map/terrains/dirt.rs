@@ -62,9 +62,19 @@ impl TerrainInteract for Dirt {
     fn can_stock_items(&self) -> bool {
         true
     }
+
+    fn on_step(&self) -> Option<Terrain> {
+        if self.variant == DirtVariant::Flat {
+            None
+        } else if rand::thread_rng().gen_bool(0.1) {
+            Some(Dirt::new(DirtVariant::Flat).into())
+        } else {
+            None
+        }
+    }
 }
 
-#[derive(serde::Serialize, serde::Deserialize, Debug, Copy, Clone)]
+#[derive(serde::Serialize, serde::Deserialize, Debug, Copy, Clone, Eq, PartialEq)]
 pub enum DirtVariant {
     #[serde(rename = "1")]
     Flat,

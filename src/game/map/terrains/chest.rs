@@ -1,3 +1,6 @@
+use rand::Rng;
+
+use crate::game::map::terrains::{Dirt, DirtVariant};
 use crate::game::map::Passage;
 use crate::game::{Item, Terrain};
 
@@ -65,5 +68,23 @@ impl TerrainInteract for Chest {
 
     fn close_and_suck_items(&self, items: Vec<Item>) -> Terrain {
         Chest::new(items, false).into()
+    }
+
+    fn is_smashable(&self) -> bool {
+        true
+    }
+
+    fn smash_toughness(&self) -> u8 {
+        8
+    }
+
+    fn smash_result(&self) -> (Terrain, Vec<Item>) {
+        let mut rng = rand::thread_rng();
+        let splinters_count = rng.gen_range(1..=3);
+        let mut items = self.items_inside.clone();
+        for _ in 0..splinters_count {
+            items.push(Item::new("wooden_splinter"));
+        }
+        (Dirt::new(DirtVariant::Flat).into(), items)
     }
 }

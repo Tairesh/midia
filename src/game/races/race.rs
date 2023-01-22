@@ -1,13 +1,14 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use enum_iterator::{next_cycle, previous_cycle, Sequence};
 use rand::distributions::{Distribution, Standard};
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 
-use crate::game::savage::Skill;
+use crate::game::game_data::DamageType;
+use crate::game::savage::{DamageDice, Skill};
 use crate::game::traits::Name;
-use crate::game::SkillLevel;
+use crate::game::{Attribute, Damage, MeleeDamageValue, SkillLevel};
 
 #[derive(Serialize, Deserialize, Debug, Copy, Clone, Eq, PartialEq, Hash)]
 #[serde(rename_all = "snake_case")]
@@ -59,14 +60,47 @@ impl Race {
         .copied()
     }
 
-    // in grams
-    pub fn body_mass(self) -> u32 {
+    pub fn natural_weapon(self) -> (&'static str, MeleeDamageValue) {
         match self {
-            Race::Gazan => 75_000,
-            Race::Nyarnik => 70_000,
-            Race::Totik => 60_000,
-            Race::Lagnam => 65_000,
-            Race::Bug => 50_000,
+            Race::Gazan | Race::Nyarnik => (
+                "fists",
+                MeleeDamageValue {
+                    damage: Damage {
+                        dices: Vec::new(),
+                        attribute: Some(Attribute::Strength),
+                        modifier: 0,
+                    },
+                    damage_types: HashSet::from([DamageType::Blunt]),
+                    distance: 0,
+                    penetration: 0,
+                },
+            ),
+            Race::Totik | Race::Lagnam => (
+                "fangs",
+                MeleeDamageValue {
+                    damage: Damage {
+                        dices: vec![DamageDice::D4],
+                        attribute: Some(Attribute::Strength),
+                        modifier: 0,
+                    },
+                    damage_types: HashSet::from([DamageType::Pierce]),
+                    distance: 0,
+                    penetration: 0,
+                },
+            ),
+            Race::Bug => (
+                "mandibles",
+                MeleeDamageValue {
+                    damage: Damage {
+                        dices: vec![DamageDice::D6],
+                        attribute: Some(Attribute::Strength),
+                        modifier: 0,
+                    },
+                    damage_types: HashSet::from([DamageType::Pierce]),
+                    distance: 0,
+                    penetration: 0,
+                },
+            ),
         }
     }
 }

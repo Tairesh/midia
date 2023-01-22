@@ -1,0 +1,85 @@
+[
+  {
+    "type": "item",
+    "id": "wooden_sap",
+    "name": "wooden sap",
+    "description": "Small pear-like wooden club. Light and easily concealed, but can break sculls.",
+    "looks_like": "wooden_sap",
+    "tags": ["WEAPON"],
+    "size": "SMALL",
+    "melee_damage": {
+      "damage": {
+        "attribute": "STRENGTH",
+        "dices": ["D4/2"]
+      },
+      "damage_types": ["BLUNT"]
+    }
+  },
+  {
+    "type": "item",
+    "id": "stone_sap",
+    "name": "stone sap",
+    "description": "Small pear-like stone club. Light and easily concealed, but can break sculls.",
+    "looks_like": "stone_sap",
+    "tags": ["WEAPON"],
+    "size": "SMALL",
+    "melee_damage": {
+      "damage": {
+        "attribute": "STRENGTH",
+        "dices": ["D4"]
+      },
+      "damage_types": ["BLUNT"]
+    }
+  },
+  {
+    "type": "item",
+    "id": "iron_sap",
+    "name": "iron sap",
+    "description": "Small pear-like iron club. Light and easily concealed, but can break sculls.",
+    "looks_like": "metal_sap",
+    "tags": ["WEAPON"],
+    "size": "SMALL",
+    "melee_damage": {
+      "damage": {
+        "attribute": "STRENGTH",
+        "dices": ["D4"],
+        "modifier": 1
+      },
+      "damage_types": ["BLUNT"]
+    }
+  },
+  {
+    "type": "item",
+    "id": "steel_sap",
+    "name": "steel sap",
+    "description": "Small pear-like steel club. Light and easily concealed, but can break sculls.",
+    "looks_like": "metal_sap",
+    "tags": ["WEAPON"],
+    "size": "SMALL",
+    "melee_damage": {
+      "damage": {
+        "attribute": "STRENGTH",
+        "dices": ["D4"],
+        "modifier": 2
+      },
+      "damage_types": ["BLUNT"]
+    }
+  },
+  {
+    "type": "item",
+    "id": "demonic_sap",
+    "name": "demonic sap",
+    "description": "Small pear-like demonic metal club. Light and easily concealed, but can break sculls.",
+    "looks_like": "demonic_sap",
+    "tags": ["WEAPON"],
+    "size": "SMALL",
+    "melee_damage": {
+      "damage": {
+        "attribute": "STRENGTH",
+        "dices": ["D4"],
+        "modifier": 1
+      },
+      "damage_types": ["BLUNT"]
+    }
+  }
+]

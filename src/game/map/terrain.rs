@@ -71,6 +71,15 @@ pub trait TerrainInteract {
     fn on_step(&self) -> Option<Terrain> {
         None
     }
+    fn is_smashable(&self) -> bool {
+        false
+    }
+    fn smash_toughness(&self) -> u8 {
+        unimplemented!()
+    }
+    fn smash_result(&self) -> (Terrain, Vec<Item>) {
+        unimplemented!()
+    }
 }
 
 #[cfg(test)]

@@ -9,13 +9,7 @@
       "layer": "OUTER",
       "armor": 1,
       "variants": [
-        [
-          "torso",
-          "left_arm",
-          "right_arm",
-          "left_leg",
-          "right_leg"
-        ]
+        ["torso", "left_arm", "right_arm", "left_leg", "right_leg"]
       ]
     }
   },
@@ -28,11 +22,7 @@
     "wearable": {
       "layer": "OUTER",
       "armor": 1,
-      "variants": [
-        [
-          "head"
-        ]
-      ]
+      "variants": [["head"]]
     }
   },
   {
@@ -45,13 +35,7 @@
       "layer": "OUTER",
       "armor": 1,
       "variants": [
-        [
-          "torso",
-          "left_arm",
-          "right_arm",
-          "left_leg",
-          "right_leg"
-        ]
+        ["torso", "left_arm", "right_arm", "left_leg", "right_leg"]
       ]
     }
   },
@@ -64,11 +48,7 @@
     "wearable": {
       "layer": "CLIPPED",
       "armor": 1,
-      "variants": [
-        [
-          "torso"
-        ]
-      ]
+      "variants": [["torso"]]
     }
   },
   {
@@ -81,12 +61,8 @@
       "layer": "CLIPPED",
       "armor": 1,
       "variants": [
-        [
-          "left_arm"
-        ],
-        [
-          "right_arm"
-        ]
+        ["left_arm"],
+        ["right_arm"]
       ]
     }
   }

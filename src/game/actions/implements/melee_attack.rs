@@ -1,7 +1,12 @@
 use geometry::Point;
 
+use crate::game::game_data::DamageType;
+use crate::game::savage::{melee_attack_terrain, TerrainAttackResult};
+use crate::game::Item;
+
 use super::super::{
-    super::{melee_attack, Action, AttackResult, Avatar, LogEvent, World, Wound},
+    super::map::{TerrainInteract, TerrainView},
+    super::{melee_attack_unit, Action, Avatar, LogEvent, UnitAttackResult, World, Wound},
     ActionImpl,
     ActionPossibility::{self, No, Yes},
 };
@@ -17,36 +22,85 @@ impl MeleeAttack {
     pub fn new(target: Point) -> Self {
         Self { target }
     }
-}
 
-impl ActionImpl for MeleeAttack {
-    fn is_possible(&self, actor: &Avatar, _world: &World) -> ActionPossibility {
-        if actor.personality.char_sheet.shock {
-            return No("You are in shock".to_string());
-        }
-
-        let distance = (actor.pos.distance(self.target).floor() - 1.0) as u8;
-        let weapon = actor.wield.active_hand();
-        if distance > 0 {
-            let weapon_distance = weapon.map_or(0, |w| w.melee_damage().distance);
-            if distance > weapon_distance {
-                No("You can't reach the target from this distance".to_string())
-            } else {
-                Yes(MELEE_ATTACK_MOVES)
-            }
+    fn smash(self, action: &Action, world: &mut World) -> bool {
+        let owner = action.owner(world);
+        let weapon = owner.wield.active_hand();
+        let (weapon_name, can_smash) = if let Some(weapon) = weapon {
+            (
+                weapon.name(),
+                weapon
+                    .melee_damage()
+                    .damage_types
+                    .contains(&DamageType::Blunt),
+            )
         } else {
-            Yes(MELEE_ATTACK_MOVES)
+            let (name, damage) = owner.personality.appearance.race.natural_weapon();
+            (name, damage.damage_types.contains(&DamageType::Blunt))
+        };
+
+        if can_smash && world.map().get_tile(self.target).terrain.is_smashable() {
+            let attack = melee_attack_terrain(owner, &world.map().get_tile(self.target).terrain);
+            match attack {
+                TerrainAttackResult::Miss => {
+                    world.log().push(LogEvent::info(
+                        format!(
+                            "{} {} trying to smash the {} with {} {weapon_name} but miss{}!",
+                            owner.name_for_actions(),
+                            if owner.is_player() { "are" } else { "is" },
+                            world.map().get_tile(self.target).terrain.name(),
+                            owner.pronounce().2,
+                            if owner.is_player() { "" } else { "es" },
+                        ),
+                        self.target,
+                    ));
+                }
+                TerrainAttackResult::Hit(damage) => {
+                    world.log().push(LogEvent::info(
+                        format!(
+                            "{} smash{} the {} with {} {weapon_name} for {damage} damage but didn't break it.",
+                            owner.name_for_actions(),
+                            if owner.is_player() { "" } else { "es" },
+                            world.map().get_tile(self.target).terrain.name(),
+                            owner.pronounce().2,
+                        ),
+                        self.target,
+                    ));
+                }
+                TerrainAttackResult::Success(damage) => {
+                    world.log().push(LogEvent::info(
+                        format!(
+                            "{} smash{} the {} with {} {weapon_name} for {damage} damage and completely destroyed it.",
+                            owner.name_for_actions(),
+                            if owner.is_player() { "" } else { "es" },
+                            world.map().get_tile(self.target).terrain.name(),
+                            owner.pronounce().2,
+                        ),
+                        self.target,
+                    ));
+                    let (new_terrain, mut items) =
+                        world.map().get_tile(self.target).terrain.smash_result();
+                    world.map().get_tile_mut(self.target).terrain = new_terrain;
+                    world
+                        .map()
+                        .get_tile_mut(self.target)
+                        .items
+                        .append(&mut items);
+                }
+            }
+
+            true
+        } else {
+            false
         }
     }
 
-    fn on_finish(&self, action: &Action, world: &mut World) {
-        // TODO: refactor this to smaller functions
+    fn attack_unit(self, action: &Action, world: &mut World) -> bool {
         let owner = action.owner(world);
-        let weapon_name = if let Some(weapon) = owner.wield.active_hand() {
-            weapon.name()
-        } else {
-            "fists"
-        };
+        let weapon_name = owner.wield.active_hand().map_or(
+            owner.personality.appearance.race.natural_weapon().0,
+            Item::name,
+        );
         let unit_id = world
             .map()
             .get_tile(self.target)
@@ -56,9 +110,9 @@ impl ActionImpl for MeleeAttack {
             .next();
         if let Some(unit_id) = unit_id {
             let unit = world.get_unit(unit_id);
-            let attack = melee_attack(owner, unit);
+            let attack = melee_attack_unit(owner, unit);
             match attack {
-                AttackResult::Hit(damage) => {
+                UnitAttackResult::Hit(damage) => {
                     let mut message = format!(
                         "{} attack{} {} with {} {weapon_name} and deal {} damage with {} penetration.",
                         owner.name_for_actions(),
@@ -98,7 +152,7 @@ impl ActionImpl for MeleeAttack {
 
                     world.apply_damage(unit_id, damage);
                 }
-                AttackResult::Miss => {
+                UnitAttackResult::Miss => {
                     world.log().push(LogEvent::warning(
                         format!(
                             "{} attack{} {} with {} {weapon_name} and miss.",
@@ -111,18 +165,57 @@ impl ActionImpl for MeleeAttack {
                     ));
                 }
             }
+
+            true
         } else {
-            // TODO: attack terrains and items
-            world.log().push(LogEvent::info(
-                format!(
-                    "{} swing{} in the air with {} {weapon_name}.",
-                    owner.name_for_actions(),
-                    if owner.is_player() { "" } else { "s" },
-                    owner.pronounce().2,
-                ),
-                self.target,
-            ));
-        };
+            false
+        }
+    }
+
+    fn swing(self, action: &Action, world: &mut World) {
+        let owner = action.owner(world);
+        let weapon = owner.wield.active_hand().map_or(
+            owner.personality.appearance.race.natural_weapon().0,
+            Item::name,
+        );
+
+        world.log().push(LogEvent::info(
+            format!(
+                "{} swing{} in the air with {} {weapon}.",
+                owner.name_for_actions(),
+                if owner.is_player() { "" } else { "s" },
+                owner.pronounce().2,
+            ),
+            self.target,
+        ));
+    }
+}
+
+impl ActionImpl for MeleeAttack {
+    fn is_possible(&self, actor: &Avatar, _world: &World) -> ActionPossibility {
+        if actor.personality.char_sheet.shock {
+            return No("You are in shock".to_string());
+        }
+
+        let distance = (actor.pos.distance(self.target).floor() - 1.0) as u8;
+        let weapon = actor.wield.active_hand();
+        if distance > 0 {
+            let weapon_distance = weapon.map_or(0, |w| w.melee_damage().distance);
+            if distance > weapon_distance {
+                No("You can't reach the target from this distance".to_string())
+            } else {
+                Yes(MELEE_ATTACK_MOVES)
+            }
+        } else {
+            Yes(MELEE_ATTACK_MOVES)
+        }
+    }
+
+    fn on_finish(&self, action: &Action, world: &mut World) {
+        // TODO: attack with cutting weapon
+        if !self.attack_unit(action, world) && !self.smash(action, world) {
+            self.swing(action, world);
+        }
     }
 }
 
@@ -130,6 +223,7 @@ impl ActionImpl for MeleeAttack {
 mod tests {
     use geometry::Point;
 
+    use crate::game::map::terrains::Boulder;
     use crate::game::world::tests::{add_npc, prepare_world};
     use crate::game::{Action, Item};
 
@@ -175,6 +269,48 @@ mod tests {
         assert!(
             event.msg.contains("with your stone axe"),
             "msg \"{}\" doesn't contains \"with your stone axe\"",
+            event.msg
+        );
+    }
+
+    #[test]
+    fn test_smash_boulder() {
+        let mut world = prepare_world();
+        assert_eq!(world.meta.current_tick, 0);
+
+        world.map().get_tile_mut(Point::new(1, 0)).terrain = Boulder::default().into();
+        world.player_mut().wield.wield(Item::new("demonic_sap"));
+        world.player_mut().action =
+            Some(Action::new(0, MeleeAttack::new(Point::new(1, 0)).into(), &world).unwrap());
+        world.tick();
+
+        assert_eq!(world.meta.current_tick, MELEE_ATTACK_MOVES as u128);
+        let mut log = world.log();
+        let event = &log.new_events()[0];
+        assert!(
+            event.msg.contains("smash the small boulder"),
+            "msg \"{}\" doesn't contains \"smash the small boulder\"",
+            event.msg
+        );
+    }
+
+    #[test]
+    fn test_cant_smash_with_knife() {
+        let mut world = prepare_world();
+        assert_eq!(world.meta.current_tick, 0);
+
+        world.map().get_tile_mut(Point::new(1, 0)).terrain = Boulder::default().into();
+        world.player_mut().wield.wield(Item::new("stone_knife"));
+        world.player_mut().action =
+            Some(Action::new(0, MeleeAttack::new(Point::new(1, 0)).into(), &world).unwrap());
+        world.tick();
+
+        assert_eq!(world.meta.current_tick, MELEE_ATTACK_MOVES as u128);
+        let mut log = world.log();
+        let event = &log.new_events()[0];
+        assert!(
+            event.msg.contains("swing in the air with your stone knife"),
+            "msg \"{}\" doesn't contains \"swing in the air with your knife\"",
             event.msg
         );
     }

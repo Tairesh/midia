@@ -18,9 +18,14 @@ pub enum ItemTag {
 #[derive(Serialize, Deserialize, Debug, Hash, Eq, PartialEq, Copy, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum ItemQuality {
+    /// can be used for digging
     Dig,
+    /// can be used for butchering corpses
     Butch,
+    /// can be used for cutting things
     Cut,
+    /// can be used for chopping trees
+    Chop,
 }
 
 #[derive(Serialize, Deserialize, Debug, Hash, Eq, PartialEq, Copy, Clone, Ord, PartialOrd)]
@@ -32,9 +37,24 @@ pub enum WearLayer {
     Clipped,
 }
 
+#[derive(Serialize, Deserialize, Debug, Hash, Eq, PartialEq, Copy, Clone)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum DamageType {
+    Blunt,
+    Pierce,
+    Slash,
+    Fire,
+    Cold,
+    Acid,
+    Electric,
+    Poison,
+    Magic,
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct MeleeDamageValue {
     pub damage: Damage,
+    pub damage_types: HashSet<DamageType>,
     #[serde(default)]
     pub distance: u8,
     #[serde(default)]
@@ -49,6 +69,7 @@ impl Default for MeleeDamageValue {
     fn default() -> Self {
         Self {
             damage: Damage::default(),
+            damage_types: HashSet::from([DamageType::Blunt]),
             distance: 0,
             penetration: 0,
         }

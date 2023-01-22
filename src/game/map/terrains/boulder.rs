@@ -3,6 +3,9 @@ use rand::{
     Rng,
 };
 
+use crate::game::map::terrains::{Dirt, DirtVariant};
+use crate::game::{Item, Terrain};
+
 use super::super::{Passage, TerrainInteract, TerrainView};
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
@@ -15,6 +18,12 @@ pub struct Boulder {
 impl Boulder {
     pub fn new(size: BoulderSize) -> Self {
         Self { size }
+    }
+}
+
+impl Default for Boulder {
+    fn default() -> Self {
+        Self::new(BoulderSize::Small)
     }
 }
 
@@ -50,6 +59,37 @@ impl TerrainInteract for Boulder {
 
     fn can_stock_items(&self) -> bool {
         false
+    }
+
+    fn is_smashable(&self) -> bool {
+        true
+    }
+
+    fn smash_toughness(&self) -> u8 {
+        match self.size {
+            BoulderSize::Huge => 12,
+            BoulderSize::Middle => 10,
+            BoulderSize::Small => 8,
+        }
+    }
+
+    fn smash_result(&self) -> (Terrain, Vec<Item>) {
+        let mut rng = rand::thread_rng();
+        let dirt_variant = match self.size {
+            BoulderSize::Huge => DirtVariant::LotOfChunks,
+            BoulderSize::Middle => DirtVariant::SomeChunks,
+            BoulderSize::Small => DirtVariant::Flat,
+        };
+        let shards_count = match self.size {
+            BoulderSize::Huge => rng.gen_range(3..6),
+            BoulderSize::Middle => rng.gen_range(1..3),
+            BoulderSize::Small => 1,
+        };
+        let items = (0..shards_count)
+            .map(|_| Item::new("stone_shards"))
+            .collect();
+
+        (Dirt::new(dirt_variant).into(), items)
     }
 }
 

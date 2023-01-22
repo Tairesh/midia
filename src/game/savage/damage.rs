@@ -24,6 +24,21 @@ pub enum DamageDice {
 }
 
 impl DamageDice {
+    pub fn roll(self) -> u8 {
+        match self {
+            DamageDice::D4Half => Dice::D4.roll() / 2,
+            DamageDice::D4 => Dice::D4.roll(),
+            DamageDice::D6Half => Dice::D6.roll() / 2,
+            DamageDice::D6 => Dice::D6.roll(),
+            DamageDice::D8Half => Dice::D8.roll() / 2,
+            DamageDice::D8 => Dice::D8.roll(),
+            DamageDice::D10Half => Dice::D10.roll() / 2,
+            DamageDice::D10 => Dice::D10.roll(),
+            DamageDice::D12Half => Dice::D12.roll() / 2,
+            DamageDice::D12 => Dice::D12.roll(),
+        }
+    }
+
     pub fn roll_explosive(self) -> u8 {
         match self {
             DamageDice::D4Half => Dice::D4.roll_explosive() / 2,
@@ -42,18 +57,22 @@ impl DamageDice {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Damage {
-    dices: Vec<DamageDice>,
+    pub dices: Vec<DamageDice>,
     #[serde(default)]
-    attribute: Option<Attribute>,
+    pub attribute: Option<Attribute>,
     #[serde(default)]
-    modifier: i8,
+    pub modifier: i8,
 }
 
 impl Damage {
-    pub fn roll(&self, char_sheet: &CharSheet, critical: bool) -> u8 {
+    pub fn roll(&self, char_sheet: &CharSheet, critical: bool, explosive: bool) -> u8 {
         let mut result = self.modifier;
         for dice in &self.dices {
-            result += dice.roll_explosive() as i8;
+            result += if explosive {
+                dice.roll_explosive()
+            } else {
+                dice.roll()
+            } as i8;
         }
         if let Some(attribute) = self.attribute {
             result += char_sheet

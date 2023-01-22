@@ -41,7 +41,7 @@ impl Chunk {
             tiles.push(Tile::new(if rng.gen_bool(0.005) {
                 Tree::new(rng.sample(Standard)).into()
             } else if rng.gen_bool(0.003) {
-                Chest::new(vec![random_book(), Item::new("knife")], false).into()
+                Chest::new(vec![random_book(), Item::new("stone_knife")], false).into()
             } else if rng.gen_bool(0.01) {
                 Boulder::new(rng.sample(Standard)).into()
             } else if rng.gen_bool(0.5) {
@@ -76,7 +76,7 @@ impl Chunk {
                 .unwrap()
                 .items
                 .push(match rng.gen_range(0..8) {
-                    0 => Item::new("cloak"),
+                    0 => Item::new("wooden_sap"),
                     1 => Item::new("hat"),
                     2 => Item::new("stone_axe"),
                     3 => Item::new("shovel"),

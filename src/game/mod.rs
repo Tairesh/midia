@@ -6,8 +6,8 @@ pub use log::{Log, LogEvent};
 pub use map::{Chunk, ChunkPos, Item, Map, Terrain, TerrainInteract, TerrainView, Tile, TilePos};
 pub use races::{BodySlot, MainHand};
 pub use savage::{
-    melee_attack, AttackResult, Attribute, CharSheet, Damage, Dice, DiceWithModifier, HitResult,
-    Skill, SkillLevel, Wound,
+    melee_attack_unit, Attribute, CharSheet, Damage, Dice, DiceWithModifier, HitResult, Skill,
+    SkillLevel, UnitAttackResult, Wound,
 };
 pub use units::{Avatar, Wear, Wield};
 pub use world::World;

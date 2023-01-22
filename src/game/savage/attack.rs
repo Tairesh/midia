@@ -1,8 +1,10 @@
-use crate::game::{Avatar, BodySlot, Dice, DiceWithModifier, MeleeDamageValue, Skill};
+use crate::game::{
+    Avatar, BodySlot, Dice, DiceWithModifier, Item, Skill, Terrain, TerrainInteract,
+};
 
 use super::Wound;
 
-pub enum AttackResult {
+pub enum UnitAttackResult {
     Miss,
     Hit(HitResult),
 }
@@ -56,36 +58,73 @@ impl HitResult {
     }
 }
 
-// TODO: attack terrains and items
-// TODO: refactor this function to smaller ones
-pub fn melee_attack(attacker: &Avatar, defender: &Avatar) -> AttackResult {
-    let weapon = attacker.wield.active_hand();
-    // TODO: add +1 to hit for every ally
-    let hit_dice = attacker
+pub enum TerrainAttackResult {
+    Miss,
+    Hit(u8),
+    Success(u8),
+}
+
+/// Performs roll on hit
+pub fn melee_hit_roll(attacker: &Avatar) -> u8 {
+    let fightning_dice = attacker
         .personality
         .char_sheet
         .get_skill_with_modifiers(Skill::Fighting);
-    let hit_roll = if attacker.personality.char_sheet.wild_card {
-        let wild_dice = DiceWithModifier::new(Dice::D6, hit_dice.modifier());
-        u8::max(hit_dice.roll(), wild_dice.roll_explosive())
+    if attacker.personality.char_sheet.wild_card {
+        let wild_dice = DiceWithModifier::new(Dice::D6, fightning_dice.modifier());
+        u8::max(fightning_dice.roll_explosive(), wild_dice.roll_explosive())
     } else {
-        hit_dice.roll()
-    };
+        fightning_dice.roll_explosive()
+    }
+}
+
+static TERRAIN_PARRY: u8 = 2;
+
+pub fn melee_attack_terrain(attacker: &Avatar, defender: &Terrain) -> TerrainAttackResult {
+    let hit_roll = melee_hit_roll(attacker);
+    if hit_roll >= TERRAIN_PARRY {
+        let delta = hit_roll - TERRAIN_PARRY;
+        let critical = delta >= 4;
+
+        let damage_params = attacker
+            .wield
+            .active_hand()
+            .map(Item::melee_damage)
+            .unwrap_or_default();
+
+        let damage = damage_params
+            .damage
+            .roll(&attacker.personality.char_sheet, critical, false);
+        if damage >= defender.smash_toughness() {
+            TerrainAttackResult::Success(damage)
+        } else {
+            TerrainAttackResult::Hit(damage)
+        }
+    } else {
+        TerrainAttackResult::Miss
+    }
+}
+
+// TODO: attack terrains and items
+// TODO: refactor this function to smaller ones
+pub fn melee_attack_unit(attacker: &Avatar, defender: &Avatar) -> UnitAttackResult {
     // TODO: Attack of unarmed enemy while attacker is armed causes +2 to Fighting skill rolls
+    // TODO: add +1 to hit for every ally
+    let hit_roll = melee_hit_roll(attacker);
 
     let parry = defender.personality.char_sheet.parry();
     if hit_roll >= parry {
         let delta = hit_roll - parry;
         let critical = delta >= 4;
 
-        let damage_params = if let Some(weapon) = weapon {
-            weapon.melee_damage()
-        } else {
-            MeleeDamageValue::default()
-        };
+        let damage_params = attacker
+            .wield
+            .active_hand()
+            .map(Item::melee_damage)
+            .unwrap_or_default();
         let damage = damage_params
             .damage
-            .roll(&attacker.personality.char_sheet, critical);
+            .roll(&attacker.personality.char_sheet, critical, true);
         let penetration = damage_params.penetration;
 
         let toughness = defender.personality.char_sheet.toughness();
@@ -109,12 +148,12 @@ pub fn melee_attack(attacker: &Avatar, defender: &Avatar) -> AttackResult {
             }
         }
 
-        AttackResult::Hit(HitResult::new(
+        UnitAttackResult::Hit(HitResult::new(
             HitParams::new(damage, penetration, critical),
             HitCauses::random_wounds(shock, wounds),
         ))
     } else {
-        AttackResult::Miss
+        UnitAttackResult::Miss
     }
 }
 

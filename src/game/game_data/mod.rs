@@ -6,7 +6,9 @@ use std::path::{Path, PathBuf};
 use once_cell::sync::OnceCell;
 
 use data_entity::DataEntity;
-pub use item::{ItemPrototype, ItemQuality, ItemSize, ItemTag, MeleeDamageValue, WearLayer};
+pub use item::{
+    DamageType, ItemPrototype, ItemQuality, ItemSize, ItemTag, MeleeDamageValue, WearLayer,
+};
 
 use crate::game::races::{Race, Sex};
 

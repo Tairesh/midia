@@ -5,8 +5,20 @@
     "name": "book",
     "looks_like": "book",
     "size": "SMALL",
-    "tags": [
-      "BOOK"
-    ]
+    "tags": ["BOOK"]
+  },
+  {
+    "type": "item",
+    "id": "stone_shards",
+    "name": "stone shards",
+    "looks_like": "stone_shards",
+    "size": "SMALL"
+  },
+  {
+    "type": "item",
+    "id": "wooden_splinter",
+    "name": "wooden splinter",
+    "looks_like": "wooden_splinter",
+    "size": "SMALL"
   }
 ]

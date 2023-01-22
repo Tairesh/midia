@@ -71,14 +71,14 @@ mod tests {
             "size": "MEDIUM",
             "two_handed_tool": true,
             "melee_damage": {
-              "moves": 50,
               "damage": {
                 "attribute": "STRENGTH",
                 "dices": [
                   "D6"
                 ],
                 "modifier": -1
-              }
+              },
+              "damage_types": ["BLUNT"]
             }
           },
           {
@@ -131,14 +131,14 @@ mod tests {
             "size": "MEDIUM",
             "two_handed_tool": true,
             "melee_damage": {
-              "moves": 50,
               "damage": {
                 "attribute": "STRENGTH",
                 "dices": [
                   "D6"
                 ],
                 "modifier": -1
-              }
+              },
+              "damage_types": ["BLUNT"]
             }
           }
         ]
@@ -215,11 +215,11 @@ mod tests {
             "size": "SMALL",
             "two_handed_tool": false,
             "melee_damage": {
-              "moves": 10,
               "damage": {
                 "attribute": "STRENGTH",
                 "dices": [ "D4" ]
-              }
+              },
+              "damage_types": [ "SLASH", "PIERCE" ]
             }
           }
       ]

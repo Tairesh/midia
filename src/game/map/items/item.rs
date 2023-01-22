@@ -14,11 +14,17 @@ static CUSTOM_PROTO: &str = "custom";
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Item {
     proto: String,
+    #[serde(default)]
     custom_proto: Option<ItemPrototype>,
+    #[serde(default)]
     named: Option<String>,
+    #[serde(default)]
     colored: Option<Color>,
+    #[serde(default)]
     readable: Option<String>,
+    #[serde(default)]
     looks_like: Option<String>,
+    #[serde(default)]
     container: Option<Container>,
 }
 
@@ -143,6 +149,7 @@ impl Item {
         self.tags().contains(&ItemTag::Weapon)
     }
 
+    /// Used for determining if an item should be displayed in full size when wielded.
     pub fn tool_or_weapon(&self) -> bool {
         self.is_tool() || self.is_weapon()
     }
@@ -190,6 +197,7 @@ impl Item {
             return damage.clone();
         }
 
+        // TODO: improvised weapons
         MeleeDamageValue::default()
     }
 }

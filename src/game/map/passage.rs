@@ -1,10 +1,6 @@
-use serde::Deserialize;
-
-// TODO: why?
-#[derive(Deserialize, Debug)]
-#[serde(rename_all = "snake_case")]
+#[derive(Debug)]
 pub enum Passage {
-    // ticks to pass (for 2-legged racesperson without buffs)
+    // ticks to pass (for 2-legged gazan without buffs)
     Passable(f32),
     Impassable,
 }

@@ -5,7 +5,6 @@ use serde::{Deserialize, Serialize};
 use crate::game::races::BodySlot;
 use crate::game::savage::Damage;
 
-// TODO: do we really need tags?
 #[derive(Serialize, Deserialize, Debug, Hash, Eq, PartialEq, Copy, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum ItemTag {

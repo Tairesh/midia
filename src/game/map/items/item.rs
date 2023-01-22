@@ -13,18 +13,19 @@ const CUSTOM_PROTO: &str = "custom";
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Item {
+    #[serde(rename = "p")]
     proto: String,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none", rename = "cp")]
     custom_proto: Option<ItemPrototype>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none", rename = "n")]
     named: Option<String>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none", rename = "c")]
     colored: Option<Color>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none", rename = "r")]
     readable: Option<String>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none", rename = "l")]
     looks_like: Option<String>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none", rename = "t")]
     container: Option<Container>,
 }
 

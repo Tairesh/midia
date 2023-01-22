@@ -78,7 +78,7 @@ pub fn melee_hit_roll(attacker: &Avatar) -> u8 {
     }
 }
 
-static TERRAIN_PARRY: u8 = 2;
+const TERRAIN_PARRY: u8 = 2;
 
 pub fn melee_attack_terrain(attacker: &Avatar, defender: &Terrain) -> TerrainAttackResult {
     let hit_roll = melee_hit_roll(attacker);

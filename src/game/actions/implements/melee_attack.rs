@@ -11,7 +11,7 @@ use super::super::{
     ActionPossibility::{self, No, Yes},
 };
 
-static MELEE_ATTACK_MOVES: u32 = 10;
+const MELEE_ATTACK_MOVES: u32 = 10;
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Copy, Clone)]
 pub struct MeleeAttack {

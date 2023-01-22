@@ -4,7 +4,7 @@ use tetra::{
     Context,
 };
 
-static REGIONS: phf::Map<&'static str, Rectangle> = phf::phf_map! {
+const REGIONS: phf::Map<&'static str, Rectangle> = phf::phf_map! {
     "gazan" => Rectangle::new(0.0, 0.0, 10.0, 10.0),
     "nyarnik" => Rectangle::new(10.0, 0.0, 10.0, 10.0),
     "totik" => Rectangle::new(20.0, 0.0, 10.0, 10.0),

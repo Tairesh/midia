@@ -9,7 +9,7 @@ use crate::game::{GameData, ItemPrototype, ItemQuality, ItemSize, ItemTag, Melee
 
 use super::container::Container;
 
-static CUSTOM_PROTO: &str = "custom";
+const CUSTOM_PROTO: &str = "custom";
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Item {

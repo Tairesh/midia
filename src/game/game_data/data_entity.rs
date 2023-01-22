@@ -57,7 +57,7 @@ mod tests {
 
     #[test]
     fn test_deserialize_different_types() {
-        static JSON: &str = r#"
+        const JSON: &str = r#"
         [
           {
             "type": "item",
@@ -117,7 +117,7 @@ mod tests {
 
     #[test]
     fn test_deserialize_shovel() {
-        static JSON: &str = r#"
+        const JSON: &str = r#"
         [
           {
             "type": "item",
@@ -150,7 +150,7 @@ mod tests {
 
     #[test]
     fn test_deserialize_cloak() {
-        static JSON: &str = r#"
+        const JSON: &str = r#"
         [
           {
             "type": "item",
@@ -197,7 +197,7 @@ mod tests {
 
     #[test]
     fn test_deserialize_knife() {
-        static JSON: &str = r#"
+        const JSON: &str = r#"
         [
           {
             "type": "item",

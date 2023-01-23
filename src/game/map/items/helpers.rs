@@ -62,6 +62,8 @@ pub const DEMONIC_SAP: &str = "sap_demonic";
 // pub const IRON_KNUCKLE: &str = "knuckle_iron";
 // pub const STEEL_KNUCKLE: &str = "knuckle_steel";
 // pub const DEMONIC_KNUCKLE: &str = "knuckle_demonic";
+// pub const OBSIDIAN_KNUCKLE: &str = "knuckle_obsidian";
+// pub const BONE_KNUCKLE: &str = "knuckle_bone";
 
 // pub const WOODEN_HAMMER: &str = "hammer_wood";
 // pub const STONE_HAMMER: &str = "hammer_stone";
@@ -91,6 +93,7 @@ pub const DEMONIC_SAP: &str = "sap_demonic";
 // pub const BOOMSTICK: &str = "boomstick";
 // pub const PISTOL: &str = "pistol";
 // pub const RIFLE: &str = "rifle";
+// pub const SLINGSHOT: &str = "slingshot";
 
 // pub const WOODEN_ARROW: &str = "arrow_wood";
 // pub const STONE_ARROW: &str = "arrow_stone";
@@ -105,7 +108,7 @@ pub const DEMONIC_SAP: &str = "sap_demonic";
 
 pub const ROCK: &str = "rock";
 // pub const SHARP_ROCK: &str = "sharp_rock";
-// pub const RUBBLE: &str = "rubble";
+// pub const PEBBLE: &str = "pebble";
 // pub const METAL_CHUNK: &str = "metal_chunk";
 // pub const SHARP_METAL_CHUNK: &str = "sharp_metal_chunk";
 // pub const METAL_SHOT: &str = "metal_shot";

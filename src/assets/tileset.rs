@@ -108,6 +108,8 @@ const REGIONS: phf::Map<&'static str, Rectangle> = phf::phf_map! {
     "mace_stone" => Rectangle::new(50.0, 140.0, 10.0, 10.0),
     "mace_metal" => Rectangle::new(60.0, 140.0, 10.0, 10.0),
     "mace_demonic" => Rectangle::new(70.0, 140.0, 10.0, 10.0),
+    "knuckle_obsidian" => Rectangle::new(80.0, 140.0, 10.0, 10.0),
+    "knuckle_bone" => Rectangle::new(90.0, 140.0, 10.0, 10.0),
 
     "knuckle_wood" => Rectangle::new(0.0, 150.0, 10.0, 10.0),
     "knuckle_stone" => Rectangle::new(10.0, 150.0, 10.0, 10.0),
@@ -136,6 +138,7 @@ const REGIONS: phf::Map<&'static str, Rectangle> = phf::phf_map! {
     "pipe" => Rectangle::new(60.0, 170.0, 10.0, 10.0),
     "pistol" => Rectangle::new(70.0, 170.0, 10.0, 10.0),
     "rifle" => Rectangle::new(80.0, 170.0, 10.0, 10.0),
+    "slingshot" => Rectangle::new(90.0, 170.0, 10.0, 10.0),
 
     "arrow_wood" => Rectangle::new(0.0, 180.0, 10.0, 10.0),
     "arrow_stone" => Rectangle::new(10.0, 180.0, 10.0, 10.0),
@@ -148,7 +151,7 @@ const REGIONS: phf::Map<&'static str, Rectangle> = phf::phf_map! {
 
     "rock" => Rectangle::new(0.0, 190.0, 10.0, 10.0),
     "sharp_rock" => Rectangle::new(10.0, 190.0, 10.0, 10.0),
-    "rubble" => Rectangle::new(20.0, 190.0, 10.0, 10.0),
+    "pebble" => Rectangle::new(20.0, 190.0, 10.0, 10.0),
     "metal_chunk" => Rectangle::new(30.0, 190.0, 10.0, 10.0),
     "sharp_metal_chunk" => Rectangle::new(40.0, 190.0, 10.0, 10.0),
     "metal_shot" => Rectangle::new(50.0, 190.0, 10.0, 10.0),

@@ -1,22 +1,17 @@
-use crate::game::{Avatar, Item, Skill, Terrain, TerrainInteract};
+use crate::game::{Avatar, Terrain, TerrainInteract};
+
+use super::fighting_roll;
 
 const TERRAIN_PARRY: u8 = 2;
 
 pub fn melee_smash_terrain(attacker: &Avatar, defender: &Terrain) -> TerrainAttackResult {
-    let hit_roll = attacker.personality.char_sheet.roll_skill(Skill::Fighting);
+    let hit_roll = fighting_roll(attacker);
     if hit_roll >= TERRAIN_PARRY {
-        let delta = hit_roll - TERRAIN_PARRY;
-        let critical = delta >= 4;
+        let melee_damage = attacker.melee_damage();
 
-        let damage_params = attacker
-            .wield
-            .active_hand()
-            .map(Item::melee_damage)
-            .unwrap_or_default();
-
-        let damage = damage_params
+        let damage = melee_damage
             .damage
-            .roll(&attacker.personality.char_sheet, critical, false);
+            .roll(&attacker.personality.char_sheet, false, false);
         if damage >= defender.smash_toughness() {
             TerrainAttackResult::Success(damage)
         } else {

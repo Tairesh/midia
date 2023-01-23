@@ -5,7 +5,10 @@ use std::collections::HashSet;
 use serde::{Deserialize, Serialize};
 use tetra::graphics::Color;
 
-use crate::game::{GameData, ItemPrototype, ItemQuality, ItemSize, ItemTag, MeleeDamageValue};
+use crate::game::{
+    Attribute, DamageDice, DamageType, GameData, ItemPrototype, ItemQuality, ItemSize, ItemTag,
+    Material, MeleeDamageValue,
+};
 
 use super::container::Container;
 
@@ -204,8 +207,30 @@ impl Item {
             return damage.clone();
         }
 
-        // TODO: improvised weapons
-        MeleeDamageValue::default()
+        // Improvised weapons
+        let mut damage_value = MeleeDamageValue::zero();
+        if self.size() > ItemSize::Tiny {
+            damage_value.damage.attribute = Some(Attribute::Strength);
+            damage_value.damage.dices.push(match self.size() {
+                ItemSize::Tiny => unreachable!(),
+                ItemSize::Small => DamageDice::D4,
+                ItemSize::Medium => DamageDice::D6,
+                ItemSize::Large | ItemSize::Huge => DamageDice::D8,
+            });
+            damage_value.parry_modifier -= 1;
+            damage_value.attack_modifier -= 1;
+            if self
+                .proto()
+                .materials
+                .iter()
+                .copied()
+                .any(Material::is_hard)
+            {
+                damage_value.damage_types.insert(DamageType::Blunt);
+            }
+        }
+
+        damage_value
     }
 }
 

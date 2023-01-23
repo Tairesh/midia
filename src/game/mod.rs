@@ -1,11 +1,14 @@
 pub use actions::{Action, ActionType};
 pub use game_data::{
-    GameData, ItemPrototype, ItemQuality, ItemSize, ItemTag, Material, MeleeDamageValue, WearLayer,
+    DamageType, GameData, ItemPrototype, ItemQuality, ItemSize, ItemTag, Material,
+    MeleeDamageValue, WearLayer,
 };
 pub use log::{Log, LogEvent};
 pub use map::{Chunk, ChunkPos, Item, Map, Terrain, TerrainInteract, TerrainView, Tile, TilePos};
 pub use races::{BodySlot, MainHand, Race};
-pub use savage::{Attribute, CharSheet, Damage, Dice, DiceWithModifier, Skill, SkillLevel, Wound};
+pub use savage::{
+    Attribute, CharSheet, Damage, DamageDice, Dice, DiceWithModifier, Skill, SkillLevel, Wound,
+};
 pub use units::{Avatar, Wear, Wield};
 pub use world::World;
 

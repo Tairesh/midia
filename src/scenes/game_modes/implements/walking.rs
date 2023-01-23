@@ -122,7 +122,7 @@ impl GameModeImpl for Walking {
                 .personality
                 .char_sheet
                 .toughness();
-            let parry = game.world.borrow().player().personality.char_sheet.parry();
+            let parry = game.world.borrow().player().parry();
             game.log.log(
                 format!(
                     "You wear: {}, armor value is {armor}, toughness: {toughness}, parry: {parry}",

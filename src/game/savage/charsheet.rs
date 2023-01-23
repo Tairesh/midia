@@ -124,8 +124,8 @@ impl CharSheet {
             .with_modifier(-(self.wounds.len() as i8))
     }
 
-    pub fn roll_skill(&self, skill: Skill) -> u8 {
-        let skill_dice = self.get_skill_with_modifiers(skill);
+    pub fn roll_skill(&self, skill: Skill, modifier: i8) -> u8 {
+        let skill_dice = self.get_skill_with_modifiers(skill).with_modifier(modifier);
 
         if self.wild_card {
             let wild_dice = DiceWithModifier::new(Dice::D6, skill_dice.modifier());

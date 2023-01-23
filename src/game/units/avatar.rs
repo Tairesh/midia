@@ -2,6 +2,8 @@
 
 use geometry::{Point, TwoDimDirection};
 
+use crate::game::MeleeDamageValue;
+
 use super::super::{
     map::items::helpers::{dead_body, CLOAK, HAT},
     races::{MainHand, Personality},
@@ -99,6 +101,19 @@ impl Avatar {
             items
         } else {
             Vec::new()
+        }
+    }
+
+    pub fn parry(&self) -> u8 {
+        (self.personality.char_sheet.parry() as i8 + self.melee_damage().parry_modifier).max(0)
+            as u8
+    }
+
+    pub fn melee_damage(&self) -> MeleeDamageValue {
+        if let Some(weapon) = self.wield.active_hand() {
+            weapon.melee_damage()
+        } else {
+            self.personality.appearance.race.natural_weapon().1
         }
     }
 }

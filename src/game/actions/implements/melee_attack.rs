@@ -226,7 +226,7 @@ mod tests {
     use crate::game::map::items::helpers::{DEMONIC_SAP, STONE_AXE, STONE_KNIFE};
     use crate::game::map::terrains::Boulder;
     use crate::game::world::tests::{add_npc, prepare_world};
-    use crate::game::{Action, Item};
+    use crate::game::{Action, Item, Race};
 
     use super::{MeleeAttack, MELEE_ATTACK_MOVES};
 
@@ -312,6 +312,49 @@ mod tests {
         assert!(
             event.msg.contains("swing in the air with your stone knife"),
             "msg \"{}\" doesn't contains \"swing in the air with your knife\"",
+            event.msg
+        );
+    }
+
+    #[test]
+    fn test_smash_with_fists() {
+        let mut world = prepare_world();
+        assert_eq!(world.meta.current_tick, 0);
+        assert_eq!(world.player().personality.appearance.race, Race::Gazan);
+
+        world.map().get_tile_mut(Point::new(1, 0)).terrain = Boulder::default().into();
+        world.player_mut().wield.clear();
+        world.player_mut().action =
+            Some(Action::new(0, MeleeAttack::new(Point::new(1, 0)).into(), &world).unwrap());
+        world.tick();
+
+        assert_eq!(world.meta.current_tick, MELEE_ATTACK_MOVES as u128);
+        let mut log = world.log();
+        let event = &log.new_events()[0];
+        assert!(
+            event.msg.contains("smash the small boulder"),
+            "msg \"{}\" doesn't contains \"smash the small boulder\"",
+            event.msg
+        );
+    }
+
+    #[test]
+    fn test_cant_smash_with_fangs() {
+        let mut world = prepare_world();
+        world.player_mut().personality.appearance.race = Race::Lagnam;
+        world.player_mut().wield.clear();
+
+        world.map().get_tile_mut(Point::new(1, 0)).terrain = Boulder::default().into();
+        world.player_mut().action =
+            Some(Action::new(0, MeleeAttack::new(Point::new(1, 0)).into(), &world).unwrap());
+        world.tick();
+
+        assert_eq!(world.meta.current_tick, MELEE_ATTACK_MOVES as u128);
+        let mut log = world.log();
+        let event = &log.new_events()[0];
+        assert!(
+            event.msg.contains("swing in the air with your fangs"),
+            "msg \"{}\" doesn't contains \"swing in the air with your fangs\"",
             event.msg
         );
     }

@@ -15,7 +15,9 @@
         "dices": ["D6"],
         "modifier": -1
       },
-      "damage_types": ["BLUNT"]
+      "damage_types": ["SLASH"],
+      "fighting_modifier": -1,
+      "parry_modifier": -1
     }
   },
   {

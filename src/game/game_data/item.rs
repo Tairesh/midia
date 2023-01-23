@@ -62,19 +62,26 @@ pub struct MeleeDamageValue {
     pub distance: u8,
     #[serde(default)]
     pub penetration: u8,
-    // TODO: fighting modifier
+    #[serde(default)]
+    pub attack_modifier: i8,
+    #[serde(default)]
+    pub parry_modifier: i8,
     // TODO: minumum strength
-    // TODO: parry modifier
 }
 
-impl Default for MeleeDamageValue {
-    /// Attack with fists
-    fn default() -> Self {
+impl MeleeDamageValue {
+    pub fn zero() -> Self {
         Self {
-            damage: Damage::default(),
-            damage_types: HashSet::from([DamageType::Blunt]),
+            damage: Damage {
+                dices: vec![],
+                attribute: None,
+                modifier: 0,
+            },
+            damage_types: HashSet::new(),
             distance: 0,
             penetration: 0,
+            attack_modifier: 0,
+            parry_modifier: 0,
         }
     }
 }
@@ -89,15 +96,16 @@ pub struct WearableValue {
 #[derive(Serialize, Deserialize, Debug, Hash, Eq, PartialEq, Copy, Clone, Ord, PartialOrd)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum ItemSize {
+    /// like a coin
     Tiny,
-    // like a coin
+    /// like a dagger
     Small,
-    // like a dagger
+    /// like a sword
     Medium,
-    // like a sword
+    /// like a polearm
     Large,
-    // like a polearm
-    Huge, // like a boulder
+    /// like a boulder
+    Huge,
 }
 
 #[derive(Serialize, Deserialize, Debug, Hash, Eq, PartialEq, Copy, Clone, Ord, PartialOrd)]
@@ -117,6 +125,22 @@ pub enum Material {
     Flesh,
     Plant,
     Paper,
+}
+
+impl Material {
+    pub fn is_hard(self) -> bool {
+        matches!(
+            self,
+            Self::Wood
+                | Self::Stone
+                | Self::Iron
+                | Self::Steel
+                | Self::Obsidian
+                | Self::Demonite
+                | Self::LapisLazuli
+                | Self::Bone
+        )
+    }
 }
 
 impl From<Material> for Color {

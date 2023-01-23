@@ -141,6 +141,7 @@ impl Skills {
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub enum Skill {
+    // TODO: probably rename to Throwing
     Athletics,
     Fighting,
     Shooting,

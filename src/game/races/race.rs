@@ -77,6 +77,8 @@ impl Race {
                     damage_types: HashSet::from([DamageType::Blunt]),
                     distance: 0,
                     penetration: 0,
+                    attack_modifier: 0,
+                    parry_modifier: 0,
                 },
             ),
             Race::Totik | Race::Lagnam => (
@@ -90,6 +92,8 @@ impl Race {
                     damage_types: HashSet::from([DamageType::Pierce]),
                     distance: 0,
                     penetration: 0,
+                    attack_modifier: 0,
+                    parry_modifier: 0,
                 },
             ),
             Race::Bug => (
@@ -103,6 +107,8 @@ impl Race {
                     damage_types: HashSet::from([DamageType::Pierce]),
                     distance: 0,
                     penetration: 0,
+                    attack_modifier: 0,
+                    parry_modifier: 0,
                 },
             ),
         }

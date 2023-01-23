@@ -29,28 +29,28 @@ pub struct Skills {
 impl Skills {
     pub fn default(race: Race) -> Self {
         Self {
-            athletics: SkillLevel::D4_2,
-            fighting: SkillLevel::D4_2,
-            shooting: SkillLevel::D4_2,
-            stealth: SkillLevel::D4_2,
-            thievery: SkillLevel::D4_2,
+            athletics: SkillLevel::None,
+            fighting: SkillLevel::None,
+            shooting: SkillLevel::None,
+            stealth: SkillLevel::None,
+            thievery: SkillLevel::None,
             swimming: if race == Race::Totik {
                 SkillLevel::D6
             } else {
-                SkillLevel::D4_2
+                SkillLevel::None
             },
-            gambling: SkillLevel::D4_2,
-            notice: SkillLevel::D4_2,
-            survival: SkillLevel::D4_2,
-            healing: SkillLevel::D4_2,
-            repair: SkillLevel::D4_2,
-            reading: SkillLevel::D4_2,
-            persuasion: SkillLevel::D4_2,
-            intimidation: SkillLevel::D4_2,
+            gambling: SkillLevel::None,
+            notice: SkillLevel::None,
+            survival: SkillLevel::None,
+            healing: SkillLevel::None,
+            repair: SkillLevel::None,
+            reading: SkillLevel::None,
+            persuasion: SkillLevel::None,
+            intimidation: SkillLevel::None,
             climbing: if race == Race::Gazan {
                 SkillLevel::D6
             } else {
-                SkillLevel::D4_2
+                SkillLevel::None
             },
         }
     }
@@ -123,7 +123,7 @@ impl Skills {
         let mut skill_points = 15;
         for (attr, skill, value) in self.get_skills_by_attributes() {
             let mut attr_value = attributes.get_attribute(attr);
-            let mut base_value = SkillLevel::D4_2;
+            let mut base_value = SkillLevel::None;
             if let Some(&free_skill_level) = race.free_skills().get(&skill) {
                 if value == free_skill_level {
                     continue;

@@ -444,7 +444,7 @@ impl CharacterAttributes {
                 (83, self.personality.char_sheet.skills.intimidation),
                 (87, self.personality.char_sheet.skills.climbing),
             ]),
-            SkillLevel::D4_2,
+            SkillLevel::None,
         );
     }
 
@@ -661,7 +661,7 @@ impl SceneImpl for CharacterAttributes {
             let value = self.get_skill(skill);
             let attribute = self.get_attribute(skill.attribute());
             let cost = if value > attribute.into() { 2 } else { 1 };
-            if value > SkillLevel::D4_2 {
+            if value > SkillLevel::None {
                 self.skills_points += cost;
                 self.set_skill(skill, value - 1);
                 self.update_skill_label(skill, ctx);

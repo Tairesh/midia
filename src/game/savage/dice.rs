@@ -163,7 +163,8 @@ impl From<Dice> for DiceWithModifier {
 
 #[derive(Serialize, Deserialize, Sequence, Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd)]
 pub enum SkillLevel {
-    D4_2,
+    #[serde(rename = "d4-2")]
+    None,
     D4,
     D6,
     D8,
@@ -174,7 +175,7 @@ pub enum SkillLevel {
 impl From<SkillLevel> for DiceWithModifier {
     fn from(skill_level: SkillLevel) -> Self {
         match skill_level {
-            SkillLevel::D4_2 => DiceWithModifier::new(Dice::D4, -2),
+            SkillLevel::None => DiceWithModifier::new(Dice::D4, -2),
             SkillLevel::D4 => Dice::D4.into(),
             SkillLevel::D6 => Dice::D6.into(),
             SkillLevel::D8 => Dice::D8.into(),
@@ -193,7 +194,7 @@ impl From<SkillLevel> for Dice {
 impl From<SkillLevel> for &str {
     fn from(skill_level: SkillLevel) -> Self {
         match skill_level {
-            SkillLevel::D4_2 => "d4-2",
+            SkillLevel::None => "d4-2",
             SkillLevel::D4 => "d4",
             SkillLevel::D6 => "d6",
             SkillLevel::D8 => "d8",
@@ -212,7 +213,7 @@ impl Name for SkillLevel {
 impl SkillLevel {
     pub fn value(self) -> u8 {
         match self {
-            SkillLevel::D4_2 => 2,
+            SkillLevel::None => 2,
             SkillLevel::D4 => 4,
             SkillLevel::D6 => 6,
             SkillLevel::D8 => 8,
@@ -248,7 +249,7 @@ impl SkillLevel {
 
 impl Default for SkillLevel {
     fn default() -> Self {
-        SkillLevel::D4_2
+        SkillLevel::None
     }
 }
 
@@ -303,37 +304,37 @@ mod tests {
 
     #[test]
     fn test_steps_above() {
-        assert_eq!(SkillLevel::D4_2.steps_above(SkillLevel::D4_2), 0);
-        assert_eq!(SkillLevel::D4.steps_above(SkillLevel::D4_2), 1);
-        assert_eq!(SkillLevel::D6.steps_above(SkillLevel::D4_2), 2);
-        assert_eq!(SkillLevel::D8.steps_above(SkillLevel::D4_2), 3);
-        assert_eq!(SkillLevel::D10.steps_above(SkillLevel::D4_2), 4);
-        assert_eq!(SkillLevel::D12.steps_above(SkillLevel::D4_2), 5);
-        assert_eq!(SkillLevel::D4_2.steps_above(SkillLevel::D4), -1);
+        assert_eq!(SkillLevel::None.steps_above(SkillLevel::None), 0);
+        assert_eq!(SkillLevel::D4.steps_above(SkillLevel::None), 1);
+        assert_eq!(SkillLevel::D6.steps_above(SkillLevel::None), 2);
+        assert_eq!(SkillLevel::D8.steps_above(SkillLevel::None), 3);
+        assert_eq!(SkillLevel::D10.steps_above(SkillLevel::None), 4);
+        assert_eq!(SkillLevel::D12.steps_above(SkillLevel::None), 5);
+        assert_eq!(SkillLevel::None.steps_above(SkillLevel::D4), -1);
         assert_eq!(SkillLevel::D4.steps_above(SkillLevel::D4), 0);
         assert_eq!(SkillLevel::D6.steps_above(SkillLevel::D4), 1);
         assert_eq!(SkillLevel::D8.steps_above(SkillLevel::D4), 2);
         assert_eq!(SkillLevel::D10.steps_above(SkillLevel::D4), 3);
         assert_eq!(SkillLevel::D12.steps_above(SkillLevel::D4), 4);
-        assert_eq!(SkillLevel::D4_2.steps_above(SkillLevel::D6), -2);
+        assert_eq!(SkillLevel::None.steps_above(SkillLevel::D6), -2);
         assert_eq!(SkillLevel::D4.steps_above(SkillLevel::D6), -1);
         assert_eq!(SkillLevel::D6.steps_above(SkillLevel::D6), 0);
         assert_eq!(SkillLevel::D8.steps_above(SkillLevel::D6), 1);
         assert_eq!(SkillLevel::D10.steps_above(SkillLevel::D6), 2);
         assert_eq!(SkillLevel::D12.steps_above(SkillLevel::D6), 3);
-        assert_eq!(SkillLevel::D4_2.steps_above(SkillLevel::D8), -3);
+        assert_eq!(SkillLevel::None.steps_above(SkillLevel::D8), -3);
         assert_eq!(SkillLevel::D4.steps_above(SkillLevel::D8), -2);
         assert_eq!(SkillLevel::D6.steps_above(SkillLevel::D8), -1);
         assert_eq!(SkillLevel::D8.steps_above(SkillLevel::D8), 0);
         assert_eq!(SkillLevel::D10.steps_above(SkillLevel::D8), 1);
         assert_eq!(SkillLevel::D12.steps_above(SkillLevel::D8), 2);
-        assert_eq!(SkillLevel::D4_2.steps_above(SkillLevel::D10), -4);
+        assert_eq!(SkillLevel::None.steps_above(SkillLevel::D10), -4);
         assert_eq!(SkillLevel::D4.steps_above(SkillLevel::D10), -3);
         assert_eq!(SkillLevel::D6.steps_above(SkillLevel::D10), -2);
         assert_eq!(SkillLevel::D8.steps_above(SkillLevel::D10), -1);
         assert_eq!(SkillLevel::D10.steps_above(SkillLevel::D10), 0);
         assert_eq!(SkillLevel::D12.steps_above(SkillLevel::D10), 1);
-        assert_eq!(SkillLevel::D4_2.steps_above(SkillLevel::D12), -5);
+        assert_eq!(SkillLevel::None.steps_above(SkillLevel::D12), -5);
         assert_eq!(SkillLevel::D4.steps_above(SkillLevel::D12), -4);
         assert_eq!(SkillLevel::D6.steps_above(SkillLevel::D12), -3);
         assert_eq!(SkillLevel::D8.steps_above(SkillLevel::D12), -2);
@@ -343,31 +344,31 @@ mod tests {
 
     #[test]
     fn test_steps_above_attr() {
-        assert_eq!(SkillLevel::D4_2.steps_above_attr(Dice::D4), -1);
+        assert_eq!(SkillLevel::None.steps_above_attr(Dice::D4), -1);
         assert_eq!(SkillLevel::D4.steps_above_attr(Dice::D4), 0);
         assert_eq!(SkillLevel::D6.steps_above_attr(Dice::D4), 1);
         assert_eq!(SkillLevel::D8.steps_above_attr(Dice::D4), 2);
         assert_eq!(SkillLevel::D10.steps_above_attr(Dice::D4), 3);
         assert_eq!(SkillLevel::D12.steps_above_attr(Dice::D4), 4);
-        assert_eq!(SkillLevel::D4_2.steps_above_attr(Dice::D6), -2);
+        assert_eq!(SkillLevel::None.steps_above_attr(Dice::D6), -2);
         assert_eq!(SkillLevel::D4.steps_above_attr(Dice::D6), -1);
         assert_eq!(SkillLevel::D6.steps_above_attr(Dice::D6), 0);
         assert_eq!(SkillLevel::D8.steps_above_attr(Dice::D6), 1);
         assert_eq!(SkillLevel::D10.steps_above_attr(Dice::D6), 2);
         assert_eq!(SkillLevel::D12.steps_above_attr(Dice::D6), 3);
-        assert_eq!(SkillLevel::D4_2.steps_above_attr(Dice::D8), -3);
+        assert_eq!(SkillLevel::None.steps_above_attr(Dice::D8), -3);
         assert_eq!(SkillLevel::D4.steps_above_attr(Dice::D8), -2);
         assert_eq!(SkillLevel::D6.steps_above_attr(Dice::D8), -1);
         assert_eq!(SkillLevel::D8.steps_above_attr(Dice::D8), 0);
         assert_eq!(SkillLevel::D10.steps_above_attr(Dice::D8), 1);
         assert_eq!(SkillLevel::D12.steps_above_attr(Dice::D8), 2);
-        assert_eq!(SkillLevel::D4_2.steps_above_attr(Dice::D10), -4);
+        assert_eq!(SkillLevel::None.steps_above_attr(Dice::D10), -4);
         assert_eq!(SkillLevel::D4.steps_above_attr(Dice::D10), -3);
         assert_eq!(SkillLevel::D6.steps_above_attr(Dice::D10), -2);
         assert_eq!(SkillLevel::D8.steps_above_attr(Dice::D10), -1);
         assert_eq!(SkillLevel::D10.steps_above_attr(Dice::D10), 0);
         assert_eq!(SkillLevel::D12.steps_above_attr(Dice::D10), 1);
-        assert_eq!(SkillLevel::D4_2.steps_above_attr(Dice::D12), -5);
+        assert_eq!(SkillLevel::None.steps_above_attr(Dice::D12), -5);
         assert_eq!(SkillLevel::D4.steps_above_attr(Dice::D12), -4);
         assert_eq!(SkillLevel::D6.steps_above_attr(Dice::D12), -3);
         assert_eq!(SkillLevel::D8.steps_above_attr(Dice::D12), -2);

@@ -1,7 +1,7 @@
 use rand::Rng;
 
 use crate::game::races::Race;
-use crate::game::{Dice, HitResult};
+use crate::game::{Dice, HitResult, SkillLevel};
 
 use super::{Attribute, Attributes, DiceWithModifier, Skill, Skills, Wound};
 
@@ -58,7 +58,11 @@ impl CharSheet {
     }
 
     pub fn parry(&self) -> u8 {
-        2 + self.get_skill_with_modifiers(Skill::Fighting).value() / 2
+        2 + if self.skills.get_skill(Skill::Fighting) > SkillLevel::None {
+            self.get_skill_with_modifiers(Skill::Fighting).value() / 2
+        } else {
+            0
+        }
     }
 
     pub fn toughness(&self) -> u8 {

@@ -11,6 +11,8 @@ const REGIONS: phf::Map<&'static str, Rectangle> = phf::phf_map! {
     "lt" => Rectangle::new(30.0, 0.0, 10.0, 10.0),
     "minus" => Rectangle::new(40.0, 0.0, 10.0, 10.0),
     "plus" => Rectangle::new(50.0, 0.0, 10.0, 10.0),
+    "cursor" => Rectangle::new(60.0, 0.0, 10.0, 10.0),
+    "fill" => Rectangle::new(70.0, 0.0, 10.0, 10.0),
 
     "dirt1" => Rectangle::new(0.0, 10.0, 10.0, 10.0),
     "dirt2" => Rectangle::new(10.0, 10.0, 10.0, 10.0),

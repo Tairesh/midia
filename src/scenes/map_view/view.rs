@@ -1,8 +1,7 @@
 use std::cell::RefCell;
 
 use geometry::{Point, TwoDimDirection, Vec2};
-use tetra::graphics::mesh::{Mesh, ShapeStyle};
-use tetra::graphics::{Color, DrawParams, Rectangle};
+use tetra::graphics::{Color, DrawParams};
 use tetra::Context;
 
 use crate::assets::{Assets, Tileset};
@@ -98,26 +97,19 @@ pub fn draw(
     //     self.action_text = None;
     // }
 
-    let cursor_mesh = Mesh::rectangle(
-        ctx,
-        ShapeStyle::Stroke(1.0),
-        Rectangle::new(
-            0.0,
-            0.0,
-            assets.tileset.tile_size as f32,
-            assets.tileset.tile_size as f32,
-        ),
-    )
-    .unwrap();
     for (delta, color) in cursors {
         let delta = delta * tile_size;
-        cursor_mesh.draw(
+        let position = center + delta;
+
+        let params = DrawParams::new().position(position).scale(scale);
+        assets.tileset.draw_region(
             ctx,
-            DrawParams::new()
-                .position(center + delta)
-                .scale(scale)
-                .color(color.with_alpha(0.7)),
+            "fill",
+            params.clone().color(Colors::WHITE.with_alpha(0.1)),
         );
+        assets
+            .tileset
+            .draw_region(ctx, "cursor", params.color(color));
     }
 }
 

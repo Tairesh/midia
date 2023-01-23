@@ -1,9 +1,9 @@
 use rand::Rng;
 
-use crate::game::races::Race;
-use crate::game::{Dice, HitResult, SkillLevel};
-
-use super::{Attribute, Attributes, DiceWithModifier, Skill, Skills, Wound};
+use super::{
+    super::Race, Attribute, Attributes, Dice, DiceWithModifier, HitResult, Skill, SkillLevel,
+    Skills, Wound,
+};
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
 pub struct CharSheet {
@@ -122,6 +122,17 @@ impl CharSheet {
     pub fn get_skill_with_modifiers(&self, skill: Skill) -> DiceWithModifier {
         DiceWithModifier::from(self.skills.get_skill(skill))
             .with_modifier(-(self.wounds.len() as i8))
+    }
+
+    pub fn roll_skill(&self, skill: Skill) -> u8 {
+        let skill_dice = self.get_skill_with_modifiers(skill);
+
+        if self.wild_card {
+            let wild_dice = DiceWithModifier::new(Dice::D6, skill_dice.modifier());
+            u8::max(skill_dice.roll_explosive(), wild_dice.roll_explosive())
+        } else {
+            skill_dice.roll_explosive()
+        }
     }
 
     pub fn apply_hit(&mut self, mut hit: HitResult, current_tick: u128) {

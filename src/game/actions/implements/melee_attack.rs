@@ -1,12 +1,12 @@
 use geometry::Point;
 
-use crate::game::game_data::DamageType;
-use crate::game::savage::{melee_attack_terrain, TerrainAttackResult};
-use crate::game::Item;
-
 use super::super::{
     super::map::{TerrainInteract, TerrainView},
-    super::{melee_attack_unit, Action, Avatar, LogEvent, UnitAttackResult, World, Wound},
+    super::{
+        game_data::DamageType,
+        savage::{melee_attack_unit, melee_smash_terrain, TerrainAttackResult, UnitAttackResult},
+        Action, Avatar, Item, LogEvent, World, Wound,
+    },
     ActionImpl,
     ActionPossibility::{self, No, Yes},
 };
@@ -40,7 +40,7 @@ impl MeleeAttack {
         };
 
         if can_smash && world.map().get_tile(self.target).terrain.is_smashable() {
-            let attack = melee_attack_terrain(owner, &world.map().get_tile(self.target).terrain);
+            let attack = melee_smash_terrain(owner, &world.map().get_tile(self.target).terrain);
             match attack {
                 TerrainAttackResult::Miss => {
                     world.log().push(LogEvent::info(

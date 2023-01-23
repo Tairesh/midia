@@ -2,12 +2,11 @@
 
 use geometry::{Point, TwoDimDirection};
 
-use crate::game::map::items::helpers::{CLOAK, HAT};
-
 use super::super::{
-    map::items::helpers::dead_body,
+    map::items::helpers::{dead_body, CLOAK, HAT},
     races::{MainHand, Personality},
-    Action, BodySlot, HitResult, Item, Wear, Wield,
+    savage::HitResult,
+    Action, BodySlot, Item, Wear, Wield,
 };
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
@@ -110,9 +109,8 @@ mod tests {
 
     use crate::game::map::items::helpers::{CLOAK, STONE_AXE};
     use crate::game::races::tests::personality::tester_girl;
-    use crate::game::{BodySlot, HitResult, Item};
 
-    use super::Avatar;
+    use super::{Avatar, BodySlot, HitResult, Item};
 
     #[test]
     fn test_npc_name() {

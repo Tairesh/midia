@@ -4,11 +4,8 @@ pub use game_data::{
 };
 pub use log::{Log, LogEvent};
 pub use map::{Chunk, ChunkPos, Item, Map, Terrain, TerrainInteract, TerrainView, Tile, TilePos};
-pub use races::{BodySlot, MainHand};
-pub use savage::{
-    melee_attack_unit, Attribute, CharSheet, Damage, Dice, DiceWithModifier, HitResult, Skill,
-    SkillLevel, UnitAttackResult, Wound,
-};
+pub use races::{BodySlot, MainHand, Race};
+pub use savage::{Attribute, CharSheet, Damage, Dice, DiceWithModifier, Skill, SkillLevel, Wound};
 pub use units::{Avatar, Wear, Wield};
 pub use world::World;
 

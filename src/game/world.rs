@@ -4,17 +4,16 @@ use std::convert::TryFrom;
 
 use geometry::{Direction, Point, TwoDimDirection};
 
-use crate::game::game_data::pregen;
-
 use super::{
     super::{
         lang,
         savefile::{self, GameView, Meta, SaveError},
     },
+    game_data::pregen,
     map::{field_of_view_set, Fov, TerrainView},
     races::{Appearance, Gender, MainHand, Mind, Personality, Race, Sex},
-    savage::CharSheet,
-    Action, Avatar, Chunk, ChunkPos, HitResult, Log, LogEvent, Map, TilePos,
+    savage::HitResult,
+    Action, Avatar, CharSheet, Chunk, ChunkPos, Log, LogEvent, Map, TilePos,
 };
 
 // TODO: weather and outside lighting system
@@ -292,16 +291,13 @@ impl World {
         }
     }
 
-    #[allow(dead_code)]
     pub fn next_unit_id(&self) -> usize {
         self.units.keys().copied().max().unwrap_or(0) + 1
     }
 
-    #[allow(dead_code)]
     pub fn add_unit(&mut self, unit: Avatar) -> usize {
         let pos = unit.pos;
-        self.units
-            .insert(self.units.keys().copied().max().unwrap_or(0) + 1, unit);
+        self.units.insert(self.next_unit_id(), unit);
         self.load_units();
         let new_id = self.units.len() - 1;
         self.map().get_tile_mut(pos).units.insert(new_id);

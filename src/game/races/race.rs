@@ -21,6 +21,10 @@ pub enum Race {
 }
 
 impl Race {
+    // TODO: gazans has almost invisible light colored fluff,
+    // TODO: nyarniks has a variety of skin colors from yellow to red and brown,
+    // TODO: toticks has scale from blue to green
+    // TODO: lagnams also can be black, so we need tile with white border
     pub fn has_fur(self) -> bool {
         matches!(self, Race::Gazan | Race::Lagnam)
     }

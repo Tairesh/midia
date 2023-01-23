@@ -1,17 +1,16 @@
-pub use attack::{
-    melee_attack_terrain, melee_attack_unit, melee_hit_roll, HitResult, TerrainAttackResult,
-    UnitAttackResult,
-};
 pub use attributes::{Attribute, Attributes};
 pub use charsheet::CharSheet;
+pub use combat::{
+    melee_attack_unit, melee_smash_terrain, HitResult, TerrainAttackResult, UnitAttackResult,
+};
 pub use damage::{Damage, DamageDice};
 pub use dice::{Dice, DiceWithModifier, SkillLevel};
 pub use skills::{Skill, Skills};
 pub use wound::Wound;
 
-mod attack;
 mod attributes;
 mod charsheet;
+mod combat;
 mod damage;
 mod dice;
 mod skills;

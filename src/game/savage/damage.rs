@@ -75,12 +75,19 @@ impl Damage {
             } as i8;
         }
         if let Some(attribute) = self.attribute {
-            result += char_sheet
-                .get_attribute_with_modifiers(attribute)
-                .roll_explosive() as i8;
+            let attribute_dice = char_sheet.get_attribute_with_modifiers(attribute);
+            result += if explosive {
+                attribute_dice.roll_explosive()
+            } else {
+                attribute_dice.roll()
+            } as i8;
         }
         if critical {
-            result += Dice::D6.roll_explosive() as i8;
+            result += if explosive {
+                Dice::D6.roll_explosive()
+            } else {
+                Dice::D6.roll()
+            } as i8;
         }
         result.max(0) as u8
     }

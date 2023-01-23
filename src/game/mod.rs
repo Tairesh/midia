@@ -1,6 +1,6 @@
 pub use actions::{Action, ActionType};
 pub use game_data::{
-    GameData, ItemPrototype, ItemQuality, ItemSize, ItemTag, MeleeDamageValue, WearLayer,
+    GameData, ItemPrototype, ItemQuality, ItemSize, ItemTag, Material, MeleeDamageValue, WearLayer,
 };
 pub use log::{Log, LogEvent};
 pub use map::{Chunk, ChunkPos, Item, Map, Terrain, TerrainInteract, TerrainView, Tile, TilePos};

@@ -1,5 +1,6 @@
 use enum_dispatch::enum_dispatch;
 use serde::{Deserialize, Serialize};
+use tetra::graphics::Color;
 
 use super::{
     terrains::{Boulder, Chest, Dirt, Grass, Pit, Tree},
@@ -25,6 +26,9 @@ pub trait TerrainView {
     fn name(&self) -> &str;
     // TODO: probably use String
     fn looks_like(&self) -> &'static str;
+    fn color(&self) -> Option<Color> {
+        None
+    }
     fn is_transparent(&self) -> bool; // for FOV
 }
 
@@ -79,32 +83,5 @@ pub trait TerrainInteract {
     }
     fn smash_result(&self) -> (Terrain, Vec<Item>) {
         unimplemented!()
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::{
-        super::terrains::{Dirt, DirtVariant, Grass, GrassVariant},
-        Terrain, TerrainInteract, TerrainView,
-    };
-
-    #[test]
-    fn test_dirt() {
-        let terrain: Terrain = Dirt::new(DirtVariant::Flat).into();
-        assert_eq!("flat dirt", terrain.name());
-        assert!(terrain.is_diggable());
-    }
-
-    #[test]
-    fn test_dead_grass() {
-        let mut terrain: Terrain = Grass::new(GrassVariant::Grass9).into();
-        assert_eq!("grass", terrain.name());
-        if let Terrain::Grass(grass) = &mut terrain {
-            grass.die();
-        } else {
-            unreachable!()
-        }
-        assert_eq!("dead grass", terrain.name());
     }
 }

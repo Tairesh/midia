@@ -5,20 +5,24 @@
     "name": "book",
     "looks_like": "book",
     "size": "SMALL",
-    "tags": ["BOOK"]
+    "tags": ["BOOK"],
+    "materials": ["paper"]
   },
   {
     "type": "item",
-    "id": "stone_shards",
-    "name": "stone shards",
-    "looks_like": "stone_shards",
-    "size": "SMALL"
+    "id": "rock",
+    "name": "rock",
+    "looks_like": "rock",
+    "size": "SMALL",
+    "materials": ["stone"],
+    "//": "add sharp rocks and rubble"
   },
   {
     "type": "item",
     "id": "wooden_splinter",
     "name": "wooden splinter",
     "looks_like": "wooden_splinter",
-    "size": "SMALL"
+    "size": "SMALL",
+    "materials": ["wood"]
   }
 ]

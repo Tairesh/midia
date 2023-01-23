@@ -1,13 +1,14 @@
 [
   {
     "type": "item",
-    "id": "shovel",
-    "name": "shovel",
-    "looks_like": "shovel",
+    "id": "shovel_stone",
+    "name": "stone shovel",
+    "looks_like": "shovel_stone",
     "tags": ["TOOL"],
     "qualities": ["DIG"],
     "size": "MEDIUM",
     "two_handed_tool": true,
+    "materials": ["wood", "stone"],
     "melee_damage": {
       "damage": {
         "attribute": "STRENGTH",
@@ -19,12 +20,13 @@
   },
   {
     "type": "item",
-    "id": "stone_axe",
+    "id": "axe_stone",
     "name": "stone axe",
-    "looks_like": "axe",
+    "looks_like": "axe_stone",
     "tags": ["TOOL", "WEAPON"],
     "qualities": ["CHOP"],
     "size": "MEDIUM",
+    "materials": ["wood", "stone"],
     "melee_damage": {
       "damage": {
         "attribute": "STRENGTH",
@@ -35,13 +37,14 @@
   },
   {
     "type": "item",
-    "id": "stone_knife",
+    "id": "knife_stone",
     "name": "stone knife",
-    "looks_like": "knife",
+    "looks_like": "knife_stone",
     "tags": ["TOOL", "WEAPON"],
     "qualities": ["BUTCH", "CUT"],
     "size": "SMALL",
     "two_handed_tool": false,
+    "materials": ["wood", "stone"],
     "melee_damage": {
       "damage": {
         "attribute": "STRENGTH",

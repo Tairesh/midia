@@ -223,6 +223,7 @@ impl ActionImpl for MeleeAttack {
 mod tests {
     use geometry::Point;
 
+    use crate::game::map::items::helpers::{DEMONIC_SAP, STONE_AXE, STONE_KNIFE};
     use crate::game::map::terrains::Boulder;
     use crate::game::world::tests::{add_npc, prepare_world};
     use crate::game::{Action, Item};
@@ -257,7 +258,7 @@ mod tests {
         assert_eq!(world.meta.current_tick, 0);
 
         add_npc(&mut world, Point::new(1, 0));
-        world.player_mut().wield.wield(Item::new("stone_axe"));
+        world.player_mut().wield.wield(Item::new(STONE_AXE));
 
         world.player_mut().action =
             Some(Action::new(0, MeleeAttack::new(Point::new(1, 0)).into(), &world).unwrap());
@@ -279,7 +280,7 @@ mod tests {
         assert_eq!(world.meta.current_tick, 0);
 
         world.map().get_tile_mut(Point::new(1, 0)).terrain = Boulder::default().into();
-        world.player_mut().wield.wield(Item::new("demonic_sap"));
+        world.player_mut().wield.wield(Item::new(DEMONIC_SAP));
         world.player_mut().action =
             Some(Action::new(0, MeleeAttack::new(Point::new(1, 0)).into(), &world).unwrap());
         world.tick();
@@ -300,7 +301,7 @@ mod tests {
         assert_eq!(world.meta.current_tick, 0);
 
         world.map().get_tile_mut(Point::new(1, 0)).terrain = Boulder::default().into();
-        world.player_mut().wield.wield(Item::new("stone_knife"));
+        world.player_mut().wield.wield(Item::new(STONE_KNIFE));
         world.player_mut().action =
             Some(Action::new(0, MeleeAttack::new(Point::new(1, 0)).into(), &world).unwrap());
         world.tick();

@@ -423,23 +423,19 @@ impl Colors {
     pub const YELLOW_GREEN: Color = Color::rgb(u8tof32(154), u8tof32(205), u8tof32(50));
     pub const MIDIA_SAND: Color = Color::rgb(u8tof32(203), u8tof32(149), u8tof32(85));
 
-    // skin colors
-    pub const WARM_IVORY: Color = Color::rgb(u8tof32(253), u8tof32(231), u8tof32(173));
-    pub const SAND: Color = Color::rgb(u8tof32(252), u8tof32(217), u8tof32(151));
-    pub const PALE_IVORY: Color = Color::rgb(u8tof32(253), u8tof32(228), u8tof32(197));
-    pub const ROSE_BEIGE: Color = Color::rgb(u8tof32(251), u8tof32(211), u8tof32(159));
-    pub const SIENNA: Color = Color::rgb(u8tof32(215), u8tof32(159), u8tof32(122));
-    pub const LIMESTONE: Color = Color::rgb(u8tof32(238), u8tof32(191), u8tof32(145));
-    pub const BEIGE: Color = Color::rgb(u8tof32(244), u8tof32(193), u8tof32(127));
-    pub const AMBER: Color = Color::rgb(u8tof32(189), u8tof32(101), u8tof32(51));
-    pub const HONEY: Color = Color::rgb(u8tof32(208), u8tof32(152), u8tof32(95));
-    pub const BAND: Color = Color::rgb(u8tof32(175), u8tof32(138), u8tof32(94));
-    pub const ALMOND: Color = Color::rgb(u8tof32(149), u8tof32(96), u8tof32(54));
-    pub const BRONZE: Color = Color::rgb(u8tof32(116), u8tof32(64), u8tof32(25));
-    pub const UMBER: Color = Color::rgb(u8tof32(181), u8tof32(103), u8tof32(67));
-    pub const GOLDEN: Color = Color::rgb(u8tof32(129), u8tof32(69), u8tof32(33));
-    pub const ESPRESSO: Color = Color::rgb(u8tof32(96), u8tof32(51), u8tof32(18));
-    pub const CHOCOLATE: Color = Color::rgb(u8tof32(42), u8tof32(25), u8tof32(15));
+    // materials' colors
+    pub const CLOTH: Color = Color::rgb(u8tof32(158), u8tof32(134), u8tof32(100));
+    pub const LEATHER: Color = Color::rgb(u8tof32(150), u8tof32(99), u8tof32(39));
+    pub const WOOD: Color = Color::rgb(u8tof32(149), u8tof32(99), u8tof32(40));
+    pub const STONE: Color = Color::rgb(u8tof32(102), u8tof32(102), u8tof32(102));
+    pub const METAL: Color = Color::rgb(u8tof32(142), u8tof32(142), u8tof32(142));
+    pub const DEMONITE: Color = Color::rgb(u8tof32(138), u8tof32(208), u8tof32(255));
+    pub const OBSIDIAN: Color = Color::rgb(u8tof32(103), u8tof32(5), u8tof32(139));
+    pub const LAPIS_LAZULI: Color = Color::rgb(u8tof32(52), u8tof32(0), u8tof32(229));
+    pub const BONE: Color = Color::rgb(u8tof32(204), u8tof32(204), u8tof32(204));
+    pub const DIRT: Color = Color::rgb(u8tof32(113), u8tof32(78), u8tof32(52));
+    pub const PLANT: Color = Color::rgb(u8tof32(53), u8tof32(178), u8tof32(58));
+    pub const DEAD_PLANT: Color = Color::rgb(u8tof32(162), u8tof32(97), u8tof32(52));
 
     // Special
     pub const TRANSPARENT: Color = Color::rgba(0.0, 0.0, 0.0, 0.0);

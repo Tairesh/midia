@@ -1,9 +1,13 @@
 use std::collections::HashSet;
 
 use serde::{Deserialize, Serialize};
+use tetra::graphics::Color;
 
+use crate::colors::Colors;
 use crate::game::races::BodySlot;
 use crate::game::savage::Damage;
+
+// TODO: move this to subfolder
 
 #[derive(Serialize, Deserialize, Debug, Hash, Eq, PartialEq, Copy, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
@@ -96,12 +100,51 @@ pub enum ItemSize {
     Huge, // like a boulder
 }
 
+#[derive(Serialize, Deserialize, Debug, Hash, Eq, PartialEq, Copy, Clone, Ord, PartialOrd)]
+#[serde(rename_all = "snake_case")]
+pub enum Material {
+    Cloth,
+    Wool,
+    Leather,
+    Wood,
+    Stone,
+    Iron,
+    Steel,
+    Obsidian,
+    Demonite,
+    LapisLazuli,
+    Bone,
+    Flesh,
+    Plant,
+    Paper,
+}
+
+impl From<Material> for Color {
+    fn from(value: Material) -> Self {
+        match value {
+            Material::Cloth | Material::Wool => Colors::CLOTH,
+            Material::Leather => Colors::LEATHER,
+            Material::Wood => Colors::WOOD,
+            Material::Stone => Colors::STONE,
+            Material::Iron | Material::Steel => Colors::METAL,
+            Material::Obsidian => Colors::OBSIDIAN,
+            Material::Demonite => Colors::DEMONITE,
+            Material::LapisLazuli => Colors::LAPIS_LAZULI,
+            Material::Bone => Colors::BONE,
+            Material::Flesh => Colors::RED,
+            Material::Plant => Colors::PLANT,
+            Material::Paper => Colors::LIGHT_SEPIA,
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ItemPrototype {
     pub id: String,
     pub name: String,
     pub looks_like: String,
     pub size: ItemSize,
+    pub materials: HashSet<Material>,
     #[serde(default)]
     pub tags: HashSet<ItemTag>,
     #[serde(default)]
@@ -112,4 +155,6 @@ pub struct ItemPrototype {
     pub wearable: Option<WearableValue>,
     #[serde(default)]
     pub melee_damage: Option<MeleeDamageValue>,
+    #[serde(default)]
+    pub color_from_material: Option<Material>,
 }

@@ -9,7 +9,6 @@ use super::super::{Passage, TerrainInteract, TerrainView};
 pub struct Tree {
     #[serde(rename = "v")]
     variant: TreeVariant,
-    // TODO: hp
 }
 
 impl Tree {
@@ -20,14 +19,21 @@ impl Tree {
 
 impl TerrainView for Tree {
     fn name(&self) -> &str {
-        "dead tree"
+        "tree"
     }
 
     fn looks_like(&self) -> &'static str {
         match self.variant {
-            TreeVariant::DeadTree => "dead_tree",
-            TreeVariant::DeadPine => "dead_pine",
-            TreeVariant::DeadHickory => "dead_hickory",
+            TreeVariant::DeadTree => "tree_dead",
+            TreeVariant::DeadPine => "pine_dead",
+            TreeVariant::DeadHickory => "hickory_dead",
+            TreeVariant::DeadWillow => "willow_dead",
+            TreeVariant::DeadBirch => "birch_dead",
+            TreeVariant::Tree => "tree",
+            TreeVariant::Pine => "pine",
+            TreeVariant::Hickory => "hickory",
+            TreeVariant::Willow => "willow",
+            TreeVariant::Birch => "birch",
         }
     }
 
@@ -56,14 +62,35 @@ pub enum TreeVariant {
     DeadPine,
     #[serde(rename = "3")]
     DeadHickory,
+    #[serde(rename = "4")]
+    DeadWillow,
+    #[serde(rename = "5")]
+    DeadBirch,
+    #[serde(rename = "6")]
+    Tree,
+    #[serde(rename = "7")]
+    Pine,
+    #[serde(rename = "8")]
+    Hickory,
+    #[serde(rename = "9")]
+    Willow,
+    #[serde(rename = "10")]
+    Birch,
 }
 
 impl Distribution<TreeVariant> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> TreeVariant {
-        match rng.gen_range(0..3) {
+        match rng.gen_range(0..10) {
             0 => TreeVariant::DeadTree,
             1 => TreeVariant::DeadPine,
             2 => TreeVariant::DeadHickory,
+            3 => TreeVariant::DeadWillow,
+            4 => TreeVariant::DeadBirch,
+            5 => TreeVariant::Tree,
+            6 => TreeVariant::Pine,
+            7 => TreeVariant::Hickory,
+            8 => TreeVariant::Willow,
+            9 => TreeVariant::Birch,
             _ => unreachable!(),
         }
     }

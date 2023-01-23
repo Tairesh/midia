@@ -1,12 +1,13 @@
 [
   {
     "type": "item",
-    "id": "wooden_sap",
+    "id": "sap_wood",
     "name": "wooden sap",
     "description": "Small pear-like wooden club. Light and easily concealed, but can break sculls.",
-    "looks_like": "wooden_sap",
+    "looks_like": "sap_wood",
     "tags": ["WEAPON"],
     "size": "SMALL",
+    "materials": ["wood"],
     "melee_damage": {
       "damage": {
         "attribute": "STRENGTH",
@@ -17,12 +18,13 @@
   },
   {
     "type": "item",
-    "id": "stone_sap",
+    "id": "sap_stone",
     "name": "stone sap",
     "description": "Small pear-like stone club. Light and easily concealed, but can break sculls.",
-    "looks_like": "stone_sap",
+    "looks_like": "sap_stone",
     "tags": ["WEAPON"],
     "size": "SMALL",
+    "materials": ["stone"],
     "melee_damage": {
       "damage": {
         "attribute": "STRENGTH",
@@ -33,12 +35,13 @@
   },
   {
     "type": "item",
-    "id": "iron_sap",
+    "id": "sap_iron",
     "name": "iron sap",
     "description": "Small pear-like iron club. Light and easily concealed, but can break sculls.",
-    "looks_like": "metal_sap",
+    "looks_like": "sap_metal",
     "tags": ["WEAPON"],
     "size": "SMALL",
+    "materials": ["iron"],
     "melee_damage": {
       "damage": {
         "attribute": "STRENGTH",
@@ -50,12 +53,13 @@
   },
   {
     "type": "item",
-    "id": "steel_sap",
+    "id": "sap_steel",
     "name": "steel sap",
     "description": "Small pear-like steel club. Light and easily concealed, but can break sculls.",
-    "looks_like": "metal_sap",
+    "looks_like": "sap_metal",
     "tags": ["WEAPON"],
     "size": "SMALL",
+    "materials": ["steel"],
     "melee_damage": {
       "damage": {
         "attribute": "STRENGTH",
@@ -67,12 +71,13 @@
   },
   {
     "type": "item",
-    "id": "demonic_sap",
-    "name": "demonic sap",
+    "id": "sap_demonic",
+    "name": "demonic metal sap",
     "description": "Small pear-like demonic metal club. Light and easily concealed, but can break sculls.",
-    "looks_like": "demonic_sap",
+    "looks_like": "sap_demonic",
     "tags": ["WEAPON"],
     "size": "SMALL",
+    "materials": ["demonite"],
     "melee_damage": {
       "damage": {
         "attribute": "STRENGTH",

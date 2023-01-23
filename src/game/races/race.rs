@@ -105,6 +105,7 @@ impl Race {
     }
 }
 
+// TODO: add looks_like
 impl From<Race> for &str {
     fn from(value: Race) -> Self {
         match value {
@@ -112,7 +113,7 @@ impl From<Race> for &str {
             Race::Nyarnik => "nyarnik",
             Race::Totik => "totik",
             Race::Lagnam => "lagnam",
-            Race::Bug => "bug",
+            Race::Bug => "giant_bug",
         }
     }
 }

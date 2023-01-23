@@ -3,6 +3,7 @@ use rand::{
     Rng,
 };
 
+use crate::game::map::items::helpers::ROCK;
 use crate::game::map::terrains::{Dirt, DirtVariant};
 use crate::game::{Item, Terrain};
 
@@ -39,7 +40,7 @@ impl TerrainView for Boulder {
     fn looks_like(&self) -> &'static str {
         match self.size {
             BoulderSize::Huge => "boulder_huge",
-            BoulderSize::Middle => "boulder_middle",
+            BoulderSize::Middle => "boulder",
             BoulderSize::Small => "boulder_small",
         }
     }
@@ -75,19 +76,14 @@ impl TerrainInteract for Boulder {
 
     fn smash_result(&self) -> (Terrain, Vec<Item>) {
         let mut rng = rand::thread_rng();
-        let dirt_variant = match self.size {
-            BoulderSize::Huge => DirtVariant::LotOfChunks,
-            BoulderSize::Middle => DirtVariant::SomeChunks,
-            BoulderSize::Small => DirtVariant::Flat,
-        };
+        let dirt_variant = rng.gen::<DirtVariant>();
         let shards_count = match self.size {
             BoulderSize::Huge => rng.gen_range(3..6),
             BoulderSize::Middle => rng.gen_range(1..3),
             BoulderSize::Small => 1,
         };
-        let items = (0..shards_count)
-            .map(|_| Item::new("stone_shards"))
-            .collect();
+        // TODO: add sharp rocks and rubble
+        let items = (0..shards_count).map(|_| Item::new(ROCK)).collect();
 
         (Dirt::new(dirt_variant).into(), items)
     }

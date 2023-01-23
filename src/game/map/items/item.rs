@@ -30,8 +30,9 @@ pub struct Item {
 }
 
 impl Item {
+    // TODO: create a builder for this
     pub fn new(proto: impl Into<String>) -> Self {
-        Self {
+        let mut item = Self {
             proto: proto.into(),
             custom_proto: None,
             named: None,
@@ -39,18 +40,23 @@ impl Item {
             readable: None,
             looks_like: None,
             container: None,
+        };
+        if let Some(material) = item.proto().color_from_material {
+            item.colored = Some(material.into());
         }
+
+        item
     }
 
     pub fn custom(proto: ItemPrototype) -> Self {
         Self {
             proto: CUSTOM_PROTO.to_string(),
-            custom_proto: Some(proto),
             named: None,
-            colored: None,
+            colored: proto.color_from_material.map(Color::from),
             readable: None,
             looks_like: None,
             container: None,
+            custom_proto: Some(proto),
         }
     }
 
@@ -139,7 +145,7 @@ impl Item {
     }
 
     pub fn is_two_handed(&self) -> bool {
-        self.proto().two_handed_tool || self.size() >= ItemSize::Medium
+        self.proto().two_handed_tool || self.size() > ItemSize::Medium
     }
 
     pub fn is_tool(&self) -> bool {
@@ -205,15 +211,17 @@ impl Item {
 
 #[cfg(test)]
 mod tests {
+    use crate::game::map::items::helpers::{BACKPACK, STONE_AXE};
+
     use super::Item;
 
     #[test]
     fn test_backpack() {
-        let mut backpack = Item::new("backpack").with_container(vec![]);
+        let mut backpack = Item::new(BACKPACK).with_container(vec![]);
         assert_eq!(backpack.name(), "leather backpack");
         if let Some(container) = backpack.container() {
             assert_eq!(container.items.len(), 0);
-            let axe = Item::new("axe");
+            let axe = Item::new(STONE_AXE);
             container.items.push(axe);
             assert_eq!(container.items.len(), 1);
         } else {

@@ -45,7 +45,7 @@ pub fn draw(
     let tiles = map.tiles_between(left_top, right_bottom);
     for &(pos, tile) in &tiles {
         if !world.is_visible(pos) {
-            continue; // TODO: TileView struct for remembering unseen tiles
+            continue; // TODO: remembering tiles that are not in FOV
         }
         let delta = Vec2::from(pos - center_tile);
 
@@ -58,9 +58,13 @@ pub fn draw(
         let position = center + delta * tile_size + correction;
 
         let params = DrawParams::new().position(position).scale(scale);
-        assets
-            .tileset
-            .draw_region(ctx, tile.terrain.looks_like(), params.clone());
+        assets.tileset.draw_region(
+            ctx,
+            tile.terrain.looks_like(),
+            params
+                .clone()
+                .color(tile.terrain.color().unwrap_or(Colors::WHITE)),
+        );
         if let Some(item) = tile.top_item() {
             assets
                 .tileset

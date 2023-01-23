@@ -59,7 +59,7 @@ impl ActionImpl for WieldFromGround {
 mod tests {
     use geometry::{Direction, Point};
 
-    use crate::game::map::items::helpers::random_book;
+    use crate::game::map::items::helpers::{random_book, STONE_AXE, STONE_SHOVEL};
     use crate::game::world::tests::prepare_world;
     use crate::game::{Action, Item};
 
@@ -73,7 +73,7 @@ mod tests {
             .map()
             .get_tile_mut(Point::new(1, 0))
             .items
-            .push(Item::new("stone_axe"));
+            .push(Item::new(STONE_AXE));
 
         assert!(world.player().wield.is_empty());
         assert_eq!(0, world.meta.current_tick);
@@ -92,14 +92,14 @@ mod tests {
         world.tick();
 
         let item = world.player().wield.active_hand().unwrap();
-        assert_eq!(item.proto().id, "stone_axe");
+        assert_eq!(item.proto().id, STONE_AXE);
         assert_eq!(0, world.map().get_tile(Point::new(1, 0)).items.len());
     }
 
     #[test]
     fn test_wielding_two_handed_items() {
         let mut world = prepare_world();
-        world.player_mut().wield.wield(Item::new("shovel"));
+        world.player_mut().wield.wield(Item::new(STONE_SHOVEL));
         world.player_mut().wield.swap_items();
         assert!(world.player().wield.can_wield(false).is_err());
 
@@ -108,7 +108,7 @@ mod tests {
             .map()
             .get_tile_mut(Point::new(1, 0))
             .items
-            .push(Item::new("stone_axe"));
+            .push(Item::new(STONE_AXE));
         assert!(Action::new(
             0,
             WieldFromGround {

@@ -82,6 +82,7 @@ impl ActionImpl for Dig {
 mod tests {
     use geometry::{Direction, Point};
 
+    use crate::game::map::items::helpers::STONE_SHOVEL;
     use crate::game::map::{terrains::Dirt, Terrain};
     use crate::game::world::tests::prepare_world;
     use crate::game::{Action, Item};
@@ -99,7 +100,7 @@ mod tests {
         };
         assert!(Action::new(0, typ.into(), &world).is_err());
 
-        world.player_mut().wield.wield(Item::new("shovel"));
+        world.player_mut().wield.wield(Item::new(STONE_SHOVEL));
         world.player_mut().action = Some(Action::new(0, typ.into(), &world).unwrap());
         while world.player().action.is_some() {
             world.tick();

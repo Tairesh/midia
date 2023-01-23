@@ -61,6 +61,7 @@ impl ActionImpl for Drop {
 mod tests {
     use geometry::{Direction, Point};
 
+    use crate::game::map::items::helpers::STONE_AXE;
     use crate::game::map::terrains::Dirt;
     use crate::game::world::tests::prepare_world;
     use crate::game::{Action, Item};
@@ -73,7 +74,7 @@ mod tests {
         world.map().get_tile_mut(Point::new(0, 0)).terrain = Dirt::default().into();
         world.map().get_tile_mut(Point::new(0, 0)).items.clear();
         world.player_mut().wield.clear();
-        world.player_mut().wield.wield(Item::new("stone_axe"));
+        world.player_mut().wield.wield(Item::new(STONE_AXE));
 
         world.player_mut().action = Some(
             Action::new(
@@ -93,6 +94,6 @@ mod tests {
         let mut map = world.map();
         assert_eq!(1, map.get_tile(Point::new(0, 0)).items.len());
         let item = map.get_tile(Point::new(0, 0)).items.first().unwrap();
-        assert_eq!(item.proto().id, "stone_axe");
+        assert_eq!(item.proto().id, STONE_AXE);
     }
 }

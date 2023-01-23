@@ -1,5 +1,6 @@
 use rand::Rng;
 
+use crate::game::map::items::helpers::WOODEN_SPLINTER;
 use crate::game::map::terrains::{Dirt, DirtVariant};
 use crate::game::map::Passage;
 use crate::game::{Item, Terrain};
@@ -27,7 +28,7 @@ impl TerrainView for Chest {
 
     fn looks_like(&self) -> &'static str {
         if self.open {
-            "opened_chest"
+            "chest_open"
         } else {
             "chest"
         }
@@ -80,11 +81,12 @@ impl TerrainInteract for Chest {
 
     fn smash_result(&self) -> (Terrain, Vec<Item>) {
         let mut rng = rand::thread_rng();
+        let dirt_variant = rng.gen::<DirtVariant>();
         let splinters_count = rng.gen_range(1..=3);
         let mut items = self.items_inside.clone();
         for _ in 0..splinters_count {
-            items.push(Item::new("wooden_splinter"));
+            items.push(Item::new(WOODEN_SPLINTER));
         }
-        (Dirt::new(DirtVariant::Flat).into(), items)
+        (Dirt::new(dirt_variant).into(), items)
     }
 }

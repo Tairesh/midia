@@ -61,6 +61,7 @@ impl ActionImpl for Wear {
 
 #[cfg(test)]
 mod tests {
+    use crate::game::map::items::helpers::{CLOAK, STONE_AXE};
     use crate::game::world::tests::prepare_world;
     use crate::game::{Action, Item};
 
@@ -69,7 +70,7 @@ mod tests {
     #[test]
     fn test_wear() {
         let mut world = prepare_world();
-        world.player_mut().wield.wield(Item::new("cloak"));
+        world.player_mut().wield.wield(Item::new(CLOAK));
         world.player_mut().wear.clear();
 
         if let Ok(action) = Action::new(0, Wear {}.into(), &world) {
@@ -92,7 +93,7 @@ mod tests {
         world.player_mut().wield.clear();
         assert!(Action::new(0, Wear {}.into(), &world).is_err());
 
-        world.player_mut().wield.wield(Item::new("stone_axe"));
+        world.player_mut().wield.wield(Item::new(STONE_AXE));
         assert!(Action::new(0, Wear {}.into(), &world).is_err());
     }
 }

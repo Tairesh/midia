@@ -4,7 +4,10 @@ use std::hash::{Hash, Hasher};
 use arrayvec::ArrayVec;
 use rand::{distributions::Standard, rngs::StdRng, Rng, SeedableRng};
 
-use crate::game::map::items::helpers::random_book;
+use crate::game::map::items::helpers::{
+    random_book, BACKPACK, DEMONIC_SAP, HAT, LEATHER_ARM_GUARD, RAGS, STONE_AXE, STONE_KNIFE,
+    STONE_SHOVEL,
+};
 
 use super::{
     terrains::{Boulder, Chest, Dirt, Grass, Tree},
@@ -41,11 +44,11 @@ impl Chunk {
             tiles.push(Tile::new(if rng.gen_bool(0.005) {
                 Tree::new(rng.sample(Standard)).into()
             } else if rng.gen_bool(0.003) {
-                Chest::new(vec![random_book(), Item::new("stone_knife")], false).into()
+                Chest::new(vec![random_book(), Item::new(STONE_KNIFE)], false).into()
             } else if rng.gen_bool(0.01) {
                 Boulder::new(rng.sample(Standard)).into()
             } else if rng.gen_bool(0.5) {
-                Grass::new(rng.sample(Standard)).into()
+                Grass::new(rng.sample(Standard), rng.gen_bool(0.1)).into()
             } else {
                 Dirt::new(rng.sample(Standard)).into()
             }));
@@ -76,14 +79,14 @@ impl Chunk {
                 .unwrap()
                 .items
                 .push(match rng.gen_range(0..8) {
-                    0 => Item::new("wooden_sap"),
-                    1 => Item::new("hat"),
-                    2 => Item::new("stone_axe"),
-                    3 => Item::new("shovel"),
+                    0 => Item::new(DEMONIC_SAP),
+                    1 => Item::new(HAT),
+                    2 => Item::new(STONE_AXE),
+                    3 => Item::new(STONE_SHOVEL),
                     4 => random_book(),
-                    5 => Item::new("backpack").with_container(Vec::new()),
-                    6 => Item::new("leather_oversleeve"),
-                    7 => Item::new("rags"),
+                    5 => Item::new(BACKPACK).with_container(Vec::new()),
+                    6 => Item::new(LEATHER_ARM_GUARD),
+                    7 => Item::new(RAGS),
                     _ => unreachable!(),
                 });
         }

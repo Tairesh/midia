@@ -5,13 +5,15 @@
     "name": "cloak",
     "looks_like": "cloak",
     "size": "SMALL",
+    "materials": ["cloth"],
     "wearable": {
       "layer": "OUTER",
       "armor": 1,
       "variants": [
         ["torso", "left_arm", "right_arm", "left_leg", "right_leg"]
       ]
-    }
+    },
+    "color_from_material": "cloth"
   },
   {
     "type": "item",
@@ -19,11 +21,13 @@
     "name": "strange hat",
     "looks_like": "hat",
     "size": "SMALL",
+    "materials": ["cloth"],
     "wearable": {
       "layer": "OUTER",
       "armor": 1,
       "variants": [["head"]]
-    }
+    },
+    "color_from_material": "cloth"
   },
   {
     "type": "item",
@@ -31,13 +35,15 @@
     "name": "dirty rags",
     "looks_like": "rags",
     "size": "SMALL",
+    "materials": ["cloth"],
     "wearable": {
       "layer": "OUTER",
       "armor": 1,
       "variants": [
         ["torso", "left_arm", "right_arm", "left_leg", "right_leg"]
       ]
-    }
+    },
+    "color_from_material": "cloth"
   },
   {
     "type": "item",
@@ -45,18 +51,21 @@
     "name": "leather backpack",
     "looks_like": "backpack",
     "size": "SMALL",
+    "materials": ["leather"],
     "wearable": {
       "layer": "CLIPPED",
       "armor": 1,
       "variants": [["torso"]]
-    }
+    },
+    "color_from_material": "leather"
   },
   {
     "type": "item",
-    "id": "leather_oversleeve",
-    "name": "leather oversleeve",
-    "looks_like": "leather_oversleeve",
+    "id": "arm_guard_leather",
+    "name": "leather arm guard",
+    "looks_like": "arm_guard",
     "size": "SMALL",
+    "materials": ["leather"],
     "wearable": {
       "layer": "CLIPPED",
       "armor": 1,
@@ -64,6 +73,7 @@
         ["left_arm"],
         ["right_arm"]
       ]
-    }
+    },
+    "color_from_material": "leather"
   }
 ]

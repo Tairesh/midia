@@ -7,7 +7,8 @@ use once_cell::sync::OnceCell;
 
 use data_entity::DataEntity;
 pub use item::{
-    DamageType, ItemPrototype, ItemQuality, ItemSize, ItemTag, MeleeDamageValue, WearLayer,
+    DamageType, ItemPrototype, ItemQuality, ItemSize, ItemTag, Material, MeleeDamageValue,
+    WearLayer,
 };
 
 use crate::game::races::{Race, Sex};

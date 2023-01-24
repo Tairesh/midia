@@ -22,7 +22,7 @@ pub fn unit_attack_success(
     ));
     if damage.params.critical {
         events.push(LogEvent::new(
-            " Critical hit!".to_string(),
+            "Critical hit!".to_string(),
             unit.pos,
             if owner.is_player() {
                 LogCategory::Success
@@ -34,7 +34,7 @@ pub fn unit_attack_success(
     if damage.causes.shock {
         if damage.causes.wounds.is_empty() {
             events.push(LogEvent::new(
-                format!(" {} is stunned.", unit.name_for_actions()),
+                format!("{} is stunned.", unit.name_for_actions()),
                 unit.pos,
                 if owner.is_player() {
                     LogCategory::Success
@@ -44,7 +44,7 @@ pub fn unit_attack_success(
             ));
         } else {
             events.push(LogEvent::new(
-                format!(" {} is stunned and wounded.", unit.name_for_actions()),
+                format!("{} is stunned and wounded.", unit.name_for_actions()),
                 unit.pos,
                 if owner.is_player() {
                     LogCategory::Success

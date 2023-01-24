@@ -112,3 +112,7 @@ pub fn get_direction_keys_down(ctx: &Context) -> Option<Direction> {
 pub fn is_mouse_scrolled(ctx: &mut Context) -> bool {
     !get_mouse_wheel_movement(ctx).is_zero()
 }
+
+pub fn is_some_of_keys_pressed(ctx: &mut Context, keys: &[Key]) -> bool {
+    keys.iter().any(|&k| is_key_pressed(ctx, k))
+}

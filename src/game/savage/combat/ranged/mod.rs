@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use geometry::Point;
 
-pub use distance::Distance;
+pub use distance::RangedDistance;
 pub use throw::throw_attack_unit;
 
 use super::HitResult;

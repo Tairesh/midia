@@ -6,6 +6,7 @@ pub use force_attack::ForceAttack;
 pub use observing::Observing;
 pub use opening::Opening;
 pub use reading::Reading;
+pub use throwing::Throwing;
 pub use walking::Walking;
 pub use wielding_from_ground::WieldingFromGround;
 
@@ -17,5 +18,6 @@ mod force_attack;
 mod observing;
 mod opening;
 mod reading;
+mod throwing;
 mod walking;
 mod wielding_from_ground;

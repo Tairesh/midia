@@ -47,6 +47,7 @@ pub fn draw(
             continue; // TODO: remembering tiles that are not in FOV
         }
         let delta = Vec2::from(pos - center_tile);
+        let position = center + delta * tile_size;
 
         let this_tile_size = Tileset::get_size(tile.terrain.looks_like());
         let asset_tile_size = assets.tileset.tile_size as f32;
@@ -54,22 +55,36 @@ pub fn draw(
             -(this_tile_size.x - asset_tile_size) / 2.0 * zoom,
             -(this_tile_size.y - asset_tile_size) * zoom,
         );
-        let position = center + delta * tile_size + correction;
 
-        let params = DrawParams::new().position(position).scale(scale);
         assets.tileset.draw_region(
             ctx,
             tile.terrain.looks_like(),
-            params
-                .clone()
+            DrawParams::new()
+                .position(position + correction)
+                .scale(scale)
                 .color(tile.terrain.color().unwrap_or(Colors::WHITE)),
         );
         if let Some(item) = tile.top_item() {
-            assets
-                .tileset
-                .draw_region(ctx, item.looks_like(), params.clone().color(item.color()));
+            let this_tile_size = Tileset::get_size(item.looks_like());
+            let correction = Vec2::new(
+                -(this_tile_size.x - asset_tile_size) / 2.0 * zoom,
+                -(this_tile_size.y - asset_tile_size) * zoom,
+            );
+
+            assets.tileset.draw_region(
+                ctx,
+                item.looks_like(),
+                DrawParams::new()
+                    .position(position + correction)
+                    .scale(scale)
+                    .color(item.color()),
+            );
             if tile.items.len() > 1 {
-                assets.tileset.draw_region(ctx, "highlight", params);
+                assets.tileset.draw_region(
+                    ctx,
+                    "highlight",
+                    DrawParams::new().position(position).scale(scale),
+                );
             }
         }
     }

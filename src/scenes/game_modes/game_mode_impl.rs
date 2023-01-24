@@ -8,8 +8,8 @@ use crate::game::World;
 use super::{
     super::{implements::GameScene, SomeTransitions},
     implements::{
-        Closing, Digging, Dropping, Examining, ForceAttack, Observing, Opening, Reading, Walking,
-        WieldingFromGround,
+        Closing, Digging, Dropping, Examining, ForceAttack, Observing, Opening, Reading, Throwing,
+        Walking, WieldingFromGround,
     },
     GameMode,
 };

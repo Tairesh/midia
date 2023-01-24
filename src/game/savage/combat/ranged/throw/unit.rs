@@ -3,7 +3,7 @@ use geometry::DIR8;
 use crate::game::savage::HitResult;
 use crate::game::{Avatar, RollResult, Skill, World};
 
-use super::super::{Distance, UnitRangedAttackResult};
+use super::super::{RangedDistance, UnitRangedAttackResult};
 
 // TODO: grenades
 pub fn throw_attack_unit(
@@ -30,21 +30,25 @@ pub fn throw_attack_unit(
 
         UnitRangedAttackResult::InnocentBystander(
             random_target,
-            calculate_hit(attacker, target, throw_roll.total),
+            calculate_hit(attacker, target, false),
         )
     } else if throw_roll.total < 4 {
         UnitRangedAttackResult::Miss
     } else {
-        UnitRangedAttackResult::Hit(calculate_hit(attacker, defender, throw_roll.total))
+        UnitRangedAttackResult::Hit(calculate_hit(
+            attacker,
+            defender,
+            (throw_roll.total - 4) >= 4,
+        ))
     }
 }
 
 fn throwing_roll(attacker: &Avatar, defender: &Avatar) -> Option<RollResult> {
     let distance = attacker.pos.distance(defender.pos);
     let damage_value = attacker.throw_damage().unwrap();
-    let distance = Distance::define(distance, damage_value.distance);
+    let distance = RangedDistance::define(distance, damage_value.distance);
 
-    if distance == Distance::Unreachable {
+    if distance == RangedDistance::Unreachable {
         return None;
     }
 
@@ -54,13 +58,13 @@ fn throwing_roll(attacker: &Avatar, defender: &Avatar) -> Option<RollResult> {
     ))
 }
 
-fn calculate_hit(attacker: &Avatar, defender: &Avatar, roll: i8) -> HitResult {
-    let delta = roll - 4;
-    let critical = delta >= 4;
+fn calculate_hit(attacker: &Avatar, defender: &Avatar, critical: bool) -> HitResult {
     let damage_value = attacker.throw_damage().unwrap();
+    dbg!(&damage_value);
     let damage = damage_value
         .damage
         .roll(&attacker.personality.char_sheet, critical, true);
+    dbg!(damage);
     let penetration = damage_value.penetration;
 
     HitResult::calculate(damage, penetration, defender, critical)

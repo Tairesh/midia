@@ -1,12 +1,12 @@
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Distance {
+pub enum RangedDistance {
     Close,
     Medium,
     Far,
     Unreachable,
 }
 
-impl Distance {
+impl RangedDistance {
     pub fn define(distance: f64, weapon_distance: u8) -> Self {
         let distance = distance.round() as u8;
         if distance <= weapon_distance {

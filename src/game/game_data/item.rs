@@ -70,6 +70,24 @@ pub struct DamageValue {
     // TODO: minumum strength
 }
 
+fn damage_types(item: &Item) -> HashSet<DamageType> {
+    if let Some(melee_damage) = item.proto().melee_damage.as_ref() {
+        melee_damage.damage_types.clone()
+    } else if let Some(throw_damage) = item.proto().throw_damage.as_ref() {
+        throw_damage.damage_types.clone()
+    } else if item
+        .proto()
+        .materials
+        .iter()
+        .copied()
+        .any(Material::is_hard)
+    {
+        HashSet::from([DamageType::Blunt])
+    } else {
+        HashSet::new()
+    }
+}
+
 impl DamageValue {
     pub fn zero() -> Self {
         Self {
@@ -98,17 +116,7 @@ impl DamageValue {
                 attribute: Some(Attribute::Strength),
                 modifier: 0,
             },
-            damage_types: if item
-                .proto()
-                .materials
-                .iter()
-                .copied()
-                .any(Material::is_hard)
-            {
-                HashSet::from([DamageType::Blunt])
-            } else {
-                HashSet::new()
-            },
+            damage_types: damage_types(item),
             distance: 0,
             penetration: 0,
             attack_modifier: -1,

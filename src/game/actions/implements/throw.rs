@@ -1,7 +1,10 @@
+use geometry::DIR8;
+use rand::seq::SliceRandom;
+
 use super::super::{
     super::{
         log::helpers::unit_attack_success,
-        savage::{throw_attack_unit, Distance, UnitRangedAttackResult},
+        savage::{throw_attack_unit, RangedDistance, UnitRangedAttackResult},
         Action, Avatar, Item, LogEvent, World,
     },
     ActionImpl,
@@ -43,8 +46,9 @@ impl ActionImpl for Throw {
                 return No(format!("You can't throw {} at a dead body.", item.name()));
             }
 
-            let distance = Distance::define(actor.pos.distance(target.pos), throw_value.distance);
-            if distance == Distance::Unreachable {
+            let distance =
+                RangedDistance::define(actor.pos.distance(target.pos), throw_value.distance);
+            if distance == RangedDistance::Unreachable {
                 return No(format!("You can't throw {} that far.", item.name()));
             }
 
@@ -69,8 +73,32 @@ impl ActionImpl for Throw {
 
         let attack = throw_attack_unit(owner, unit, world);
         match attack {
-            UnitRangedAttackResult::InnocentBystander(_, _) => {
-                todo!()
+            UnitRangedAttackResult::InnocentBystander(unit_id, damage) => {
+                let victim = world.get_unit(unit_id);
+                let target = victim.pos;
+                for event in unit_attack_success(
+                    owner,
+                    victim,
+                    &damage,
+                    format!(
+                        "{} throw{} {} {weapon_name} to {} but misses and hit {}!",
+                        owner.name_for_actions(),
+                        if owner.is_player() { "" } else { "s" },
+                        owner.pronounce().2,
+                        unit.name_for_actions(),
+                        victim.name_for_actions(),
+                    ),
+                ) {
+                    world.log().push(event);
+                }
+
+                world.apply_damage(victim.id, damage);
+                let item = action
+                    .owner_mut(world)
+                    .wield
+                    .take_from_active_hand()
+                    .unwrap();
+                world.map().get_tile_mut(target).items.push(item);
             }
             UnitRangedAttackResult::Miss => {
                 world.log().push(LogEvent::warning(
@@ -83,6 +111,13 @@ impl ActionImpl for Throw {
                     ),
                     target,
                 ));
+                let item = action
+                    .owner_mut(world)
+                    .wield
+                    .take_from_active_hand()
+                    .unwrap();
+                let random_pos = target + *DIR8.choose(&mut rand::thread_rng()).unwrap();
+                world.map().get_tile_mut(random_pos).items.push(item);
             }
             UnitRangedAttackResult::Hit(damage) => {
                 for event in unit_attack_success(

@@ -1,5 +1,7 @@
 use rand::Rng;
 
+use crate::game::RollResult;
+
 use super::{
     super::Race, Attribute, Attributes, Dice, DiceWithModifier, HitResult, Skill, SkillLevel,
     Skills, Wound,
@@ -58,15 +60,16 @@ impl CharSheet {
     }
 
     pub fn parry(&self) -> u8 {
-        2 + if self.skills.get_skill(Skill::Fighting) > SkillLevel::None {
-            self.get_skill_with_modifiers(Skill::Fighting).value() / 2
+        let fighting_skill = self.skills.get_skill(Skill::Fighting);
+        2 + if fighting_skill > SkillLevel::None {
+            fighting_skill.value() / 2
         } else {
             0
         }
     }
 
     pub fn toughness(&self) -> u8 {
-        (2 + self.get_attribute_with_modifiers(Attribute::Vigor).value() as i8 / 2
+        (2 + self.attributes.get_attribute(Attribute::Vigor).value() as i8 / 2
             + self.race.toughness_bonus())
         .max(0) as u8
     }
@@ -124,14 +127,20 @@ impl CharSheet {
             .with_modifier(-(self.wounds.len() as i8))
     }
 
-    pub fn roll_skill(&self, skill: Skill, modifier: i8) -> u8 {
+    pub fn roll_skill(&self, skill: Skill, modifier: i8) -> RollResult {
         let skill_dice = self.get_skill_with_modifiers(skill).with_modifier(modifier);
+        let roll = skill_dice.roll_explosive();
 
-        if self.wild_card {
+        if self.wild_card && roll.natural != 1 {
             let wild_dice = DiceWithModifier::new(Dice::D6, skill_dice.modifier());
-            u8::max(skill_dice.roll_explosive(), wild_dice.roll_explosive())
+            let wild_roll = wild_dice.roll_explosive();
+            if wild_roll.total > roll.total {
+                wild_roll
+            } else {
+                roll
+            }
         } else {
-            skill_dice.roll_explosive()
+            roll
         }
     }
 
@@ -157,12 +166,14 @@ impl CharSheet {
         let mut roll = self
             .get_attribute_with_modifiers(Attribute::Spirit)
             .roll_explosive();
-        if self.wild_card {
+        if self.wild_card && roll.natural != 1 {
             let wild_roll =
                 DiceWithModifier::new(Dice::D6, -(self.wounds.len() as i8)).roll_explosive();
-            roll = roll.max(wild_roll);
+            if wild_roll.total > roll.total {
+                roll = wild_roll;
+            }
         }
-        if roll >= 4 {
+        if roll.total >= 4 {
             self.shock = false;
             true
         } else {

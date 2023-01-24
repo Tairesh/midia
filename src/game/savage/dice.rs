@@ -6,6 +6,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::game::traits::Name;
 
+// TODO: it's getting a bit messy here, maybe it's time to split this file
+
 #[derive(Serialize, Deserialize, Sequence, Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd)]
 pub enum Dice {
     D4,
@@ -108,6 +110,18 @@ impl SubAssign<i8> for Dice {
     }
 }
 
+#[derive(serde::Serialize, serde::Deserialize, Debug, Copy, Clone, Eq, PartialEq)]
+pub struct RollResult {
+    pub natural: u8,
+    pub total: i8,
+}
+
+impl RollResult {
+    pub fn new(natural: u8, total: i8) -> Self {
+        RollResult { natural, total }
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Copy, Clone, Eq, PartialEq)]
 pub struct DiceWithModifier(Dice, i8);
 
@@ -120,12 +134,14 @@ impl DiceWithModifier {
         DiceWithModifier(dice, 0)
     }
 
-    pub fn roll(self) -> u8 {
-        (self.0.roll() as i8 + self.1).max(1) as u8
+    pub fn roll(self) -> RollResult {
+        let natural = self.0.roll();
+        RollResult::new(natural, natural as i8 + self.1)
     }
 
-    pub fn roll_explosive(self) -> u8 {
-        (self.0.roll_explosive() as i8 + self.1).max(1) as u8
+    pub fn roll_explosive(self) -> RollResult {
+        let natural = self.0.roll_explosive();
+        RollResult::new(natural, natural as i8 + self.1)
     }
 
     pub fn value(self) -> u8 {
@@ -222,11 +238,11 @@ impl SkillLevel {
         }
     }
 
-    pub fn roll(self) -> u8 {
+    pub fn roll(self) -> RollResult {
         DiceWithModifier::from(self).roll()
     }
 
-    pub fn roll_explosive(self) -> u8 {
+    pub fn roll_explosive(self) -> RollResult {
         DiceWithModifier::from(self).roll_explosive()
     }
 

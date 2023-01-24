@@ -12,7 +12,7 @@ pub fn melee_attack_unit(attacker: &Avatar, defender: &Avatar) -> UnitAttackResu
     // TODO: Attack of unarmed enemy while attacker is armed causes +2 to Fighting skill rolls
     // TODO: some traits make some avatars armed even if they don't have weapons
     let hit_roll = fighting_roll(attacker);
-    let parry = defender.parry();
+    let parry = defender.parry() as i8;
 
     if hit_roll >= parry {
         let delta = hit_roll - parry;

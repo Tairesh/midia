@@ -2,7 +2,7 @@ use crate::game::{Avatar, Terrain, TerrainInteract};
 
 use super::fighting_roll;
 
-const TERRAIN_PARRY: u8 = 2;
+const TERRAIN_PARRY: i8 = 2;
 
 pub fn melee_smash_terrain(attacker: &Avatar, defender: &Terrain) -> TerrainAttackResult {
     let hit_roll = fighting_roll(attacker);

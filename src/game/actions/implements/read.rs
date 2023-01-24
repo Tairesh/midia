@@ -3,7 +3,7 @@ use geometry::Direction;
 use super::super::{
     super::{
         log::{LogCategory, LogEvent},
-        Avatar, Skill, World,
+        Avatar, RollResult, Skill, World,
     },
     Action, ActionImpl,
     ActionPossibility::{self, No, Yes},
@@ -12,7 +12,7 @@ use super::super::{
 #[derive(serde::Serialize, serde::Deserialize, Debug, Copy, Clone)]
 pub struct Read {
     dir: Direction,
-    reading_roll: u8,
+    reading_roll: RollResult,
 }
 
 impl Read {
@@ -26,7 +26,7 @@ impl Read {
     }
 
     #[cfg(test)]
-    pub fn new_test(dir: Direction, reading_roll: u8) -> Self {
+    pub fn new_test(dir: Direction, reading_roll: RollResult) -> Self {
         Self { dir, reading_roll }
     }
 }
@@ -43,9 +43,11 @@ impl ActionImpl for Read {
         if tile.is_readable() {
             // Every character takes one tick to read, wow!
             let reading_time = tile.read().len() as f32;
-            match self.reading_roll {
-                0..=1 => No("You tried to read it but failed".to_string()),
-                2..=3 => Yes((reading_time * 2.0).round() as u32),
+            if self.reading_roll.natural == 1 {
+                return No("You tried to read it but failed".to_string());
+            }
+            match self.reading_roll.total {
+                ..=3 => Yes((reading_time * 2.0).round() as u32),
                 4..=7 => Yes(reading_time.round() as u32),
                 8.. => Yes((reading_time * 0.5).round() as u32),
             }
@@ -71,7 +73,7 @@ mod tests {
 
     use crate::game::map::items::helpers::random_book;
     use crate::game::world::tests::prepare_world;
-    use crate::game::Action;
+    use crate::game::{Action, RollResult};
 
     use super::Read;
 
@@ -85,7 +87,7 @@ mod tests {
             .items
             .push(random_book());
 
-        let typ = Read::new_test(Direction::East, 4);
+        let typ = Read::new_test(Direction::East, RollResult::new(4, 4));
         if let Ok(action) = Action::new(0, typ.into(), &world) {
             world.player_mut().action = Some(action);
             while world.player().action.is_some() {
@@ -108,7 +110,7 @@ mod tests {
             .items
             .push(random_book());
 
-        let typ = Read::new_test(Direction::East, 1);
+        let typ = Read::new_test(Direction::East, RollResult::new(1, 1));
         assert!(Action::new(0, typ.into(), &world).is_err());
     }
 }

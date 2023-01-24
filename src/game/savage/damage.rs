@@ -80,7 +80,8 @@ impl Damage {
                 attribute_dice.roll_explosive()
             } else {
                 attribute_dice.roll()
-            } as i8;
+            }
+            .total;
         }
         if critical {
             result += if explosive {

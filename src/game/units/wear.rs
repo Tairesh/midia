@@ -59,6 +59,12 @@ impl Wear {
     }
 }
 
+impl Default for Wear {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::game::map::items::helpers::{BACKPACK, CLOAK, HAT, LEATHER_ARM_GUARD, RAGS};

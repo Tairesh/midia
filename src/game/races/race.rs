@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use crate::game::game_data::DamageType;
 use crate::game::savage::{DamageDice, Skill};
 use crate::game::traits::Name;
-use crate::game::{Attribute, Damage, MeleeDamageValue, SkillLevel};
+use crate::game::{Attribute, Damage, DamageValue, SkillLevel};
 
 #[derive(Serialize, Deserialize, Debug, Copy, Clone, Eq, PartialEq, Hash)]
 #[serde(rename_all = "snake_case")]
@@ -64,11 +64,11 @@ impl Race {
         .copied()
     }
 
-    pub fn natural_weapon(self) -> (&'static str, MeleeDamageValue) {
+    pub fn natural_weapon(self) -> (&'static str, DamageValue) {
         match self {
             Race::Gazan | Race::Nyarnik => (
                 "fists",
-                MeleeDamageValue {
+                DamageValue {
                     damage: Damage {
                         dices: Vec::new(),
                         attribute: Some(Attribute::Strength),
@@ -83,7 +83,7 @@ impl Race {
             ),
             Race::Totik | Race::Lagnam => (
                 "fangs",
-                MeleeDamageValue {
+                DamageValue {
                     damage: Damage {
                         dices: vec![DamageDice::D4],
                         attribute: Some(Attribute::Strength),
@@ -98,7 +98,7 @@ impl Race {
             ),
             Race::Bug => (
                 "mandibles",
-                MeleeDamageValue {
+                DamageValue {
                     damage: Damage {
                         dices: vec![DamageDice::D6],
                         attribute: Some(Attribute::Strength),

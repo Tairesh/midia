@@ -2,7 +2,7 @@ use enum_dispatch::enum_dispatch;
 
 use super::{
     super::{Avatar, World},
-    implements::{Close, Dig, Drop, MeleeAttack, Open, Read, Skip, Walk, Wear, WieldFromGround},
+    implements::{Close, Dig, Drop, Melee, Open, Read, Skip, Throw, Walk, Wear, WieldFromGround},
     Action, ActionImpl, ActionPossibility,
 };
 
@@ -18,5 +18,6 @@ pub enum ActionType {
     Open,
     Close,
     Wear,
-    MeleeAttack,
+    Melee,
+    Throw,
 }

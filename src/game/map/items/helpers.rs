@@ -149,6 +149,7 @@ pub fn dead_body(unit: &Avatar) -> Item {
         two_handed_tool: false,
         wearable: None,
         melee_damage: None,
+        throw_damage: None,
         // TODO: fur color
         color_from_material: Some(Material::Flesh),
     })

@@ -3,6 +3,7 @@ pub use event::LogEvent;
 
 mod category;
 mod event;
+pub mod helpers;
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct Log {
@@ -28,6 +29,12 @@ impl Log {
         let events = &self.events[self.pushed..];
         self.pushed = self.events.len();
         events
+    }
+}
+
+impl Default for Log {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

@@ -4,8 +4,11 @@ use super::super::{
     super::map::{TerrainInteract, TerrainView},
     super::{
         game_data::DamageType,
-        savage::{melee_attack_unit, melee_smash_terrain, TerrainAttackResult, UnitAttackResult},
-        Action, Avatar, Item, LogEvent, World, Wound,
+        log::helpers::unit_attack_success,
+        savage::{
+            melee_attack_unit, melee_smash_terrain, TerrainMeleeAttackResult, UnitMeleeAttackResult,
+        },
+        Action, Avatar, Item, LogEvent, World,
     },
     ActionImpl,
     ActionPossibility::{self, No, Yes},
@@ -14,11 +17,11 @@ use super::super::{
 const MELEE_ATTACK_MOVES: u32 = 10;
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Copy, Clone)]
-pub struct MeleeAttack {
+pub struct Melee {
     target: Point,
 }
 
-impl MeleeAttack {
+impl Melee {
     pub fn new(target: Point) -> Self {
         Self { target }
     }
@@ -42,7 +45,7 @@ impl MeleeAttack {
         if can_smash && world.map().get_tile(self.target).terrain.is_smashable() {
             let attack = melee_smash_terrain(owner, &world.map().get_tile(self.target).terrain);
             match attack {
-                TerrainAttackResult::Miss => {
+                TerrainMeleeAttackResult::Miss => {
                     world.log().push(LogEvent::info(
                         format!(
                             "{} {} trying to smash the {} with {} {weapon_name} but miss{}!",
@@ -55,7 +58,7 @@ impl MeleeAttack {
                         self.target,
                     ));
                 }
-                TerrainAttackResult::Hit(damage) => {
+                TerrainMeleeAttackResult::Hit(damage) => {
                     world.log().push(LogEvent::info(
                         format!(
                             "{} smash{} the {} with {} {weapon_name} for {damage} damage but didn't break it.",
@@ -67,7 +70,7 @@ impl MeleeAttack {
                         self.target,
                     ));
                 }
-                TerrainAttackResult::Success(damage) => {
+                TerrainMeleeAttackResult::Success(damage) => {
                     world.log().push(LogEvent::info(
                         format!(
                             "{} smash{} the {} with {} {weapon_name} for {damage} damage and completely destroyed it.",
@@ -112,47 +115,25 @@ impl MeleeAttack {
             let unit = world.get_unit(unit_id);
             let attack = melee_attack_unit(owner, unit);
             match attack {
-                UnitAttackResult::Hit(damage) => {
-                    let mut message = format!(
-                        "{} attack{} {} with {} {weapon_name} and deal {} damage with {} penetration.",
-                        owner.name_for_actions(),
-                        if owner.is_player() { "" } else { "s" },
-                        unit.name_for_actions(),
-                        owner.pronounce().2,
-                        damage.params.damage,
-                        damage.params.penetration,
-                    );
-                    if damage.params.critical {
-                        message.push_str(" Critical hit!");
+                UnitMeleeAttackResult::Hit(damage) => {
+                    for event in unit_attack_success(
+                        owner,
+                        unit,
+                        &damage,
+                        format!(
+                            "{} attack{} {} with {} {weapon_name}",
+                            owner.name_for_actions(),
+                            if owner.is_player() { "" } else { "s" },
+                            unit.name_for_actions(),
+                            owner.pronounce().2,
+                        ),
+                    ) {
+                        world.log().push(event);
                     }
-
-                    if !damage.causes.shock && damage.causes.wounds.is_empty() {
-                        message.push_str(" No effect.");
-                    } else {
-                        if damage.causes.shock {
-                            message.push_str(
-                                format!(" {} is stunned.", unit.name_for_actions()).as_str(),
-                            );
-                        }
-                        if !damage.causes.wounds.is_empty() {
-                            message.push_str(&format!(
-                                " Attack causes wounds: {}",
-                                damage
-                                    .causes
-                                    .wounds
-                                    .iter()
-                                    .copied()
-                                    .map(Wound::name)
-                                    .collect::<Vec<_>>()
-                                    .join(", ")
-                            ));
-                        }
-                    }
-                    world.log().push(LogEvent::success(message, self.target));
 
                     world.apply_damage(unit_id, damage);
                 }
-                UnitAttackResult::Miss => {
+                UnitMeleeAttackResult::Miss => {
                     world.log().push(LogEvent::warning(
                         format!(
                             "{} attack{} {} with {} {weapon_name} and miss.",
@@ -191,7 +172,7 @@ impl MeleeAttack {
     }
 }
 
-impl ActionImpl for MeleeAttack {
+impl ActionImpl for Melee {
     fn is_possible(&self, actor: &Avatar, _world: &World) -> ActionPossibility {
         if actor.personality.char_sheet.shock {
             return No("You are in shock".to_string());
@@ -228,7 +209,7 @@ mod tests {
     use crate::game::world::tests::{add_npc, prepare_world};
     use crate::game::{Action, Item, Race};
 
-    use super::{MeleeAttack, MELEE_ATTACK_MOVES};
+    use super::{Melee, MELEE_ATTACK_MOVES};
 
     #[test]
     fn test_melee_attack_with_fists() {
@@ -239,10 +220,10 @@ mod tests {
         world.player_mut().wield.clear();
 
         world.player_mut().action =
-            Some(Action::new(0, MeleeAttack::new(Point::new(1, 0)).into(), &world).unwrap());
+            Some(Action::new(0, Melee::new(Point::new(1, 0)).into(), &world).unwrap());
         world.tick();
 
-        assert_eq!(world.meta.current_tick, 10);
+        assert_eq!(world.meta.current_tick, MELEE_ATTACK_MOVES as u128);
         let mut log = world.log();
         let event = &log.new_events()[0];
         assert!(
@@ -261,7 +242,7 @@ mod tests {
         world.player_mut().wield.wield(Item::new(STONE_AXE));
 
         world.player_mut().action =
-            Some(Action::new(0, MeleeAttack::new(Point::new(1, 0)).into(), &world).unwrap());
+            Some(Action::new(0, Melee::new(Point::new(1, 0)).into(), &world).unwrap());
         world.tick();
 
         assert_eq!(world.meta.current_tick, MELEE_ATTACK_MOVES as u128);
@@ -282,7 +263,7 @@ mod tests {
         world.map().get_tile_mut(Point::new(1, 0)).terrain = Boulder::default().into();
         world.player_mut().wield.wield(Item::new(DEMONIC_SAP));
         world.player_mut().action =
-            Some(Action::new(0, MeleeAttack::new(Point::new(1, 0)).into(), &world).unwrap());
+            Some(Action::new(0, Melee::new(Point::new(1, 0)).into(), &world).unwrap());
         world.tick();
 
         assert_eq!(world.meta.current_tick, MELEE_ATTACK_MOVES as u128);
@@ -303,7 +284,7 @@ mod tests {
         world.map().get_tile_mut(Point::new(1, 0)).terrain = Boulder::default().into();
         world.player_mut().wield.wield(Item::new(STONE_KNIFE));
         world.player_mut().action =
-            Some(Action::new(0, MeleeAttack::new(Point::new(1, 0)).into(), &world).unwrap());
+            Some(Action::new(0, Melee::new(Point::new(1, 0)).into(), &world).unwrap());
         world.tick();
 
         assert_eq!(world.meta.current_tick, MELEE_ATTACK_MOVES as u128);
@@ -325,7 +306,7 @@ mod tests {
         world.map().get_tile_mut(Point::new(1, 0)).terrain = Boulder::default().into();
         world.player_mut().wield.clear();
         world.player_mut().action =
-            Some(Action::new(0, MeleeAttack::new(Point::new(1, 0)).into(), &world).unwrap());
+            Some(Action::new(0, Melee::new(Point::new(1, 0)).into(), &world).unwrap());
         world.tick();
 
         assert_eq!(world.meta.current_tick, MELEE_ATTACK_MOVES as u128);
@@ -346,7 +327,7 @@ mod tests {
 
         world.map().get_tile_mut(Point::new(1, 0)).terrain = Boulder::default().into();
         world.player_mut().action =
-            Some(Action::new(0, MeleeAttack::new(Point::new(1, 0)).into(), &world).unwrap());
+            Some(Action::new(0, Melee::new(Point::new(1, 0)).into(), &world).unwrap());
         world.tick();
 
         assert_eq!(world.meta.current_tick, MELEE_ATTACK_MOVES as u128);

@@ -5,10 +5,7 @@ use std::collections::HashSet;
 use serde::{Deserialize, Serialize};
 use tetra::graphics::Color;
 
-use crate::game::{
-    Attribute, DamageDice, DamageType, GameData, ItemPrototype, ItemQuality, ItemSize, ItemTag,
-    Material, MeleeDamageValue,
-};
+use crate::game::{DamageValue, GameData, ItemPrototype, ItemQuality, ItemSize, ItemTag};
 
 use super::container::Container;
 
@@ -201,36 +198,21 @@ impl Item {
         }
     }
 
-    pub fn melee_damage(&self) -> MeleeDamageValue {
+    pub fn melee_damage(&self) -> DamageValue {
         // TODO: check for minimum strength
         if let Some(damage) = &self.proto().melee_damage {
             return damage.clone();
         }
 
-        // Improvised weapons
-        let mut damage_value = MeleeDamageValue::zero();
-        if self.size() > ItemSize::Tiny {
-            damage_value.damage.attribute = Some(Attribute::Strength);
-            damage_value.damage.dices.push(match self.size() {
-                ItemSize::Tiny => unreachable!(),
-                ItemSize::Small => DamageDice::D4,
-                ItemSize::Medium => DamageDice::D6,
-                ItemSize::Large | ItemSize::Huge => DamageDice::D8,
-            });
-            damage_value.parry_modifier -= 1;
-            damage_value.attack_modifier -= 1;
-            if self
-                .proto()
-                .materials
-                .iter()
-                .copied()
-                .any(Material::is_hard)
-            {
-                damage_value.damage_types.insert(DamageType::Blunt);
-            }
+        DamageValue::improvised_melee(self)
+    }
+
+    pub fn throw_damage(&self) -> Option<DamageValue> {
+        if let Some(damage) = &self.proto().throw_damage {
+            return Some(damage.clone());
         }
 
-        damage_value
+        DamageValue::improvised_throw(self)
     }
 }
 

@@ -1,4 +1,4 @@
-use crate::game::Wound;
+use crate::game::{Avatar, BodySlot, Wound};
 
 pub struct HitResult {
     pub params: HitParams,
@@ -8,6 +8,38 @@ pub struct HitResult {
 impl HitResult {
     pub fn new(params: HitParams, causes: HitCauses) -> Self {
         Self { params, causes }
+    }
+
+    pub fn calculate(damage: u8, penetration: u8, target: &Avatar, critical: bool) -> Self {
+        let toughness = target.personality.char_sheet.toughness() as i8;
+
+        // TODO: attack random parts of the body
+        let mut armor = target.armor(BodySlot::Torso) as i8;
+        armor -= penetration as i8;
+        if armor < 0 {
+            armor = 0;
+        }
+        let mut total_damage = damage as i8 - (toughness + armor);
+
+        let mut shock = false;
+        let mut wounds = 0;
+        if total_damage >= 0 {
+            // add wound if target already shocked
+            if target.personality.char_sheet.shock {
+                wounds += 1;
+            }
+            shock = true;
+            // add wound for every Ace
+            while total_damage > 4 {
+                wounds += 1;
+                total_damage -= 4;
+            }
+        }
+
+        Self::new(
+            HitParams::new(damage, penetration, critical),
+            HitCauses::random_wounds(shock, wounds),
+        )
     }
 
     #[cfg(test)]
@@ -41,6 +73,13 @@ pub struct HitCauses {
 }
 
 impl HitCauses {
+    pub fn nothing() -> Self {
+        Self {
+            shock: false,
+            wounds: Vec::new(),
+        }
+    }
+
     pub fn random_wounds(shock: bool, wounds: u8) -> Self {
         Self {
             shock,

@@ -6,6 +6,7 @@ use tetra::graphics::Color;
 use crate::colors::Colors;
 use crate::game::races::BodySlot;
 use crate::game::savage::Damage;
+use crate::game::{Attribute, DamageDice, Item};
 
 // TODO: move this to subfolder
 
@@ -55,7 +56,7 @@ pub enum DamageType {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct MeleeDamageValue {
+pub struct DamageValue {
     pub damage: Damage,
     pub damage_types: HashSet<DamageType>,
     #[serde(default)]
@@ -69,7 +70,7 @@ pub struct MeleeDamageValue {
     // TODO: minumum strength
 }
 
-impl MeleeDamageValue {
+impl DamageValue {
     pub fn zero() -> Self {
         Self {
             damage: Damage {
@@ -83,6 +84,51 @@ impl MeleeDamageValue {
             attack_modifier: 0,
             parry_modifier: 0,
         }
+    }
+
+    pub fn improvised_melee(item: &Item) -> Self {
+        Self {
+            damage: Damage {
+                dices: match item.size() {
+                    ItemSize::Tiny => vec![],
+                    ItemSize::Small => vec![DamageDice::D4],
+                    ItemSize::Medium => vec![DamageDice::D6],
+                    ItemSize::Large | ItemSize::Huge => vec![DamageDice::D8],
+                },
+                attribute: Some(Attribute::Strength),
+                modifier: 0,
+            },
+            damage_types: if item
+                .proto()
+                .materials
+                .iter()
+                .copied()
+                .any(Material::is_hard)
+            {
+                HashSet::from([DamageType::Blunt])
+            } else {
+                HashSet::new()
+            },
+            distance: 0,
+            penetration: 0,
+            attack_modifier: -1,
+            parry_modifier: -1,
+        }
+    }
+
+    pub fn improvised_throw(item: &Item) -> Option<Self> {
+        if item.size() == ItemSize::Huge {
+            return None;
+        }
+        Some(Self {
+            distance: match item.size() {
+                ItemSize::Tiny | ItemSize::Small => 3,
+                ItemSize::Medium => 2,
+                ItemSize::Large => 1,
+                ItemSize::Huge => unreachable!(),
+            },
+            ..Self::improvised_melee(item)
+        })
     }
 }
 
@@ -178,7 +224,9 @@ pub struct ItemPrototype {
     #[serde(default)]
     pub wearable: Option<WearableValue>,
     #[serde(default)]
-    pub melee_damage: Option<MeleeDamageValue>,
+    pub melee_damage: Option<DamageValue>,
     #[serde(default)]
     pub color_from_material: Option<Material>,
+    #[serde(default)]
+    pub throw_damage: Option<DamageValue>,
 }

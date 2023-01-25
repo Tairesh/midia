@@ -1,4 +1,4 @@
-use crate::game::{Avatar, Terrain, TerrainInteract};
+use crate::game::{Avatar, DamageType, Terrain, TerrainInteract};
 
 use super::fighting_roll;
 
@@ -8,14 +8,15 @@ pub fn melee_smash_terrain(attacker: &Avatar, defender: &Terrain) -> TerrainMele
     let hit_roll = fighting_roll(attacker);
     if hit_roll >= TERRAIN_PARRY {
         let melee_damage = attacker.melee_damage();
+        let damage = melee_damage.roll(&attacker.personality.char_sheet, false, false);
 
-        let damage = melee_damage
-            .damage
-            .roll(&attacker.personality.char_sheet, false, false);
-        if damage >= defender.smash_toughness() {
-            TerrainMeleeAttackResult::Success(damage)
+        if damage.damage_type.is_some()
+            && damage.damage_type.unwrap() == DamageType::Blunt
+            && damage.damage >= defender.smash_toughness()
+        {
+            TerrainMeleeAttackResult::Success(damage.damage)
         } else {
-            TerrainMeleeAttackResult::Hit(damage)
+            TerrainMeleeAttackResult::Hit(damage.damage)
         }
     } else {
         TerrainMeleeAttackResult::Miss
@@ -24,6 +25,7 @@ pub fn melee_smash_terrain(attacker: &Avatar, defender: &Terrain) -> TerrainMele
 
 pub enum TerrainMeleeAttackResult {
     Miss,
+
     Hit(u8),
     Success(u8),
 }

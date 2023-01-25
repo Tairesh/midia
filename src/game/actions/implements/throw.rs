@@ -81,12 +81,17 @@ impl ActionImpl for Throw {
                     victim,
                     &damage,
                     format!(
-                        "{} throw{} {} {weapon_name} to {} but misses and hit {}!",
+                        "{} throw{} {} {weapon_name} to {} but misses and hit {}{}",
                         owner.name_for_actions(),
                         if owner.is_player() { "" } else { "s" },
                         owner.pronounce().2,
                         unit.name_for_actions(),
                         victim.name_for_actions(),
+                        if damage.params.damage == 0 {
+                            " but it doesn't do any damage"
+                        } else {
+                            "!"
+                        },
                     ),
                 ) {
                     world.log().push(event);
@@ -125,11 +130,16 @@ impl ActionImpl for Throw {
                     unit,
                     &damage,
                     format!(
-                        "{} throw{} {} {weapon_name} to {} and hit.",
+                        "{} throw{} {} {weapon_name} to {} and hit{}",
                         owner.name_for_actions(),
                         if owner.is_player() { "" } else { "s" },
                         owner.pronounce().2,
                         unit.name_for_actions(),
+                        if damage.params.damage == 0 {
+                            " but it doesn't do any damage"
+                        } else {
+                            "!"
+                        },
                     ),
                 ) {
                     world.log().push(event);

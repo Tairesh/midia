@@ -5,7 +5,7 @@ use arrayvec::ArrayVec;
 use rand::{distributions::Standard, rngs::StdRng, Rng, SeedableRng};
 
 use crate::game::map::items::helpers::{
-    random_book, BACKPACK, DEMONIC_SAP, HAT, LEATHER_ARM_GUARD, RAGS, STONE_AXE, STONE_KNIFE,
+    random_book, BACKPACK, DEMONIC_SAP, GOD_AXE, HAT, LEATHER_ARM_GUARD, RAGS, STONE_KNIFE,
     STONE_SHOVEL,
 };
 
@@ -81,7 +81,7 @@ impl Chunk {
                 .push(match rng.gen_range(0..8) {
                     0 => Item::new(DEMONIC_SAP),
                     1 => Item::new(HAT),
-                    2 => Item::new(STONE_AXE),
+                    2 => Item::new(GOD_AXE),
                     3 => Item::new(STONE_SHOVEL),
                     4 => random_book(),
                     5 => Item::new(BACKPACK).with_container(Vec::new()),

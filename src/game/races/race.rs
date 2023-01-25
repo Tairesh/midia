@@ -79,6 +79,7 @@ impl Race {
                     penetration: 0,
                     attack_modifier: 0,
                     parry_modifier: 0,
+                    minimum_strength: None,
                 },
             ),
             Race::Totik | Race::Lagnam => (
@@ -94,6 +95,7 @@ impl Race {
                     penetration: 0,
                     attack_modifier: 0,
                     parry_modifier: 0,
+                    minimum_strength: None,
                 },
             ),
             Race::Bug => (
@@ -109,6 +111,7 @@ impl Race {
                     penetration: 0,
                     attack_modifier: 0,
                     parry_modifier: 0,
+                    minimum_strength: None,
                 },
             ),
         }

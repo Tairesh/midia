@@ -17,14 +17,15 @@
       },
       "damage_types": ["SLASH"],
       "fighting_modifier": -1,
-      "parry_modifier": -1
+      "parry_modifier": -1,
+      "minimum_strength": "D6"
     }
   },
   {
     "type": "item",
-    "id": "axe_stone",
-    "name": "stone axe",
-    "looks_like": "axe_stone",
+    "id": "axe_god",
+    "name": "god axe",
+    "looks_like": "axe_demonic",
     "tags": ["TOOL", "WEAPON"],
     "qualities": ["CHOP"],
     "size": "MEDIUM",
@@ -34,7 +35,8 @@
         "attribute": "STRENGTH",
         "dices": ["D8"]
       },
-      "damage_types": ["SLASH"]
+      "damage_types": ["SLASH"],
+      "minimum_strength": "D8"
     }
   },
   {

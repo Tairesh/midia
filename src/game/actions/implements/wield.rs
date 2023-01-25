@@ -3,7 +3,7 @@ use geometry::Direction;
 use super::super::{
     super::{
         log::{LogCategory, LogEvent},
-        Avatar, World,
+        Attribute, Avatar, World,
     },
     Action, ActionImpl,
     ActionPossibility::{self, No, Yes},
@@ -35,22 +35,34 @@ impl ActionImpl for WieldFromGround {
         let pos = action.owner(world).pos + self.dir;
         let item = world.map().get_tile_mut(pos).items.pop();
         if let Some(item) = item {
-            let name = item.name().to_string();
+            let mut msg = format!(
+                "{} wield{} the {}.",
+                action.owner(world).name_for_actions(),
+                if action.owner(world).is_player() {
+                    ""
+                } else {
+                    "s"
+                },
+                item.name()
+            );
+            if action.owner(world).is_player() {
+                if let Some(dice) = item.melee_damage().minimum_strength {
+                    if action
+                        .owner(world)
+                        .personality
+                        .char_sheet
+                        .get_attribute_with_modifiers(Attribute::Strength)
+                        .dice()
+                        < dice
+                    {
+                        msg += " You are not strong enough to use it effectively.";
+                    }
+                }
+            }
             action.owner_mut(world).wield.wield(item);
-            world.log().push(LogEvent::new(
-                format!(
-                    "{} wield{} the {}",
-                    action.owner(world).name_for_actions(),
-                    if action.owner(world).is_player() {
-                        ""
-                    } else {
-                        "s"
-                    },
-                    name
-                ),
-                pos,
-                LogCategory::Success,
-            ));
+            world
+                .log()
+                .push(LogEvent::new(msg, pos, LogCategory::Success));
         }
     }
 }
@@ -59,7 +71,7 @@ impl ActionImpl for WieldFromGround {
 mod tests {
     use geometry::{Direction, Point};
 
-    use crate::game::map::items::helpers::{random_book, STONE_AXE, STONE_SHOVEL};
+    use crate::game::map::items::helpers::{random_book, GOD_AXE, STONE_SHOVEL};
     use crate::game::world::tests::prepare_world;
     use crate::game::{Action, Item};
 
@@ -73,7 +85,7 @@ mod tests {
             .map()
             .get_tile_mut(Point::new(1, 0))
             .items
-            .push(Item::new(STONE_AXE));
+            .push(Item::new(GOD_AXE));
 
         assert!(world.player().wield.is_empty());
         assert_eq!(0, world.meta.current_tick);
@@ -92,7 +104,7 @@ mod tests {
         world.tick();
 
         let item = world.player().wield.active_hand().unwrap();
-        assert_eq!(item.proto().id, STONE_AXE);
+        assert_eq!(item.proto().id, GOD_AXE);
         assert_eq!(0, world.map().get_tile(Point::new(1, 0)).items.len());
     }
 
@@ -108,7 +120,7 @@ mod tests {
             .map()
             .get_tile_mut(Point::new(1, 0))
             .items
-            .push(Item::new(STONE_AXE));
+            .push(Item::new(GOD_AXE));
         assert!(Action::new(
             0,
             WieldFromGround {

@@ -15,8 +15,6 @@ pub enum Dice {
     D8,
     D10,
     D12,
-    D20,
-    D100,
 }
 
 impl From<Dice> for &str {
@@ -27,8 +25,6 @@ impl From<Dice> for &str {
             Dice::D8 => "d8",
             Dice::D10 => "d10",
             Dice::D12 => "d12",
-            Dice::D20 => "d20",
-            Dice::D100 => "d100",
         }
     }
 }
@@ -47,8 +43,6 @@ impl Dice {
             Dice::D8 => 8,
             Dice::D10 => 10,
             Dice::D12 => 12,
-            Dice::D20 => 20,
-            Dice::D100 => 100,
         }
     }
 
@@ -309,7 +303,7 @@ impl From<Dice> for SkillLevel {
             Dice::D6 => SkillLevel::D6,
             Dice::D8 => SkillLevel::D8,
             Dice::D10 => SkillLevel::D10,
-            _ => SkillLevel::D12,
+            Dice::D12 => SkillLevel::D12,
         }
     }
 }

@@ -1,12 +1,13 @@
 use std::collections::HashSet;
 
+use rand::seq::IteratorRandom;
 use serde::{Deserialize, Serialize};
 use tetra::graphics::Color;
 
 use crate::colors::Colors;
 use crate::game::races::BodySlot;
 use crate::game::savage::Damage;
-use crate::game::{Attribute, DamageDice, Item};
+use crate::game::{Attribute, CharSheet, DamageDice, Dice, Item};
 
 // TODO: move this to subfolder
 
@@ -67,7 +68,8 @@ pub struct DamageValue {
     pub attack_modifier: i8,
     #[serde(default)]
     pub parry_modifier: i8,
-    // TODO: minumum strength
+    #[serde(default)]
+    pub minimum_strength: Option<Dice>,
 }
 
 fn damage_types(item: &Item) -> HashSet<DamageType> {
@@ -101,6 +103,7 @@ impl DamageValue {
             penetration: 0,
             attack_modifier: 0,
             parry_modifier: 0,
+            minimum_strength: None,
         }
     }
 
@@ -121,6 +124,13 @@ impl DamageValue {
             penetration: 0,
             attack_modifier: -1,
             parry_modifier: -1,
+            minimum_strength: match item.size() {
+                ItemSize::Tiny => None,
+                ItemSize::Small => Some(Dice::D4),
+                ItemSize::Medium => Some(Dice::D6),
+                ItemSize::Large => Some(Dice::D8),
+                ItemSize::Huge => Some(Dice::D12),
+            },
         }
     }
 
@@ -137,6 +147,59 @@ impl DamageValue {
             },
             ..Self::improvised_melee(item)
         })
+    }
+
+    pub fn roll(
+        &self,
+        char_sheet: &CharSheet,
+        critical: bool,
+        explosive: bool,
+    ) -> DamageRollResult {
+        let damage_type = self
+            .damage_types
+            .iter()
+            .copied()
+            .choose(&mut rand::thread_rng());
+        if let Some(damage_type) = damage_type {
+            DamageRollResult::new(
+                self.damage
+                    .roll(char_sheet, critical, explosive, self.minimum_strength),
+                damage_type,
+                self.penetration,
+            )
+        } else {
+            DamageRollResult::empty()
+        }
+    }
+}
+
+pub struct DamageRollResult {
+    pub damage: u8,
+    pub damage_type: Option<DamageType>,
+    pub penetration: u8,
+}
+
+impl DamageRollResult {
+    pub fn new(damage: u8, damage_type: DamageType, penetration: u8) -> Self {
+        Self {
+            damage,
+            penetration,
+            damage_type: Some(damage_type),
+        }
+    }
+
+    pub fn empty() -> Self {
+        Self {
+            damage: 0,
+            damage_type: None,
+            penetration: 0,
+        }
+    }
+}
+
+impl Default for DamageRollResult {
+    fn default() -> Self {
+        Self::empty()
     }
 }
 

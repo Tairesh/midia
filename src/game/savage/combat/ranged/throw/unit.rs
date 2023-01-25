@@ -60,12 +60,7 @@ fn throwing_roll(attacker: &Avatar, defender: &Avatar) -> Option<RollResult> {
 
 fn calculate_hit(attacker: &Avatar, defender: &Avatar, critical: bool) -> HitResult {
     let damage_value = attacker.throw_damage().unwrap();
-    dbg!(&damage_value);
-    let damage = damage_value
-        .damage
-        .roll(&attacker.personality.char_sheet, critical, true);
-    dbg!(damage);
-    let penetration = damage_value.penetration;
+    let damage = damage_value.roll(&attacker.personality.char_sheet, critical, true);
 
-    HitResult::calculate(damage, penetration, defender, critical)
+    HitResult::calculate(damage.damage, damage.penetration, defender, critical)
 }

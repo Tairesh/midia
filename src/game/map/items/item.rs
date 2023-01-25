@@ -218,7 +218,7 @@ impl Item {
 
 #[cfg(test)]
 mod tests {
-    use crate::game::map::items::helpers::{BACKPACK, STONE_AXE};
+    use crate::game::map::items::helpers::{BACKPACK, GOD_AXE};
 
     use super::Item;
 
@@ -228,7 +228,7 @@ mod tests {
         assert_eq!(backpack.name(), "leather backpack");
         if let Some(container) = backpack.container() {
             assert_eq!(container.items.len(), 0);
-            let axe = Item::new(STONE_AXE);
+            let axe = Item::new(GOD_AXE);
             container.items.push(axe);
             assert_eq!(container.items.len(), 1);
         } else {

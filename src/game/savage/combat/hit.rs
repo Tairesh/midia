@@ -14,6 +14,7 @@ impl HitResult {
         let toughness = target.personality.char_sheet.toughness() as i8;
 
         // TODO: attack random parts of the body
+        // TODO: add damage_type and armor types
         let mut armor = target.armor(BodySlot::Torso) as i8;
         armor -= penetration as i8;
         if armor < 0 {

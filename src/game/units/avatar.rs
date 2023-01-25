@@ -130,7 +130,7 @@ impl Avatar {
 mod tests {
     use geometry::Point;
 
-    use crate::game::map::items::helpers::{CLOAK, STONE_AXE};
+    use crate::game::map::items::helpers::{CLOAK, GOD_AXE};
     use crate::game::races::tests::personality::tester_girl;
 
     use super::{Avatar, BodySlot, HitResult, Item};
@@ -160,12 +160,12 @@ mod tests {
     #[test]
     fn test_die() {
         let mut avatar = Avatar::new(0, tester_girl(), Point::new(0, 0));
-        avatar.wield.wield(Item::new(STONE_AXE));
+        avatar.wield.wield(Item::new(GOD_AXE));
         avatar.wear.add(Item::new(CLOAK), 0);
         let items = avatar.apply_hit(HitResult::ultra_damage(), 0);
         assert_eq!(items.len(), 3);
         assert!(items.iter().any(|i| i.name() == "cloak"));
-        assert!(items.iter().any(|i| i.name() == "stone axe"));
+        assert!(items.iter().any(|i| i.name() == "god axe"));
         assert_eq!(items[2].name(), "dead gazan girl");
     }
 }

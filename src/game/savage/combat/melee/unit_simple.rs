@@ -15,14 +15,11 @@ pub fn melee_attack_unit(attacker: &Avatar, defender: &Avatar) -> UnitMeleeAttac
         let critical = delta >= 4;
 
         let melee_damage = attacker.melee_damage();
-        let damage = melee_damage
-            .damage
-            .roll(&attacker.personality.char_sheet, critical, true);
-        let penetration = melee_damage.penetration;
+        let damage = melee_damage.roll(&attacker.personality.char_sheet, critical, true);
 
         UnitMeleeAttackResult::Hit(HitResult::calculate(
-            damage,
-            penetration,
+            damage.damage,
+            damage.penetration,
             defender,
             critical,
         ))

@@ -121,11 +121,16 @@ impl Melee {
                         unit,
                         &damage,
                         format!(
-                            "{} attack{} {} with {} {weapon_name}",
+                            "{} attack{} {} with {} {weapon_name}{}",
                             owner.name_for_actions(),
                             if owner.is_player() { "" } else { "s" },
                             unit.name_for_actions(),
                             owner.pronounce().2,
+                            if damage.params.damage == 0 {
+                                " but it doesn't do any damage"
+                            } else {
+                                ""
+                            },
                         ),
                     ) {
                         world.log().push(event);
@@ -204,7 +209,7 @@ impl ActionImpl for Melee {
 mod tests {
     use geometry::Point;
 
-    use crate::game::map::items::helpers::{DEMONIC_SAP, STONE_AXE, STONE_KNIFE};
+    use crate::game::map::items::helpers::{DEMONIC_SAP, GOD_AXE, STONE_KNIFE};
     use crate::game::map::terrains::Boulder;
     use crate::game::world::tests::{add_npc, prepare_world};
     use crate::game::{Action, Item, Race};
@@ -239,7 +244,7 @@ mod tests {
         assert_eq!(world.meta.current_tick, 0);
 
         add_npc(&mut world, Point::new(1, 0));
-        world.player_mut().wield.wield(Item::new(STONE_AXE));
+        world.player_mut().wield.wield(Item::new(GOD_AXE));
 
         world.player_mut().action =
             Some(Action::new(0, Melee::new(Point::new(1, 0)).into(), &world).unwrap());
@@ -249,8 +254,8 @@ mod tests {
         let mut log = world.log();
         let event = &log.new_events()[0];
         assert!(
-            event.msg.contains("with your stone axe"),
-            "msg \"{}\" doesn't contains \"with your stone axe\"",
+            event.msg.contains("with your god axe"),
+            "msg \"{}\" doesn't contains \"with your god axe\"",
             event.msg
         );
     }

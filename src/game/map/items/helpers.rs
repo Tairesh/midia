@@ -27,10 +27,11 @@ pub const STONE_KNIFE: &str = "knife_stone";
 // pub const OBSIDIAN_KNIFE: &str = "knife_obsidian";
 
 // pub const WOODEN_AXE: &str = "axe_wood";
-pub const STONE_AXE: &str = "axe_stone";
+// pub const STONE_AXE: &str = "axe_stone";
 // pub const IRON_AXE: &str = "axe_iron";
 // pub const STEEL_AXE: &str = "axe_steel";
 // pub const DEMONIC_AXE: &str = "axe_demonic";
+pub const GOD_AXE: &str = "axe_god";
 
 pub const WOODEN_SAP: &str = "sap_wood";
 pub const STONE_SAP: &str = "sap_stone";

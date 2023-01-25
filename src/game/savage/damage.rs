@@ -55,6 +55,18 @@ impl DamageDice {
     }
 }
 
+impl From<Dice> for DamageDice {
+    fn from(dice: Dice) -> Self {
+        match dice {
+            Dice::D4 => DamageDice::D4,
+            Dice::D6 => DamageDice::D6,
+            Dice::D8 => DamageDice::D8,
+            Dice::D10 => DamageDice::D10,
+            Dice::D12 => DamageDice::D12,
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Damage {
     pub dices: Vec<DamageDice>,
@@ -65,9 +77,34 @@ pub struct Damage {
 }
 
 impl Damage {
-    pub fn roll(&self, char_sheet: &CharSheet, critical: bool, explosive: bool) -> u8 {
+    pub fn roll(
+        &self,
+        char_sheet: &CharSheet,
+        critical: bool,
+        explosive: bool,
+        minimum_strength: Option<Dice>,
+    ) -> u8 {
+        let mut not_enough_strength = false;
+        let strength = char_sheet
+            .get_attribute_with_modifiers(Attribute::Strength)
+            .dice();
+        if let Some(minimum_strength) = minimum_strength {
+            if strength < minimum_strength {
+                not_enough_strength = true;
+            }
+        }
+
         let mut result = self.modifier;
-        for dice in &self.dices {
+        if not_enough_strength && result > 0 {
+            result = 0;
+        }
+        for mut dice in self.dices.iter().copied() {
+            if not_enough_strength {
+                let strength = strength.into();
+                if strength < dice {
+                    dice = strength;
+                }
+            }
             result += if explosive {
                 dice.roll_explosive()
             } else {

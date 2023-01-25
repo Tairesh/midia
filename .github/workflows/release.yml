@@ -1,0 +1,79 @@
+name: release
+
+permissions:
+  contents: write
+
+on:
+  push:
+    tags:
+      - v[0-9]+.*
+  workflow_dispatch:
+
+env:
+  MIDIA_VERSION_POSTFIX:
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v3
+
+      - name: "Create release"
+        uses: taiki-e/create-gh-release-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  upload-assets:
+    needs: create-release
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows
+            os: windows-2019
+          - name: Linux
+            os: ubuntu-latest
+          - name: OSX
+            os: macos-10.15
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v3
+
+      - name: "Install Rust toolchain"
+        uses: dtolnay/rust-toolchain@master
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - name: "Install SDL2 (linux)"
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update -y -qq
+          sudo apt-get install libsdl2-dev
+
+      - name: "Install SDL2 (mac)"
+        if: runner.os == 'macOS'
+        run: |
+          HOMEBREW_NO_AUTO_UPDATE=yes HOMEBREW_NO_INSTALL_CLEANUP=yes brew install sdl2
+
+      - name: "Install SDL2 (windows)"
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          Import-Module BitsTransfer
+          Start-BitsTransfer -Source "https://www.libsdl.org/release/SDL2-devel-2.0.22-VC.zip" -Destination SDL2.zip
+          Expand-Archive -Path SDL2.zip -Destination .
+          Get-ChildItem -Path SDL2-2.0.22/lib/x64/ -Recurse -File | Move-Item -Destination . -Force
+
+      - name: "Build and upload binary"
+        uses: taiki-e/upload-rust-binary-action@v1
+        with:
+          bin: midia
+          archive: $bin-$tag-${{ runner.os }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          include: LICENSE,README.md,data
+          leading_dir: true

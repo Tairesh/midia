@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - '**.json'
+    branches:
+      - main
   pull_request:
     paths:
       - '**.json'

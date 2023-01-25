@@ -1,4 +1,4 @@
-use crate::game::{Avatar, BodySlot, Wound};
+use crate::game::{Attribute, Avatar, BodySlot, Wound};
 
 pub struct HitResult {
     pub params: HitParams,
@@ -35,6 +35,19 @@ impl HitResult {
                 wounds += 1;
                 total_damage -= 4;
             }
+        }
+
+        // target can do a Vigor roll to avoid wounds
+        let vigor_roll = target
+            .personality
+            .char_sheet
+            .get_attribute_with_modifiers(Attribute::Vigor)
+            .roll();
+        if vigor_roll.successes() >= wounds {
+            wounds = 0;
+            shock = false;
+        } else {
+            wounds -= vigor_roll.successes();
         }
 
         Self::new(

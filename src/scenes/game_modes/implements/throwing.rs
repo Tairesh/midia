@@ -97,11 +97,12 @@ impl GameModeImpl for Throwing {
     fn update(&mut self, ctx: &mut Context, game: &mut GameScene) -> SomeTransitions {
         self.update_mouse(ctx, game);
         if input::is_key_pressed(ctx, Key::Escape) {
-            game.shift_of_view = Point::default();
+            game.set_shift_of_view(Point::default());
             game.modes.pop();
             return None;
         } else if input::is_some_of_keys_pressed(ctx, &[Key::T, Key::Space, Key::Enter]) {
-            let pos = game.world.borrow().player().pos + game.shift_of_view + self.mouse_moved_pos;
+            let pos =
+                game.world.borrow().player().pos + game.shift_of_view() + self.mouse_moved_pos;
             let unit_in_tile = game
                 .world
                 .borrow()
@@ -124,13 +125,9 @@ impl GameModeImpl for Throwing {
                     .unwrap();
                 game.world.borrow().map().get_tile_mut(pos).items.push(item);
             }
-            game.shift_of_view = Point::default();
+            game.set_shift_of_view(Point::default());
             game.modes.pop();
             return None;
-        } else if input::is_mouse_scrolled_down(ctx) {
-            game.world.borrow_mut().game_view.zoom.dec();
-        } else if input::is_mouse_scrolled_up(ctx) {
-            game.world.borrow_mut().game_view.zoom.inc();
         } else if let Some(dir) = input::get_direction_keys_down(ctx) {
             let now = Instant::now();
             if now.duration_since(self.last_shift).subsec_millis()
@@ -138,11 +135,11 @@ impl GameModeImpl for Throwing {
                 || input::is_key_modifier_down(ctx, KeyModifier::Shift)
             {
                 self.last_shift = now;
-                game.shift_of_view += dir;
+                game.set_shift_of_view(game.shift_of_view() + dir);
             }
         }
 
-        self.shift_of_view = game.shift_of_view;
+        self.shift_of_view = game.shift_of_view();
 
         None
     }

@@ -3,7 +3,8 @@ use std::convert::TryFrom;
 use std::rc::Rc;
 
 use geometry::{Direction, Point, TwoDimDirection, Vec2};
-use tetra::graphics::Color;
+use tetra::graphics::{Canvas, Color};
+use tetra::input::{Key, KeyModifier};
 use tetra::Context;
 
 use crate::game::Item;
@@ -12,6 +13,7 @@ use crate::{
     assets::Assets,
     colors::Colors,
     game::{Action, ActionType, MainHand, World},
+    input,
     scenes::map_view,
     ui::{
         Colorize, GameLog, Horizontal, Label, Position, SomeUISprites, SomeUISpritesMut,
@@ -29,9 +31,11 @@ pub struct GameScene {
     pub world: Rc<RefCell<World>>,
     pub modes: Vec<Rc<RefCell<GameMode>>>,
     pub log: GameLog,
-    pub shift_of_view: Point,
+    shift_of_view: Point,
     pub assets: Rc<Assets>,
     pub window_size: (i32, i32),
+    need_redraw: bool,
+    map_canvas: Option<Canvas>,
 }
 
 impl GameScene {
@@ -135,6 +139,8 @@ impl GameScene {
             assets: app.assets.clone(),
             window_size: app.window_size,
             world,
+            need_redraw: true,
+            map_canvas: None,
         }
     }
 
@@ -154,6 +160,7 @@ impl GameScene {
     pub fn try_rotate_player(&mut self, dir: Direction) {
         if let Ok(dir) = TwoDimDirection::try_from(dir) {
             self.world.borrow_mut().player_mut().vision = dir;
+            self.need_redraw = true;
         }
     }
 
@@ -161,6 +168,7 @@ impl GameScene {
         let pos = self.world.borrow().player().pos + dir;
         self.log
             .log(self.world.borrow().this_is(pos, false), Colors::WHITE_SMOKE);
+        self.need_redraw = true;
     }
 
     fn cancel_action_msg(&mut self, msg: String) {
@@ -174,9 +182,19 @@ impl GameScene {
         match action {
             Ok(action) => {
                 self.world.borrow_mut().player_mut().action = Some(action);
+                self.need_redraw = true;
             }
             Err(msg) => self.cancel_action_msg(msg),
         }
+    }
+
+    pub fn set_shift_of_view(&mut self, shift: Point) {
+        self.shift_of_view = shift;
+        self.need_redraw = true;
+    }
+
+    pub fn shift_of_view(&self) -> Point {
+        self.shift_of_view
     }
 
     pub fn mode_update(&mut self, ctx: &mut Context) -> SomeTransitions {
@@ -190,6 +208,7 @@ impl GameScene {
     fn make_world_tick(&mut self, ctx: &mut Context) {
         self.world.borrow_mut().tick();
 
+        self.need_redraw = true;
         self.update_ui(ctx);
     }
 
@@ -262,8 +281,19 @@ impl GameScene {
 
 impl SceneImpl for GameScene {
     fn on_update(&mut self, ctx: &mut Context) -> SomeTransitions {
+        if input::is_mouse_scrolled_down(ctx)
+            || input::is_key_with_mod_pressed(ctx, (Key::Z, KeyModifier::Shift))
+        {
+            self.world.borrow_mut().game_view.zoom.dec();
+            self.need_redraw = true;
+        } else if input::is_mouse_scrolled_up(ctx) || input::is_key_with_mod_pressed(ctx, Key::Z) {
+            self.world.borrow_mut().game_view.zoom.inc();
+            self.need_redraw = true;
+        }
+
         if self.world.borrow().player().action.is_some() {
             self.make_world_tick(ctx);
+            self.need_redraw = true;
 
             None
         } else {
@@ -272,21 +302,31 @@ impl SceneImpl for GameScene {
     }
 
     fn before_draw(&mut self, ctx: &mut Context) {
-        map_view::view::draw(
-            ctx,
-            &self.world,
-            &self.assets,
-            self.window_size,
-            self.shift_of_view,
-            self.cursors(),
-        );
+        if self.need_redraw || self.map_canvas.is_none() {
+            self.map_canvas = Some(map_view::view::draw(
+                ctx,
+                &self.world,
+                &self.assets,
+                self.window_size,
+                self.shift_of_view,
+            ));
+            self.need_redraw = false;
+        }
+
+        self.map_canvas.as_mut().unwrap().draw(ctx, Vec2::zero());
     }
 
     fn after_draw(&mut self, ctx: &mut Context) {
         // TODO: move this to UI
 
+        map_view::view::draw_cursors(
+            ctx,
+            &self.world,
+            &self.assets,
+            self.window_size,
+            self.cursors(),
+        );
         map_view::ui::draw_log(ctx, &mut self.log);
-
         map_view::view::draw_unit(
             ctx,
             &self.assets.tileset,
@@ -300,6 +340,7 @@ impl SceneImpl for GameScene {
 
     fn on_resize(&mut self, _ctx: &mut Context, window_size: (i32, i32)) {
         self.window_size = window_size;
+        self.need_redraw = true;
     }
 
     fn sprites(&self) -> SomeUISprites {

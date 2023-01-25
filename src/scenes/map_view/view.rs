@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 
 use geometry::{Point, TwoDimDirection, Vec2};
-use tetra::graphics::{Color, DrawParams};
+use tetra::graphics::{Canvas, Color, DrawParams};
 use tetra::Context;
 
 use crate::assets::{Assets, Tileset};
@@ -18,8 +18,9 @@ pub fn draw(
     assets: &Assets,
     window_size: (i32, i32),
     shift_of_view: Point,
-    cursors: Vec<(Point, Color)>,
-) {
+) -> Canvas {
+    let canvas = Canvas::new(ctx, window_size.0, window_size.1).unwrap();
+    tetra::graphics::set_canvas(ctx, &canvas);
     tetra::graphics::clear(ctx, Colors::BLACK);
     let world = world.borrow();
 
@@ -111,6 +112,25 @@ pub fn draw(
     // } else {
     //     self.action_text = None;
     // }
+
+    tetra::graphics::reset_canvas(ctx);
+    canvas
+}
+
+pub fn draw_cursors(
+    ctx: &mut Context,
+    world: &RefCell<World>,
+    assets: &Assets,
+    window_size: (i32, i32),
+    cursors: Vec<(Point, Color)>,
+) {
+    let world = world.borrow();
+
+    let scale = world.game_view.zoom.as_scale();
+    let zoom = world.game_view.zoom.as_view();
+    let tile_size = assets.tileset.tile_size as f32 * zoom;
+    let center = Vec2::new(window_size.0 as f32, window_size.1 as f32) / 2.0
+        - Vec2::new(tile_size, tile_size) / 2.0;
 
     for (delta, color) in cursors {
         let delta = delta * tile_size;

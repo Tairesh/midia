@@ -47,15 +47,7 @@ impl GameModeImpl for Walking {
     // TODO: refactor this method
     #[allow(clippy::too_many_lines)]
     fn update(&mut self, ctx: &mut Context, game: &mut GameScene) -> SomeTransitions {
-        if input::is_mouse_scrolled_down(ctx)
-            || input::is_key_with_mod_pressed(ctx, (Key::Z, KeyModifier::Shift))
-        {
-            game.world.borrow_mut().game_view.zoom.dec();
-            None
-        } else if input::is_mouse_scrolled_up(ctx) || input::is_key_with_mod_pressed(ctx, Key::Z) {
-            game.world.borrow_mut().game_view.zoom.inc();
-            None
-        } else if input::is_key_pressed(ctx, Key::Escape) {
+        if input::is_key_pressed(ctx, Key::Escape) {
             Some(vec![Transition::Push(Scene::GameMenu)])
         } else if input::is_key_with_mod_pressed(ctx, Key::E) {
             game.push_mode(Examining::new().into());

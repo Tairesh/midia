@@ -3,7 +3,7 @@ use std::convert::TryFrom;
 use std::rc::Rc;
 
 use geometry::{Direction, Point, TwoDimDirection, Vec2};
-use tetra::graphics::{Canvas, Color};
+use tetra::graphics::Canvas;
 use tetra::input::{Key, KeyModifier};
 use tetra::Context;
 
@@ -22,7 +22,7 @@ use crate::{
 };
 
 use super::super::{
-    game_modes::{implements::Walking, GameMode, GameModeImpl},
+    game_modes::{implements::Walking, Cursor, GameMode, GameModeImpl},
     SceneImpl, SomeTransitions,
 };
 
@@ -232,7 +232,7 @@ impl GameScene {
         self.sprites[3].as_label().unwrap()
     }
 
-    fn cursors(&self) -> Vec<(Point, Color)> {
+    fn cursors(&self) -> Vec<Cursor> {
         self.current_mode().borrow().cursors(&self.world.borrow())
     }
 

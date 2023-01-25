@@ -1,5 +1,5 @@
-use geometry::{Direction, Point, DIR9};
-use tetra::{graphics::Color, input::Key, Context};
+use geometry::{Direction, DIR9};
+use tetra::{input::Key, Context};
 
 use crate::{
     colors::Colors,
@@ -9,7 +9,7 @@ use crate::{
 
 use super::super::{
     super::{implements::GameScene, SomeTransitions},
-    GameModeImpl,
+    Cursor, CursorType, GameModeImpl,
 };
 
 pub struct Dropping {
@@ -29,9 +29,16 @@ impl Default for Dropping {
 }
 
 impl GameModeImpl for Dropping {
-    fn cursors(&self, world: &World) -> Vec<(Point, Color)> {
+    fn cursors(&self, world: &World) -> Vec<Cursor> {
         if let Some(selected) = self.selected {
-            vec![(selected.into(), Colors::LIME)]
+            vec![
+                (
+                    selected.into(),
+                    Colors::WHITE.with_alpha(0.1),
+                    CursorType::Fill,
+                ),
+                (selected.into(), Colors::LIME, CursorType::Select),
+            ]
         } else {
             DIR9.iter()
                 .copied()
@@ -39,7 +46,7 @@ impl GameModeImpl for Dropping {
                     let pos = world.player().pos + *d;
                     world.map().get_tile(pos).terrain.can_stock_items()
                 })
-                .map(|d| (d.into(), Colors::WHITE_SMOKE))
+                .map(|d| (d.into(), Colors::WHITE_SMOKE, CursorType::Select))
                 .collect()
         }
     }

@@ -1,11 +1,11 @@
-use geometry::{Direction, Point};
-use tetra::{graphics::Color, input::Key, Context};
+use geometry::Direction;
+use tetra::{input::Key, Context};
 
 use crate::{colors::Colors, game::World, input};
 
 use super::super::{
     super::{implements::GameScene, SomeTransitions},
-    GameModeImpl,
+    Cursor, CursorType, GameModeImpl,
 };
 
 pub struct Examining {
@@ -25,9 +25,16 @@ impl Default for Examining {
 }
 
 impl GameModeImpl for Examining {
-    fn cursors(&self, _world: &World) -> Vec<(Point, Color)> {
+    fn cursors(&self, _world: &World) -> Vec<Cursor> {
         if let Some(selected) = self.selected {
-            vec![(selected.into(), Colors::LIME)]
+            vec![
+                (
+                    selected.into(),
+                    Colors::WHITE.with_alpha(0.1),
+                    CursorType::Fill,
+                ),
+                (selected.into(), Colors::LIME, CursorType::Select),
+            ]
         } else {
             vec![]
         }

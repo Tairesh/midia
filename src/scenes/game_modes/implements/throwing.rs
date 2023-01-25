@@ -2,7 +2,6 @@ use std::time::Instant;
 
 use geometry::{Point, Vec2};
 use tetra::{
-    graphics::Color,
     input::{Key, KeyModifier},
     Context,
 };
@@ -13,7 +12,7 @@ use crate::{colors::Colors, game::World, input, settings::Settings};
 
 use super::super::{
     super::{implements::GameScene, SomeTransitions},
-    GameModeImpl,
+    Cursor, CursorType, GameModeImpl,
 };
 
 pub struct Throwing {
@@ -62,7 +61,7 @@ impl Default for Throwing {
 }
 
 impl GameModeImpl for Throwing {
-    fn cursors(&self, world: &World) -> Vec<(Point, Color)> {
+    fn cursors(&self, world: &World) -> Vec<Cursor> {
         let pos = self.shift_of_view + self.mouse_moved_pos;
         let damage = world
             .player()
@@ -73,15 +72,24 @@ impl GameModeImpl for Throwing {
             .unwrap();
         let distance = RangedDistance::define(pos.distance(Point::default()), damage.distance);
 
-        vec![(
-            self.mouse_moved_pos,
-            match distance {
-                RangedDistance::Close => Colors::LIME,
-                RangedDistance::Medium => Colors::YELLOW,
-                RangedDistance::Far => Colors::ORANGE,
-                RangedDistance::Unreachable => Colors::RED,
-            },
-        )]
+        // TODO: add line to target
+        vec![
+            (
+                self.mouse_moved_pos,
+                Colors::WHITE.with_alpha(0.1),
+                CursorType::Fill,
+            ),
+            (
+                self.mouse_moved_pos,
+                match distance {
+                    RangedDistance::Close => Colors::LIME,
+                    RangedDistance::Medium => Colors::YELLOW,
+                    RangedDistance::Far => Colors::ORANGE,
+                    RangedDistance::Unreachable => Colors::RED,
+                },
+                CursorType::Select,
+            ),
+        ]
     }
 
     fn can_push(&self, world: &World) -> Result<(), String> {

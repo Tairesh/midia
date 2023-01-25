@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 
 use geometry::{Point, TwoDimDirection, Vec2};
-use tetra::graphics::{Canvas, Color, DrawParams};
+use tetra::graphics::{Canvas, DrawParams};
 use tetra::Context;
 
 use crate::assets::{Assets, Tileset};
@@ -9,6 +9,7 @@ use crate::colors::Colors;
 use crate::game::map::TerrainView;
 use crate::game::traits::Name;
 use crate::game::{Avatar, World};
+use crate::scenes::game_modes::Cursor;
 
 // TODO: refactor this shit
 
@@ -122,7 +123,7 @@ pub fn draw_cursors(
     world: &RefCell<World>,
     assets: &Assets,
     window_size: (i32, i32),
-    cursors: Vec<(Point, Color)>,
+    cursors: Vec<Cursor>,
 ) {
     let world = world.borrow();
 
@@ -132,19 +133,15 @@ pub fn draw_cursors(
     let center = Vec2::new(window_size.0 as f32, window_size.1 as f32) / 2.0
         - Vec2::new(tile_size, tile_size) / 2.0;
 
-    for (delta, color) in cursors {
+    for (delta, color, typ) in cursors {
         let delta = delta * tile_size;
         let position = center + delta;
 
-        let params = DrawParams::new().position(position).scale(scale);
-        assets.tileset.draw_region(
-            ctx,
-            "fill",
-            params.clone().color(Colors::WHITE.with_alpha(0.1)),
-        );
-        assets
-            .tileset
-            .draw_region(ctx, "cursor", params.color(color));
+        let params = DrawParams::new()
+            .position(position)
+            .scale(scale)
+            .color(color);
+        assets.tileset.draw_region(ctx, typ.looks_like(), params);
     }
 }
 

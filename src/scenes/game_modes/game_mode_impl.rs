@@ -1,6 +1,4 @@
 use enum_dispatch::enum_dispatch;
-use geometry::Point;
-use tetra::graphics::Color;
 use tetra::Context;
 
 use crate::game::World;
@@ -11,12 +9,12 @@ use super::{
         Closing, Digging, Dropping, Examining, ForceAttack, Observing, Opening, Reading, Throwing,
         Walking, WieldingFromGround,
     },
-    GameMode,
+    Cursor, GameMode,
 };
 
 #[enum_dispatch]
 pub trait GameModeImpl {
-    fn cursors(&self, _world: &World) -> Vec<(Point, Color)> {
+    fn cursors(&self, _world: &World) -> Vec<Cursor> {
         vec![]
     }
     fn can_push(&self, _world: &World) -> Result<(), String> {

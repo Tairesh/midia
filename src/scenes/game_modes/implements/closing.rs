@@ -1,5 +1,4 @@
-use geometry::{Direction, Point, DIR9};
-use tetra::graphics::Color;
+use geometry::{Direction, DIR9};
 use tetra::input::Key;
 use tetra::Context;
 
@@ -10,7 +9,7 @@ use crate::{
     scenes::{implements::GameScene, SomeTransitions},
 };
 
-use super::super::GameModeImpl;
+use super::super::{Cursor, CursorType, GameModeImpl};
 
 pub struct Closing {
     selected: Option<Direction>,
@@ -29,16 +28,23 @@ impl Default for Closing {
 }
 
 impl GameModeImpl for Closing {
-    fn cursors(&self, world: &World) -> Vec<(Point, Color)> {
+    fn cursors(&self, world: &World) -> Vec<Cursor> {
         if let Some(selected) = self.selected {
-            vec![(selected.into(), Colors::LIME)]
+            vec![
+                (
+                    selected.into(),
+                    Colors::WHITE.with_alpha(0.1),
+                    CursorType::Fill,
+                ),
+                (selected.into(), Colors::LIME, CursorType::Select),
+            ]
         } else {
             DIR9.into_iter()
                 .filter(|&d| {
                     let pos = world.player().pos + d;
                     world.map().get_tile(pos).terrain.can_be_closed()
                 })
-                .map(|d| (d.into(), Colors::WHITE_SMOKE))
+                .map(|d| (d.into(), Colors::WHITE_SMOKE, CursorType::Select))
                 .collect()
         }
     }

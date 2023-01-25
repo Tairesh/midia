@@ -4,7 +4,7 @@ use geometry::{Direction, Point, Rect, Vec2};
 use tetra::{
     graphics::{
         mesh::{Mesh, ShapeStyle},
-        Color, Rectangle,
+        Rectangle,
     },
     input::{Key, KeyModifier},
     Context,
@@ -20,7 +20,7 @@ use crate::{
 
 use super::super::{
     super::{implements::GameScene, SomeTransitions},
-    GameModeImpl,
+    Cursor, CursorType, GameModeImpl,
 };
 
 struct ObservingSprite {
@@ -137,8 +137,8 @@ impl Default for Observing {
 }
 
 impl GameModeImpl for Observing {
-    fn cursors(&self, _world: &World) -> Vec<(Point, Color)> {
-        vec![(self.mouse_moved_pos, Colors::LIME)]
+    fn cursors(&self, _world: &World) -> Vec<Cursor> {
+        vec![(self.mouse_moved_pos, Colors::LIME, CursorType::Select)]
     }
 
     fn update(&mut self, ctx: &mut Context, game: &mut GameScene) -> SomeTransitions {

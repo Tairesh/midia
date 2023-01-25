@@ -1,5 +1,4 @@
 use geometry::{Point, DIR8};
-use tetra::graphics::Color;
 use tetra::input::Key;
 use tetra::Context;
 
@@ -10,7 +9,7 @@ use crate::input;
 use crate::scenes::implements::GameScene;
 use crate::scenes::SomeTransitions;
 
-use super::super::GameModeImpl;
+use super::super::{Cursor, CursorType, GameModeImpl};
 
 pub struct ForceAttack {
     pub target: Option<Point>,
@@ -23,9 +22,13 @@ impl ForceAttack {
 }
 
 impl GameModeImpl for ForceAttack {
-    fn cursors(&self, world: &World) -> Vec<(Point, Color)> {
+    fn cursors(&self, world: &World) -> Vec<Cursor> {
         if let Some(target) = self.target {
-            vec![(target - world.player().pos, Colors::LIGHT_CORAL)]
+            let pos = target - world.player().pos;
+            vec![
+                (pos, Colors::WHITE.with_alpha(0.1), CursorType::Fill),
+                (pos, Colors::LIGHT_CORAL, CursorType::Select),
+            ]
         } else {
             DIR8.iter()
                 .copied()
@@ -36,7 +39,7 @@ impl GameModeImpl for ForceAttack {
                         .units
                         .is_empty()
                 })
-                .map(|dir| (dir.into(), Colors::RED))
+                .map(|dir| (dir.into(), Colors::RED, CursorType::Select))
                 .collect()
         }
     }

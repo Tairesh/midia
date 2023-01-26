@@ -72,24 +72,26 @@ impl GameModeImpl for Throwing {
             .unwrap();
         let distance = RangedDistance::define(pos.distance(Point::default()), damage.distance);
 
-        // TODO: add line to target
-        vec![
-            (
-                self.mouse_moved_pos,
-                Colors::WHITE.with_alpha(0.1),
-                CursorType::Fill,
-            ),
-            (
-                self.mouse_moved_pos,
-                match distance {
-                    RangedDistance::Close => Colors::LIME,
-                    RangedDistance::Medium => Colors::YELLOW,
-                    RangedDistance::Far => Colors::ORANGE,
-                    RangedDistance::Unreachable => Colors::RED,
-                },
-                CursorType::Select,
-            ),
-        ]
+        let mut cursors: Vec<Cursor> = self
+            .mouse_moved_pos
+            .line_to(-self.shift_of_view)
+            .into_iter()
+            .skip(1)
+            .map(|p| (p, Colors::RED.with_alpha(0.2), CursorType::Fill))
+            .collect();
+
+        cursors.push((
+            self.mouse_moved_pos,
+            match distance {
+                RangedDistance::Close => Colors::LIME,
+                RangedDistance::Medium => Colors::YELLOW,
+                RangedDistance::Far => Colors::ORANGE,
+                RangedDistance::Unreachable => Colors::RED,
+            },
+            CursorType::Select,
+        ));
+
+        cursors
     }
 
     fn can_push(&self, world: &World) -> Result<(), String> {

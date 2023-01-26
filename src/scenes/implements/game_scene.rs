@@ -208,7 +208,6 @@ impl GameScene {
     fn make_world_tick(&mut self, ctx: &mut Context) {
         self.world.borrow_mut().tick();
 
-        self.need_redraw = true;
         self.update_ui(ctx);
     }
 
@@ -238,6 +237,7 @@ impl GameScene {
 
     pub fn update_ui(&mut self, ctx: &mut Context) {
         // TODO: refactor
+        self.need_redraw = true;
 
         for event in self.world.borrow().log().new_events() {
             self.log.log(event.msg.as_str(), event.category.into());

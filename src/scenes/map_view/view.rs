@@ -13,6 +13,7 @@ use crate::scenes::game_modes::Cursor;
 
 // TODO: refactor this shit
 
+#[allow(clippy::too_many_lines)]
 pub fn draw(
     ctx: &mut Context,
     world: &RefCell<World>,
@@ -52,26 +53,24 @@ pub fn draw(
         let position = center + delta * tile_size;
 
         let this_tile_size = Tileset::get_size(tile.terrain.looks_like());
-        let asset_tile_size = assets.tileset.tile_size as f32;
-        let correction = Vec2::new(
-            -(this_tile_size.x - asset_tile_size) / 2.0 * zoom,
-            -(this_tile_size.y - asset_tile_size) * zoom,
+        let asset_tile_size = Vec2::new(
+            assets.tileset.tile_size as f32,
+            assets.tileset.tile_size as f32,
         );
-
-        assets.tileset.draw_region(
-            ctx,
-            tile.terrain.looks_like(),
-            DrawParams::new()
-                .position(position + correction)
-                .scale(scale)
-                .color(tile.terrain.color().unwrap_or(Colors::WHITE)),
-        );
+        if this_tile_size == asset_tile_size {
+            assets.tileset.draw_region(
+                ctx,
+                tile.terrain.looks_like(),
+                DrawParams::new()
+                    .position(position)
+                    .scale(scale)
+                    .color(tile.terrain.color().unwrap_or(Colors::WHITE)),
+            );
+        }
         if let Some(item) = tile.top_item() {
             let this_tile_size = Tileset::get_size(item.looks_like());
-            let correction = Vec2::new(
-                -(this_tile_size.x - asset_tile_size) / 2.0 * zoom,
-                -(this_tile_size.y - asset_tile_size) * zoom,
-            );
+            let mut correction = -(this_tile_size - asset_tile_size) * zoom;
+            correction.x /= 2.0;
 
             assets.tileset.draw_region(
                 ctx,
@@ -94,8 +93,8 @@ pub fn draw(
         if !world.is_visible(pos) {
             continue;
         }
-
         let position = center + Vec2::from(pos - center_tile) * tile_size;
+
         for i in tile.units.iter().copied() {
             draw_unit(
                 ctx,
@@ -104,6 +103,31 @@ pub fn draw(
                 zoom,
                 true,
                 world.get_unit(i),
+            );
+        }
+    }
+    for &(pos, tile) in &tiles {
+        if !world.is_visible(pos) {
+            continue;
+        }
+        let position = center + Vec2::from(pos - center_tile) * tile_size;
+
+        let this_tile_size = Tileset::get_size(tile.terrain.looks_like());
+        let asset_tile_size = Vec2::new(
+            assets.tileset.tile_size as f32,
+            assets.tileset.tile_size as f32,
+        );
+        if this_tile_size != asset_tile_size {
+            let mut correction = -(this_tile_size - asset_tile_size) * zoom;
+            correction.x /= 2.0;
+
+            assets.tileset.draw_region(
+                ctx,
+                tile.terrain.looks_like(),
+                DrawParams::new()
+                    .position(position + correction)
+                    .scale(scale)
+                    .color(tile.terrain.color().unwrap_or(Colors::WHITE)),
             );
         }
     }

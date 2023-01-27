@@ -183,8 +183,12 @@ impl World {
         self.map.borrow_mut()
     }
 
-    pub fn is_visible<P: Into<Point>>(&self, pos: P) -> bool {
+    pub fn is_visible(&self, pos: impl Into<Point>) -> bool {
         self.fov.visible().contains(&pos.into())
+    }
+
+    pub fn is_observable(&self, pos: impl Into<Point>) -> bool {
+        self.player().pos.square_distance(pos.into()) <= (VISION_RANGE * VISION_RANGE) as u32
     }
 
     pub fn get_unit(&self, unit_id: usize) -> &Avatar {

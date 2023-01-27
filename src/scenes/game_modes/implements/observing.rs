@@ -82,7 +82,11 @@ impl Observing {
 
     fn update_sprite(&mut self, ctx: &mut Context, game: &mut GameScene) {
         let pos = game.world.borrow().player().pos + game.shift_of_view() + self.mouse_moved_pos;
-        let msg = game.world.borrow().this_is(pos, true);
+        let msg = if game.world.borrow().is_visible(pos) {
+            game.world.borrow().this_is(pos, true)
+        } else {
+            "???".to_string()
+        };
         let tile_size = game.tile_size();
         let position = Vec2::from(self.mouse_moved_pos * tile_size);
         let position_shift = tile_size / 2.0 + 5.0;
@@ -149,14 +153,20 @@ impl GameModeImpl for Observing {
             game.modes.pop();
             return None;
         } else if let Some(dir) = input::get_direction_keys_down(ctx) {
-            let now = Instant::now();
-            if now.duration_since(self.last_shift).subsec_millis()
-                > Settings::instance().input.repeat_interval
-                || input::is_key_modifier_down(ctx, KeyModifier::Shift)
-            {
-                self.last_shift = now;
-                game.set_shift_of_view(game.shift_of_view() + dir);
-                shifted = true;
+            let pos = game.world.borrow().player().pos
+                + game.shift_of_view()
+                + self.mouse_moved_pos
+                + dir;
+            if game.world.borrow().is_observable(pos) {
+                let now = Instant::now();
+                if now.duration_since(self.last_shift).subsec_millis()
+                    > Settings::instance().input.repeat_interval
+                    || input::is_key_modifier_down(ctx, KeyModifier::Shift)
+                {
+                    self.last_shift = now;
+                    game.set_shift_of_view(game.shift_of_view() + dir);
+                    shifted = true;
+                }
             }
         }
         if self.mouse_moved || shifted {

@@ -38,23 +38,5 @@
       "damage_types": ["SLASH"],
       "minimum_strength": "D8"
     }
-  },
-  {
-    "type": "item",
-    "id": "knife_stone",
-    "name": "stone knife",
-    "looks_like": "knife_stone",
-    "tags": ["TOOL", "WEAPON"],
-    "qualities": ["BUTCH", "CUT"],
-    "size": "SMALL",
-    "two_handed_tool": false,
-    "materials": ["wood", "stone"],
-    "melee_damage": {
-      "damage": {
-        "attribute": "STRENGTH",
-        "dices": ["D4"]
-      },
-      "damage_types": ["SLASH", "PIERCE"]
-    }
   }
 ]

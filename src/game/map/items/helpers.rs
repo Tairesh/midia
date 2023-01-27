@@ -18,13 +18,13 @@ pub const LEATHER_ARM_GUARD: &str = "arm_guard_leather";
 
 // pub const BUCKLER: &str = "buckler";
 
-// pub const WOODEN_KNIFE: &str = "knife_wood";
+pub const WOODEN_KNIFE: &str = "knife_wood";
 pub const STONE_KNIFE: &str = "knife_stone";
-// pub const IRON_KNIFE: &str = "knife_iron";
-// pub const STEEL_KNIFE: &str = "knife_steel";
-// pub const DEMONIC_KNIFE: &str = "knife_demonic";
-// pub const BONE_KNIFE: &str = "knife_bone";
-// pub const OBSIDIAN_KNIFE: &str = "knife_obsidian";
+pub const IRON_KNIFE: &str = "knife_iron";
+pub const STEEL_KNIFE: &str = "knife_steel";
+pub const DEMONIC_KNIFE: &str = "knife_demonic";
+pub const BONE_KNIFE: &str = "knife_bone";
+pub const OBSIDIAN_KNIFE: &str = "knife_obsidian";
 
 // pub const WOODEN_AXE: &str = "axe_wood";
 // pub const STONE_AXE: &str = "axe_stone";

@@ -86,5 +86,128 @@
       },
       "damage_types": ["BLUNT"]
     }
+  },
+  {
+    "type": "item",
+    "id": "knife_wood",
+    "name": "wooden knife",
+    "looks_like": "knife_wood",
+    "tags": ["TOOL", "WEAPON"],
+    "qualities": ["BUTCH", "CUT"],
+    "size": "SMALL",
+    "materials": ["wood"],
+    "melee_damage": {
+      "damage": {
+        "attribute": "STRENGTH",
+        "dices": ["D4/2"]
+      },
+      "damage_types": ["SLASH", "PIERCE"]
+    }
+  },
+  {
+    "type": "item",
+    "id": "knife_stone",
+    "name": "stone knife",
+    "looks_like": "knife_stone",
+    "tags": ["TOOL", "WEAPON"],
+    "qualities": ["BUTCH", "CUT"],
+    "size": "SMALL",
+    "materials": ["wood", "stone"],
+    "melee_damage": {
+      "damage": {
+        "attribute": "STRENGTH",
+        "dices": ["D4"]
+      },
+      "damage_types": ["SLASH", "PIERCE"]
+    }
+  },
+  {
+    "type": "item",
+    "id": "knife_iron",
+    "name": "iron knife",
+    "looks_like": "knife_metal",
+    "tags": ["TOOL", "WEAPON"],
+    "qualities": ["BUTCH", "CUT"],
+    "size": "SMALL",
+    "materials": ["wood", "iron"],
+    "melee_damage": {
+      "damage": {
+        "attribute": "STRENGTH",
+        "dices": ["D4"]
+      },
+      "penetration": 1,
+      "damage_types": ["SLASH", "PIERCE"]
+    }
+  },
+  {
+    "type": "item",
+    "id": "knife_steel",
+    "name": "steel knife",
+    "looks_like": "knife_metal",
+    "tags": ["TOOL", "WEAPON"],
+    "qualities": ["BUTCH", "CUT"],
+    "size": "SMALL",
+    "materials": ["wood", "steel"],
+    "melee_damage": {
+      "damage": {
+        "attribute": "STRENGTH",
+        "dices": ["D4"]
+      },
+      "penetration": 2,
+      "damage_types": ["SLASH", "PIERCE"]
+    }
+  },
+  {
+    "type": "item",
+    "id": "knife_demonic",
+    "name": "demonic metal knife",
+    "looks_like": "knife_demonic",
+    "tags": ["TOOL", "WEAPON"],
+    "qualities": ["BUTCH", "CUT"],
+    "size": "SMALL",
+    "materials": ["wood", "demonite"],
+    "melee_damage": {
+      "damage": {
+        "attribute": "STRENGTH",
+        "dices": ["D4"]
+      },
+      "penetration": 2,
+      "damage_types": ["SLASH", "PIERCE"]
+    }
+  },
+  {
+    "type": "item",
+    "id": "knife_bone",
+    "name": "bone knife",
+    "looks_like": "knife_bone",
+    "tags": ["TOOL", "WEAPON"],
+    "qualities": ["BUTCH", "CUT"],
+    "size": "SMALL",
+    "materials": ["wood", "bone"],
+    "melee_damage": {
+      "damage": {
+        "attribute": "STRENGTH",
+        "dices": ["D4"]
+      },
+      "damage_types": ["SLASH", "PIERCE"]
+    }
+  },
+  {
+    "type": "item",
+    "id": "knife_obsidian",
+    "name": "obsidian knife",
+    "looks_like": "knife_obsidian",
+    "tags": ["TOOL", "WEAPON"],
+    "qualities": ["BUTCH", "CUT"],
+    "size": "SMALL",
+    "materials": ["wood", "obsidian"],
+    "melee_damage": {
+      "damage": {
+        "attribute": "STRENGTH",
+        "dices": ["D4"],
+        "modifier": 1
+      },
+      "damage_types": ["SLASH", "PIERCE"]
+    }
   }
 ]

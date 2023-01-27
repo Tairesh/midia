@@ -83,10 +83,11 @@ impl GameModeImpl for Throwing {
         cursors.push((
             self.mouse_moved_pos,
             match distance {
+                RangedDistance::Melee => Colors::ORANGE,
                 RangedDistance::Close => Colors::LIME,
                 RangedDistance::Medium => Colors::YELLOW,
-                RangedDistance::Far => Colors::ORANGE,
-                RangedDistance::Unreachable => Colors::RED,
+                RangedDistance::Far => Colors::RED,
+                RangedDistance::Unreachable => Colors::LIGHT_SKY_BLUE,
             },
             CursorType::Select,
         ));
@@ -139,13 +140,26 @@ impl GameModeImpl for Throwing {
             game.modes.pop();
             return None;
         } else if let Some(dir) = input::get_direction_keys_down(ctx) {
-            let now = Instant::now();
-            if now.duration_since(self.last_shift).subsec_millis()
-                > Settings::instance().input.repeat_interval
-                || input::is_key_modifier_down(ctx, KeyModifier::Shift)
-            {
-                self.last_shift = now;
-                game.set_shift_of_view(game.shift_of_view() + dir);
+            let damage = game
+                .world
+                .borrow()
+                .player()
+                .wield
+                .active_hand()
+                .unwrap()
+                .throw_damage()
+                .unwrap();
+            let pos = self.shift_of_view + self.mouse_moved_pos + dir;
+            let distance = RangedDistance::define(pos.distance(Point::default()), damage.distance);
+            if distance != RangedDistance::Unreachable {
+                let now = Instant::now();
+                if now.duration_since(self.last_shift).subsec_millis()
+                    > Settings::instance().input.repeat_interval
+                    || input::is_key_modifier_down(ctx, KeyModifier::Shift)
+                {
+                    self.last_shift = now;
+                    game.set_shift_of_view(game.shift_of_view() + dir);
+                }
             }
         }
 

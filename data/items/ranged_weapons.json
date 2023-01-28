@@ -1,0 +1,19 @@
+[
+  {
+    "type": "item",
+    "id": "shard_obsidian",
+    "name": "obsidian shard",
+    "description": "A shard of obsidian.  It's very sharp.",
+    "looks_like": "obsidian_chunk",
+    "size": "SMALL",
+    "materials": ["obsidian"],
+    "throw_damage": {
+      "damage": {
+        "dices": ["D4", "D4"],
+        "crit_dice": "D8"
+      },
+      "damage_types": ["SLASH", "PIERCE"],
+      "distance": 3
+    }
+  }
+]

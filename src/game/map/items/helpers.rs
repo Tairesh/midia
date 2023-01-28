@@ -116,7 +116,7 @@ pub const ROCK: &str = "rock";
 // pub const DEMONIC_CHUNK: &str = "demonic_chunk";
 // pub const SHARP_DEMONIC_CHUNK: &str = "sharp_demonic_chunk";
 // pub const DEMONIC_SHOT: &str = "demonic_shot";
-// pub const OBSIDIAN_CHUNK: &str = "obsidian_chunk";
+pub const OBSIDIAN_SHARD: &str = "shard_obsidian";
 
 pub const CORPSE: &str = "corpse";
 pub const BOOK: &str = "book";

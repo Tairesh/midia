@@ -74,6 +74,8 @@ pub struct Damage {
     pub attribute: Option<Attribute>,
     #[serde(default)]
     pub modifier: i8,
+    #[serde(default)]
+    pub crit_dice: Option<Dice>,
 }
 
 impl Damage {
@@ -121,10 +123,11 @@ impl Damage {
             .total;
         }
         if critical {
+            let crit_dice = self.crit_dice.unwrap_or(Dice::D6);
             result += if explosive {
-                Dice::D6.roll_explosive()
+                crit_dice.roll_explosive()
             } else {
-                Dice::D6.roll()
+                crit_dice.roll()
             } as i8;
         }
         result.max(0) as u8

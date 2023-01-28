@@ -5,8 +5,8 @@ use arrayvec::ArrayVec;
 use rand::{distributions::Standard, rngs::StdRng, Rng, SeedableRng};
 
 use crate::game::map::items::helpers::{
-    random_book, BACKPACK, DEMONIC_SAP, GOD_AXE, HAT, LEATHER_ARM_GUARD, RAGS, STONE_KNIFE,
-    STONE_SHOVEL,
+    random_book, BACKPACK, DEMONIC_SAP, GOD_AXE, HAT, LEATHER_ARM_GUARD, OBSIDIAN_SHARD, RAGS,
+    STONE_KNIFE, STONE_SHOVEL,
 };
 
 use super::{
@@ -44,7 +44,15 @@ impl Chunk {
             tiles.push(Tile::new(if rng.gen_bool(0.005) {
                 Tree::new(rng.sample(Standard)).into()
             } else if rng.gen_bool(0.003) {
-                Chest::new(vec![random_book(), Item::new(STONE_KNIFE)], false).into()
+                Chest::new(
+                    vec![
+                        random_book(),
+                        Item::new(STONE_KNIFE),
+                        Item::new(OBSIDIAN_SHARD),
+                    ],
+                    false,
+                )
+                .into()
             } else if rng.gen_bool(0.01) {
                 Boulder::new(rng.sample(Standard)).into()
             } else if rng.gen_bool(0.5) {

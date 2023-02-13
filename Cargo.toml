@@ -29,4 +29,4 @@ enum-iterator = "1.1"
 winres = "0.1"
 
 [dev-dependencies]
-test-case = "2.1"
+test-case = "3.0"

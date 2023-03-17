@@ -7,7 +7,7 @@ edition = "2021"
 build = "build.rs"
 
 [dependencies.tetra]
-version = "0.7"
+version = "0.8"
 default-features = false
 features = ["serde_support", "texture_png", "texture_jpeg", "font_ttf"]
 

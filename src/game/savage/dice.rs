@@ -175,8 +175,11 @@ impl From<Dice> for DiceWithModifier {
     }
 }
 
-#[derive(Serialize, Deserialize, Sequence, Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(
+    Serialize, Deserialize, Sequence, Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Default,
+)]
 pub enum SkillLevel {
+    #[default]
     #[serde(rename = "d4-2")]
     None,
     D4,
@@ -258,12 +261,6 @@ impl SkillLevel {
 
     pub fn steps_above_attr(self, attr: Dice) -> i8 {
         self as i8 - (attr as i8 + 1)
-    }
-}
-
-impl Default for SkillLevel {
-    fn default() -> Self {
-        SkillLevel::None
     }
 }
 

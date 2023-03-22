@@ -54,7 +54,7 @@ impl ActionImpl for Throw {
 
             Yes(THROW_ATTACK_MOVES)
         } else {
-            return No(format!("You can't throw {}.", item.name()));
+            No(format!("You can't throw {}.", item.name()))
         }
     }
 

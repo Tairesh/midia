@@ -16,7 +16,7 @@ features = ["serde_support", "texture_png", "texture_jpeg", "font_ttf"]
 geometry = { git = "https://github.com/Tairesh/geometry.git", features = ["serde", "rand"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-serde_with = "2.0"
+serde_with = "3.0"
 rand = "^0.8"
 chrono = "0.4"
 enum_dispatch = "0.3"

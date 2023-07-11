@@ -105,6 +105,13 @@ pub fn draw(
                 world.get_unit(i),
             );
         }
+        if !tile.items.is_empty() {
+            assets.tileset.draw_region(
+                ctx,
+                "highlight",
+                DrawParams::new().position(position).scale(scale),
+            );
+        }
     }
     for &(pos, tile) in &tiles {
         if !world.is_visible(pos) {

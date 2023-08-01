@@ -84,7 +84,7 @@ pub const DEMONIC_SAP: &str = "sap_demonic";
 // pub const STEEL_PIKE: &str = "pike_steel";
 // pub const DEMONIC_PIKE: &str = "pike_demonic";
 
-// pub const WOODEN_BOW: &str = "bow_wood";
+pub const WOODEN_SHORTBOW: &str = "shortbow_wood";
 // pub const DEMONIC_BOW: &str = "bow_demonic";
 // pub const WOODEN_CROSSBOW: &str = "crossbow_wood";
 // pub const IRON_CROSSBOW: &str = "crossbow_iron";
@@ -96,7 +96,7 @@ pub const DEMONIC_SAP: &str = "sap_demonic";
 // pub const RIFLE: &str = "rifle";
 // pub const SLINGSHOT: &str = "slingshot";
 
-// pub const WOODEN_ARROW: &str = "arrow_wood";
+pub const WOODEN_ARROW: &str = "arrow_wood";
 // pub const STONE_ARROW: &str = "arrow_stone";
 // pub const IRON_ARROW: &str = "arrow_iron";
 // pub const STEEL_ARROW: &str = "arrow_steel";
@@ -151,6 +151,9 @@ pub fn dead_body(unit: &Avatar) -> Item {
         wearable: None,
         melee_damage: None,
         throw_damage: None,
+        ranged_damage: None,
+        ammo: None,
+        ammo_types: HashSet::default(),
         // TODO: fur color
         color_from_material: Some(Material::Flesh),
     })

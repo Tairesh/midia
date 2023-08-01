@@ -237,6 +237,9 @@ mod tests {
             melee_damage: None,
             color_from_material: None,
             throw_damage: None,
+            ranged_damage: None,
+            ammo_types: HashSet::new(),
+            ammo: None,
         }));
 
         assert!(Action::new(0, Throw::new(1).into(), &world).is_err());

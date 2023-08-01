@@ -205,6 +205,30 @@ impl Default for DamageRollResult {
     }
 }
 
+#[derive(Serialize, Deserialize, Debug, Hash, Eq, PartialEq, Copy, Clone)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum AmmoType {
+    Arrow,
+    Bolt,
+    Rock,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct AmmoValue {
+    pub typ: HashSet<AmmoType>,
+    pub damage_modifier: DamageModifier,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct DamageModifier {
+    #[serde(default)]
+    pub damage: i8,
+    #[serde(default)]
+    pub penetration: i8,
+    #[serde(default)]
+    pub damage_dice: Option<Dice>,
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct WearableValue {
     pub layer: WearLayer,
@@ -297,9 +321,15 @@ pub struct ItemPrototype {
     #[serde(default)]
     pub wearable: Option<WearableValue>,
     #[serde(default)]
-    pub melee_damage: Option<DamageValue>,
-    #[serde(default)]
     pub color_from_material: Option<Material>,
     #[serde(default)]
+    pub melee_damage: Option<DamageValue>,
+    #[serde(default)]
     pub throw_damage: Option<DamageValue>,
+    #[serde(default)]
+    pub ranged_damage: Option<DamageValue>,
+    #[serde(default)]
+    pub ammo_types: HashSet<AmmoType>,
+    #[serde(default)]
+    pub ammo: Option<AmmoValue>,
 }

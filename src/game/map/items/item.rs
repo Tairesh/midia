@@ -5,6 +5,7 @@ use std::collections::HashSet;
 use serde::{Deserialize, Serialize};
 use tetra::graphics::Color;
 
+use crate::game::game_data::AmmoType;
 use crate::game::{DamageValue, GameData, ItemPrototype, ItemQuality, ItemSize, ItemTag};
 
 use super::container::Container;
@@ -213,6 +214,14 @@ impl Item {
         }
 
         DamageValue::improvised_throw(self)
+    }
+
+    pub fn ranged_damage(&self) -> Option<DamageValue> {
+        self.proto().ranged_damage.clone()
+    }
+
+    pub fn ammo_types(&self) -> &HashSet<AmmoType> {
+        &self.proto().ammo_types
     }
 }
 

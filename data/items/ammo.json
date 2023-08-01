@@ -1,0 +1,17 @@
+[
+  {
+    "type": "item",
+    "id": "arrow_wood",
+    "name": "wooden arrow",
+    "description": "Weakest arrow, made entirely from wood.",
+    "looks_like": "arrow_wood",
+    "size": "SMALL",
+    "materials": ["wood"],
+    "ammo": {
+      "typ": ["ARROW"],
+      "damage_modifier": {
+        "damage": -1
+      }
+    }
+  }
+]

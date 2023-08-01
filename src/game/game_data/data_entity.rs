@@ -14,6 +14,7 @@ pub enum DataEntity {
 
 #[cfg(test)]
 mod tests {
+    use crate::game::game_data::item::AmmoType;
     use crate::game::game_data::DamageType;
     use crate::game::races::{BodySlot, Race, Sex};
     use crate::game::savage::DamageDice;
@@ -254,6 +255,102 @@ mod tests {
             assert!(item.materials.contains(&Material::Stone));
             assert_eq!(item.size, ItemSize::Small);
             assert!(!item.two_handed_tool);
+        } else {
+            panic!("Expected DataEntity::Item, got {:?}", slice[0]);
+        }
+    }
+
+    #[test]
+    fn test_deserialize_bow_and_arrow() {
+        const JSON: &str = r#"
+        [
+          {
+            "type": "item",
+            "id": "shortbow_wood",
+            "name": "wooden short bow",
+            "description": "Emphasizing portability and agility over power, this all-wood bow is suitable for small game and harassing enemies.",
+            "looks_like": "bow_wood",
+            "size": "MEDIUM",
+            "materials": ["wood"],
+            "tags": ["WEAPON"],
+            "two_handed_tool": true,
+            "ranged_damage": {
+              "damage": {
+                "attribute": "STRENGTH",
+                "dices": ["D4"]
+              },
+              "damage_types": ["PIERCE"],
+              "distance": 12
+            },
+            "ammo_types": ["ARROW"]
+          },
+          {
+            "type": "item",
+            "id": "arrow_wood",
+            "name": "wooden arrow",
+            "description": "Weakest arrow, made entirely from wood.",
+            "looks_like": "arrow_wood",
+            "size": "SMALL",
+            "materials": ["wood"],
+            "ammo": {
+              "typ": ["ARROW"],
+              "damage_modifier": {
+                "damage": -1
+              }
+            }
+          }
+      ]
+      "#;
+
+        let data: Vec<DataEntity> = serde_json::from_str(JSON).unwrap();
+        let slice = data.as_slice();
+        assert!(matches!(slice[0], DataEntity::Item(..)));
+        if let DataEntity::Item(item) = &slice[0] {
+            assert_eq!(item.id, "shortbow_wood");
+            assert!(!item.tags.contains(&ItemTag::Tool));
+            assert!(item.tags.contains(&ItemTag::Weapon));
+            assert!(item.qualities.is_empty());
+            assert!(item.ranged_damage.is_some());
+            if let Some(ranged_damage) = &item.ranged_damage {
+                assert_eq!(ranged_damage.damage.attribute, Some(Attribute::Strength));
+                assert_eq!(ranged_damage.damage.dices.len(), 1);
+                assert_eq!(ranged_damage.damage.dices[0], DamageDice::D4);
+                assert_eq!(ranged_damage.damage.modifier, 0);
+                assert_eq!(ranged_damage.damage_types.len(), 1);
+                assert!(ranged_damage.damage_types.contains(&DamageType::Pierce));
+            } else {
+                panic!("Expected ranged_damage!");
+            }
+            assert_eq!(item.materials.len(), 1);
+            assert!(item.materials.contains(&Material::Wood));
+            assert_eq!(item.size, ItemSize::Medium);
+            assert!(item.two_handed_tool);
+            assert_eq!(item.ammo_types.len(), 1);
+            assert!(item.ammo_types.contains(&AmmoType::Arrow));
+        } else {
+            panic!("Expected DataEntity::Item, got {:?}", slice[0]);
+        }
+        assert!(matches!(slice[1], DataEntity::Item(..)));
+        if let DataEntity::Item(item) = &slice[1] {
+            assert_eq!(item.id, "arrow_wood");
+            assert!(!item.tags.contains(&ItemTag::Tool));
+            assert!(!item.tags.contains(&ItemTag::Weapon));
+            assert!(item.qualities.is_empty());
+            assert!(item.ranged_damage.is_none());
+            if let Some(ammo_value) = &item.ammo {
+                assert_eq!(ammo_value.typ.len(), 1);
+                assert!(ammo_value.typ.contains(&AmmoType::Arrow));
+                assert!(ammo_value.damage_modifier.damage_dice.is_none());
+                assert_eq!(ammo_value.damage_modifier.damage, -1);
+                assert_eq!(ammo_value.damage_modifier.penetration, 0);
+            } else {
+                panic!("Expected ammo_value!");
+            }
+            assert_eq!(item.materials.len(), 1);
+            assert!(item.materials.contains(&Material::Wood));
+            assert_eq!(item.size, ItemSize::Small);
+            assert!(!&item.two_handed_tool);
+            assert!(item.ammo_types.is_empty());
         } else {
             panic!("Expected DataEntity::Item, got {:?}", slice[0]);
         }

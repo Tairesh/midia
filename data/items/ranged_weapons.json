@@ -15,5 +15,25 @@
       "damage_types": ["SLASH", "PIERCE"],
       "distance": 3
     }
+  },
+  {
+    "type": "item",
+    "id": "shortbow_wood",
+    "name": "wooden short bow",
+    "description": "Emphasizing portability and agility over power, this all-wood bow is suitable for small game and harassing enemies.",
+    "looks_like": "bow_wood",
+    "size": "MEDIUM",
+    "materials": ["wood"],
+    "tags": ["WEAPON"],
+    "two_handed_tool": true,
+    "ranged_damage": {
+      "damage": {
+        "attribute": "STRENGTH",
+        "dices": ["D4"]
+      },
+      "damage_types": ["PIERCE"],
+      "distance": 12
+    },
+    "ammo_types": ["ARROW"]
   }
 ]

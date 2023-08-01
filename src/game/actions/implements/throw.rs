@@ -231,7 +231,7 @@ mod tests {
             size: ItemSize::Huge,
             materials: HashSet::new(),
             tags: HashSet::new(),
-            qualities: HashSet::new(),
+            qualities: Vec::new(),
             two_handed_tool: false,
             wearable: None,
             melee_damage: None,

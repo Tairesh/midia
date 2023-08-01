@@ -11,6 +11,7 @@ pub const CLOAK: &str = "cloak";
 pub const HAT: &str = "hat";
 pub const RAGS: &str = "rags";
 pub const BACKPACK: &str = "backpack";
+pub const QUIVER: &str = "quiver";
 pub const LEATHER_ARM_GUARD: &str = "arm_guard_leather";
 // pub const LEATHER_LEG_GUARD: &str = "leg_guard_leather";
 // pub const LEATHER_LEFT_GLOVE: &str = "glove_left_leather";
@@ -146,7 +147,7 @@ pub fn dead_body(unit: &Avatar) -> Item {
         size: ItemSize::Huge,
         materials: HashSet::from([Material::Flesh]),
         tags: HashSet::from([ItemTag::Corpse]),
-        qualities: HashSet::default(),
+        qualities: Vec::default(),
         two_handed_tool: false,
         wearable: None,
         melee_damage: None,

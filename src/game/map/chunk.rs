@@ -92,7 +92,7 @@ impl Chunk {
                     2 => Item::new(GOD_AXE),
                     3 => Item::new(STONE_SHOVEL),
                     4 => random_book(),
-                    5 => Item::new(BACKPACK).with_container(Vec::new()),
+                    5 => Item::new(BACKPACK),
                     6 => Item::new(LEATHER_ARM_GUARD),
                     7 => Item::new(RAGS),
                     _ => unreachable!(),

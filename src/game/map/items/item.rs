@@ -46,6 +46,16 @@ impl Item {
             item.colored = Some(material.into());
         }
 
+        let container = item
+            .proto()
+            .qualities
+            .iter()
+            .find(|q| matches!(q, ItemQuality::Container { .. }))
+            .cloned();
+        if let Some(ItemQuality::Container { volume, for_ammo }) = container {
+            item = item.with_container([], volume, for_ammo);
+        }
+
         item
     }
 
@@ -90,9 +100,16 @@ impl Item {
         self
     }
 
-    pub fn with_container(mut self, items: impl Into<Vec<Item>>) -> Self {
+    pub fn with_container(
+        mut self,
+        items: impl Into<Vec<Item>>,
+        volume: u8,
+        for_ammo: impl Into<HashSet<AmmoType>>,
+    ) -> Self {
         self.container = Some(Container {
             items: items.into(),
+            max_volume: volume,
+            for_ammo: for_ammo.into(),
         });
         self
     }
@@ -133,7 +150,7 @@ impl Item {
         self.container.as_mut()
     }
 
-    pub fn qualities(&self) -> &HashSet<ItemQuality> {
+    pub fn qualities(&self) -> &Vec<ItemQuality> {
         &self.proto().qualities
     }
 
@@ -223,22 +240,51 @@ impl Item {
     pub fn ammo_types(&self) -> &HashSet<AmmoType> {
         &self.proto().ammo_types
     }
+
+    pub fn is_ammo(&self, ammo_type: AmmoType) -> bool {
+        if let Some(ammo) = &self.proto().ammo {
+            ammo.typ.contains(&ammo_type)
+        } else {
+            false
+        }
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::game::map::items::helpers::{BACKPACK, GOD_AXE};
+    use crate::game::map::items::helpers::{BACKPACK, GOD_AXE, QUIVER, WOODEN_ARROW};
 
     use super::Item;
 
     #[test]
     fn test_backpack() {
-        let mut backpack = Item::new(BACKPACK).with_container(vec![]);
+        let mut backpack = Item::new(BACKPACK);
         assert_eq!(backpack.name(), "leather backpack");
         if let Some(container) = backpack.container() {
+            assert_eq!(container.max_volume, 30);
+            assert!(!container.is_for_ammo());
             assert_eq!(container.items.len(), 0);
             let axe = Item::new(GOD_AXE);
-            container.items.push(axe);
+            container.push_item(axe);
+            assert_eq!(container.items.len(), 1);
+        } else {
+            panic!("backpack is not a container");
+        }
+    }
+
+    #[test]
+    fn test_quiver() {
+        let mut quiver = Item::new(QUIVER);
+        assert_eq!(quiver.name(), "leather quiver");
+        if let Some(container) = quiver.container() {
+            assert_eq!(container.max_volume, 15);
+            assert!(container.is_for_ammo());
+            assert_eq!(container.items.len(), 0);
+            let axe = Item::new(GOD_AXE);
+            container.push_item(axe);
+            assert_eq!(container.items.len(), 0);
+            let arrow = Item::new(WOODEN_ARROW);
+            container.push_item(arrow);
             assert_eq!(container.items.len(), 1);
         } else {
             panic!("backpack is not a container");

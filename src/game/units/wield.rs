@@ -44,10 +44,10 @@ impl Wield {
         }
     }
 
-    pub fn has_quality(&self, quality: ItemQuality) -> bool {
+    pub fn has_quality(&self, quality: &ItemQuality) -> bool {
         self.items.iter().any(|i| {
             if let Some(i) = i {
-                i.qualities().contains(&quality)
+                i.qualities().contains(quality)
             } else {
                 false
             }

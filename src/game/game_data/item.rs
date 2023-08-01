@@ -20,7 +20,7 @@ pub enum ItemTag {
     Corpse,
 }
 
-#[derive(Serialize, Deserialize, Debug, Hash, Eq, PartialEq, Copy, Clone)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum ItemQuality {
     /// can be used for digging
@@ -31,6 +31,12 @@ pub enum ItemQuality {
     Cut,
     /// can be used for chopping trees
     Chop,
+    /// can store items
+    Container {
+        volume: u8,
+        #[serde(default)]
+        for_ammo: HashSet<AmmoType>,
+    },
 }
 
 #[derive(Serialize, Deserialize, Debug, Hash, Eq, PartialEq, Copy, Clone, Ord, PartialOrd)]
@@ -315,7 +321,7 @@ pub struct ItemPrototype {
     #[serde(default)]
     pub tags: HashSet<ItemTag>,
     #[serde(default)]
-    pub qualities: HashSet<ItemQuality>,
+    pub qualities: Vec<ItemQuality>,
     #[serde(default)]
     pub two_handed_tool: bool,
     #[serde(default)]

@@ -52,7 +52,7 @@ impl GameModeImpl for Digging {
     }
 
     fn can_push(&self, world: &World) -> Result<(), String> {
-        if world.player().wield.has_quality(ItemQuality::Dig) {
+        if world.player().wield.has_quality(&ItemQuality::Dig) {
             Ok(())
         } else {
             Err("You can't dig without a shovel".to_string())

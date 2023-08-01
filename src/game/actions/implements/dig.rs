@@ -32,7 +32,7 @@ impl ActionImpl for Dig {
                 No(format!("You can't dig the {}", tile.terrain.name()))
             };
         }
-        if !actor.wield.has_quality(ItemQuality::Dig) {
+        if !actor.wield.has_quality(&ItemQuality::Dig) {
             return No("You need a shovel to dig!".to_string());
         }
 

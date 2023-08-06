@@ -32,7 +32,7 @@ impl Avatar {
             action: None,
             vision: TwoDimDirection::East,
             wield: Wield::new(!matches!(personality.mind.main_hand, MainHand::Left)),
-            wear: Wear::new(),
+            wear: Wear::default(),
             personality,
             pos,
         }
@@ -40,11 +40,8 @@ impl Avatar {
 
     // TODO: remove this and select dress in create character scene
     pub fn dressed_default(id: usize, personality: Personality, pos: Point) -> Self {
-        let mut wear = Wear::new();
-        wear.add(Item::new(HAT), 0);
-        wear.add(Item::new(CLOAK), 0);
         Self {
-            wear,
+            wear: Wear::new([(Item::new(HAT), 0), (Item::new(CLOAK), 0)]),
             ..Self::new(id, personality, pos)
         }
     }

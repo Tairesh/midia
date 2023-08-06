@@ -6,8 +6,10 @@ pub struct Wear {
 }
 
 impl Wear {
-    pub fn new() -> Self {
-        Self { items: Vec::new() }
+    pub fn new(items: impl Into<Vec<(Item, usize)>>) -> Self {
+        Self {
+            items: items.into(),
+        }
     }
 
     pub fn can_add(&self, item: &Item, variant: usize) -> bool {
@@ -61,7 +63,7 @@ impl Wear {
 
 impl Default for Wear {
     fn default() -> Self {
-        Self::new()
+        Self { items: Vec::new() }
     }
 }
 
@@ -74,29 +76,25 @@ mod tests {
 
     #[test]
     fn test_cant_wear_two_items_in_one_slot() {
-        let mut wear = Wear::new();
-        wear.add(Item::new(CLOAK), 0);
+        let wear = Wear::new([(Item::new(CLOAK), 0)]);
         assert!(!wear.can_add(&Item::new(RAGS), 0));
     }
 
     #[test]
     fn test_can_wear_two_items_in_different_slots() {
-        let mut wear = Wear::new();
-        wear.add(Item::new(CLOAK), 0);
+        let wear = Wear::new([(Item::new(CLOAK), 0)]);
         assert!(wear.can_add(&Item::new(HAT), 0));
     }
 
     #[test]
     fn test_can_wear_two_items_in_different_layers() {
-        let mut wear = Wear::new();
-        wear.add(Item::new(CLOAK), 0);
+        let wear = Wear::new([(Item::new(CLOAK), 0)]);
         assert!(wear.can_add(&Item::new(BACKPACK), 0));
     }
 
     #[test]
     fn test_can_wear_two_oversleeves_in_different_slots() {
-        let mut wear = Wear::new();
-        wear.add(Item::new(CLOAK), 0);
+        let mut wear = Wear::new([(Item::new(CLOAK), 0)]);
         let oversleeve = Item::new(LEATHER_ARM_GUARD);
         assert!(wear.can_add(&oversleeve, 0));
         wear.add(oversleeve.clone(), 0);

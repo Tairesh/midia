@@ -7,12 +7,32 @@ use crate::game::Item;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Container {
-    pub items: Vec<Item>,
+    items: Vec<Item>,
     pub max_volume: u8,
-    pub for_ammo: HashSet<AmmoType>,
+    for_ammo: HashSet<AmmoType>,
 }
 
 impl Container {
+    pub fn new(
+        items: impl Into<Vec<Item>>,
+        max_volume: u8,
+        for_ammo: impl Into<HashSet<AmmoType>>,
+    ) -> Self {
+        Self {
+            items: items.into(),
+            max_volume,
+            for_ammo: for_ammo.into(),
+        }
+    }
+
+    pub fn volume_used(&self) -> u8 {
+        self.items.len() as u8
+    }
+
+    pub fn free_volume(&self) -> u8 {
+        self.max_volume - self.volume_used()
+    }
+
     pub fn is_for_ammo(&self) -> bool {
         !self.for_ammo.is_empty()
     }

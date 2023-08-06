@@ -106,11 +106,7 @@ impl Item {
         volume: u8,
         for_ammo: impl Into<HashSet<AmmoType>>,
     ) -> Self {
-        self.container = Some(Container {
-            items: items.into(),
-            max_volume: volume,
-            for_ammo: for_ammo.into(),
-        });
+        self.container = Some(Container::new(items, volume, for_ammo));
         self
     }
 
@@ -263,10 +259,10 @@ mod tests {
         if let Some(container) = backpack.container() {
             assert_eq!(container.max_volume, 30);
             assert!(!container.is_for_ammo());
-            assert_eq!(container.items.len(), 0);
+            assert_eq!(container.volume_used(), 0);
             let axe = Item::new(GOD_AXE);
             container.push_item(axe);
-            assert_eq!(container.items.len(), 1);
+            assert_eq!(container.volume_used(), 1);
         } else {
             panic!("backpack is not a container");
         }
@@ -279,13 +275,13 @@ mod tests {
         if let Some(container) = quiver.container() {
             assert_eq!(container.max_volume, 15);
             assert!(container.is_for_ammo());
-            assert_eq!(container.items.len(), 0);
+            assert_eq!(container.volume_used(), 0);
             let axe = Item::new(GOD_AXE);
             container.push_item(axe);
-            assert_eq!(container.items.len(), 0);
+            assert_eq!(container.volume_used(), 0);
             let arrow = Item::new(WOODEN_ARROW);
             container.push_item(arrow);
-            assert_eq!(container.items.len(), 1);
+            assert_eq!(container.volume_used(), 1);
         } else {
             panic!("backpack is not a container");
         }

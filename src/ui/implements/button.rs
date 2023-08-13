@@ -4,7 +4,7 @@ use std::rc::Rc;
 
 use geometry::{Rect, Vec2};
 use tetra::{
-    graphics::{text::Text, DrawParams},
+    graphics::{text::Text, Color, DrawParams},
     Context,
 };
 
@@ -20,15 +20,16 @@ use super::super::{Disable, Draw, Focus, Hover, Position, Positionate, Press, Ui
 enum ButtonContent {
     Text(Text, f32),
     Icon {
-        name: &'static str,
+        name: String,
         scale: Vec2,
+        color: Option<Color>,
         tileset: Rc<Tileset>,
     },
     Empty(Vec2),
 }
 
 impl ButtonContent {
-    pub const fn offset_x(&self) -> f32 {
+    pub const fn offset(&self) -> f32 {
         match self {
             ButtonContent::Text(..) => 30.0,
             ButtonContent::Empty(..) => 0.0,
@@ -164,9 +165,13 @@ impl Button {
         }
     }
 
+    // TODO: refactoring, create a factory
+    #[allow(clippy::too_many_arguments)]
     pub fn icon(
         keys: Vec<KeyWithMod>,
-        name: &'static str,
+        name: impl Into<String>,
+        scale: Vec2,
+        color: Option<Color>,
         tileset: Rc<Tileset>,
         asset: Rc<ButtonAsset>,
         position: Position,
@@ -175,14 +180,34 @@ impl Button {
         Self::new(
             keys,
             ButtonContent::Icon {
-                name,
-                scale: Vec2::new(3.0, 3.0),
+                name: name.into(),
+                scale,
                 tileset,
+                color,
             },
             asset,
             position,
             on_click,
         )
+    }
+
+    pub fn update_icon(
+        &mut self,
+        name: impl Into<String>,
+        scale: Vec2,
+        color: Option<Color>,
+        ctx: &mut Context,
+        window_size: (i32, i32),
+    ) {
+        if let ButtonContent::Icon { tileset, .. } = &self.content {
+            self.content = ButtonContent::Icon {
+                name: name.into(),
+                scale,
+                color,
+                tileset: tileset.clone(),
+            }
+        }
+        self.positionate(ctx, window_size);
     }
 
     pub fn with_disabled(mut self, val: bool) -> Self {
@@ -248,9 +273,14 @@ impl Draw for Button {
                 name,
                 scale,
                 tileset,
+                color,
             } => {
                 vec.y -= 1.0;
-                tileset.draw_region(ctx, name, DrawParams::new().position(vec).scale(*scale));
+                let mut params = DrawParams::new().position(vec).scale(*scale);
+                if let Some(color) = color {
+                    params = params.color(*color);
+                }
+                tileset.draw_region(ctx, name, params);
             }
             ButtonContent::Empty(_) => {}
         }
@@ -276,8 +306,15 @@ impl Positionate for Button {
 
     fn calc_size(&mut self, ctx: &mut Context) -> Vec2 {
         let content_size = self.content_size(ctx);
-        let offset_x = self.content.offset_x();
-        Vec2::new(content_size.x + offset_x, 42.0)
+        let offset_x = self.content.offset();
+        Vec2::new(
+            content_size.x + offset_x,
+            if let ButtonContent::Icon { name, scale, .. } = &self.content {
+                Tileset::get_size(name).y * scale.y + self.content.offset()
+            } else {
+                42.0
+            },
+        )
     }
 
     fn rect(&self) -> Rect {

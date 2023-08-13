@@ -1,3 +1,4 @@
+use geometry::Vec2;
 use tetra::{
     graphics::Color,
     input::{Key, KeyModifier, MouseButton},
@@ -12,6 +13,8 @@ use crate::{
 };
 
 use super::{SomeTransitions, Transition};
+
+pub const UI_ICONS_SCALE: Vec2 = Vec2::new(3.0, 3.0);
 
 pub(crate) fn easy_back(event: &Event, focused: bool) -> SomeTransitions {
     if focused {
@@ -194,6 +197,8 @@ pub(crate) fn icon_left(assets: &Assets, position: Position, custom_event: u8) -
     Box::new(Button::icon(
         vec![],
         "lt",
+        UI_ICONS_SCALE,
+        None,
         assets.tileset.clone(),
         assets.button.clone(),
         position,
@@ -205,6 +210,8 @@ pub(crate) fn icon_right(assets: &Assets, position: Position, custom_event: u8) 
     Box::new(Button::icon(
         vec![],
         "mt",
+        UI_ICONS_SCALE,
+        None,
         assets.tileset.clone(),
         assets.button.clone(),
         position,
@@ -216,6 +223,8 @@ pub(crate) fn icon_plus(assets: &Assets, position: Position, custom_event: u8) -
     Box::new(Button::icon(
         vec![],
         "plus",
+        UI_ICONS_SCALE,
+        None,
         assets.tileset.clone(),
         assets.button.clone(),
         position,
@@ -227,6 +236,8 @@ pub(crate) fn icon_minus(assets: &Assets, position: Position, custom_event: u8) 
     Box::new(Button::icon(
         vec![],
         "minus",
+        UI_ICONS_SCALE,
+        None,
         assets.tileset.clone(),
         assets.button.clone(),
         position,

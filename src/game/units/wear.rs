@@ -1,6 +1,6 @@
 use crate::game::{BodySlot, Item};
 
-#[derive(serde::Serialize, serde::Deserialize, Debug)]
+#[derive(serde::Serialize, serde::Deserialize, Debug, Default)]
 pub struct Wear {
     items: Vec<(Item, usize)>,
 }
@@ -58,12 +58,6 @@ impl Wear {
     #[cfg(test)]
     pub fn clear(&mut self) {
         self.items.clear();
-    }
-}
-
-impl Default for Wear {
-    fn default() -> Self {
-        Self { items: Vec::new() }
     }
 }
 

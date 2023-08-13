@@ -8,6 +8,8 @@ use tetra::input::{Key, KeyModifier};
 use tetra::Context;
 
 use crate::game::Item;
+use crate::scenes::Transition;
+use crate::ui::Button;
 use crate::{
     app::App,
     assets::Assets,
@@ -26,8 +28,10 @@ use super::super::{
     SceneImpl, SomeTransitions,
 };
 
+const INVENTORY_UI_ICONS_SCALE: Vec2 = Vec2::new(5.0, 5.0);
+
 pub struct GameScene {
-    sprites: [Box<dyn UiSprite>; 8],
+    sprites: [Box<dyn UiSprite>; 10],
     pub world: Rc<RefCell<World>>,
     pub modes: Vec<Rc<RefCell<GameMode>>>,
     pub log: GameLog,
@@ -39,6 +43,8 @@ pub struct GameScene {
 }
 
 impl GameScene {
+    // TODO: refactor this method
+    #[allow(clippy::too_many_lines)]
     pub fn new(app: &App) -> Self {
         let world = app.get_world();
         let world_borrow = world.borrow();
@@ -120,6 +126,32 @@ impl GameScene {
             2.0,
             second_hand.map(Item::color),
         ));
+        let left_hand_button = Box::new(Button::icon(
+            Vec::new(),
+            player.wield.left_hand().map_or("empty", Item::looks_like),
+            INVENTORY_UI_ICONS_SCALE,
+            player.wield.left_hand().map(Item::color),
+            app.assets.tileset.clone(),
+            app.assets.button.clone(),
+            Position {
+                x: Horizontal::AtWindowCenterByRight { offset: -10.0 },
+                y: Vertical::AtWindowBottomByBottom { offset: -20.0 },
+            },
+            Transition::CustomEvent(0),
+        ));
+        let right_hand_button = Box::new(Button::icon(
+            Vec::new(),
+            player.wield.right_hand().map_or("empty", Item::looks_like),
+            INVENTORY_UI_ICONS_SCALE,
+            player.wield.right_hand().map(Item::color),
+            app.assets.tileset.clone(),
+            app.assets.button.clone(),
+            Position {
+                x: Horizontal::AtWindowCenterByLeft { offset: 10.0 },
+                y: Vertical::AtWindowBottomByBottom { offset: -20.0 },
+            },
+            Transition::CustomEvent(0),
+        ));
 
         drop(world_borrow);
         Self {
@@ -132,6 +164,8 @@ impl GameScene {
                 second_hand_display,
                 main_hand_image,
                 second_hand_image,
+                left_hand_button,
+                right_hand_button,
             ],
             modes: vec![Rc::new(RefCell::new(Walking::new().into()))],
             log: GameLog::new(app.assets.fonts.default.font.clone()),
@@ -231,6 +265,14 @@ impl GameScene {
         self.sprites[3].as_label().unwrap()
     }
 
+    fn left_hand_btn(&mut self) -> &mut Button {
+        self.sprites[8].as_button().unwrap()
+    }
+
+    fn right_hand_btn(&mut self) -> &mut Button {
+        self.sprites[9].as_button().unwrap()
+    }
+
     fn cursors(&self) -> Vec<Cursor> {
         self.current_mode().borrow().cursors(&self.world.borrow())
     }
@@ -262,6 +304,16 @@ impl GameScene {
             .to_string();
         let second_hand_item_color = second_hand_item.map(Item::color).unwrap_or_default();
 
+        let left_hand_item = player.wield.left_hand();
+        let left_hand_item_sprite = left_hand_item.map_or("empty", Item::looks_like).to_string();
+        let left_hand_item_color = left_hand_item.map(Item::color);
+
+        let right_hand_item = player.wield.right_hand();
+        let right_hand_item_sprite = right_hand_item
+            .map_or("empty", Item::looks_like)
+            .to_string();
+        let rignt_hand_item_color = right_hand_item.map(Item::color);
+
         drop(world);
 
         self.main_hand_display_label()
@@ -276,6 +328,20 @@ impl GameScene {
             .set_name(&second_hand_item_sprite);
         self.second_hand_display_image()
             .set_color(second_hand_item_color);
+        self.left_hand_btn().update_icon(
+            left_hand_item_sprite,
+            INVENTORY_UI_ICONS_SCALE,
+            left_hand_item_color,
+            ctx,
+            window_size,
+        );
+        self.right_hand_btn().update_icon(
+            right_hand_item_sprite,
+            INVENTORY_UI_ICONS_SCALE,
+            rignt_hand_item_color,
+            ctx,
+            window_size,
+        );
     }
 }
 

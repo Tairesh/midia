@@ -5,7 +5,6 @@ use tetra::graphics::mesh::{BorderRadii, Mesh, ShapeStyle};
 use tetra::graphics::Rectangle;
 use tetra::{Context, Event};
 
-use crate::game::CharSheet;
 use crate::{
     app::App,
     colors::Colors,
@@ -14,6 +13,7 @@ use crate::{
             Appearance, FurColor, Gender, MainHand, Mind, Personality, PlayableRace, Race, Sex,
         },
         traits::Name,
+        CharSheet,
     },
     savefile::{self, Meta},
     ui::{
@@ -25,7 +25,7 @@ use crate::{
 use super::super::{
     helpers::{
         back_randomize_next, bg, easy_back, error_label, icon_left, icon_minus, icon_plus,
-        icon_right, label, subtitle, text_input, title,
+        icon_right, label, subtitle, text_input, title, UI_ICONS_SCALE,
     },
     Scene, SceneImpl, SomeTransitions, Transition,
 };
@@ -121,6 +121,8 @@ impl CreateCharacter {
                 Box::new(Button::icon(
                     vec![],
                     "lt",
+                    UI_ICONS_SCALE,
+                    None,
                     app.assets.tileset.clone(),
                     app.assets.button.clone(),
                     Position {
@@ -141,6 +143,8 @@ impl CreateCharacter {
                 Box::new(Button::icon(
                     vec![],
                     "mt",
+                    UI_ICONS_SCALE,
+                    None,
                     app.assets.tileset.clone(),
                     app.assets.button.clone(),
                     Position {
@@ -160,6 +164,8 @@ impl CreateCharacter {
                 Box::new(Button::icon(
                     vec![],
                     "lt",
+                    UI_ICONS_SCALE,
+                    None,
                     app.assets.tileset.clone(),
                     app.assets.button.clone(),
                     Position {
@@ -184,6 +190,8 @@ impl CreateCharacter {
                 Box::new(Button::icon(
                     vec![],
                     "mt",
+                    UI_ICONS_SCALE,
+                    None,
                     app.assets.tileset.clone(),
                     app.assets.button.clone(),
                     Position {

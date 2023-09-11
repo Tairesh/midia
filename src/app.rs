@@ -141,7 +141,7 @@ impl State for App {
         if let Some(scene) = self.current_scene() {
             scene.before_draw(ctx);
             if let Some(sprites) = scene.sprites_mut() {
-                for sprite in sprites.iter_mut() {
+                for sprite in &mut *sprites {
                     if sprite.visible() {
                         sprite.draw(ctx);
                     }

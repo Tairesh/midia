@@ -32,9 +32,9 @@ pub trait SceneImpl {
 
     fn reposition_all_sprites(&mut self, ctx: &mut Context, window_size: (i32, i32)) {
         if let Some(sprites) = self.sprites_mut() {
-            for sprite in sprites.iter_mut() {
-                sprite.positionate(ctx, window_size);
-            }
+            sprites
+                .iter_mut()
+                .for_each(|sprite| sprite.positionate(ctx, window_size));
         }
     }
 
@@ -45,14 +45,14 @@ pub trait SceneImpl {
         if let Some(sprites) = self.sprites_mut() {
             // creating same big useless vec of Rects EVERY frame
             let mut blocked = Vec::with_capacity(sprites.len());
-            for sprite in sprites.iter_mut().rev() {
+            sprites.iter_mut().rev().for_each(|sprite| {
                 if let Some(transition) = sprite.update(ctx, focused, &blocked) {
                     transitions.push(transition);
                 }
                 if sprite.visible() && sprite.block_mouse() {
                     blocked.push(sprite.rect());
                 }
-            }
+            });
         }
 
         transitions

@@ -292,7 +292,7 @@ impl Update for TextInput {
                     ValueType::String { max_length } => {
                         (self.text.content().len() + text_input.len()) <= max_length
                     }
-                    ValueType::Unsigned { .. } => matches!(text_input.parse::<u32>(), Ok(_)),
+                    ValueType::Unsigned { .. } => text_input.parse::<u32>().is_ok(),
                 };
                 if allow {
                     self.text.push_str(text_input);

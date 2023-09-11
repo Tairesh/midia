@@ -2,6 +2,7 @@ use tetra::input::{Key, KeyModifier};
 use tetra::window::WindowPosition;
 use tetra::{Context, Event};
 
+use crate::ui::ButtonBuilder;
 use crate::{
     app::App,
     settings::Settings,
@@ -43,30 +44,32 @@ pub struct SettingsScene {
 impl SettingsScene {
     pub fn new(app: &App, ctx: &mut Context) -> Self {
         let settings = Settings::instance();
-        let fullscreen_btn = Box::new(Button::fixed(
-            vec![(Key::F, KeyModifier::Alt).into()],
-            "[Alt+F] Fullscreen",
-            app.assets.fonts.default.clone(),
-            app.assets.button.clone(),
-            settings.window.fullscreen,
-            Position {
-                x: Horizontal::AtWindowCenterByLeft { offset: 100.0 },
-                y: Vertical::ByCenter { y: 200.0 },
-            },
-            Transition::CustomEvent(ButtonEvent::FullscreenMode as u8),
-        ));
-        let mut window_btn = Box::new(Button::fixed(
-            vec![(Key::W, KeyModifier::Alt).into()],
-            "[Alt+W] Window",
-            app.assets.fonts.default.clone(),
-            app.assets.button.clone(),
-            !settings.window.fullscreen,
-            Position {
-                x: Horizontal::AtWindowCenterByRight { offset: 98.0 },
-                y: Vertical::ByCenter { y: 200.0 },
-            },
-            Transition::CustomEvent(ButtonEvent::WindowMode as u8),
-        ));
+        let fullscreen_btn = Box::new(
+            ButtonBuilder::new(app.assets.button.clone())
+                .with_text("[Alt+F] Fullscreen", app.assets.fonts.default.clone())
+                .with_keys(vec![(Key::F, KeyModifier::Alt).into()])
+                .with_position(Position {
+                    x: Horizontal::AtWindowCenterByLeft { offset: 100.0 },
+                    y: Vertical::ByCenter { y: 200.0 },
+                })
+                .with_transition(Transition::CustomEvent(ButtonEvent::FullscreenMode as u8))
+                .with_fixable(true)
+                .with_pressed(settings.window.fullscreen)
+                .build(),
+        );
+        let mut window_btn = Box::new(
+            ButtonBuilder::new(app.assets.button.clone())
+                .with_text("[Alt+W] Window", app.assets.fonts.default.clone())
+                .with_keys(vec![(Key::W, KeyModifier::Alt).into()])
+                .with_position(Position {
+                    x: Horizontal::AtWindowCenterByRight { offset: 98.0 },
+                    y: Vertical::ByCenter { y: 200.0 },
+                })
+                .with_transition(Transition::CustomEvent(ButtonEvent::WindowMode as u8))
+                .with_fixable(true)
+                .with_pressed(!settings.window.fullscreen)
+                .build(),
+        );
         let window_btn_size = window_btn.calc_size(ctx);
 
         Self {

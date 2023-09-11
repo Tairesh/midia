@@ -1,5 +1,6 @@
 use tetra::{input::Key, Context};
 
+use crate::ui::ButtonBuilder;
 use crate::{
     app::App,
     colors::Colors,
@@ -31,40 +32,50 @@ impl MainMenu {
             Position::horizontal_center(0.0, Vertical::AtWindowCenterByBottom { offset: -80.0 }),
         ));
         let select_btn = Box::new(
-            Button::text(
-                vec![Key::E.into()],
-                "[e] Select world",
-                app.assets.fonts.default.clone(),
-                app.assets.button.clone(),
-                Position::horizontal_center(0.0, Vertical::AtWindowCenterByTop { offset: 0.0 }),
-                Transition::Push(Scene::LoadWorld),
-            )
-            .with_disabled(true),
+            ButtonBuilder::new(app.assets.button.clone())
+                .with_text("[e] Select world", app.assets.fonts.default.clone())
+                .with_keys(vec![Key::E.into()])
+                .with_position(Position::horizontal_center(
+                    0.0,
+                    Vertical::AtWindowCenterByTop { offset: 0.0 },
+                ))
+                .with_transition(Transition::Push(Scene::LoadWorld))
+                .build()
+                .with_disabled(true),
         );
-        let create_btn = Box::new(Button::text(
-            vec![Key::C.into()],
-            "[c] Create new world",
-            app.assets.fonts.default.clone(),
-            app.assets.button.clone(),
-            Position::horizontal_center(0.0, Vertical::AtWindowCenterByTop { offset: 50.0 }),
-            Transition::Push(Scene::CreateWorld),
-        ));
-        let settings_btn = Box::new(Button::text(
-            vec![Key::S.into()],
-            "[s] Settings",
-            app.assets.fonts.default.clone(),
-            app.assets.button.clone(),
-            Position::horizontal_center(0.0, Vertical::AtWindowCenterByTop { offset: 100.0 }),
-            Transition::Push(Scene::Settings),
-        ));
-        let exit_btn = Box::new(Button::text(
-            vec![Key::X.into()],
-            "[x] Exit",
-            app.assets.fonts.default.clone(),
-            app.assets.button.clone(),
-            Position::horizontal_center(0.0, Vertical::AtWindowCenterByTop { offset: 150.0 }),
-            Transition::Quit,
-        ));
+        let create_btn = Box::new(
+            ButtonBuilder::new(app.assets.button.clone())
+                .with_text("[c] Create new world", app.assets.fonts.default.clone())
+                .with_keys(vec![Key::C.into()])
+                .with_position(Position::horizontal_center(
+                    0.0,
+                    Vertical::AtWindowCenterByTop { offset: 50.0 },
+                ))
+                .with_transition(Transition::Push(Scene::CreateWorld))
+                .build(),
+        );
+        let settings_btn = Box::new(
+            ButtonBuilder::new(app.assets.button.clone())
+                .with_text("[s] Settings", app.assets.fonts.default.clone())
+                .with_keys(vec![Key::S.into()])
+                .with_position(Position::horizontal_center(
+                    0.0,
+                    Vertical::AtWindowCenterByTop { offset: 100.0 },
+                ))
+                .with_transition(Transition::Push(Scene::Settings))
+                .build(),
+        );
+        let exit_btn = Box::new(
+            ButtonBuilder::new(app.assets.button.clone())
+                .with_text("[x] Exit", app.assets.fonts.default.clone())
+                .with_keys(vec![Key::X.into()])
+                .with_position(Position::horizontal_center(
+                    0.0,
+                    Vertical::AtWindowCenterByTop { offset: 150.0 },
+                ))
+                .with_transition(Transition::Quit)
+                .build(),
+        );
 
         Self {
             // Order is matter, change hardcoded indices in functions below if modified

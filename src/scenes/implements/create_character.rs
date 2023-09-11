@@ -25,7 +25,7 @@ use crate::{
 use super::super::{
     helpers::{
         back_randomize_next, bg, easy_back, error_label, icon_left, icon_minus, icon_plus,
-        icon_right, label, subtitle, text_input, title, UI_ICONS_SCALE,
+        icon_right, label, subtitle, text_input, title,
     },
     Scene, SceneImpl, SomeTransitions, Transition,
 };
@@ -118,19 +118,14 @@ impl CreateCharacter {
                         y: Vertical::ByCenter { y: 250.0 },
                     },
                 ),
-                Box::new(Button::icon(
-                    vec![],
-                    "lt",
-                    UI_ICONS_SCALE,
-                    None,
-                    app.assets.tileset.clone(),
-                    app.assets.button.clone(),
+                icon_left(
+                    &app.assets,
                     Position {
                         x: Horizontal::AtWindowCenterByLeft { offset: -40.0 },
                         y: Vertical::ByCenter { y: 250.0 },
                     },
-                    Transition::CustomEvent(ButtonEvent::RaceLeft as u8),
-                )),
+                    ButtonEvent::RaceLeft as u8,
+                ),
                 Box::new(Label::new(
                     "Gazan",
                     app.assets.fonts.header.clone(),
@@ -140,19 +135,14 @@ impl CreateCharacter {
                         y: Vertical::ByCenter { y: 250.0 },
                     },
                 )),
-                Box::new(Button::icon(
-                    vec![],
-                    "mt",
-                    UI_ICONS_SCALE,
-                    None,
-                    app.assets.tileset.clone(),
-                    app.assets.button.clone(),
+                icon_right(
+                    &app.assets,
                     Position {
                         x: Horizontal::AtWindowCenterByRight { offset: 260.0 },
                         y: Vertical::ByCenter { y: 250.0 },
                     },
-                    Transition::CustomEvent(ButtonEvent::RaceRight as u8),
-                )),
+                    ButtonEvent::RaceRight as u8,
+                ),
                 label(
                     "Gender:",
                     &app.assets,
@@ -161,19 +151,14 @@ impl CreateCharacter {
                         y: Vertical::ByCenter { y: 295.0 },
                     },
                 ),
-                Box::new(Button::icon(
-                    vec![],
-                    "lt",
-                    UI_ICONS_SCALE,
-                    None,
-                    app.assets.tileset.clone(),
-                    app.assets.button.clone(),
+                icon_left(
+                    &app.assets,
                     Position {
                         x: Horizontal::AtWindowCenterByLeft { offset: -40.0 },
                         y: Vertical::ByCenter { y: 300.0 },
                     },
-                    Transition::CustomEvent(ButtonEvent::GenderLeft as u8),
-                )),
+                    ButtonEvent::GenderLeft as u8,
+                ),
                 text_input(
                     if meta.time.elapsed().unwrap().as_secs() % 2 == 0 {
                         "Female"
@@ -187,19 +172,14 @@ impl CreateCharacter {
                         y: Vertical::ByCenter { y: 300.0 },
                     },
                 ),
-                Box::new(Button::icon(
-                    vec![],
-                    "mt",
-                    UI_ICONS_SCALE,
-                    None,
-                    app.assets.tileset.clone(),
-                    app.assets.button.clone(),
+                icon_right(
+                    &app.assets,
                     Position {
                         x: Horizontal::AtWindowCenterByRight { offset: 260.0 },
                         y: Vertical::ByCenter { y: 300.0 },
                     },
-                    Transition::CustomEvent(ButtonEvent::GenderRight as u8),
-                )),
+                    ButtonEvent::GenderRight as u8,
+                ),
                 label(
                     "Age:",
                     &app.assets,

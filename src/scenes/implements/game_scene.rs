@@ -9,7 +9,7 @@ use tetra::Context;
 
 use crate::game::Item;
 use crate::scenes::Transition;
-use crate::ui::Button;
+use crate::ui::{Button, ButtonBuilder};
 use crate::{
     app::App,
     assets::Assets,
@@ -126,32 +126,36 @@ impl GameScene {
             2.0,
             second_hand.map(Item::color),
         ));
-        let left_hand_button = Box::new(Button::icon(
-            Vec::new(),
-            player.wield.left_hand().map_or("empty", Item::looks_like),
-            INVENTORY_UI_ICONS_SCALE,
-            player.wield.left_hand().map(Item::color),
-            app.assets.tileset.clone(),
-            app.assets.button.clone(),
-            Position {
-                x: Horizontal::AtWindowCenterByRight { offset: -10.0 },
-                y: Vertical::AtWindowBottomByBottom { offset: -20.0 },
-            },
-            Transition::CustomEvent(0),
-        ));
-        let right_hand_button = Box::new(Button::icon(
-            Vec::new(),
-            player.wield.right_hand().map_or("empty", Item::looks_like),
-            INVENTORY_UI_ICONS_SCALE,
-            player.wield.right_hand().map(Item::color),
-            app.assets.tileset.clone(),
-            app.assets.button.clone(),
-            Position {
-                x: Horizontal::AtWindowCenterByLeft { offset: 10.0 },
-                y: Vertical::AtWindowBottomByBottom { offset: -20.0 },
-            },
-            Transition::CustomEvent(0),
-        ));
+        let left_hand_button = Box::new(
+            ButtonBuilder::new(app.assets.button.clone())
+                .with_icon(
+                    player.wield.left_hand().map_or("empty", Item::looks_like),
+                    INVENTORY_UI_ICONS_SCALE,
+                    player.wield.left_hand().map(Item::color),
+                    app.assets.tileset.clone(),
+                )
+                .with_position(Position {
+                    x: Horizontal::AtWindowCenterByRight { offset: -10.0 },
+                    y: Vertical::AtWindowBottomByBottom { offset: -20.0 },
+                })
+                .with_transition(Transition::CustomEvent(0))
+                .build(),
+        );
+        let right_hand_button = Box::new(
+            ButtonBuilder::new(app.assets.button.clone())
+                .with_icon(
+                    player.wield.right_hand().map_or("empty", Item::looks_like),
+                    INVENTORY_UI_ICONS_SCALE,
+                    player.wield.right_hand().map(Item::color),
+                    app.assets.tileset.clone(),
+                )
+                .with_position(Position {
+                    x: Horizontal::AtWindowCenterByLeft { offset: 10.0 },
+                    y: Vertical::AtWindowBottomByBottom { offset: -20.0 },
+                })
+                .with_transition(Transition::CustomEvent(1))
+                .build(),
+        );
 
         drop(world_borrow);
         Self {

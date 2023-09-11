@@ -1,7 +1,7 @@
 pub use self::game_log::GameLog;
 pub use self::implements::{
     alert::Alert,
-    button::Button,
+    button::{Button, ButtonBuilder},
     image::{Image, TilesetSprite},
     inputs::TextInput,
     label::{ItemDisplay, Label},

@@ -11,12 +11,13 @@ use tetra::{
     Context, Event,
 };
 
+use crate::ui::ButtonBuilder;
 use crate::{
     app::App,
     colors::Colors,
     savefile::{self, savefiles, savefiles_exists, Meta},
     ui::{
-        Alert, Button, Horizontal, HoverableMesh, Label, Position, Positionate, SomeUISprites,
+        Alert, Horizontal, HoverableMesh, Label, Position, Positionate, SomeUISprites,
         SomeUISpritesMut, UiSprite, Vertical,
     },
     VERSION,
@@ -130,40 +131,46 @@ impl LoadWorld {
                 y: Vertical::AtWindowCenterByTop { offset: y + 30.0 },
             },
         )));
-        sprites.push(Box::new(Button::text(
-            if i < 10 { vec![KEYS[i].into()] } else { vec![] },
-            if i < 10 {
-                format!("[{}] Load", if i < 9 { i + 1 } else { 0 })
-            } else {
-                "Load".to_string()
-            },
-            app.assets.fonts.default.clone(),
-            app.assets.button.clone(),
-            Position {
-                x: Horizontal::AtWindowCenterByRight { offset: 120.0 },
-                y: Vertical::AtWindowCenterByCenter { offset: y + 24.5 },
-            },
-            Transition::CustomEvent((i * 2) as u8),
-        )));
-        sprites.push(Box::new(Button::text(
-            if i < 10 {
-                vec![(KEYS[i], KeyModifier::Alt).into()]
-            } else {
-                vec![]
-            },
-            if i < 10 {
-                format!("[Alt+{}] Delete", if i < 9 { i + 1 } else { 0 })
-            } else {
-                "Delete".to_string()
-            },
-            app.assets.fonts.default.clone(),
-            app.assets.button.clone(),
-            Position {
-                x: Horizontal::AtWindowCenterByRight { offset: 275.0 },
-                y: Vertical::AtWindowCenterByCenter { offset: y + 24.5 },
-            },
-            Transition::CustomEvent((i * 2 + 1) as u8),
-        )));
+        sprites.push(Box::new(
+            ButtonBuilder::new(app.assets.button.clone())
+                .with_text(
+                    if i < 10 {
+                        format!("[{}] Load", if i < 9 { i + 1 } else { 0 })
+                    } else {
+                        "Load".to_string()
+                    },
+                    app.assets.fonts.default.clone(),
+                )
+                .with_position(Position {
+                    x: Horizontal::AtWindowCenterByRight { offset: 120.0 },
+                    y: Vertical::AtWindowCenterByCenter { offset: y + 24.5 },
+                })
+                .with_keys(if i < 10 { vec![KEYS[i].into()] } else { vec![] })
+                .with_transition(Transition::CustomEvent((i * 2) as u8))
+                .build(),
+        ));
+        sprites.push(Box::new(
+            ButtonBuilder::new(app.assets.button.clone())
+                .with_text(
+                    if i < 10 {
+                        format!("[Alt+{}] Delete", if i < 9 { i + 1 } else { 0 })
+                    } else {
+                        "Delete".to_string()
+                    },
+                    app.assets.fonts.default.clone(),
+                )
+                .with_keys(if i < 10 {
+                    vec![(KEYS[i], KeyModifier::Alt).into()]
+                } else {
+                    vec![]
+                })
+                .with_position(Position {
+                    x: Horizontal::AtWindowCenterByRight { offset: 275.0 },
+                    y: Vertical::AtWindowCenterByCenter { offset: y + 24.5 },
+                })
+                .with_transition(Transition::CustomEvent((i * 2 + 1) as u8))
+                .build(),
+        ));
     }
 }
 

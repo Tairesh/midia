@@ -5,7 +5,7 @@ use tetra::{
     Context, Event,
 };
 
-use crate::ui::UiSprite;
+use crate::ui::{ButtonBuilder, UiSprite};
 use crate::{
     assets::Assets,
     colors::Colors,
@@ -104,14 +104,14 @@ pub(crate) fn error_label(
 }
 
 pub(crate) fn back_btn(position: Position, assets: &Assets) -> Box<Button> {
-    Box::new(Button::text(
-        vec![Key::Escape.into()],
-        "[Esc] Back",
-        assets.fonts.default.clone(),
-        assets.button.clone(),
-        position,
-        Transition::Pop,
-    ))
+    Box::new(
+        ButtonBuilder::new(assets.button.clone())
+            .with_text("[Esc] Back", assets.fonts.default.clone())
+            .with_keys(vec![Key::Escape.into()])
+            .with_position(position)
+            .with_transition(Transition::Pop)
+            .build(),
+    )
 }
 
 pub(crate) fn next_btn(
@@ -120,14 +120,14 @@ pub(crate) fn next_btn(
     custom_event: u8,
     text: &str,
 ) -> Box<Button> {
-    Box::new(Button::text(
-        vec![(Key::Enter, KeyModifier::Alt).into()],
-        format!("[Alt+Enter] {text}"),
-        assets.fonts.default.clone(),
-        assets.button.clone(),
-        position,
-        Transition::CustomEvent(custom_event),
-    ))
+    Box::new(
+        ButtonBuilder::new(assets.button.clone())
+            .with_text(format!("[Alt+Enter] {text}"), assets.fonts.default.clone())
+            .with_keys(vec![(Key::Enter, KeyModifier::Alt).into()])
+            .with_position(position)
+            .with_transition(Transition::CustomEvent(custom_event))
+            .build(),
+    )
 }
 
 pub(crate) fn text_input(
@@ -145,17 +145,17 @@ pub(crate) fn text_input(
 }
 
 pub(crate) fn randomize_btn(assets: &Assets, position: Position, custom_event: u8) -> Box<Button> {
-    Box::new(Button::text(
-        vec![
-            Key::NumPadMultiply.into(),
-            (Key::Num8, KeyModifier::Shift).into(),
-        ],
-        "[*] Randomize",
-        assets.fonts.default.clone(),
-        assets.button.clone(),
-        position,
-        Transition::CustomEvent(custom_event),
-    ))
+    Box::new(
+        ButtonBuilder::new(assets.button.clone())
+            .with_text("[*] Randomize", assets.fonts.default.clone())
+            .with_keys(vec![
+                Key::NumPadMultiply.into(),
+                (Key::Num8, KeyModifier::Shift).into(),
+            ])
+            .with_position(position)
+            .with_transition(Transition::CustomEvent(custom_event))
+            .build(),
+    )
 }
 
 pub(crate) fn back_randomize_next(
@@ -193,54 +193,33 @@ pub(crate) fn back_randomize_next(
     [back_btn, randomize_btn, next_btn]
 }
 
+pub fn icon_button(
+    assets: &Assets,
+    name: impl Into<String>,
+    position: Position,
+    custom_event: u8,
+) -> Box<Button> {
+    Box::new(
+        ButtonBuilder::new(assets.button.clone())
+            .with_icon(name, UI_ICONS_SCALE, None, assets.tileset.clone())
+            .with_position(position)
+            .with_transition(Transition::CustomEvent(custom_event))
+            .build(),
+    )
+}
+
 pub(crate) fn icon_left(assets: &Assets, position: Position, custom_event: u8) -> Box<Button> {
-    Box::new(Button::icon(
-        vec![],
-        "lt",
-        UI_ICONS_SCALE,
-        None,
-        assets.tileset.clone(),
-        assets.button.clone(),
-        position,
-        Transition::CustomEvent(custom_event),
-    ))
+    icon_button(assets, "lt", position, custom_event)
 }
 
 pub(crate) fn icon_right(assets: &Assets, position: Position, custom_event: u8) -> Box<Button> {
-    Box::new(Button::icon(
-        vec![],
-        "mt",
-        UI_ICONS_SCALE,
-        None,
-        assets.tileset.clone(),
-        assets.button.clone(),
-        position,
-        Transition::CustomEvent(custom_event),
-    ))
+    icon_button(assets, "mt", position, custom_event)
 }
 
 pub(crate) fn icon_plus(assets: &Assets, position: Position, custom_event: u8) -> Box<Button> {
-    Box::new(Button::icon(
-        vec![],
-        "plus",
-        UI_ICONS_SCALE,
-        None,
-        assets.tileset.clone(),
-        assets.button.clone(),
-        position,
-        Transition::CustomEvent(custom_event),
-    ))
+    icon_button(assets, "plus", position, custom_event)
 }
 
 pub(crate) fn icon_minus(assets: &Assets, position: Position, custom_event: u8) -> Box<Button> {
-    Box::new(Button::icon(
-        vec![],
-        "minus",
-        UI_ICONS_SCALE,
-        None,
-        assets.tileset.clone(),
-        assets.button.clone(),
-        position,
-        Transition::CustomEvent(custom_event),
-    ))
+    icon_button(assets, "minus", position, custom_event)
 }

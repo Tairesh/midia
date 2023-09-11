@@ -38,7 +38,7 @@ impl ButtonContent {
     }
 }
 
-enum ButtonState {
+pub enum ButtonState {
     Default,
     Pressed,
     Hovered,
@@ -94,103 +94,6 @@ pub struct Button {
 }
 
 impl Button {
-    fn new(
-        keys: Vec<KeyWithMod>,
-        content: ButtonContent,
-        asset: Rc<ButtonAsset>,
-        position: Position,
-        on_click: Transition,
-    ) -> Self {
-        Self {
-            keys,
-            content,
-            on_click,
-            position,
-            asset,
-            scale: Vec2::new(3.0, 3.0),
-            rect: None,
-            state: ButtonState::Default,
-            fixable: false,
-            visible: true,
-        }
-    }
-
-    pub fn text<S>(
-        keys: Vec<KeyWithMod>,
-        text: S,
-        font: PreparedFont,
-        asset: Rc<ButtonAsset>,
-        position: Position,
-        on_click: Transition,
-    ) -> Self
-    where
-        S: Into<String>,
-    {
-        Self::new(
-            keys,
-            ButtonContent::Text(Text::new(text, font.font), font.line_height),
-            asset,
-            position,
-            on_click,
-        )
-    }
-
-    pub fn empty(
-        keys: Vec<KeyWithMod>,
-        asset: Rc<ButtonAsset>,
-        size: Vec2,
-        position: Position,
-        on_click: Transition,
-    ) -> Self {
-        Self::new(keys, ButtonContent::Empty(size), asset, position, on_click)
-    }
-
-    pub fn fixed(
-        keys: Vec<KeyWithMod>,
-        text: &str,
-        font: PreparedFont,
-        asset: Rc<ButtonAsset>,
-        state: bool,
-        position: Position,
-        on_click: Transition,
-    ) -> Self {
-        Self {
-            fixable: true,
-            state: if state {
-                ButtonState::Pressed
-            } else {
-                ButtonState::Default
-            },
-            ..Self::text(keys, text, font, asset, position, on_click)
-        }
-    }
-
-    // TODO: refactoring, create a factory
-    #[allow(clippy::too_many_arguments)]
-    pub fn icon(
-        keys: Vec<KeyWithMod>,
-        name: impl Into<String>,
-        scale: Vec2,
-        color: Option<Color>,
-        tileset: Rc<Tileset>,
-        asset: Rc<ButtonAsset>,
-        position: Position,
-        on_click: Transition,
-    ) -> Self {
-        Self::new(
-            keys,
-            ButtonContent::Icon {
-                name: name.into(),
-                scale,
-                tileset,
-                color,
-            },
-            asset,
-            position,
-            on_click,
-        )
-    }
-
     pub fn update_icon(
         &mut self,
         name: impl Into<String>,
@@ -431,5 +334,139 @@ impl Focus for Button {}
 impl UiSprite for Button {
     fn as_button(&mut self) -> Option<&mut Button> {
         Some(self)
+    }
+}
+
+pub struct ButtonBuilder {
+    keys: Vec<KeyWithMod>,
+    content: Option<ButtonContent>,
+    on_click: Option<Transition>,
+    position: Option<Position>,
+    asset: Rc<ButtonAsset>,
+    scale: Vec2,
+    state: ButtonState,
+    fixable: bool,
+    visible: bool,
+    pressed: bool,
+}
+
+impl ButtonBuilder {
+    pub fn new(asset: Rc<ButtonAsset>) -> Self {
+        Self {
+            keys: Vec::new(),
+            content: None,
+            on_click: None,
+            position: None,
+            asset,
+            scale: Vec2::new(3.0, 3.0),
+            state: ButtonState::Default,
+            fixable: false,
+            visible: true,
+            pressed: false,
+        }
+    }
+
+    pub fn with_keys(mut self, keys: impl Into<Vec<KeyWithMod>>) -> Self {
+        self.keys = keys.into();
+
+        self
+    }
+
+    pub fn with_text(mut self, text: impl Into<String>, font: PreparedFont) -> Self {
+        self.content = Some(ButtonContent::Text(
+            Text::new(text, font.font),
+            font.line_height,
+        ));
+
+        self
+    }
+
+    pub fn with_empty(mut self, size: Vec2) -> Self {
+        self.content = Some(ButtonContent::Empty(size));
+
+        self
+    }
+
+    pub fn with_icon(
+        mut self,
+        name: impl Into<String>,
+        scale: Vec2,
+        color: Option<Color>,
+        tileset: Rc<Tileset>,
+    ) -> Self {
+        self.content = Some(ButtonContent::Icon {
+            name: name.into(),
+            scale,
+            color,
+            tileset,
+        });
+
+        self
+    }
+
+    pub fn with_transition(mut self, transition: Transition) -> Self {
+        self.on_click = Some(transition);
+
+        self
+    }
+
+    pub fn with_position(mut self, position: Position) -> Self {
+        self.position = Some(position);
+
+        self
+    }
+
+    pub fn with_scale(mut self, scale: Vec2) -> Self {
+        self.scale = scale;
+
+        self
+    }
+
+    pub fn with_state(mut self, state: ButtonState) -> Self {
+        self.state = state;
+
+        self
+    }
+
+    pub fn with_fixable(mut self, fixable: bool) -> Self {
+        self.fixable = fixable;
+
+        self
+    }
+
+    pub fn with_visible(mut self, visible: bool) -> Self {
+        self.visible = visible;
+
+        self
+    }
+
+    pub fn with_pressed(mut self, pressed: bool) -> Self {
+        self.state = if pressed {
+            ButtonState::Pressed
+        } else {
+            ButtonState::Default
+        };
+
+        self
+    }
+
+    pub fn build(self) -> Button {
+        assert!(
+            !(self.content.is_none() || self.on_click.is_none() || self.position.is_none()),
+            "Invalid button config"
+        );
+
+        Button {
+            keys: self.keys,
+            content: self.content.unwrap(),
+            on_click: self.on_click.unwrap(),
+            position: self.position.unwrap(),
+            asset: self.asset,
+            scale: self.scale,
+            rect: None,
+            state: self.state,
+            fixable: self.fixable,
+            visible: self.visible,
+        }
     }
 }

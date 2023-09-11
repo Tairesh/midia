@@ -1,10 +1,10 @@
 use tetra::input::Key;
 
+use crate::scenes::helpers::back_btn;
+use crate::ui::ButtonBuilder;
 use crate::{
     app::App,
-    ui::{
-        Alert, Button, Horizontal, Position, SomeUISprites, SomeUISpritesMut, UiSprite, Vertical,
-    },
+    ui::{Alert, Horizontal, Position, SomeUISprites, SomeUISpritesMut, UiSprite, Vertical},
 };
 
 use super::super::{Scene, SceneImpl, Transition};
@@ -21,39 +21,35 @@ impl GameMenu {
             app.assets.alert.clone(),
             Position::center(),
         ));
-        let back_btn = Box::new(Button::text(
-            vec![Key::Escape.into()],
-            "[Esc] Back",
-            app.assets.fonts.default.clone(),
-            app.assets.button.clone(),
+        let back_btn = back_btn(
             Position {
                 x: Horizontal::AtWindowCenterByCenter { offset: 0.0 },
                 y: Vertical::AtWindowCenterByBottom { offset: -30.0 },
             },
-            Transition::Pop,
-        ));
-        let settings_btn = Box::new(Button::text(
-            vec![Key::S.into()],
-            "[S] Settings",
-            app.assets.fonts.default.clone(),
-            app.assets.button.clone(),
-            Position {
-                x: Horizontal::AtWindowCenterByCenter { offset: 0.0 },
-                y: Vertical::AtWindowCenterByBottom { offset: 20.0 },
-            },
-            Transition::Replace(Scene::Settings),
-        ));
-        let quit_btn = Box::new(Button::text(
-            vec![Key::Q.into()],
-            "[q] Quit",
-            app.assets.fonts.default.clone(),
-            app.assets.button.clone(),
-            Position {
-                x: Horizontal::AtWindowCenterByCenter { offset: 0.0 },
-                y: Vertical::AtWindowCenterByBottom { offset: 70.0 },
-            },
-            Transition::GoMainMenu,
-        ));
+            &app.assets,
+        );
+        let settings_btn = Box::new(
+            ButtonBuilder::new(app.assets.button.clone())
+                .with_text("[S] Settings", app.assets.fonts.default.clone())
+                .with_keys(vec![Key::S.into()])
+                .with_position(Position {
+                    x: Horizontal::AtWindowCenterByCenter { offset: 0.0 },
+                    y: Vertical::AtWindowCenterByBottom { offset: 20.0 },
+                })
+                .with_transition(Transition::Replace(Scene::Settings))
+                .build(),
+        );
+        let quit_btn = Box::new(
+            ButtonBuilder::new(app.assets.button.clone())
+                .with_text("[q] Quit", app.assets.fonts.default.clone())
+                .with_keys(vec![Key::Q.into()])
+                .with_position(Position {
+                    x: Horizontal::AtWindowCenterByCenter { offset: 0.0 },
+                    y: Vertical::AtWindowCenterByBottom { offset: 70.0 },
+                })
+                .with_transition(Transition::GoMainMenu)
+                .build(),
+        );
 
         Self {
             sprites: [alert, back_btn, settings_btn, quit_btn],

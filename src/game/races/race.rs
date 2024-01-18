@@ -4,11 +4,17 @@ use enum_iterator::{next_cycle, previous_cycle, Sequence};
 use rand::distributions::{Distribution, Standard};
 use rand::Rng;
 use serde::{Deserialize, Serialize};
+use tetra::graphics::Color;
 
-use crate::game::game_data::DamageType;
-use crate::game::savage::{DamageDice, Skill};
-use crate::game::traits::Name;
-use crate::game::{Attribute, Damage, DamageValue, SkillLevel};
+use crate::colors::Colors;
+use crate::game::{
+    game_data::DamageType,
+    savage::{DamageDice, Skill},
+    traits::Name,
+    Attribute, Damage, DamageValue, SkillLevel,
+};
+
+use super::BodyColor;
 
 #[derive(Serialize, Deserialize, Debug, Copy, Clone, Eq, PartialEq, Hash)]
 #[serde(rename_all = "snake_case")]
@@ -21,12 +27,52 @@ pub enum Race {
 }
 
 impl Race {
-    // TODO: gazans has almost invisible light colored fluff,
-    // TODO: nyarniks has a variety of skin colors from yellow to red and brown,
-    // TODO: toticks has scale from blue to green
-    // TODO: lagnams also can be black, so we need tile with white border
-    pub fn has_fur(self) -> bool {
-        matches!(self, Race::Gazan | Race::Lagnam)
+    pub fn has_custom_colors(self) -> bool {
+        !self.custom_colors().is_empty()
+    }
+
+    pub fn custom_colors(self) -> Vec<BodyColor> {
+        match self {
+            Self::Gazan => vec![
+                BodyColor::LightBrown,
+                BodyColor::Ginger,
+                BodyColor::DarkBrown,
+                BodyColor::LightGreen,
+                BodyColor::Green,
+                BodyColor::DarkGreen,
+                BodyColor::White,
+                BodyColor::Gray,
+                BodyColor::DarkGray,
+                BodyColor::Albino,
+            ],
+            Self::Lagnam => vec![
+                BodyColor::LightBrown,
+                BodyColor::Ginger,
+                BodyColor::DarkBrown,
+                BodyColor::White,
+                BodyColor::Gray,
+                BodyColor::DarkGray,
+                BodyColor::Albino,
+            ],
+            Self::Totik => vec![
+                BodyColor::LightBlue,
+                BodyColor::Blue,
+                BodyColor::DarkBlue,
+                BodyColor::GreenBlue,
+                BodyColor::LightGreen,
+                BodyColor::Green,
+                BodyColor::DarkGreen,
+                BodyColor::Albino,
+            ],
+            Self::Nyarnik => vec![
+                BodyColor::LightBrown,
+                BodyColor::Ginger,
+                BodyColor::DarkBrown,
+                BodyColor::OrangeRed,
+                BodyColor::Albino,
+            ],
+            Self::Bug => vec![BodyColor::Lime, BodyColor::Red],
+        }
     }
 
     pub fn free_skills(self) -> HashMap<Skill, SkillLevel> {

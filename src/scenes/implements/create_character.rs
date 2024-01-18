@@ -10,7 +10,8 @@ use crate::{
     colors::Colors,
     game::{
         races::{
-            Appearance, FurColor, Gender, MainHand, Mind, Personality, PlayableRace, Race, Sex,
+            next_color, Appearance, BodyColor, Gender, MainHand, Mind, Personality, PlayableRace,
+            Race, Sex,
         },
         traits::Name,
         CharSheet,
@@ -30,7 +31,7 @@ use super::super::{
     Scene, SceneImpl, SomeTransitions, Transition,
 };
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 enum ButtonEvent {
     RaceLeft,
     RaceRight,
@@ -40,8 +41,8 @@ enum ButtonEvent {
     AgePlus,
     HandLeft,
     HandRight,
-    FurLeft,
-    FurRight,
+    ColorLeft,
+    ColorRight,
     Randomize,
     Next,
 }
@@ -57,7 +58,7 @@ pub struct CreateCharacter {
     sprites: [Box<dyn UiSprite>; 31],
     race: PlayableRace,
     main_hand: MainHand,
-    fur_color: Option<FurColor>,
+    body_color: Option<BodyColor>,
     window_size: (i32, i32),
 }
 
@@ -66,7 +67,7 @@ impl CreateCharacter {
     #[allow(clippy::too_many_lines)]
     pub fn new(path: &Path, app: &App, ctx: &mut Context) -> Self {
         let meta = savefile::load(path).unwrap();
-        let fur_color = FurColor::Gray;
+        let body_color = BodyColor::Ginger;
 
         let [back_btn, randomize_btn, next_btn] = back_randomize_next(
             &app.assets,
@@ -248,7 +249,7 @@ impl CreateCharacter {
                     ButtonEvent::HandRight as u8,
                 ),
                 label(
-                    "Fur color:",
+                    "Body color:",
                     &app.assets,
                     Position {
                         x: Horizontal::AtWindowCenterByRight { offset: -60.0 },
@@ -261,7 +262,7 @@ impl CreateCharacter {
                         x: Horizontal::AtWindowCenterByLeft { offset: -40.0 },
                         y: Vertical::ByCenter { y: 450.0 },
                     },
-                    ButtonEvent::FurLeft as u8,
+                    ButtonEvent::ColorLeft as u8,
                 ),
                 Box::new(JustMesh::new(
                     Mesh::rounded_rectangle(
@@ -271,7 +272,7 @@ impl CreateCharacter {
                         BorderRadii::new(5.0),
                     )
                     .unwrap(),
-                    Some(fur_color.into()),
+                    Some(body_color.into()),
                     Vec2::new(200.0, 42.0),
                     Position {
                         x: Horizontal::AtWindowCenterByCenter { offset: 110.0 },
@@ -279,9 +280,9 @@ impl CreateCharacter {
                     },
                 )),
                 Box::new(Label::new(
-                    fur_color.name(),
+                    body_color.name(),
                     app.assets.fonts.header.clone(),
-                    fur_color.text_color(),
+                    body_color.text_color(),
                     Position {
                         x: Horizontal::AtWindowCenterByCenter { offset: 110.0 },
                         y: Vertical::ByCenter { y: 450.0 },
@@ -293,7 +294,7 @@ impl CreateCharacter {
                         x: Horizontal::AtWindowCenterByRight { offset: 260.0 },
                         y: Vertical::ByCenter { y: 450.0 },
                     },
-                    ButtonEvent::FurRight as u8,
+                    ButtonEvent::ColorRight as u8,
                 ),
                 Box::new(TilesetSprite::new(
                     Race::Gazan.name(),
@@ -303,7 +304,7 @@ impl CreateCharacter {
                         y: Vertical::ByCenter { y: 250.0 },
                     },
                     3.0,
-                    Some(fur_color.into()),
+                    Some(body_color.into()),
                 )),
                 back_btn,
                 randomize_btn,
@@ -313,7 +314,7 @@ impl CreateCharacter {
             race: PlayableRace::Gazan,
             main_hand: MainHand::Right,
             window_size: app.window_size,
-            fur_color: Some(fur_color),
+            body_color: Some(body_color),
         }
     }
 
@@ -335,31 +336,31 @@ impl CreateCharacter {
     fn hand_name(&mut self) -> &mut Label {
         self.sprites[20].as_label().unwrap()
     }
-    fn fur_label(&mut self) -> &mut Label {
+    fn color_label(&mut self) -> &mut Label {
         self.sprites[22].as_label().unwrap()
     }
-    fn fur_left(&mut self) -> &mut Button {
+    fn color_left(&mut self) -> &mut Button {
         self.sprites[23].as_button().unwrap()
     }
-    fn fur_bg(&mut self) -> &mut JustMesh {
+    fn color_bg(&mut self) -> &mut JustMesh {
         self.sprites[24].as_just_mesh().unwrap()
     }
-    fn fur_name(&mut self) -> &mut Label {
+    fn color_name(&mut self) -> &mut Label {
         self.sprites[25].as_label().unwrap()
     }
-    fn fur_right(&mut self) -> &mut Button {
+    fn color_right(&mut self) -> &mut Button {
         self.sprites[26].as_button().unwrap()
     }
     fn race_sprite(&mut self) -> &mut TilesetSprite {
         self.sprites[27].as_tileset_sprite().unwrap()
     }
 
-    fn hide_fur_selectors(&mut self, hide: bool) {
-        self.fur_label().set_visible(!hide);
-        self.fur_left().set_visible(!hide);
-        self.fur_bg().set_visible(!hide);
-        self.fur_name().set_visible(!hide);
-        self.fur_right().set_visible(!hide);
+    fn hide_color_selectors(&mut self, hide: bool) {
+        self.color_label().set_visible(!hide);
+        self.color_left().set_visible(!hide);
+        self.color_bg().set_visible(!hide);
+        self.color_name().set_visible(!hide);
+        self.color_right().set_visible(!hide);
     }
 
     fn randomize(&mut self, ctx: &mut Context) {
@@ -376,15 +377,16 @@ impl CreateCharacter {
         let window_size = self.window_size;
         self.hand_name().update(name, ctx, window_size);
         self.race_name().update(race_name, ctx, window_size);
-        self.fur_color = character.appearance.fur_color;
+        self.body_color = character.appearance.body_color;
         let race = Race::from(self.race);
-        self.hide_fur_selectors(!race.has_fur());
+        self.hide_color_selectors(!race.has_custom_colors());
         self.race_sprite().set_name(race.name());
-        if let Some(fur_color) = self.fur_color {
-            self.fur_bg().set_color(fur_color);
-            self.fur_name().update(fur_color.name(), ctx, window_size);
-            self.fur_name().set_color(fur_color.text_color());
-            self.race_sprite().set_color(fur_color);
+        if let Some(body_color) = self.body_color {
+            self.color_bg().set_color(body_color);
+            self.color_name()
+                .update(body_color.name(), ctx, window_size);
+            self.color_name().set_color(body_color.text_color());
+            self.race_sprite().set_color(body_color);
         } else {
             self.race_sprite().remove_color();
         }
@@ -402,7 +404,7 @@ impl CreateCharacter {
             let race = Race::from(self.race);
             let character = Personality::new(
                 Appearance {
-                    fur_color: self.fur_color,
+                    body_color: self.body_color,
                     sex: Sex::from(&gender),
                     race,
                     age,
@@ -459,18 +461,18 @@ impl SceneImpl for CreateCharacter {
                 let window_size = self.window_size;
                 self.race_name().update(name, ctx, window_size);
                 let race = Race::from(self.race);
-                self.hide_fur_selectors(!race.has_fur());
                 self.race_sprite().set_name(race.name());
-                if race.has_fur() {
-                    let fur_color = FurColor::Ginger;
-                    self.fur_color = Some(fur_color);
-                    let name = fur_color.name();
-                    self.fur_name().update(name, ctx, window_size);
-                    self.fur_name().set_color(fur_color.text_color());
-                    self.fur_bg().set_color(fur_color);
-                    self.race_sprite().set_color(fur_color);
+                self.hide_color_selectors(!race.has_custom_colors());
+                if race.has_custom_colors() {
+                    let color = *race.custom_colors().first().unwrap();
+                    self.body_color = Some(color);
+                    let name = color.name();
+                    self.color_name().update(name, ctx, window_size);
+                    self.color_name().set_color(color.text_color());
+                    self.color_bg().set_color(color);
+                    self.race_sprite().set_color(color);
                 } else {
-                    self.fur_color = None;
+                    self.body_color = None;
                     self.race_sprite().remove_color();
                 }
 
@@ -510,20 +512,18 @@ impl SceneImpl for CreateCharacter {
                 self.hand_name().update(name, ctx, window_size);
                 None
             }
-            ButtonEvent::FurLeft | ButtonEvent::FurRight => {
-                if let Some(fur_color) = self.fur_color {
-                    let fur_color = match event {
-                        ButtonEvent::FurLeft => fur_color.prev(),
-                        ButtonEvent::FurRight => fur_color.next(),
-                        _ => unreachable!(),
-                    };
-                    self.fur_color = Some(fur_color);
-                    let name = fur_color.name();
+            ButtonEvent::ColorLeft | ButtonEvent::ColorRight => {
+                if let Some(body_color) = self.body_color {
+                    let colors = Race::from(self.race).custom_colors();
+                    let body_color =
+                        next_color(body_color, &colors, event == ButtonEvent::ColorRight);
+                    self.body_color = Some(body_color);
+                    let name = body_color.name();
                     let window_size = self.window_size;
-                    self.fur_name().update(name, ctx, window_size);
-                    self.fur_name().set_color(fur_color.text_color());
-                    self.fur_bg().set_color(fur_color);
-                    self.race_sprite().set_color(fur_color);
+                    self.color_name().update(name, ctx, window_size);
+                    self.color_name().set_color(body_color.text_color());
+                    self.color_bg().set_color(body_color);
+                    self.race_sprite().set_color(body_color);
                 }
                 None
             }

@@ -39,7 +39,7 @@ jobs:
         with:
           profile: minimal
           toolchain: nightly
-          components: clippy
+          components: clippy,rustfmt
           override: true
 
       - name: "Fmt check"

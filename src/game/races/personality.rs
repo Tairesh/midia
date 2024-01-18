@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 use super::{
     super::{traits::Name, CharSheet, GameData},
-    FurColor, Gender, MainHand, PlayableRace, Race, Sex,
+    BodyColor, Gender, MainHand, PlayableRace, Race, Sex,
 };
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -12,8 +12,8 @@ pub struct Appearance {
     pub race: Race,
     #[serde(rename = "a")]
     pub age: u8,
-    #[serde(rename = "f")]
-    pub fur_color: Option<FurColor>,
+    #[serde(rename = "c")]
+    pub body_color: Option<BodyColor>,
     #[serde(rename = "x")]
     pub sex: Sex,
 }
@@ -75,10 +75,10 @@ impl Personality {
             .unwrap_or_default();
         Personality::new(
             Appearance {
-                fur_color: if race.has_fur() {
-                    Some(rng.sample(Standard))
-                } else {
+                body_color: if race.custom_colors().is_empty() {
                     None
+                } else {
+                    Some(*race.custom_colors().choose(rng).unwrap())
                 },
                 age,
                 sex,
@@ -129,14 +129,14 @@ pub fn age_name(appearance: &Appearance) -> String {
 
 #[cfg(test)]
 pub mod tests {
-    use super::{Appearance, CharSheet, FurColor, Gender, MainHand, Mind, Personality, Race, Sex};
+    use super::{Appearance, BodyColor, CharSheet, Gender, MainHand, Mind, Personality, Race, Sex};
 
     pub fn tester_girl() -> Personality {
         Personality::new(
             Appearance {
                 race: Race::Gazan,
                 age: 15,
-                fur_color: Some(FurColor::Ginger),
+                body_color: Some(BodyColor::Ginger),
                 sex: Sex::Female,
             },
             Mind {
@@ -153,7 +153,7 @@ pub mod tests {
             Appearance {
                 race: Race::Bug,
                 age: 99,
-                fur_color: None,
+                body_color: None,
                 sex: Sex::Undefined,
             },
             Mind {

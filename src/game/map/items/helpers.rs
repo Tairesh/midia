@@ -155,7 +155,7 @@ pub fn dead_body(unit: &Avatar) -> Item {
         ranged_damage: None,
         ammo: None,
         ammo_types: HashSet::default(),
-        // TODO: fur color
+        // TODO: body color
         color_from_material: Some(Material::Flesh),
     })
 }

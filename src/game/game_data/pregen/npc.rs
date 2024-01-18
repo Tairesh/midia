@@ -1,5 +1,5 @@
 use crate::game::{
-    races::{Appearance, FurColor, Gender, Mind, Personality, Race, Sex},
+    races::{Appearance, BodyColor, Gender, Mind, Personality, Race, Sex},
     savage::{Attributes, Skills},
     CharSheet, Dice, MainHand, SkillLevel,
 };
@@ -9,7 +9,7 @@ pub fn dragan() -> Personality {
         Appearance {
             race: Race::Gazan,
             age: 25,
-            fur_color: Some(FurColor::LightBrown),
+            body_color: Some(BodyColor::LightBrown),
             sex: Sex::Male,
         },
         Mind {
@@ -55,7 +55,7 @@ pub fn grem() -> Personality {
         Appearance {
             race: Race::Lagnam,
             age: 23,
-            fur_color: Some(FurColor::LightBrown),
+            body_color: Some(BodyColor::LightBrown),
             sex: Sex::Male,
         },
         Mind {
@@ -101,7 +101,7 @@ pub fn yasma() -> Personality {
         Appearance {
             race: Race::Gazan,
             age: 23,
-            fur_color: Some(FurColor::Ginger),
+            body_color: Some(BodyColor::Ginger),
             sex: Sex::Male,
         },
         Mind {
@@ -146,7 +146,7 @@ pub fn shasha() -> Personality {
         Appearance {
             race: Race::Nyarnik,
             age: 20,
-            fur_color: None,
+            body_color: None,
             sex: Sex::Female,
         },
         Mind {

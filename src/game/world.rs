@@ -11,7 +11,7 @@ use super::{
     },
     game_data::pregen,
     map::{field_of_view_set, Fov, TerrainView},
-    races::{Appearance, Gender, MainHand, Mind, Personality, Race, Sex},
+    races::{Appearance, BodyColor, Gender, MainHand, Mind, Personality, Race, Sex},
     savage::HitResult,
     Action, Avatar, CharSheet, Chunk, ChunkPos, Log, LogEvent, Map, TilePos,
 };
@@ -83,7 +83,7 @@ impl World {
                 Appearance {
                     race: Race::Totik,
                     age: 29,
-                    fur_color: None,
+                    body_color: Some(BodyColor::GreenBlue),
                     sex: Sex::Male,
                 },
                 Mind {
@@ -101,7 +101,7 @@ impl World {
                 Appearance {
                     race: Race::Bug,
                     age: 99,
-                    fur_color: None,
+                    body_color: Some(BodyColor::Lime),
                     sex: Sex::Undefined,
                 },
                 Mind {

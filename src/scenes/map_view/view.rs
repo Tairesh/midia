@@ -191,8 +191,8 @@ pub fn draw_unit(
         Vec2::new(-zoom, zoom)
     };
     let mut draw_params = DrawParams::new().position(position).scale(scale);
-    if let Some(fur_color) = avatar.personality.appearance.fur_color {
-        draw_params = draw_params.color(fur_color.into());
+    if let Some(body_color) = avatar.personality.appearance.body_color {
+        draw_params = draw_params.color(body_color.into());
     }
     tileset.draw_region(ctx, avatar.personality.appearance.race.name(), draw_params);
 

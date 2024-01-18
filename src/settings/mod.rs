@@ -5,68 +5,17 @@ use std::sync::{Mutex, MutexGuard};
 
 use once_cell::sync::OnceCell;
 
-// TODO: move settings to a separate directory
+use self::{debug::DebugSettings, input::InputSettings, window::WindowSettings};
+
+mod debug;
+mod input;
+mod window;
 
 const PATH: &str = "settings.json";
 static INSTANCE: OnceCell<Mutex<Settings>> = OnceCell::new();
 
 trait Validate {
     fn validate(&mut self);
-}
-
-#[derive(serde::Serialize, serde::Deserialize, Debug)]
-pub struct WindowSettings {
-    pub width: i32,
-    pub height: i32,
-    pub fullscreen: bool,
-}
-
-impl Default for WindowSettings {
-    fn default() -> Self {
-        Self {
-            width: 1366,
-            height: 768,
-            fullscreen: false,
-        }
-    }
-}
-
-impl Validate for WindowSettings {
-    fn validate(&mut self) {
-        self.width = self.width.clamp(1366, 1920);
-        self.height = self.height.clamp(768, 1280);
-    }
-}
-
-#[derive(serde::Serialize, serde::Deserialize, Debug, Default)]
-pub struct DebugSettings {
-    pub show_fps: bool,
-    // TODO: debug log, backtrace, god-mode, etc.
-}
-
-impl Validate for DebugSettings {
-    fn validate(&mut self) {
-        // do nothing
-    }
-}
-
-#[derive(serde::Serialize, serde::Deserialize, Debug)]
-pub struct InputSettings {
-    pub repeat_interval: u32,
-}
-
-impl Default for InputSettings {
-    fn default() -> Self {
-        Self {
-            repeat_interval: 125,
-        }
-    }
-}
-
-impl Validate for InputSettings {
-    fn validate(&mut self) {
-        self.repeat_interval = self.repeat_interval.clamp(1, 1000);
-    }
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Default)]
@@ -86,13 +35,17 @@ impl Settings {
 
     pub fn save(&mut self) {
         self.validate();
-        save(self, PATH);
+        self.save_to_file(PATH);
     }
 
     pub fn validate(&mut self) {
         self.window.validate();
         self.debug.validate();
         self.input.validate();
+    }
+
+    pub fn save_to_file(&self, path: &'static str) {
+        serde_json::to_writer(&File::create(Path::new(path)).unwrap(), self).ok();
     }
 }
 
@@ -114,13 +67,9 @@ fn load_from_file(path: &'static str) -> Result<Settings, ()> {
 fn load(path: &'static str) -> Settings {
     load_from_file(path).unwrap_or_else(|()| {
         let settings = Settings::default();
-        save(&settings, path);
+        settings.save_to_file(path);
         settings
     })
-}
-
-fn save(settings: &Settings, path: &'static str) {
-    serde_json::to_writer(&File::create(Path::new(path)).unwrap(), settings).ok();
 }
 
 #[cfg(test)]

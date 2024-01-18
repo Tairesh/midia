@@ -4,7 +4,7 @@ check: fmt-check cargo-check test clippy
 before-commit: fix check
 
 fix:
-    cargo fix --allow-dirty
+    cargo fix --allow-dirty --allow-staged
     cargo fmt --
 
 fmt-check:

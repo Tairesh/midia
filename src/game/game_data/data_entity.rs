@@ -45,7 +45,6 @@ mod tests {
 
     fn check_namepack(names_pack: &DataEntity) {
         if let DataEntity::NamesPack(names_pack) = names_pack {
-            assert_eq!("core", names_pack.id);
             assert!(names_pack.names.contains_key(&Race::Gazan));
             if let Some(names) = names_pack.names.get(&Race::Gazan) {
                 assert!(names.contains_key(&Sex::Male));

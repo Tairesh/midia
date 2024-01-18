@@ -1,7 +1,7 @@
 use geometry::DIR8;
 
 use crate::game::savage::HitResult;
-use crate::game::{Avatar, RollResult, Skill, World};
+use crate::game::{AttackType, Avatar, RollResult, Skill, World};
 
 use super::super::{RangedDistance, UnitRangedAttackResult};
 
@@ -45,7 +45,7 @@ pub fn throw_attack_unit(
 
 fn throwing_roll(attacker: &Avatar, defender: &Avatar) -> Option<RollResult> {
     let distance = attacker.pos.distance(defender.pos);
-    let damage_value = attacker.throw_damage().unwrap();
+    let damage_value = attacker.attack_damage(AttackType::Throw).unwrap();
     let distance = RangedDistance::define(distance, damage_value.distance);
 
     if distance == RangedDistance::Unreachable {
@@ -59,7 +59,7 @@ fn throwing_roll(attacker: &Avatar, defender: &Avatar) -> Option<RollResult> {
 }
 
 fn calculate_hit(attacker: &Avatar, defender: &Avatar, critical: bool) -> HitResult {
-    let damage_value = attacker.throw_damage().unwrap();
+    let damage_value = attacker.attack_damage(AttackType::Throw).unwrap();
     let damage = damage_value.roll(&attacker.personality.char_sheet, critical, true);
 
     HitResult::calculate(damage.damage, damage.penetration, defender, critical)

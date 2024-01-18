@@ -1,8 +1,8 @@
 pub use attributes::{Attribute, Attributes};
 pub use charsheet::CharSheet;
 pub use combat::{
-    melee_attack_unit, melee_smash_terrain, throw_attack_unit, HitResult, RangedDistance,
-    TerrainMeleeAttackResult, UnitMeleeAttackResult, UnitRangedAttackResult,
+    melee_attack_unit, melee_smash_terrain, throw_attack_unit, AttackType, HitResult,
+    RangedDistance, TerrainMeleeAttackResult, UnitMeleeAttackResult, UnitRangedAttackResult,
 };
 pub use damage::{Damage, DamageDice};
 pub use dice::{Dice, DiceWithModifier, RollResult, SkillLevel};

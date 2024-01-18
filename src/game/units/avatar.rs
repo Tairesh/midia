@@ -2,7 +2,7 @@
 
 use geometry::{Point, TwoDimDirection};
 
-use crate::game::DamageValue;
+use crate::game::{AttackType, DamageValue};
 
 use super::super::{
     map::items::helpers::{dead_body, CLOAK, HAT},
@@ -107,18 +107,22 @@ impl Avatar {
     }
 
     pub fn melee_damage(&self) -> DamageValue {
-        if let Some(weapon) = self.wield.active_hand() {
-            weapon.melee_damage()
-        } else {
-            self.personality.appearance.race.natural_weapon().1
-        }
+        self.attack_damage(AttackType::Melee).unwrap()
     }
 
-    pub fn throw_damage(&self) -> Option<DamageValue> {
-        if let Some(weapon) = self.wield.active_hand() {
-            weapon.throw_damage()
-        } else {
-            None
+    pub fn attack_damage(&self, attack_type: AttackType) -> Option<DamageValue> {
+        match attack_type {
+            AttackType::Melee => {
+                if let Some(weapon) = self.wield.active_hand() {
+                    weapon.damage(attack_type)
+                } else {
+                    Some(self.personality.appearance.race.natural_weapon().1)
+                }
+            }
+            _ => self
+                .wield
+                .active_hand()
+                .and_then(|weapon| weapon.damage(attack_type)),
         }
     }
 }

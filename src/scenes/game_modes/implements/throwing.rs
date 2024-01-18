@@ -7,7 +7,7 @@ use tetra::{
 };
 
 use crate::game::actions::implements::Throw;
-use crate::game::RangedDistance;
+use crate::game::{AttackType, RangedDistance};
 use crate::{colors::Colors, game::World, input, settings::Settings};
 
 use super::super::{
@@ -145,10 +145,7 @@ impl GameModeImpl for Throwing {
                 .world
                 .borrow()
                 .player()
-                .wield
-                .active_hand()
-                .unwrap()
-                .throw_damage()
+                .attack_damage(AttackType::Throw)
                 .unwrap();
             let pos = self.shift_of_view + self.mouse_moved_pos + dir;
             let distance = RangedDistance::define(pos.distance(Point::default()), damage.distance);

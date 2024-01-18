@@ -7,4 +7,10 @@ pub use ranged::{throw_attack_unit, RangedDistance, UnitRangedAttackResult};
 mod hit;
 mod melee;
 mod ranged;
-// TODO: distance attacks: bows, throwing, and melee weapons with distance > 0
+
+#[derive(Debug, Eq, PartialEq, Copy, Clone)]
+pub enum AttackType {
+    Melee,
+    Throw,
+    Fire,
+}

@@ -6,7 +6,9 @@ use serde::{Deserialize, Serialize};
 use tetra::graphics::Color;
 
 use crate::game::game_data::AmmoType;
-use crate::game::{DamageValue, GameData, ItemPrototype, ItemQuality, ItemSize, ItemTag};
+use crate::game::{
+    AttackType, DamageValue, GameData, ItemPrototype, ItemQuality, ItemSize, ItemTag,
+};
 
 use super::container::Container;
 
@@ -112,7 +114,7 @@ impl Item {
 
     pub fn with_items_inside(mut self, items: impl Into<Vec<Item>>) -> Self {
         if let Some(container) = &mut self.container {
-            container.push_items(items)
+            container.push_items(items);
         } else {
             unreachable!("Trying to put items into not-container item");
         }
@@ -222,25 +224,37 @@ impl Item {
         }
     }
 
-    pub fn melee_damage(&self) -> DamageValue {
-        // TODO: check for minimum strength
-        if let Some(damage) = &self.proto().melee_damage {
-            return damage.clone();
-        }
+    pub fn damage(&self, attack_type: AttackType) -> Option<DamageValue> {
+        match attack_type {
+            AttackType::Melee => {
+                // TODO: check for minimum strength
+                if self.proto().melee_damage.is_some() {
+                    return self.proto().melee_damage.clone();
+                }
 
-        DamageValue::improvised_melee(self)
+                Some(DamageValue::improvised_melee(self))
+            }
+            AttackType::Throw => {
+                if self.proto().throw_damage.is_some() {
+                    return self.proto().throw_damage.clone();
+                }
+
+                DamageValue::improvised_throw(self)
+            }
+            AttackType::Fire => self.proto().ranged_damage.clone(),
+        }
+    }
+
+    pub fn melee_damage(&self) -> DamageValue {
+        self.damage(AttackType::Melee).unwrap()
     }
 
     pub fn throw_damage(&self) -> Option<DamageValue> {
-        if let Some(damage) = &self.proto().throw_damage {
-            return Some(damage.clone());
-        }
-
-        DamageValue::improvised_throw(self)
+        self.damage(AttackType::Throw)
     }
 
     pub fn ranged_damage(&self) -> Option<DamageValue> {
-        self.proto().ranged_damage.clone()
+        self.damage(AttackType::Fire)
     }
 
     pub fn ammo_types(&self) -> &HashSet<AmmoType> {

@@ -4,8 +4,8 @@ use rand::seq::SliceRandom;
 use super::super::{
     super::{
         log::helpers::unit_attack_success,
-        savage::{throw_attack_unit, RangedDistance, UnitRangedAttackResult},
-        Action, Avatar, Item, LogEvent, World,
+        savage::{ranged_attack_unit, RangedDistance, UnitRangedAttackResult},
+        Action, AttackType, Avatar, Item, LogEvent, World,
     },
     ActionImpl,
     ActionPossibility::{self, No, Yes},
@@ -71,7 +71,7 @@ impl ActionImpl for Throw {
             Item::name,
         );
 
-        let attack = throw_attack_unit(owner, unit, world);
+        let attack = ranged_attack_unit(AttackType::Throw, owner, unit, world);
         match attack {
             UnitRangedAttackResult::InnocentBystander(unit_id, damage) => {
                 let victim = world.get_unit(unit_id);

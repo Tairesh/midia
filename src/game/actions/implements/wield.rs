@@ -23,7 +23,7 @@ impl ActionImpl for WieldFromGround {
         let pos = actor.pos + self.dir;
         if let Some(item) = world.map().get_tile(pos).items.last() {
             match world.player().wield.can_wield(item.is_two_handed()) {
-                Ok(_) => Yes(item.wield_time().round() as u32),
+                Ok(..) => Yes(item.wield_time().round() as u32),
                 Err(e) => No(e),
             }
         } else {

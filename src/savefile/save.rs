@@ -33,7 +33,7 @@ pub fn create(name: &str, seed: &str) -> Result<PathBuf, Error> {
     let mut file = File::create(&path).map_err(Error::from)?;
     file.write_all(make_data(name.as_str(), seed)?.as_bytes())
         .map_err(Into::into)
-        .map(|_| path)
+        .map(|()| path)
 }
 
 pub fn save(path: &Path, data: &str) -> Result<(), Error> {

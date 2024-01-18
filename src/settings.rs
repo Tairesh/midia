@@ -24,7 +24,7 @@ pub struct WindowSettings {
 impl Default for WindowSettings {
     fn default() -> Self {
         Self {
-            width: 1024,
+            width: 1366,
             height: 768,
             fullscreen: false,
         }
@@ -33,8 +33,8 @@ impl Default for WindowSettings {
 
 impl Validate for WindowSettings {
     fn validate(&mut self) {
-        self.width = self.width.clamp(800, 1920);
-        self.height = self.height.clamp(600, 1280);
+        self.width = self.width.clamp(1366, 1920);
+        self.height = self.height.clamp(768, 1280);
     }
 }
 
@@ -112,7 +112,7 @@ fn load_from_file(path: &'static str) -> Result<Settings, ()> {
 }
 
 fn load(path: &'static str) -> Settings {
-    load_from_file(path).unwrap_or_else(|_| {
+    load_from_file(path).unwrap_or_else(|()| {
         let settings = Settings::default();
         save(&settings, path);
         settings
@@ -130,13 +130,13 @@ mod tests {
     #[test]
     fn test_invalid_settings() {
         let mut settings = Settings::default();
-        settings.window.width = 123;
-        settings.window.height = 456;
+        settings.window.width = 1365;
+        settings.window.height = 767;
         settings.input.repeat_interval = 0;
         settings.validate();
 
-        assert_eq!(800, settings.window.width);
-        assert_eq!(600, settings.window.height);
+        assert_eq!(1366, settings.window.width);
+        assert_eq!(768, settings.window.height);
         assert_eq!(1, settings.input.repeat_interval);
     }
 }

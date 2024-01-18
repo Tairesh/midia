@@ -17,9 +17,9 @@ use crate::{
 pub struct App {
     pub assets: Rc<Assets>,
     pub window_size: (i32, i32),
+    pub world: Option<Rc<RefCell<World>>>,
     scenes: Vec<Box<dyn SceneImpl>>,
     fps_counter: Label,
-    pub world: Option<Rc<RefCell<World>>>,
 }
 
 impl App {

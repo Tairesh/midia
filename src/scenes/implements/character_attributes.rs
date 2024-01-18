@@ -70,6 +70,7 @@ enum ButtonEvent {
     ClimbingPlus,
     Randomize,
     Next,
+    // TODO: Reset,
 }
 
 impl From<Attribute> for ButtonEvent {

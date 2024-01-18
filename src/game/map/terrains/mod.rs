@@ -1,3 +1,5 @@
+#![allow(unused_imports)]
+
 pub use boulder::{Boulder, BoulderSize};
 pub use chest::Chest;
 pub use dirt::{Dirt, DirtVariant};

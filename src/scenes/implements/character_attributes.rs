@@ -486,7 +486,7 @@ impl CharacterAttributes {
 
         vec![
             Transition::LoadWorld(self.meta.path.clone()),
-            Transition::Replace(Scene::GameScene),
+            Transition::Replace(Scene::Game),
         ]
     }
 

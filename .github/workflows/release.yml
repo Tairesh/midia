@@ -46,7 +46,7 @@ jobs:
         uses: dtolnay/rust-toolchain@master
         with:
           profile: minimal
-          toolchain: stable
+          toolchain: nightly
           override: true
 
       - name: "Install SDL2 (linux)"

@@ -23,7 +23,7 @@ pub enum Scene {
     LoadWorld,
     CreateCharacter(PathBuf),
     CharacterAttributes(PathBuf, Personality),
-    GameScene,
+    Game,
     GameMenu,
 }
 
@@ -40,7 +40,7 @@ impl Scene {
             Scene::CharacterAttributes(path, personality) => {
                 Box::new(CharacterAttributes::new(&path, personality, app, ctx))
             }
-            Scene::GameScene => Box::new(GameScene::new(app)),
+            Scene::Game => Box::new(GameScene::new(app)),
             Scene::GameMenu => Box::new(GameMenu::new(app)),
         }
     }

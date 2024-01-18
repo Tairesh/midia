@@ -110,6 +110,16 @@ impl Item {
         self
     }
 
+    pub fn with_items_inside(mut self, items: impl Into<Vec<Item>>) -> Self {
+        if let Some(container) = &mut self.container {
+            container.push_items(items)
+        } else {
+            unreachable!("Trying to put items into not-container item");
+        }
+
+        self
+    }
+
     pub fn name(&self) -> &str {
         if let Some(named) = &self.named {
             return named;

@@ -44,4 +44,11 @@ impl Container {
 
         self.items.push(item);
     }
+
+    pub fn push_items(&mut self, items: impl Into<Vec<Item>>) {
+        let items: Vec<Item> = items.into();
+        for item in items {
+            self.push_item(item);
+        }
+    }
 }

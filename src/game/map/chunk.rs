@@ -5,9 +5,10 @@ use arrayvec::ArrayVec;
 use rand::{distributions::Standard, rngs::StdRng, Rng, SeedableRng};
 
 use crate::game::map::items::helpers::{
-    random_book, BACKPACK, GOD_AXE, LEATHER_ARM_GUARD, OBSIDIAN_SHARD, RAGS, STONE_KNIFE,
+    random_book, BACKPACK, GOD_AXE, LEATHER_ARM_GUARD, OBSIDIAN_SHARD, QUIVER, RAGS, STONE_KNIFE,
     STONE_SHOVEL, WOODEN_ARROW, WOODEN_SHORTBOW,
 };
+use crate::game::AmmoType;
 
 use super::{
     terrains::{Boulder, Chest, Dirt, Grass, Tree},
@@ -88,7 +89,11 @@ impl Chunk {
                 .items
                 .push(match rng.gen_range(0..8) {
                     0 => Item::new(WOODEN_SHORTBOW),
-                    1 => Item::new(WOODEN_ARROW),
+                    1 => Item::new(QUIVER).with_items_inside(vec![
+                        Item::new(WOODEN_ARROW),
+                        Item::new(WOODEN_ARROW),
+                        Item::new(WOODEN_ARROW),
+                    ]),
                     2 => Item::new(GOD_AXE),
                     3 => Item::new(STONE_SHOVEL),
                     4 => random_book(),

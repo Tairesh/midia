@@ -16,3 +16,6 @@ mod damage;
 mod dice;
 mod skills;
 mod wound;
+
+/// Default attack cost in ticks
+pub const ATTACK_MOVES: u32 = 10;

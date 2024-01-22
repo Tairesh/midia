@@ -6,15 +6,14 @@ use super::super::{
         game_data::DamageType,
         log::helpers::unit_attack_success,
         savage::{
-            melee_attack_unit, melee_smash_terrain, TerrainMeleeAttackResult, UnitMeleeAttackResult,
+            melee_attack_unit, melee_smash_terrain, TerrainMeleeAttackResult,
+            UnitMeleeAttackResult, ATTACK_MOVES,
         },
         Action, Avatar, Item, LogEvent, World,
     },
     ActionImpl,
     ActionPossibility::{self, No, Yes},
 };
-
-const MELEE_ATTACK_MOVES: u32 = 10;
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Copy, Clone)]
 pub struct Melee {
@@ -190,10 +189,10 @@ impl ActionImpl for Melee {
             if distance > weapon_distance {
                 No("You can't reach the target from this distance".to_string())
             } else {
-                Yes(MELEE_ATTACK_MOVES)
+                Yes(ATTACK_MOVES)
             }
         } else {
-            Yes(MELEE_ATTACK_MOVES)
+            Yes(ATTACK_MOVES)
         }
     }
 
@@ -214,7 +213,7 @@ mod tests {
     use crate::game::world::tests::{add_npc, prepare_world};
     use crate::game::{Action, Item, Race};
 
-    use super::{Melee, MELEE_ATTACK_MOVES};
+    use super::{Melee, ATTACK_MOVES};
 
     #[test]
     fn test_melee_attack_with_fists() {
@@ -228,7 +227,7 @@ mod tests {
             Some(Action::new(0, Melee::new(Point::new(1, 0)).into(), &world).unwrap());
         world.tick();
 
-        assert_eq!(world.meta.current_tick, MELEE_ATTACK_MOVES as u128);
+        assert_eq!(world.meta.current_tick, ATTACK_MOVES as u128);
         let mut log = world.log();
         let event = &log.new_events()[0];
         assert!(
@@ -250,7 +249,7 @@ mod tests {
             Some(Action::new(0, Melee::new(Point::new(1, 0)).into(), &world).unwrap());
         world.tick();
 
-        assert_eq!(world.meta.current_tick, MELEE_ATTACK_MOVES as u128);
+        assert_eq!(world.meta.current_tick, ATTACK_MOVES as u128);
         let mut log = world.log();
         let event = &log.new_events()[0];
         assert!(
@@ -271,7 +270,7 @@ mod tests {
             Some(Action::new(0, Melee::new(Point::new(1, 0)).into(), &world).unwrap());
         world.tick();
 
-        assert_eq!(world.meta.current_tick, MELEE_ATTACK_MOVES as u128);
+        assert_eq!(world.meta.current_tick, ATTACK_MOVES as u128);
         let mut log = world.log();
         let event = &log.new_events()[0];
         assert!(
@@ -292,7 +291,7 @@ mod tests {
             Some(Action::new(0, Melee::new(Point::new(1, 0)).into(), &world).unwrap());
         world.tick();
 
-        assert_eq!(world.meta.current_tick, MELEE_ATTACK_MOVES as u128);
+        assert_eq!(world.meta.current_tick, ATTACK_MOVES as u128);
         let mut log = world.log();
         let event = &log.new_events()[0];
         assert!(
@@ -314,7 +313,7 @@ mod tests {
             Some(Action::new(0, Melee::new(Point::new(1, 0)).into(), &world).unwrap());
         world.tick();
 
-        assert_eq!(world.meta.current_tick, MELEE_ATTACK_MOVES as u128);
+        assert_eq!(world.meta.current_tick, ATTACK_MOVES as u128);
         let mut log = world.log();
         let event = &log.new_events()[0];
         assert!(
@@ -335,7 +334,7 @@ mod tests {
             Some(Action::new(0, Melee::new(Point::new(1, 0)).into(), &world).unwrap());
         world.tick();
 
-        assert_eq!(world.meta.current_tick, MELEE_ATTACK_MOVES as u128);
+        assert_eq!(world.meta.current_tick, ATTACK_MOVES as u128);
         let mut log = world.log();
         let event = &log.new_events()[0];
         assert!(

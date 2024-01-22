@@ -7,14 +7,14 @@ use super::super::{
     super::{
         super::lang::a,
         log::helpers::unit_attack_success,
-        savage::{ranged_attack_unit, RangedDistance, UnitRangedAttackResult},
+        savage::{ranged_attack_unit, RangedDistance, UnitRangedAttackResult, ATTACK_MOVES},
         Action, AttackType, Avatar, Item, LogEvent, World,
     },
     ActionImpl,
     ActionPossibility::{self, No, Yes},
 };
 
-const RANGE_ATTACK_MOVES: u32 = 10;
+// TODO: Shooting should send missiles through entire map when missed target
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Copy, Clone)]
 pub struct Shoot {
@@ -60,7 +60,7 @@ impl ActionImpl for Shoot {
                 return No(format!("You can't shoot from {} that far.", a(item.name())));
             }
 
-            Yes(RANGE_ATTACK_MOVES)
+            Yes(ATTACK_MOVES)
         } else {
             No(format!("You can't shoot from {}.", item.name()))
         }
@@ -168,7 +168,7 @@ mod tests {
     use crate::game::world::tests::{add_npc, prepare_world};
     use crate::game::{Action, Item, ItemPrototype, ItemSize};
 
-    use super::{Shoot, RANGE_ATTACK_MOVES};
+    use super::{Shoot, ATTACK_MOVES};
 
     #[test]
     fn test_shoot_from_bow() {
@@ -185,7 +185,7 @@ mod tests {
         world.player_mut().action = Some(Action::new(0, Shoot::new(1).into(), &world).unwrap());
         world.tick();
 
-        assert_eq!(world.meta.current_tick, RANGE_ATTACK_MOVES as u128);
+        assert_eq!(world.meta.current_tick, ATTACK_MOVES as u128);
 
         let mut log = world.log();
         let event = &log.new_events()[0];

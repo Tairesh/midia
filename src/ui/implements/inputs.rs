@@ -22,6 +22,34 @@ enum ValueType {
     Unsigned { min: u32, max: u32 },
 }
 
+// TODO: something like this
+// pub enum InputState {
+//     Focused,
+//     Disabled,
+//     Hovered,
+// }
+//
+// pub struct InputBlink {
+//     state: bool,
+//     last_blinked: Instant,
+// }
+//
+// pub struct InputValue {
+//     text: Text,
+//     text_with_spaces: Text,
+// }
+//
+// pub struct InputGeometry {
+//     width: f32,
+//     line_height: f32,
+//     rect: Option<Rect>,
+// }
+//
+// pub struct InputStyle {
+//     is_danger: bool,
+//     visible: bool,
+// }
+
 #[allow(clippy::struct_excessive_bools)]
 pub struct TextInput {
     text: Text,

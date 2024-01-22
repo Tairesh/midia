@@ -1,4 +1,6 @@
-use crate::game::{BodySlot, Item};
+use std::collections::HashSet;
+
+use crate::game::{AmmoType, BodySlot, Item};
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Default)]
 pub struct Wear {
@@ -41,6 +43,10 @@ impl Wear {
         self.items.iter().map(|(item, _)| item)
     }
 
+    pub fn iter_mut(&mut self) -> impl Iterator<Item = &mut Item> {
+        self.items.iter_mut().map(|(item, _)| item)
+    }
+
     pub fn get_items_by_slot(&self, slot: BodySlot) -> Vec<&Item> {
         self.items
             .iter()
@@ -58,6 +64,27 @@ impl Wear {
     #[cfg(test)]
     pub fn clear(&mut self) {
         self.items.clear();
+    }
+
+    pub fn has_ammo(&self, ammo_types: &HashSet<AmmoType>) -> bool {
+        ammo_types
+            .iter()
+            .any(|&ammo_type| self.iter().any(|wear| wear.has_ammo(ammo_type)))
+    }
+
+    pub fn remove_ammo(&mut self, ammo_types: &HashSet<AmmoType>) -> Option<Item> {
+        for &ammo_type in ammo_types {
+            for item in self.iter_mut() {
+                if let Some(container) = item.container_mut() {
+                    let index = container.items.iter().position(|i| i.is_ammo(ammo_type));
+                    if let Some(index) = index {
+                        return Some(container.items.remove(index));
+                    }
+                }
+            }
+        }
+
+        None
     }
 }
 

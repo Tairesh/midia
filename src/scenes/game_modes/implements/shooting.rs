@@ -9,7 +9,7 @@ use tetra::{
 use crate::{
     colors::Colors,
     game::World,
-    game::{actions::implements::Throw, AttackType, RangedDistance},
+    game::{actions::implements::Shoot, AttackType, RangedDistance},
     input,
     lang::a,
     settings::Settings,
@@ -20,7 +20,7 @@ use super::super::{
     Cursor, CursorType, GameModeImpl,
 };
 
-pub struct Throwing {
+pub struct Shooting {
     last_shift: Instant,
     last_mouse_position: Vec2,
     mouse_moved: bool,
@@ -29,7 +29,7 @@ pub struct Throwing {
     shift_of_view: Point,
 }
 
-impl Throwing {
+impl Shooting {
     pub fn new() -> Self {
         Self {
             last_shift: Instant::now(),
@@ -59,13 +59,13 @@ impl Throwing {
     }
 }
 
-impl Default for Throwing {
+impl Default for Shooting {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl GameModeImpl for Throwing {
+impl GameModeImpl for Shooting {
     fn cursors(&self, world: &World) -> Vec<Cursor> {
         let pos = self.shift_of_view + self.mouse_moved_pos;
         let damage = world
@@ -73,7 +73,7 @@ impl GameModeImpl for Throwing {
             .wield
             .active_hand()
             .unwrap()
-            .throw_damage()
+            .ranged_damage()
             .unwrap();
         let distance = RangedDistance::define(pos.distance(Point::default()), damage.distance);
         let color = match distance {
@@ -105,10 +105,15 @@ impl GameModeImpl for Throwing {
         world.player().wield.active_hand().map_or(
             Err("You have nothing in your hands!".to_string()),
             |item| {
-                item.throw_damage()
-                    .map_or(Err(format!("You can't throw {}!", a(item.name()))), |_| {
-                        Ok(())
-                    })
+                if item.ranged_damage().is_none() {
+                    return Err(format!("You can't shoot from {}!", a(item.name())));
+                }
+                if !item.ammo_types().is_empty() && !world.player().wear.has_ammo(item.ammo_types())
+                {
+                    return Err(format!("You have no ammo for {}!", a(item.name())));
+                }
+
+                Ok(())
             },
         )
     }
@@ -119,7 +124,7 @@ impl GameModeImpl for Throwing {
             game.set_shift_of_view(Point::default());
             game.modes.pop();
             return None;
-        } else if input::is_some_of_keys_pressed(ctx, &[Key::T, Key::Space, Key::Enter]) {
+        } else if input::is_some_of_keys_pressed(ctx, &[Key::F, Key::Space, Key::Enter]) {
             let pos =
                 game.world.borrow().player().pos + game.shift_of_view() + self.mouse_moved_pos;
             let unit_in_tile = game
@@ -132,17 +137,9 @@ impl GameModeImpl for Throwing {
                 .copied()
                 .next();
             if let Some(unit_id) = unit_in_tile {
-                game.try_start_action(Throw::new(unit_id).into());
+                game.try_start_action(Shoot::new(unit_id).into());
             } else {
-                // TODO: throw to terrain
-                let item = game
-                    .world
-                    .borrow_mut()
-                    .player_mut()
-                    .wield
-                    .take_from_active_hand()
-                    .unwrap();
-                game.world.borrow().map().get_tile_mut(pos).items.push(item);
+                // TODO: Fire to terrain
             }
             game.set_shift_of_view(Point::default());
             game.modes.pop();
@@ -152,7 +149,7 @@ impl GameModeImpl for Throwing {
                 .world
                 .borrow()
                 .player()
-                .attack_damage(AttackType::Throw)
+                .attack_damage(AttackType::Shoot)
                 .unwrap();
             let pos = self.shift_of_view + self.mouse_moved_pos + dir;
             let distance = RangedDistance::define(pos.distance(Point::default()), damage.distance);

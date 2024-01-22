@@ -74,7 +74,7 @@ fn attack_roll(
     Some(attacker.personality.char_sheet.roll_skill(
         match attack_type {
             AttackType::Throw => Skill::Athletics,
-            AttackType::Fire => Skill::Shooting,
+            AttackType::Shoot => Skill::Shooting,
             AttackType::Melee => Skill::Fighting,
         },
         attacker.attack_damage(attack_type).unwrap().attack_modifier + distance.modifier(),

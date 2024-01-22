@@ -12,5 +12,5 @@ mod ranged;
 pub enum AttackType {
     Melee,
     Throw,
-    Fire,
+    Shoot,
 }

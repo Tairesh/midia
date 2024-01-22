@@ -19,8 +19,8 @@ use crate::{
 use super::super::{
     super::{implements::GameScene, Scene, SomeTransitions, Transition},
     implements::{
-        Closing, Digging, Dropping, Examining, ForceAttack, Observing, Opening, Reading, Throwing,
-        WieldingFromGround,
+        Closing, Digging, Dropping, Examining, ForceAttack, Observing, Opening, Reading, Shooting,
+        Throwing, WieldingFromGround,
     },
     GameModeImpl,
 };
@@ -125,6 +125,9 @@ impl GameModeImpl for Walking {
             None
         } else if input::is_key_with_mod_pressed(ctx, Key::T) {
             game.push_mode(Throwing::new().into());
+            None
+        } else if input::is_key_with_mod_pressed(ctx, Key::F) {
+            game.push_mode(Shooting::new().into());
             None
         } else if let Some(dir) = input::get_direction_keys_down(ctx) {
             let now = Instant::now();

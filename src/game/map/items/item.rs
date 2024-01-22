@@ -154,7 +154,11 @@ impl Item {
         &self.proto().looks_like
     }
 
-    pub fn container(&mut self) -> Option<&mut Container> {
+    pub fn container(&self) -> Option<&Container> {
+        self.container.as_ref()
+    }
+
+    pub fn container_mut(&mut self) -> Option<&mut Container> {
         self.container.as_mut()
     }
 
@@ -241,7 +245,7 @@ impl Item {
 
                 DamageValue::improvised_throw(self)
             }
-            AttackType::Fire => self.proto().ranged_damage.clone(),
+            AttackType::Shoot => self.proto().ranged_damage.clone(),
         }
     }
 
@@ -254,7 +258,7 @@ impl Item {
     }
 
     pub fn ranged_damage(&self) -> Option<DamageValue> {
-        self.damage(AttackType::Fire)
+        self.damage(AttackType::Shoot)
     }
 
     pub fn ammo_types(&self) -> &HashSet<AmmoType> {
@@ -264,6 +268,18 @@ impl Item {
     pub fn is_ammo(&self, ammo_type: AmmoType) -> bool {
         if let Some(ammo) = &self.proto().ammo {
             ammo.typ.contains(&ammo_type)
+        } else {
+            false
+        }
+    }
+
+    pub fn has_ammo(&self, ammo_type: AmmoType) -> bool {
+        if self.is_ammo(ammo_type) {
+            return true;
+        }
+
+        if let Some(container) = &self.container {
+            container.items.iter().any(|item| item.has_ammo(ammo_type))
         } else {
             false
         }
@@ -280,7 +296,7 @@ mod tests {
     fn test_backpack() {
         let mut backpack = Item::new(BACKPACK);
         assert_eq!(backpack.name(), "leather backpack");
-        if let Some(container) = backpack.container() {
+        if let Some(container) = backpack.container_mut() {
             assert_eq!(container.max_volume, 30);
             assert!(!container.is_for_ammo());
             assert_eq!(container.volume_used(), 0);
@@ -296,7 +312,7 @@ mod tests {
     fn test_quiver() {
         let mut quiver = Item::new(QUIVER);
         assert_eq!(quiver.name(), "leather quiver");
-        if let Some(container) = quiver.container() {
+        if let Some(container) = quiver.container_mut() {
             assert_eq!(container.max_volume, 15);
             assert!(container.is_for_ammo());
             assert_eq!(container.volume_used(), 0);

@@ -7,7 +7,7 @@ use crate::game::Item;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Container {
-    items: Vec<Item>,
+    pub items: Vec<Item>,
     pub max_volume: u8,
     for_ammo: HashSet<AmmoType>,
 }

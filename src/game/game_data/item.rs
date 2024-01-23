@@ -230,9 +230,9 @@ pub struct DamageModifier {
     #[serde(default)]
     pub damage: i8,
     #[serde(default)]
-    pub penetration: i8,
+    pub penetration: u8,
     #[serde(default)]
-    pub damage_dice: Option<Dice>,
+    pub damage_dice: Option<DamageDice>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

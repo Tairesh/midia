@@ -98,7 +98,7 @@ pub const WOODEN_SHORTBOW: &str = "shortbow_wood";
 // pub const SLINGSHOT: &str = "slingshot";
 
 pub const WOODEN_ARROW: &str = "arrow_wood";
-// pub const STONE_ARROW: &str = "arrow_stone";
+pub const STONE_ARROW: &str = "arrow_stone";
 // pub const IRON_ARROW: &str = "arrow_iron";
 // pub const STEEL_ARROW: &str = "arrow_steel";
 // pub const DEMONIC_ARROW: &str = "arrow_demonic";

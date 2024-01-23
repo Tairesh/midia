@@ -13,5 +13,20 @@
         "damage": -1
       }
     }
+  },
+  {
+    "type": "item",
+    "id": "arrow_stone",
+    "name": "stone arrow",
+    "description": "Most common type of arrows, with a flint tip.",
+    "looks_like": "arrow_stone",
+    "size": "SMALL",
+    "materials": ["wood", "stone"],
+    "ammo": {
+      "typ": ["ARROW"],
+      "damage_modifier": {
+        "damage": 0
+      }
+    }
   }
 ]

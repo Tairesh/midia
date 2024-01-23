@@ -2,7 +2,7 @@
 
 use geometry::{Point, TwoDimDirection};
 
-use crate::game::{AttackType, DamageValue};
+use crate::game::{AttackType, DamageValue, GameData};
 
 use super::super::{
     map::items::helpers::{dead_body, CLOAK, HAT},
@@ -23,6 +23,7 @@ pub struct Avatar {
     pub wear: Wear,
     // TODO: stamina
     // TODO: traits
+    selected_ammo: Option<String>,
 }
 
 impl Avatar {
@@ -33,6 +34,7 @@ impl Avatar {
             vision: TwoDimDirection::East,
             wield: Wield::new(!matches!(personality.mind.main_hand, MainHand::Left)),
             wear: Wear::default(),
+            selected_ammo: None,
             personality,
             pos,
         }
@@ -110,20 +112,66 @@ impl Avatar {
         self.attack_damage(AttackType::Melee).unwrap()
     }
 
+    // TODO: move this somewhere else
     pub fn attack_damage(&self, attack_type: AttackType) -> Option<DamageValue> {
         match attack_type {
-            AttackType::Melee => {
-                if let Some(weapon) = self.wield.active_hand() {
-                    weapon.damage(attack_type)
-                } else {
-                    Some(self.personality.appearance.race.natural_weapon().1)
+            AttackType::Melee => Some(
+                self.wield
+                    .active_hand()
+                    .map_or(self.personality.appearance.race.natural_weapon().1, |w| {
+                        w.melee_damage()
+                    }),
+            ),
+            AttackType::Shoot => {
+                let weapon = self.wield.active_hand()?;
+                if let Some(ammo) = self.selected_ammo() {
+                    let proto = GameData::instance()
+                        .items
+                        .get(ammo)
+                        .unwrap_or_else(|| panic!("Undefined ammo: `{ammo}`"));
+                    if let Some(ammo_value) = &proto.ammo {
+                        let mut damage = weapon.ranged_damage().unwrap();
+                        damage.damage.modifier += ammo_value.damage_modifier.damage;
+                        damage.penetration += ammo_value.damage_modifier.penetration;
+                        if let Some(dice) = ammo_value.damage_modifier.damage_dice {
+                            damage.damage.dices.push(dice);
+                        }
+
+                        return Some(damage);
+                    }
                 }
+
+                weapon.ranged_damage()
             }
-            _ => self
+            AttackType::Throw => self
                 .wield
                 .active_hand()
                 .and_then(|weapon| weapon.damage(attack_type)),
         }
+    }
+
+    // TODO: move this to Wear, probably
+    pub fn selected_ammo(&self) -> Option<&str> {
+        let weapon = self.wield.active_hand()?;
+        if let Some(selected_ammo) = &self.selected_ammo {
+            let proto = GameData::instance()
+                .items
+                .get(selected_ammo.as_str())
+                .unwrap();
+            if let Some(ammo_value) = &proto.ammo {
+                if ammo_value
+                    .typ
+                    .iter()
+                    .any(|t| weapon.ammo_types().contains(t))
+                {
+                    return Some(selected_ammo.as_str());
+                }
+            }
+        }
+
+        self.wear
+            .get_ammo(weapon.ammo_types())
+            .map(|a| a.proto().id.as_str())
     }
 }
 
@@ -131,8 +179,11 @@ impl Avatar {
 mod tests {
     use geometry::Point;
 
-    use crate::game::map::items::helpers::{CLOAK, GOD_AXE};
+    use crate::game::map::items::helpers::{
+        CLOAK, GOD_AXE, QUIVER, STONE_ARROW, WOODEN_ARROW, WOODEN_SHORTBOW,
+    };
     use crate::game::races::tests::personality::tester_girl;
+    use crate::game::{AmmoType, AttackType, GameData};
 
     use super::{Avatar, BodySlot, HitResult, Item};
 
@@ -168,5 +219,111 @@ mod tests {
         assert!(items.iter().any(|i| i.name() == "cloak"));
         assert!(items.iter().any(|i| i.name() == "god axe"));
         assert_eq!(items[2].name(), "dead gazan girl");
+    }
+
+    #[test]
+    fn test_melee_damage() {
+        let mut avatar = Avatar::new(0, tester_girl(), Point::new(0, 0));
+        avatar.wield.wield(Item::new(GOD_AXE));
+
+        let damage = avatar.melee_damage();
+        let proto = GameData::instance()
+            .items
+            .get(GOD_AXE)
+            .unwrap()
+            .melee_damage
+            .clone()
+            .unwrap();
+
+        assert_eq!(damage.damage.dices, proto.damage.dices);
+        assert_eq!(damage.penetration, proto.penetration);
+        assert_eq!(damage.attack_modifier, proto.attack_modifier);
+        assert_eq!(damage.parry_modifier, proto.parry_modifier);
+    }
+
+    #[test]
+    fn test_ranged_damage() {
+        let mut avatar = Avatar::new(0, tester_girl(), Point::new(0, 0));
+        avatar.wield.wield(Item::new(WOODEN_SHORTBOW));
+        avatar.wear.add(
+            Item::new(QUIVER).with_items_inside([Item::new(WOODEN_ARROW)]),
+            0,
+        );
+
+        let damage = avatar.attack_damage(AttackType::Shoot).unwrap();
+        let proto = GameData::instance()
+            .items
+            .get(WOODEN_SHORTBOW)
+            .unwrap()
+            .ranged_damage
+            .clone()
+            .unwrap();
+        let arrow_proto = GameData::instance()
+            .items
+            .get(WOODEN_ARROW)
+            .unwrap()
+            .ammo
+            .clone()
+            .unwrap();
+
+        let mut dices = proto.damage.dices;
+        if let Some(dice) = arrow_proto.damage_modifier.damage_dice {
+            dices.push(dice);
+        }
+        assert_eq!(damage.damage.dices, dices);
+        assert_eq!(
+            damage.penetration,
+            proto.penetration + arrow_proto.damage_modifier.penetration
+        );
+        assert_eq!(
+            damage.damage.modifier,
+            proto.damage.modifier + arrow_proto.damage_modifier.damage
+        );
+    }
+
+    #[test]
+    fn test_keep_selected_ammo() {
+        let mut avatar = Avatar::new(0, tester_girl(), Point::new(0, 0));
+        avatar.wield.wield(Item::new(WOODEN_SHORTBOW));
+        avatar.wear.add(
+            Item::new(QUIVER).with_items_inside([
+                Item::new(WOODEN_ARROW),
+                Item::new(WOODEN_ARROW),
+                Item::new(STONE_ARROW),
+            ]),
+            0,
+        );
+
+        let selected_ammo = avatar.selected_ammo().unwrap();
+        assert_eq!(selected_ammo, WOODEN_ARROW);
+
+        let arrow = avatar
+            .wear
+            .remove_ammo(avatar.wield.active_hand().unwrap().ammo_types());
+        assert!(arrow.is_some());
+        let arrow = arrow.unwrap();
+        assert_eq!(arrow.proto().id, WOODEN_ARROW);
+
+        let selected_ammo = avatar.selected_ammo().unwrap();
+        assert_eq!(selected_ammo, WOODEN_ARROW);
+
+        let arrow = avatar
+            .wear
+            .remove_ammo(avatar.wield.active_hand().unwrap().ammo_types());
+        assert!(arrow.is_some());
+        let arrow = arrow.unwrap();
+        assert_eq!(arrow.proto().id, WOODEN_ARROW);
+
+        let selected_ammo = avatar.selected_ammo().unwrap();
+        assert_eq!(selected_ammo, STONE_ARROW);
+
+        let arrow = avatar
+            .wear
+            .remove_ammo(avatar.wield.active_hand().unwrap().ammo_types());
+        assert!(arrow.is_some());
+        let arrow = arrow.unwrap();
+        assert_eq!(arrow.proto().id, STONE_ARROW);
+
+        assert!(avatar.selected_ammo().is_none());
     }
 }

@@ -72,6 +72,21 @@ impl Wear {
             .any(|&ammo_type| self.iter().any(|wear| wear.has_ammo(ammo_type)))
     }
 
+    pub fn get_ammo(&self, ammo_types: &HashSet<AmmoType>) -> Option<&Item> {
+        for &ammo_type in ammo_types {
+            for item in self.iter() {
+                if let Some(container) = item.container() {
+                    let index = container.items.iter().position(|i| i.is_ammo(ammo_type));
+                    if let Some(index) = index {
+                        return Some(&container.items[index]);
+                    }
+                }
+            }
+        }
+
+        None
+    }
+
     pub fn remove_ammo(&mut self, ammo_types: &HashSet<AmmoType>) -> Option<Item> {
         for &ammo_type in ammo_types {
             for item in self.iter_mut() {
@@ -90,8 +105,10 @@ impl Wear {
 
 #[cfg(test)]
 mod tests {
-    use crate::game::map::items::helpers::{BACKPACK, CLOAK, HAT, LEATHER_ARM_GUARD, RAGS};
-    use crate::game::Item;
+    use crate::game::map::items::helpers::{
+        BACKPACK, CLOAK, HAT, LEATHER_ARM_GUARD, QUIVER, RAGS, WOODEN_ARROW,
+    };
+    use crate::game::{AmmoType, Item};
 
     use super::Wear;
 
@@ -123,5 +140,46 @@ mod tests {
         wear.add(oversleeve.clone(), 1);
         assert!(!wear.can_add(&oversleeve, 0));
         assert!(!wear.can_add(&oversleeve, 1));
+    }
+
+    #[test]
+    fn test_has_ammo() {
+        let wear = Wear::new([(
+            Item::new(QUIVER).with_items_inside([Item::new(WOODEN_ARROW)]),
+            0,
+        )]);
+        assert!(wear.has_ammo(&[AmmoType::Arrow].into()));
+        assert!(!wear.has_ammo(&[AmmoType::Bolt].into()));
+
+        let wear = Wear::new([(Item::new(QUIVER), 0)]);
+        assert!(!wear.has_ammo(&[AmmoType::Arrow].into()));
+    }
+
+    #[test]
+    fn test_get_ammo() {
+        let wear = Wear::new([(
+            Item::new(QUIVER).with_items_inside([Item::new(WOODEN_ARROW)]),
+            0,
+        )]);
+        assert!(wear.get_ammo(&[AmmoType::Arrow].into()).is_some());
+        assert!(wear.get_ammo(&[AmmoType::Bolt].into()).is_none());
+
+        let arrow = wear.get_ammo(&[AmmoType::Arrow].into()).unwrap();
+        assert_eq!(arrow.proto().id, WOODEN_ARROW);
+    }
+
+    #[test]
+    fn test_remove_ammo() {
+        let mut wear = Wear::new([(
+            Item::new(QUIVER).with_items_inside([Item::new(WOODEN_ARROW)]),
+            0,
+        )]);
+        let arrow = wear.remove_ammo(&[AmmoType::Arrow].into());
+        assert!(arrow.is_some());
+        let arrow = arrow.unwrap();
+        assert_eq!(arrow.proto().id, WOODEN_ARROW);
+
+        assert!(wear.remove_ammo(&[AmmoType::Bolt].into()).is_none());
+        assert!(wear.remove_ammo(&[AmmoType::Arrow].into()).is_none());
     }
 }

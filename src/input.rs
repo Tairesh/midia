@@ -1,21 +1,60 @@
 #![allow(dead_code)]
 
 use geometry::Direction;
+use serde::{Deserializer, Serializer};
 pub use tetra::{input::*, math::num_traits::Zero, Context};
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub struct KeyWithMod {
     pub key: Key,
     pub key_mod: Option<KeyModifier>,
 }
 
+impl serde::Serialize for KeyWithMod {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match self.key_mod {
+            Some(key_mod) => serializer.serialize_str(&format!("{}+{:?}", key_mod, self.key)),
+            None => serializer.serialize_str(&format!("{:?}", self.key)),
+        }
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for KeyWithMod {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let str = String::deserialize(deserializer)?;
+        let parts: Vec<String> = str
+            .split('+')
+            .map(|s| format!("\"{}\"", s.trim()))
+            .collect();
+        match parts.len() {
+            1 => Ok(Self::key(
+                serde_json::from_str(&parts[0]).map_err(serde::de::Error::custom)?,
+            )),
+            2 => Ok(Self::new(
+                serde_json::from_str(&parts[1]).map_err(serde::de::Error::custom)?,
+                serde_json::from_str(&parts[0]).map_err(serde::de::Error::custom)?,
+            )),
+            _ => Err(serde::de::Error::custom("Invalid key")),
+        }
+    }
+}
+
 impl KeyWithMod {
-    pub fn new(key: Key, key_mod: Option<KeyModifier>) -> Self {
-        Self { key, key_mod }
+    pub fn new(key: Key, key_mod: KeyModifier) -> Self {
+        Self {
+            key,
+            key_mod: Some(key_mod),
+        }
     }
 
     pub fn key(key: Key) -> Self {
-        Self::new(key, None)
+        Self { key, key_mod: None }
     }
 
     pub fn with(mut self, key_mod: KeyModifier) -> Self {
@@ -115,4 +154,29 @@ pub fn is_mouse_scrolled(ctx: &mut Context) -> bool {
 
 pub fn is_some_of_keys_pressed(ctx: &mut Context, keys: &[Key]) -> bool {
     keys.iter().any(|&k| is_key_pressed(ctx, k))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_serializing_key_with_mod() {
+        let kwm = KeyWithMod::new(Key::A, KeyModifier::Ctrl);
+        let serialized = serde_json::to_string(&kwm).unwrap();
+        assert_eq!(serialized, "\"Ctrl+A\"");
+
+        let kwm = KeyWithMod::key(Key::A);
+        let serialized = serde_json::to_string(&kwm).unwrap();
+        assert_eq!(serialized, "\"A\"");
+    }
+
+    #[test]
+    fn test_deserializing_key_with_mod() {
+        let kwm: KeyWithMod = serde_json::from_str("\"Ctrl+A\"").unwrap();
+        assert_eq!(kwm, KeyWithMod::new(Key::A, KeyModifier::Ctrl));
+
+        let kwm: KeyWithMod = serde_json::from_str("\"A\"").unwrap();
+        assert_eq!(kwm, KeyWithMod::key(Key::A));
+    }
 }

@@ -14,21 +14,22 @@ use super::container::Container;
 
 const CUSTOM_PROTO: &str = "custom";
 
+#[serde_with::skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Item {
     #[serde(rename = "p")]
     proto: String,
-    #[serde(default, skip_serializing_if = "Option::is_none", rename = "cp")]
+    #[serde(default, rename = "cp")]
     custom_proto: Option<ItemPrototype>,
-    #[serde(default, skip_serializing_if = "Option::is_none", rename = "n")]
+    #[serde(default, rename = "n")]
     named: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none", rename = "c")]
+    #[serde(default, rename = "c")]
     colored: Option<Color>,
-    #[serde(default, skip_serializing_if = "Option::is_none", rename = "r")]
+    #[serde(default, rename = "r")]
     readable: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none", rename = "l")]
+    #[serde(default, rename = "l")]
     looks_like: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none", rename = "t")]
+    #[serde(default, rename = "t")]
     container: Option<Container>,
 }
 

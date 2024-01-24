@@ -15,7 +15,7 @@ use crate::{
     savefile::{self, Meta},
     scenes::{
         helpers::{
-            back_randomize_next, bg, colored_label, decorative_label, easy_back, icon_minus,
+            back_randomize_reset_next, bg, colored_label, decorative_label, easy_back, icon_minus,
             icon_plus, title,
         },
         Scene, SceneImpl, SomeTransitions, Transition,
@@ -26,6 +26,9 @@ use crate::{
     },
 };
 
+// TODO: Move this to separate file
+
+#[allow(dead_code)]
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 enum ButtonEvent {
     AgilityMinus,
@@ -70,7 +73,35 @@ enum ButtonEvent {
     ClimbingPlus,
     Randomize,
     Next,
-    // TODO: Reset,
+    Reset,
+}
+
+impl ButtonEvent {
+    pub fn is_minus(self) -> bool {
+        matches!(
+            self,
+            Self::AgilityMinus
+                | Self::SmartsMinus
+                | Self::SpiritMinus
+                | Self::StrengthMinus
+                | Self::VigorMinus
+                | Self::AthleticsMinus
+                | Self::FightingMinus
+                | Self::ShootingMinus
+                | Self::StealthMinus
+                | Self::ThieveryMinus
+                | Self::SwimmingMinus
+                | Self::GamblingMinus
+                | Self::SurvivalMinus
+                | Self::HealingMinus
+                | Self::NoticeMinus
+                | Self::RepairMinus
+                | Self::ReadingMinus
+                | Self::IntimidationMinus
+                | Self::PersuasionMinus
+                | Self::ClimbingMinus
+        )
+    }
 }
 
 impl From<Attribute> for ButtonEvent {
@@ -110,6 +141,48 @@ impl From<Skill> for ButtonEvent {
 impl From<u8> for ButtonEvent {
     fn from(n: u8) -> Self {
         unsafe { std::mem::transmute(n) }
+    }
+}
+
+impl TryFrom<ButtonEvent> for Attribute {
+    type Error = ();
+
+    fn try_from(value: ButtonEvent) -> Result<Self, Self::Error> {
+        match value {
+            ButtonEvent::AgilityMinus | ButtonEvent::AgilityPlus => Ok(Self::Agility),
+            ButtonEvent::SmartsMinus | ButtonEvent::SmartsPlus => Ok(Self::Smarts),
+            ButtonEvent::SpiritMinus | ButtonEvent::SpiritPlus => Ok(Self::Spirit),
+            ButtonEvent::StrengthMinus | ButtonEvent::StrengthPlus => Ok(Self::Strength),
+            ButtonEvent::VigorMinus | ButtonEvent::VigorPlus => Ok(Self::Vigor),
+            _ => Err(()),
+        }
+    }
+}
+
+impl TryFrom<ButtonEvent> for Skill {
+    type Error = ();
+
+    fn try_from(value: ButtonEvent) -> Result<Self, Self::Error> {
+        match value {
+            ButtonEvent::AthleticsMinus | ButtonEvent::AthleticsPlus => Ok(Self::Athletics),
+            ButtonEvent::FightingMinus | ButtonEvent::FightingPlus => Ok(Self::Fighting),
+            ButtonEvent::ShootingMinus | ButtonEvent::ShootingPlus => Ok(Self::Shooting),
+            ButtonEvent::StealthMinus | ButtonEvent::StealthPlus => Ok(Self::Stealth),
+            ButtonEvent::ThieveryMinus | ButtonEvent::ThieveryPlus => Ok(Self::Thievery),
+            ButtonEvent::SwimmingMinus | ButtonEvent::SwimmingPlus => Ok(Self::Swimming),
+            ButtonEvent::GamblingMinus | ButtonEvent::GamblingPlus => Ok(Self::Gambling),
+            ButtonEvent::SurvivalMinus | ButtonEvent::SurvivalPlus => Ok(Self::Survival),
+            ButtonEvent::HealingMinus | ButtonEvent::HealingPlus => Ok(Self::Healing),
+            ButtonEvent::NoticeMinus | ButtonEvent::NoticePlus => Ok(Self::Notice),
+            ButtonEvent::RepairMinus | ButtonEvent::RepairPlus => Ok(Self::Repair),
+            ButtonEvent::ReadingMinus | ButtonEvent::ReadingPlus => Ok(Self::Reading),
+            ButtonEvent::IntimidationMinus | ButtonEvent::IntimidationPlus => {
+                Ok(Self::Intimidation)
+            }
+            ButtonEvent::PersuasionMinus | ButtonEvent::PersuasionPlus => Ok(Self::Persuasion),
+            ButtonEvent::ClimbingMinus | ButtonEvent::ClimbingPlus => Ok(Self::Climbing),
+            _ => Err(()),
+        }
     }
 }
 
@@ -301,10 +374,11 @@ impl CharacterAttributes {
             Colors::DARK_VIOLET,
         ));
 
-        sprites.extend(back_randomize_next(
+        sprites.extend(back_randomize_reset_next(
             &app.assets,
             ctx,
             ButtonEvent::Randomize as u8,
+            ButtonEvent::Reset as u8,
             ButtonEvent::Next as u8,
             "Create character",
         ));
@@ -449,14 +523,7 @@ impl CharacterAttributes {
         );
     }
 
-    fn randomize(&mut self, ctx: &mut Context) -> SomeTransitions {
-        self.personality.char_sheet = CharSheet::random(
-            &mut rand::thread_rng(),
-            true,
-            self.personality.appearance.race,
-            self.personality.appearance.age,
-        );
-        self.attributes_points = 0;
+    fn update_attributes_and_skills(&mut self, ctx: &mut Context) {
         let window_size = self.window_size;
 
         for (attribute, value) in self.personality.char_sheet.attributes.get_attributes() {
@@ -472,9 +539,25 @@ impl CharacterAttributes {
             self.skill_label(skill)
                 .update(value.name(), ctx, window_size);
         }
+    }
 
+    fn reset(&mut self, ctx: &mut Context) {
+        self.personality.char_sheet.reset();
+        self.attributes_points = 5;
+        self.update_attributes_and_skills(ctx);
         self.update_points(ctx);
-        None
+    }
+
+    fn randomize(&mut self, ctx: &mut Context) {
+        self.personality.char_sheet = CharSheet::random(
+            &mut rand::thread_rng(),
+            true,
+            self.personality.appearance.race,
+            self.personality.appearance.age,
+        );
+        self.attributes_points = 0;
+        self.update_attributes_and_skills(ctx);
+        self.update_points(ctx);
     }
 
     fn next(&self) -> Vec<Transition> {
@@ -595,93 +678,54 @@ impl SceneImpl for CharacterAttributes {
     // TODO: refactor and delete this allow
     fn custom_event(&mut self, ctx: &mut Context, event: u8) -> SomeTransitions {
         let event = ButtonEvent::from(event);
-        let minus_attribute_events: HashMap<ButtonEvent, Attribute> = HashMap::from([
-            (ButtonEvent::AgilityMinus, Attribute::Agility),
-            (ButtonEvent::SmartsMinus, Attribute::Smarts),
-            (ButtonEvent::SpiritMinus, Attribute::Spirit),
-            (ButtonEvent::StrengthMinus, Attribute::Strength),
-            (ButtonEvent::VigorMinus, Attribute::Vigor),
-        ]);
-        let plus_attribute_events: HashMap<ButtonEvent, Attribute> = HashMap::from([
-            (ButtonEvent::AgilityPlus, Attribute::Agility),
-            (ButtonEvent::SmartsPlus, Attribute::Smarts),
-            (ButtonEvent::SpiritPlus, Attribute::Spirit),
-            (ButtonEvent::StrengthPlus, Attribute::Strength),
-            (ButtonEvent::VigorPlus, Attribute::Vigor),
-        ]);
-        let minus_skill_events: HashMap<ButtonEvent, Skill> = HashMap::from([
-            (ButtonEvent::AthleticsMinus, Skill::Athletics),
-            (ButtonEvent::FightingMinus, Skill::Fighting),
-            (ButtonEvent::ShootingMinus, Skill::Shooting),
-            (ButtonEvent::StealthMinus, Skill::Stealth),
-            (ButtonEvent::ThieveryMinus, Skill::Thievery),
-            (ButtonEvent::SwimmingMinus, Skill::Swimming),
-            (ButtonEvent::GamblingMinus, Skill::Gambling),
-            (ButtonEvent::NoticeMinus, Skill::Notice),
-            (ButtonEvent::SurvivalMinus, Skill::Survival),
-            (ButtonEvent::HealingMinus, Skill::Healing),
-            (ButtonEvent::RepairMinus, Skill::Repair),
-            (ButtonEvent::ReadingMinus, Skill::Reading),
-            (ButtonEvent::PersuasionMinus, Skill::Persuasion),
-            (ButtonEvent::IntimidationMinus, Skill::Intimidation),
-            (ButtonEvent::ClimbingMinus, Skill::Climbing),
-        ]);
-        let plus_skill_events: HashMap<ButtonEvent, Skill> = HashMap::from([
-            (ButtonEvent::AthleticsPlus, Skill::Athletics),
-            (ButtonEvent::FightingPlus, Skill::Fighting),
-            (ButtonEvent::ShootingPlus, Skill::Shooting),
-            (ButtonEvent::StealthPlus, Skill::Stealth),
-            (ButtonEvent::ThieveryPlus, Skill::Thievery),
-            (ButtonEvent::SwimmingPlus, Skill::Swimming),
-            (ButtonEvent::GamblingPlus, Skill::Gambling),
-            (ButtonEvent::NoticePlus, Skill::Notice),
-            (ButtonEvent::SurvivalPlus, Skill::Survival),
-            (ButtonEvent::HealingPlus, Skill::Healing),
-            (ButtonEvent::RepairPlus, Skill::Repair),
-            (ButtonEvent::ReadingPlus, Skill::Reading),
-            (ButtonEvent::PersuasionPlus, Skill::Persuasion),
-            (ButtonEvent::IntimidationPlus, Skill::Intimidation),
-            (ButtonEvent::ClimbingPlus, Skill::Climbing),
-        ]);
+        if let Ok(attribute) = Attribute::try_from(event) {
+            if event.is_minus() {
+                let value = self.get_attribute(attribute);
+                if value > Dice::D4 {
+                    self.attributes_points += 1;
+                    self.set_attribute(attribute, value - 1);
+                    self.update_attribute_label(attribute, ctx);
+                }
+            } else {
+                let value = self.get_attribute(attribute);
+                if self.attributes_points > 0 && value < Dice::D12 {
+                    self.attributes_points -= 1;
+                    self.set_attribute(attribute, value + 1);
+                    self.update_attribute_label(attribute, ctx);
+                }
+            }
+        } else if let Ok(skill) = Skill::try_from(event) {
+            if event.is_minus() {
+                let value = self.get_skill(skill);
+                let attribute = self.get_attribute(skill.attribute());
+                let cost = if value > attribute.into() { 2 } else { 1 };
+                if value > SkillLevel::None {
+                    self.skills_points += cost;
+                    self.set_skill(skill, value - 1);
+                    self.update_skill_label(skill, ctx);
+                }
+            } else {
+                let value = self.get_skill(skill);
+                let attribute = self.get_attribute(skill.attribute());
+                let cost = if value >= attribute.into() { 2 } else { 1 };
+                if self.skills_points >= cost && value < SkillLevel::D12 {
+                    self.skills_points -= cost;
+                    self.set_skill(skill, value + 1);
+                    self.update_skill_label(skill, ctx);
+                }
+            }
+        }
 
-        if let Some(&attribute) = minus_attribute_events.get(&event) {
-            let value = self.get_attribute(attribute);
-            if value > Dice::D4 {
-                self.attributes_points += 1;
-                self.set_attribute(attribute, value - 1);
-                self.update_attribute_label(attribute, ctx);
-            }
-        } else if let Some(&attribute) = plus_attribute_events.get(&event) {
-            let value = self.get_attribute(attribute);
-            if self.attributes_points > 0 && value < Dice::D12 {
-                self.attributes_points -= 1;
-                self.set_attribute(attribute, value + 1);
-                self.update_attribute_label(attribute, ctx);
-            }
-        } else if let Some(&skill) = minus_skill_events.get(&event) {
-            let value = self.get_skill(skill);
-            let attribute = self.get_attribute(skill.attribute());
-            let cost = if value > attribute.into() { 2 } else { 1 };
-            if value > SkillLevel::None {
-                self.skills_points += cost;
-                self.set_skill(skill, value - 1);
-                self.update_skill_label(skill, ctx);
-            }
-        } else if let Some(&skill) = plus_skill_events.get(&event) {
-            let value = self.get_skill(skill);
-            let attribute = self.get_attribute(skill.attribute());
-            let cost = if value >= attribute.into() { 2 } else { 1 };
-            if self.skills_points >= cost && value < SkillLevel::D12 {
-                self.skills_points -= cost;
-                self.set_skill(skill, value + 1);
-                self.update_skill_label(skill, ctx);
-            }
+        if matches!(event, ButtonEvent::Next) {
+            return Some(self.next());
         }
 
         match event {
             ButtonEvent::Randomize => self.randomize(ctx),
-            ButtonEvent::Next => Some(self.next()),
-            _ => None,
+            ButtonEvent::Reset => self.reset(ctx),
+            _ => {}
         }
+
+        None
     }
 }

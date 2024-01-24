@@ -49,6 +49,14 @@ impl CharSheet {
         Self::new(wild_card, race, age, attributes, skills)
     }
 
+    pub fn reset(&mut self) {
+        self.wounds.clear();
+        self.shock = false;
+        self.last_shock_out_roll = 0;
+        self.attributes = Attributes::default();
+        self.skills = Skills::default(self.race);
+    }
+
     pub fn random<R: Rng + ?Sized>(rng: &mut R, wild_card: bool, race: Race, age: u8) -> Self {
         let attributes = Attributes::random(rng);
         let skills = Skills::random(rng, &attributes, race);

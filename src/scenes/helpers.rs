@@ -176,6 +176,7 @@ pub(crate) fn back_randomize_next(
 
     let total_width = randomize_btn_size.x + back_btn_size.x + next_btn_size.x + 4.0;
     let y = Vertical::AtWindowBottomByBottom { offset: -50.0 };
+
     // positionate them in center
     back_btn.set_position(Position::horizontal_center(
         -total_width / 2.0 + back_btn_size.x / 2.0,
@@ -191,6 +192,67 @@ pub(crate) fn back_randomize_next(
     ));
 
     [back_btn, randomize_btn, next_btn]
+}
+
+pub(crate) fn reset_btn(assets: &Assets, position: Position, custom_event: u8) -> Box<Button> {
+    Box::new(
+        ButtonBuilder::new(assets.button.clone())
+            .with_text("[Ctrl+R] Reset", assets.fonts.default.clone())
+            .with_keys(vec![(Key::R, KeyModifier::Ctrl).into()])
+            .with_position(position)
+            .with_transition(Transition::CustomEvent(custom_event))
+            .build(),
+    )
+}
+
+pub(crate) fn back_randomize_reset_next(
+    assets: &Assets,
+    ctx: &mut Context,
+    randomize: u8,
+    reset: u8,
+    next: u8,
+    next_text: &str,
+) -> [Box<dyn UiSprite>; 4] {
+    let mut randomize_btn = randomize_btn(assets, Position::center(), randomize);
+    let randomize_btn_size = randomize_btn.calc_size(ctx);
+
+    let mut back_btn = back_btn(Position::center(), assets);
+    let back_btn_size = back_btn.calc_size(ctx);
+
+    let mut reset_btn = reset_btn(assets, Position::center(), reset);
+    let reset_btn_size = reset_btn.calc_size(ctx);
+
+    let mut next_btn = next_btn(assets, Position::center(), next, next_text);
+    let next_btn_size = next_btn.calc_size(ctx);
+
+    let total_width =
+        randomize_btn_size.x + back_btn_size.x + reset_btn_size.x + next_btn_size.x + 6.0;
+    let y = Vertical::AtWindowBottomByBottom { offset: -50.0 };
+
+    // positionate them in center
+    back_btn.set_position(Position::horizontal_center(
+        -total_width / 2.0 + back_btn_size.x / 2.0,
+        y,
+    ));
+    randomize_btn.set_position(Position::horizontal_center(
+        -total_width / 2.0 + back_btn_size.x + randomize_btn_size.x / 2.0 + 2.0,
+        y,
+    ));
+    reset_btn.set_position(Position::horizontal_center(
+        -total_width / 2.0 + back_btn_size.x + randomize_btn_size.x + reset_btn_size.x / 2.0 + 4.0,
+        y,
+    ));
+    next_btn.set_position(Position::horizontal_center(
+        -total_width / 2.0
+            + back_btn_size.x
+            + randomize_btn_size.x
+            + reset_btn_size.x
+            + next_btn_size.x / 2.0
+            + 6.0,
+        y,
+    ));
+
+    [back_btn, randomize_btn, reset_btn, next_btn]
 }
 
 pub fn icon_button(

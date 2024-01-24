@@ -1,3 +1,5 @@
+use crate::game::traits::{LooksLike, Name};
+
 use super::super::{Passage, TerrainInteract, TerrainView};
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
@@ -16,7 +18,7 @@ impl Default for Pit {
 }
 
 impl TerrainView for Pit {
-    fn name(&self) -> &str {
+    fn name(&self) -> &'static str {
         "pit"
     }
 

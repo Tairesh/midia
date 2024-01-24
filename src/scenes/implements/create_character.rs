@@ -372,8 +372,8 @@ impl CreateCharacter {
             .set_value(character.appearance.age.to_string());
         self.race = character.appearance.race.into();
         self.main_hand = character.mind.main_hand;
-        let name = self.main_hand.name();
-        let race_name = self.race.name();
+        let name = self.main_hand.name().to_string();
+        let race_name = self.race.name().to_string();
         let window_size = self.window_size;
         self.hand_name().update(name, ctx, window_size);
         self.race_name().update(race_name, ctx, window_size);
@@ -457,7 +457,7 @@ impl SceneImpl for CreateCharacter {
                     ButtonEvent::RaceRight => self.race.next(),
                     _ => unreachable!(),
                 };
-                let name = self.race.name();
+                let name = self.race.name().to_string();
                 let window_size = self.window_size;
                 self.race_name().update(name, ctx, window_size);
                 let race = Race::from(self.race);
@@ -507,7 +507,7 @@ impl SceneImpl for CreateCharacter {
                     ButtonEvent::HandLeft => self.main_hand.prev(),
                     _ => unreachable!(),
                 };
-                let name = self.main_hand.name();
+                let name = self.main_hand.name().to_string();
                 let window_size = self.window_size;
                 self.hand_name().update(name, ctx, window_size);
                 None

@@ -16,7 +16,7 @@ pub struct Action {
 
 impl Action {
     pub fn new(owner: usize, typ: ActionType, world: &World) -> Result<Self, String> {
-        match typ.is_possible(world.get_unit(owner), world) {
+        match typ.is_possible(world.units.get_unit(owner), world) {
             ActionPossibility::Yes(length) => {
                 let finish = world.meta.current_tick + length as u128;
                 Ok(Self {
@@ -31,11 +31,11 @@ impl Action {
     }
 
     pub(crate) fn owner<'a>(&self, world: &'a World) -> &'a Avatar {
-        world.get_unit(self.owner)
+        world.units.get_unit(self.owner)
     }
 
     pub(crate) fn owner_mut<'a>(&self, world: &'a mut World) -> &'a mut Avatar {
-        world.get_unit_mut(self.owner)
+        world.units.get_unit_mut(self.owner)
     }
 
     fn cancel_action(&self, world: &mut World, reason: String) {

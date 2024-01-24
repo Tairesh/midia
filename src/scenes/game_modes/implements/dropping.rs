@@ -43,7 +43,7 @@ impl GameModeImpl for Dropping {
             DIR9.iter()
                 .copied()
                 .filter(|d| {
-                    let pos = world.player().pos + *d;
+                    let pos = world.units.player().pos + *d;
                     world.map().get_tile(pos).terrain.can_stock_items()
                 })
                 .map(|d| (d.into(), Colors::WHITE_SMOKE, CursorType::Select))
@@ -52,7 +52,7 @@ impl GameModeImpl for Dropping {
     }
 
     fn can_push(&self, world: &World) -> Result<(), String> {
-        if world.player().wield.is_empty() {
+        if world.units.player().wield.is_empty() {
             Err("You have nothing to drop!".to_string())
         } else {
             Ok(())

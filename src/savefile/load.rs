@@ -99,14 +99,14 @@ pub fn load_world(path: &Path) -> Result<World, Error> {
     }
 
     let mut units = HashMap::with_capacity(units_data.len());
-    for unit in &units_data {
-        let unit: Avatar = serde_json::from_str(unit).unwrap();
+    for unit in units_data {
+        let unit: Avatar = serde_json::from_str(&unit).unwrap();
         units.insert(unit.id, unit);
     }
 
     let mut chunks = HashMap::with_capacity(chunks_data.len());
-    for chunk in &chunks_data {
-        let chunk: Chunk = serde_json::from_str(chunk).unwrap();
+    for chunk in chunks_data {
+        let chunk: Chunk = serde_json::from_str(&chunk).unwrap();
         chunks.insert(chunk.pos, chunk);
     }
 

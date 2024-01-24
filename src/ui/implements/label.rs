@@ -8,6 +8,7 @@ use tetra::{
     Context,
 };
 
+use crate::game::traits::{LooksLike, Name};
 use crate::{
     assets::{PreparedFont, Tileset},
     game::map::Item,

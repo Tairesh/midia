@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use tetra::graphics::Color;
 
 use crate::game::game_data::AmmoType;
+use crate::game::traits::{LooksLike, Name};
 use crate::game::{
     AttackType, DamageValue, GameData, ItemPrototype, ItemQuality, ItemSize, ItemTag,
 };
@@ -123,14 +124,6 @@ impl Item {
         self
     }
 
-    pub fn name(&self) -> &str {
-        if let Some(named) = &self.named {
-            return named;
-        }
-
-        &self.proto().name
-    }
-
     pub fn color(&self) -> Color {
         if let &Some(color) = &self.colored {
             return color;
@@ -145,14 +138,6 @@ impl Item {
         }
 
         None
-    }
-
-    pub fn looks_like(&self) -> &str {
-        if let Some(looks_like) = &self.looks_like {
-            return looks_like;
-        }
-
-        &self.proto().looks_like
     }
 
     pub fn container(&self) -> Option<&Container> {
@@ -287,9 +272,30 @@ impl Item {
     }
 }
 
+impl Name for Item {
+    fn name(&self) -> &str {
+        if let Some(named) = &self.named {
+            return named;
+        }
+
+        &self.proto().name
+    }
+}
+
+impl LooksLike for Item {
+    fn looks_like(&self) -> &str {
+        if let Some(looks_like) = &self.looks_like {
+            return looks_like;
+        }
+
+        &self.proto().looks_like
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::game::map::items::helpers::{BACKPACK, GOD_AXE, QUIVER, WOODEN_ARROW};
+    use crate::game::traits::Name;
 
     use super::Item;
 

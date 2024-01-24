@@ -27,9 +27,9 @@ pub struct Avatar {
 }
 
 impl Avatar {
-    pub fn new(id: usize, personality: Personality, pos: Point) -> Self {
+    pub fn new(personality: Personality, pos: Point) -> Self {
         Avatar {
-            id,
+            id: 1,
             action: None,
             vision: TwoDimDirection::East,
             wield: Wield::new(!matches!(personality.mind.main_hand, MainHand::Left)),
@@ -41,10 +41,10 @@ impl Avatar {
     }
 
     // TODO: remove this and select dress in create character scene
-    pub fn dressed_default(id: usize, personality: Personality, pos: Point) -> Self {
+    pub fn dressed_default(personality: Personality, pos: Point) -> Self {
         Self {
             wear: Wear::new([(Item::new(HAT), 0), (Item::new(CLOAK), 0)]),
-            ..Self::new(id, personality, pos)
+            ..Self::new(personality, pos)
         }
     }
 
@@ -183,27 +183,29 @@ mod tests {
         CLOAK, GOD_AXE, QUIVER, STONE_ARROW, WOODEN_ARROW, WOODEN_SHORTBOW,
     };
     use crate::game::races::tests::personality::tester_girl;
+    use crate::game::traits::Name;
     use crate::game::{AmmoType, AttackType, GameData};
 
     use super::{Avatar, BodySlot, HitResult, Item};
 
     #[test]
     fn test_npc_name() {
-        let npc = Avatar::new(1, tester_girl(), Point::new(0, 0));
+        let npc = Avatar::new(tester_girl(), Point::new(0, 0));
 
         assert_eq!(npc.name_for_actions(), "Dooka");
     }
 
     #[test]
     fn test_player_name() {
-        let player = Avatar::new(0, tester_girl(), Point::new(0, 0));
+        let mut player = Avatar::new(tester_girl(), Point::new(0, 0));
+        player.id = 0;
 
         assert_eq!(player.name_for_actions(), "you");
     }
 
     #[test]
     fn test_armor() {
-        let mut avatar = Avatar::new(0, tester_girl(), Point::new(0, 0));
+        let mut avatar = Avatar::new(tester_girl(), Point::new(0, 0));
         avatar.wear.add(Item::new(CLOAK), 0);
 
         assert_eq!(avatar.armor(BodySlot::Torso), 1);
@@ -211,7 +213,7 @@ mod tests {
 
     #[test]
     fn test_die() {
-        let mut avatar = Avatar::new(0, tester_girl(), Point::new(0, 0));
+        let mut avatar = Avatar::new(tester_girl(), Point::new(0, 0));
         avatar.wield.wield(Item::new(GOD_AXE));
         avatar.wear.add(Item::new(CLOAK), 0);
         let items = avatar.apply_hit(HitResult::ultra_damage(), 0);
@@ -223,7 +225,7 @@ mod tests {
 
     #[test]
     fn test_melee_damage() {
-        let mut avatar = Avatar::new(0, tester_girl(), Point::new(0, 0));
+        let mut avatar = Avatar::new(tester_girl(), Point::new(0, 0));
         avatar.wield.wield(Item::new(GOD_AXE));
 
         let damage = avatar.melee_damage();
@@ -243,7 +245,7 @@ mod tests {
 
     #[test]
     fn test_ranged_damage() {
-        let mut avatar = Avatar::new(0, tester_girl(), Point::new(0, 0));
+        let mut avatar = Avatar::new(tester_girl(), Point::new(0, 0));
         avatar.wield.wield(Item::new(WOODEN_SHORTBOW));
         avatar.wear.add(
             Item::new(QUIVER).with_items_inside([Item::new(WOODEN_ARROW)]),
@@ -283,7 +285,7 @@ mod tests {
 
     #[test]
     fn test_keep_selected_ammo() {
-        let mut avatar = Avatar::new(0, tester_girl(), Point::new(0, 0));
+        let mut avatar = Avatar::new(tester_girl(), Point::new(0, 0));
         avatar.wield.wield(Item::new(WOODEN_SHORTBOW));
         avatar.wear.add(
             Item::new(QUIVER).with_items_inside([

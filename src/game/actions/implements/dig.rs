@@ -1,6 +1,8 @@
 use geometry::{Direction, DIR8};
 use rand::seq::SliceRandom;
 
+use crate::game::traits::Name;
+
 use super::super::{
     super::{
         log::{LogCategory, LogEvent},
@@ -92,7 +94,7 @@ mod tests {
     #[test]
     fn test_digging() {
         let mut world = prepare_world();
-        world.player_mut().wield.clear();
+        world.units.player_mut().wield.clear();
         world.map().get_tile_mut(Point::new(1, 0)).terrain = Dirt::default().into();
 
         let typ = Dig {
@@ -100,13 +102,17 @@ mod tests {
         };
         assert!(Action::new(0, typ.into(), &world).is_err());
 
-        world.player_mut().wield.wield(Item::new(STONE_SHOVEL));
-        world.player_mut().action = Some(Action::new(0, typ.into(), &world).unwrap());
-        while world.player().action.is_some() {
+        world
+            .units
+            .player_mut()
+            .wield
+            .wield(Item::new(STONE_SHOVEL));
+        world.units.player_mut().action = Some(Action::new(0, typ.into(), &world).unwrap());
+        while world.units.player().action.is_some() {
             world.tick();
         }
 
-        assert_eq!(Point::new(0, 0), world.player().pos);
+        assert_eq!(Point::new(0, 0), world.units.player().pos);
         assert!(matches!(
             world.map().get_tile(Point::new(1, 0)).terrain,
             Terrain::Pit(..)

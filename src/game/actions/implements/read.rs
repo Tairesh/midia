@@ -89,8 +89,8 @@ mod tests {
 
         let typ = Read::new_test(Direction::East, RollResult::new(4, 4));
         if let Ok(action) = Action::new(0, typ.into(), &world) {
-            world.player_mut().action = Some(action);
-            while world.player().action.is_some() {
+            world.units.player_mut().action = Some(action);
+            while world.units.player().action.is_some() {
                 world.tick();
             }
         } else {

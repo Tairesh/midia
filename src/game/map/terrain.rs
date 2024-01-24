@@ -2,6 +2,8 @@ use enum_dispatch::enum_dispatch;
 use serde::{Deserialize, Serialize};
 use tetra::graphics::Color;
 
+use crate::game::traits::{LooksLike, Name};
+
 use super::{
     terrains::{Boulder, Chest, Dirt, Grass, Pit, Tree},
     Item, Passage,
@@ -23,8 +25,8 @@ pub enum Terrain {
 
 #[enum_dispatch(Terrain)]
 pub trait TerrainView {
+    // TODO: implement Name and LooksLike after JSON-izing all terrains
     fn name(&self) -> &str;
-    // TODO: probably use String
     fn looks_like(&self) -> &'static str;
     fn color(&self) -> Option<Color> {
         None

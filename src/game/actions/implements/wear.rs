@@ -1,3 +1,4 @@
+use crate::game::traits::Name;
 use crate::game::LogEvent;
 
 use super::super::{
@@ -70,12 +71,12 @@ mod tests {
     #[test]
     fn test_wear() {
         let mut world = prepare_world();
-        world.player_mut().wield.wield(Item::new(CLOAK));
-        world.player_mut().wear.clear();
+        world.units.player_mut().wield.wield(Item::new(CLOAK));
+        world.units.player_mut().wear.clear();
 
         if let Ok(action) = Action::new(0, Wear {}.into(), &world) {
-            world.player_mut().action = Some(action);
-            while world.player().action.is_some() {
+            world.units.player_mut().action = Some(action);
+            while world.units.player().action.is_some() {
                 world.tick();
             }
         } else {
@@ -83,17 +84,22 @@ mod tests {
         }
 
         assert!(world.log().new_events()[0].msg.contains("put on the cloak"));
-        assert!(world.player().wield.is_empty());
-        assert!(world.player().wear.iter().any(|i| i.proto().id == "cloak"));
+        assert!(world.units.player().wield.is_empty());
+        assert!(world
+            .units
+            .player()
+            .wear
+            .iter()
+            .any(|i| i.proto().id == "cloak"));
     }
 
     #[test]
     fn test_wear_invalid_items() {
         let mut world = prepare_world();
-        world.player_mut().wield.clear();
+        world.units.player_mut().wield.clear();
         assert!(Action::new(0, Wear {}.into(), &world).is_err());
 
-        world.player_mut().wield.wield(Item::new(GOD_AXE));
+        world.units.player_mut().wield.wield(Item::new(GOD_AXE));
         assert!(Action::new(0, Wear {}.into(), &world).is_err());
     }
 }

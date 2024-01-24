@@ -3,6 +3,7 @@ use rand::Rng;
 use crate::game::map::items::helpers::WOODEN_SPLINTER;
 use crate::game::map::terrains::{Dirt, DirtVariant};
 use crate::game::map::Passage;
+use crate::game::traits::{LooksLike, Name};
 use crate::game::{Item, Terrain};
 
 use super::super::{TerrainInteract, TerrainView};
@@ -22,8 +23,12 @@ impl Chest {
 }
 
 impl TerrainView for Chest {
-    fn name(&self) -> &str {
-        "chest"
+    fn name(&self) -> &'static str {
+        if self.open {
+            "chest"
+        } else {
+            "closed chest"
+        }
     }
 
     fn looks_like(&self) -> &'static str {

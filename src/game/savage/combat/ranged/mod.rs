@@ -40,7 +40,7 @@ pub fn ranged_attack_unit(
             return UnitRangedAttackResult::Miss;
         }
         let random_target = units_to_hit[rand::random::<usize>() % units_to_hit.len()];
-        let target = world.get_unit(random_target);
+        let target = world.units.get_unit(random_target);
 
         UnitRangedAttackResult::InnocentBystander(
             random_target,

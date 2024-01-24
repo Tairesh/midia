@@ -33,10 +33,11 @@
     "melee_damage": {
       "damage": {
         "attribute": "STRENGTH",
-        "dices": ["D8"]
+        "dices": ["D12", "D12"],
+        "modifier": 10
       },
       "damage_types": ["SLASH"],
-      "minimum_strength": "D8"
+      "minimum_strength": "D4"
     }
   }
 ]

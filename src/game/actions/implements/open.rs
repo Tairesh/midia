@@ -2,6 +2,7 @@ use geometry::Direction;
 
 use crate::game::log::{LogCategory, LogEvent};
 use crate::game::map::{TerrainInteract, TerrainView};
+use crate::game::traits::Name;
 use crate::game::{Action, Avatar, World};
 
 use super::super::{
@@ -70,8 +71,8 @@ mod tests {
             dir: Direction::East,
         };
         if let Ok(action) = Action::new(0, typ.into(), &world) {
-            world.player_mut().action = Some(action);
-            while world.player().action.is_some() {
+            world.units.player_mut().action = Some(action);
+            while world.units.player().action.is_some() {
                 world.tick();
             }
         } else {

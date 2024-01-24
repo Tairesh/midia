@@ -81,7 +81,8 @@ impl Observing {
     }
 
     fn update_sprite(&mut self, ctx: &mut Context, game: &mut GameScene) {
-        let pos = game.world.borrow().player().pos + game.shift_of_view() + self.mouse_moved_pos;
+        let pos =
+            game.world.borrow().units.player().pos + game.shift_of_view() + self.mouse_moved_pos;
         let msg = if game.world.borrow().is_visible(pos) {
             game.world.borrow().this_is(pos, true)
         } else {
@@ -153,7 +154,7 @@ impl GameModeImpl for Observing {
             game.modes.pop();
             return None;
         } else if let Some(dir) = input::get_direction_keys_down(ctx) {
-            let pos = game.world.borrow().player().pos
+            let pos = game.world.borrow().units.player().pos
                 + game.shift_of_view()
                 + self.mouse_moved_pos
                 + dir;

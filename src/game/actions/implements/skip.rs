@@ -25,7 +25,7 @@ mod tests {
         let mut world = prepare_world();
 
         assert_eq!(0, world.meta.current_tick);
-        world.player_mut().action = Some(Action::new(0, Skip {}.into(), &world).unwrap());
+        world.units.player_mut().action = Some(Action::new(0, Skip {}.into(), &world).unwrap());
         world.tick();
         assert_eq!(1, world.meta.current_tick);
     }

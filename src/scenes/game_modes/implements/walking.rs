@@ -6,6 +6,7 @@ use tetra::{
     Context,
 };
 
+use crate::game::traits::Name;
 use crate::{
     colors::Colors,
     game::{
@@ -91,8 +92,16 @@ impl GameModeImpl for Walking {
             game.try_start_action(Wear {}.into());
             None
         } else if input::is_key_with_mod_pressed(ctx, (Key::X, KeyModifier::Shift)) {
-            game.world.borrow_mut().player_mut().wield.swap_items();
-            let event = LogEvent::info("You swap your hands", game.world.borrow().player().pos);
+            game.world
+                .borrow_mut()
+                .units
+                .player_mut()
+                .wield
+                .swap_items();
+            let event = LogEvent::info(
+                "You swap your hands",
+                game.world.borrow().units.player().pos,
+            );
             game.world.borrow_mut().log().push(event);
             game.update_ui(ctx);
             None
@@ -101,20 +110,22 @@ impl GameModeImpl for Walking {
             let items: Vec<String> = game
                 .world
                 .borrow()
+                .units
                 .player()
                 .wear
                 .iter()
                 .map(|i| i.name().to_string())
                 .collect();
-            let armor = game.world.borrow().player().armor(BodySlot::Torso);
+            let armor = game.world.borrow().units.player().armor(BodySlot::Torso);
             let toughness = game
                 .world
                 .borrow()
+                .units
                 .player()
                 .personality
                 .char_sheet
                 .toughness();
-            let parry = game.world.borrow().player().parry();
+            let parry = game.world.borrow().units.player().parry();
             game.log.log(
                 format!(
                     "You wear: {}, armor value is {armor}, toughness: {toughness}, parry: {parry}",

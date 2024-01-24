@@ -3,6 +3,8 @@ use rand::{
     Rng,
 };
 
+use crate::game::traits::{LooksLike, Name};
+
 use super::super::{Passage, TerrainInteract, TerrainView};
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
@@ -18,8 +20,19 @@ impl Tree {
 }
 
 impl TerrainView for Tree {
-    fn name(&self) -> &str {
-        "tree"
+    fn name(&self) -> &'static str {
+        match self.variant {
+            TreeVariant::DeadTree => "dead tree",
+            TreeVariant::DeadPine => "dead pine",
+            TreeVariant::DeadHickory => "dead hickory",
+            TreeVariant::DeadWillow => "dead willow",
+            TreeVariant::DeadBirch => "dead birch",
+            TreeVariant::Tree => "tree",
+            TreeVariant::Pine => "pine",
+            TreeVariant::Hickory => "hickory",
+            TreeVariant::Willow => "willow",
+            TreeVariant::Birch => "birch",
+        }
     }
 
     fn looks_like(&self) -> &'static str {

@@ -5,6 +5,7 @@ use rand::{
 use tetra::graphics::Color;
 
 use crate::colors::Colors;
+use crate::game::traits::{LooksLike, Name};
 
 use super::super::{terrains::Pit, Item, Passage, Terrain, TerrainInteract, TerrainView};
 
@@ -27,7 +28,7 @@ impl Default for Dirt {
 }
 
 impl TerrainView for Dirt {
-    fn name(&self) -> &str {
+    fn name(&self) -> &'static str {
         "dirt"
     }
 

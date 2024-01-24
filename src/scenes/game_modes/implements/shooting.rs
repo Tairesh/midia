@@ -6,6 +6,7 @@ use tetra::{
     Context,
 };
 
+use crate::game::traits::Name;
 use crate::{
     colors::Colors,
     game::World,
@@ -69,6 +70,7 @@ impl GameModeImpl for Shooting {
     fn cursors(&self, world: &World) -> Vec<Cursor> {
         let pos = self.shift_of_view + self.mouse_moved_pos;
         let damage = world
+            .units
             .player()
             .wield
             .active_hand()
@@ -102,13 +104,14 @@ impl GameModeImpl for Shooting {
     }
 
     fn can_push(&self, world: &World) -> Result<(), String> {
-        world.player().wield.active_hand().map_or(
+        world.units.player().wield.active_hand().map_or(
             Err("You have nothing in your hands!".to_string()),
             |item| {
                 if item.ranged_damage().is_none() {
                     return Err(format!("You can't shoot from {}!", a(item.name())));
                 }
-                if !item.ammo_types().is_empty() && !world.player().wear.has_ammo(item.ammo_types())
+                if !item.ammo_types().is_empty()
+                    && !world.units.player().wear.has_ammo(item.ammo_types())
                 {
                     return Err(format!("You have no ammo for {}!", a(item.name())));
                 }
@@ -125,8 +128,9 @@ impl GameModeImpl for Shooting {
             game.modes.pop();
             return None;
         } else if input::is_some_of_keys_pressed(ctx, &[Key::F, Key::Space, Key::Enter]) {
-            let pos =
-                game.world.borrow().player().pos + game.shift_of_view() + self.mouse_moved_pos;
+            let pos = game.world.borrow().units.player().pos
+                + game.shift_of_view()
+                + self.mouse_moved_pos;
             let unit_in_tile = game
                 .world
                 .borrow()
@@ -148,6 +152,7 @@ impl GameModeImpl for Shooting {
             let damage = game
                 .world
                 .borrow()
+                .units
                 .player()
                 .attack_damage(AttackType::Shoot)
                 .unwrap();

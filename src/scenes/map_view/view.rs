@@ -7,7 +7,7 @@ use tetra::Context;
 use crate::assets::{Assets, Tileset};
 use crate::colors::Colors;
 use crate::game::map::TerrainView;
-use crate::game::traits::Name;
+use crate::game::traits::LooksLike;
 use crate::game::{Avatar, World};
 use crate::scenes::game_modes::Cursor;
 
@@ -36,7 +36,7 @@ pub fn draw(
     );
     let center = Vec2::new(window_size.0 as f32, window_size.1 as f32) / 2.0
         - Vec2::new(tile_size, tile_size) / 2.0;
-    let center_tile = world.player().pos + shift_of_view;
+    let center_tile = world.units.player().pos + shift_of_view;
 
     let left_top = center_tile + (-width / 2, -height / 2);
     let right_bottom = center_tile + (width / 2, height / 2);
@@ -102,7 +102,7 @@ pub fn draw(
                 position,
                 zoom,
                 true,
-                world.get_unit(i),
+                world.units.get_unit(i),
             );
             if !tile.items.is_empty() {
                 assets.tileset.draw_region(
@@ -194,7 +194,11 @@ pub fn draw_unit(
     if let Some(body_color) = avatar.personality.appearance.body_color {
         draw_params = draw_params.color(body_color.into());
     }
-    tileset.draw_region(ctx, avatar.personality.appearance.race.name(), draw_params);
+    tileset.draw_region(
+        ctx,
+        avatar.personality.appearance.race.looks_like(),
+        draw_params,
+    );
 
     // TODO: draw both items
     if let Some(item) = avatar.wield.active_hand() {

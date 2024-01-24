@@ -2,6 +2,8 @@ use std::f32::consts::SQRT_2;
 
 use geometry::Direction;
 
+use crate::game::traits::Name;
+
 use super::super::{
     super::{
         log::{LogCategory, LogEvent},
@@ -27,7 +29,7 @@ impl ActionImpl for Walk {
         }
         let unit_on_tile = tile.units.iter().copied().next();
         if let Some(unit_id) = unit_on_tile {
-            let unit = world.get_unit(unit_id);
+            let unit = world.units.get_unit(unit_id);
             return No(format!("{} is on the way", unit.name_for_actions()));
         }
         Yes({
@@ -44,7 +46,7 @@ impl ActionImpl for Walk {
 
     fn on_finish(&self, action: &Action, world: &mut World) {
         world.move_avatar(action.owner, self.dir);
-        let pos = world.get_unit(action.owner).pos;
+        let pos = world.units.get_unit(action.owner).pos;
         if action.length > 20 && action.owner == 0 {
             world.log().push(LogEvent::new(
                 format!(
@@ -77,10 +79,10 @@ mod tests {
         let typ = Walk {
             dir: Direction::East,
         };
-        world.player_mut().action = Some(Action::new(0, typ.into(), &world).unwrap());
+        world.units.player_mut().action = Some(Action::new(0, typ.into(), &world).unwrap());
         world.tick();
 
-        assert_eq!(Point::new(1, 0), world.player().pos);
+        assert_eq!(Point::new(1, 0), world.units.player().pos);
     }
 
     #[test]
@@ -122,7 +124,7 @@ mod tests {
         world.map().get_tile_mut(Point::new(1, 1)).terrain = Dirt::default().into();
         let npc = add_npc(&mut world, Point::new(1, 0));
 
-        world.player_mut().action = Some(
+        world.units.player_mut().action = Some(
             Action::new(
                 0,
                 Walk {
@@ -133,7 +135,7 @@ mod tests {
             )
             .unwrap(),
         );
-        world.get_unit_mut(npc).action = Some(
+        world.units.get_unit_mut(npc).action = Some(
             Action::new(
                 npc,
                 Walk {
@@ -145,14 +147,14 @@ mod tests {
             .unwrap(),
         );
         world.tick();
-        assert_eq!(Point::new(0, 1), world.player().pos);
-        assert_eq!(Point::new(1, 0), world.get_unit(npc).pos);
-        assert!(world.player().action.is_none());
+        assert_eq!(Point::new(0, 1), world.units.player().pos);
+        assert_eq!(Point::new(1, 0), world.units.get_unit(npc).pos);
+        assert!(world.units.player().action.is_none());
 
-        world.player_mut().action = Some(Action::new(0, Skip {}.into(), &world).unwrap());
+        world.units.player_mut().action = Some(Action::new(0, Skip {}.into(), &world).unwrap());
         world.tick();
         // do not check npc.action because it can be already new one, selected by AI
-        assert_eq!(Point::new(1, 0), world.get_unit(npc).pos);
+        assert_eq!(Point::new(1, 0), world.units.get_unit(npc).pos);
         assert_eq!(1, world.map().get_tile(Point::new(0, 1)).units.len());
         assert_eq!(1, world.map().get_tile(Point::new(1, 0)).units.len());
         assert_eq!(0, world.map().get_tile(Point::new(0, 0)).units.len());

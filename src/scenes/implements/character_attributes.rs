@@ -480,7 +480,7 @@ impl CharacterAttributes {
     fn next(&self) -> Vec<Transition> {
         // TODO: traits, skills, etc.
         // TODO: find available starting pos in the world
-        let avatar = Avatar::dressed_default(0, self.personality.clone(), Point::new(0, 0));
+        let avatar = Avatar::dressed_default(self.personality.clone(), Point::new(0, 0));
         let mut world = World::create(self.meta.clone(), avatar).init();
         world.save();
 
@@ -506,7 +506,7 @@ impl CharacterAttributes {
     }
 
     fn update_attribute_label(&mut self, attribute: Attribute, ctx: &mut Context) {
-        let dice_name = self.get_attribute(attribute).name();
+        let dice_name = self.get_attribute(attribute).name().to_string();
         let window_size = self.window_size;
         self.attribute_label(attribute)
             .update(dice_name, ctx, window_size);
@@ -539,7 +539,7 @@ impl CharacterAttributes {
     }
 
     fn update_skill_label(&mut self, skill: Skill, ctx: &mut Context) {
-        let skill_name = self.get_skill(skill).name();
+        let skill_name = self.get_skill(skill).name().to_string();
         let window_size = self.window_size;
         self.skill_label(skill).update(skill_name, ctx, window_size);
         self.update_points(ctx);

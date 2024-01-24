@@ -5,6 +5,7 @@ use rand::{
 use tetra::graphics::Color;
 
 use crate::colors::Colors;
+use crate::game::traits::{LooksLike, Name};
 
 use super::super::{
     terrains::{Dirt, DirtVariant, Pit},
@@ -30,7 +31,7 @@ impl Grass {
 }
 
 impl TerrainView for Grass {
-    fn name(&self) -> &str {
+    fn name(&self) -> &'static str {
         if self.dead {
             "dead grass"
         } else {

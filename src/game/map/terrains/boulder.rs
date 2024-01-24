@@ -5,6 +5,7 @@ use rand::{
 
 use crate::game::map::items::helpers::ROCK;
 use crate::game::map::terrains::{Dirt, DirtVariant};
+use crate::game::traits::{LooksLike, Name};
 use crate::game::{Item, Terrain};
 
 use super::super::{Passage, TerrainInteract, TerrainView};
@@ -29,7 +30,7 @@ impl Default for Boulder {
 }
 
 impl TerrainView for Boulder {
-    fn name(&self) -> &str {
+    fn name(&self) -> &'static str {
         match self.size {
             BoulderSize::Huge => "huge boulder",
             BoulderSize::Middle => "boulder",

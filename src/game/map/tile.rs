@@ -2,6 +2,8 @@
 
 use std::collections::HashSet;
 
+use crate::game::traits::Name;
+
 use super::{
     items::Item,
     terrain::{Terrain, TerrainInteract, TerrainView},

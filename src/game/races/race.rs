@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 use tetra::graphics::Color;
 
 use crate::colors::Colors;
+use crate::game::traits::LooksLike;
 use crate::game::{
     game_data::DamageType,
     savage::{DamageDice, Skill},
@@ -27,6 +28,13 @@ pub enum Race {
 }
 
 impl Race {
+    pub fn is_intelligent(self) -> bool {
+        match self {
+            Self::Gazan | Self::Lagnam | Self::Totik | Self::Nyarnik => true,
+            Self::Bug => false,
+        }
+    }
+
     pub fn has_custom_colors(self) -> bool {
         !self.custom_colors().is_empty()
     }
@@ -98,6 +106,7 @@ impl Race {
         }
     }
 
+    // TODO: use enum_iterator
     pub fn iterator() -> impl Iterator<Item = Race> {
         [
             Self::Gazan,
@@ -148,6 +157,7 @@ impl Race {
             ),
             Race::Bug => (
                 "mandibles",
+                // TODO: poison
                 DamageValue {
                     damage: Damage {
                         dices: vec![DamageDice::D6],
@@ -175,7 +185,7 @@ impl From<Race> for &str {
             Race::Nyarnik => "nyarnik",
             Race::Totik => "totik",
             Race::Lagnam => "lagnam",
-            Race::Bug => "giant_bug",
+            Race::Bug => "giant bug",
         }
     }
 }
@@ -183,6 +193,18 @@ impl From<Race> for &str {
 impl Name for Race {
     fn name(&self) -> &'static str {
         (*self).into()
+    }
+}
+
+impl LooksLike for Race {
+    fn looks_like(&self) -> &str {
+        match self {
+            Race::Gazan => "gazan",
+            Race::Nyarnik => "nyarnik",
+            Race::Totik => "totik",
+            Race::Lagnam => "lagnam",
+            Race::Bug => "giant_bug",
+        }
     }
 }
 

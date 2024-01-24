@@ -105,24 +105,34 @@ impl Personality {
 
 pub fn age_name(appearance: &Appearance) -> String {
     let race_name = appearance.race.name().to_lowercase();
-    match appearance.age {
-        0..=3 => format!("baby {race_name}"),
-        4..=15 => {
-            race_name
-                + " "
-                + match appearance.sex {
-                    Sex::Male => "boy",
-                    Sex::Female => "girl",
-                    Sex::Undefined => "child",
-                }
+    if appearance.race.is_intelligent() {
+        match appearance.age {
+            0..=3 => format!("baby {race_name}"),
+            4..=15 => {
+                race_name
+                    + " "
+                    + match appearance.sex {
+                        Sex::Male => "boy",
+                        Sex::Female => "girl",
+                        Sex::Undefined => "child",
+                    }
+            }
+            16.. => {
+                race_name
+                    + match appearance.sex {
+                        Sex::Male => " man",
+                        Sex::Female => " woman",
+                        Sex::Undefined => "",
+                    }
+            }
         }
-        16.. => {
-            race_name
-                + match appearance.sex {
-                    Sex::Male => " man",
-                    Sex::Female => " woman",
-                    Sex::Undefined => "",
-                }
+    } else {
+        match appearance.age {
+            0..=5 => format!("young {race_name}"),
+            _ => match appearance.sex {
+                Sex::Female => format!("{race_name} queen"),
+                _ => race_name,
+            },
         }
     }
 }

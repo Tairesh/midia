@@ -36,9 +36,21 @@ mod tests {
             .collect::<PathBuf>();
         let mut world = prepare_world();
         world.meta.path = path.clone();
-        world.player_mut().personality.mind.name = "test".to_string();
-        world.player_mut().personality.char_sheet.attributes.agility = Dice::D12;
-        world.player_mut().personality.char_sheet.skills.shooting = SkillLevel::D8;
+        world.units.player_mut().personality.mind.name = "test".to_string();
+        world
+            .units
+            .player_mut()
+            .personality
+            .char_sheet
+            .attributes
+            .agility = Dice::D12;
+        world
+            .units
+            .player_mut()
+            .personality
+            .char_sheet
+            .skills
+            .shooting = SkillLevel::D8;
         world.save();
 
         let meta = load(&path).unwrap();
@@ -49,15 +61,21 @@ mod tests {
 
         let world2 = load_world(&path).unwrap();
         assert_eq!(world.game_view.zoom, world2.game_view.zoom);
-        assert_eq!(world.player().pos, world2.player().pos);
-        assert_eq!("test", world2.player().personality.mind.name);
+        assert_eq!(world.units.player().pos, world2.units.player().pos);
+        assert_eq!("test", world2.units.player().personality.mind.name);
         assert_eq!(
             Dice::D12,
-            world2.player().personality.char_sheet.attributes.agility
+            world2
+                .units
+                .player()
+                .personality
+                .char_sheet
+                .attributes
+                .agility
         );
         assert_eq!(
             SkillLevel::D8,
-            world2.player().personality.char_sheet.skills.shooting
+            world2.units.player().personality.char_sheet.skills.shooting
         );
 
         delete(&path);

@@ -1,5 +1,7 @@
 use geometry::Direction;
 
+use crate::game::traits::Name;
+
 use super::super::{
     super::{
         log::{LogCategory, LogEvent},
@@ -73,10 +75,10 @@ mod tests {
         let mut world = prepare_world();
         world.map().get_tile_mut(Point::new(0, 0)).terrain = Dirt::default().into();
         world.map().get_tile_mut(Point::new(0, 0)).items.clear();
-        world.player_mut().wield.clear();
-        world.player_mut().wield.wield(Item::new(GOD_AXE));
+        world.units.player_mut().wield.clear();
+        world.units.player_mut().wield.wield(Item::new(GOD_AXE));
 
-        world.player_mut().action = Some(
+        world.units.player_mut().action = Some(
             Action::new(
                 0,
                 Drop {
@@ -89,8 +91,8 @@ mod tests {
         );
         world.tick();
 
-        assert_eq!(Point::new(0, 0), world.player().pos);
-        assert!(world.player().wield.is_empty());
+        assert_eq!(Point::new(0, 0), world.units.player().pos);
+        assert!(world.units.player().wield.is_empty());
         let mut map = world.map();
         assert_eq!(1, map.get_tile(Point::new(0, 0)).items.len());
         let item = map.get_tile(Point::new(0, 0)).items.first().unwrap();

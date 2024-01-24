@@ -6,6 +6,7 @@ use tetra::{
     Context,
 };
 
+use crate::game::traits::Name;
 use crate::{
     colors::Colors,
     game::World,
@@ -69,6 +70,7 @@ impl GameModeImpl for Throwing {
     fn cursors(&self, world: &World) -> Vec<Cursor> {
         let pos = self.shift_of_view + self.mouse_moved_pos;
         let damage = world
+            .units
             .player()
             .wield
             .active_hand()
@@ -102,7 +104,7 @@ impl GameModeImpl for Throwing {
     }
 
     fn can_push(&self, world: &World) -> Result<(), String> {
-        world.player().wield.active_hand().map_or(
+        world.units.player().wield.active_hand().map_or(
             Err("You have nothing in your hands!".to_string()),
             |item| {
                 item.throw_damage()
@@ -120,8 +122,9 @@ impl GameModeImpl for Throwing {
             game.modes.pop();
             return None;
         } else if input::is_some_of_keys_pressed(ctx, &[Key::T, Key::Space, Key::Enter]) {
-            let pos =
-                game.world.borrow().player().pos + game.shift_of_view() + self.mouse_moved_pos;
+            let pos = game.world.borrow().units.player().pos
+                + game.shift_of_view()
+                + self.mouse_moved_pos;
             let unit_in_tile = game
                 .world
                 .borrow()
@@ -138,6 +141,7 @@ impl GameModeImpl for Throwing {
                 let item = game
                     .world
                     .borrow_mut()
+                    .units
                     .player_mut()
                     .wield
                     .take_from_active_hand()
@@ -151,6 +155,7 @@ impl GameModeImpl for Throwing {
             let damage = game
                 .world
                 .borrow()
+                .units
                 .player()
                 .attack_damage(AttackType::Throw)
                 .unwrap();

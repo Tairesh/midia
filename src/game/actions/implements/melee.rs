@@ -1,5 +1,7 @@
 use geometry::Point;
 
+use crate::game::traits::Name;
+
 use super::super::{
     super::map::{TerrainInteract, TerrainView},
     super::{
@@ -111,7 +113,7 @@ impl Melee {
             .copied()
             .next();
         if let Some(unit_id) = unit_id {
-            let unit = world.get_unit(unit_id);
+            let unit = world.units.get_unit(unit_id);
             let attack = melee_attack_unit(owner, unit);
             match attack {
                 UnitMeleeAttackResult::Hit(damage) => {
@@ -221,9 +223,9 @@ mod tests {
         assert_eq!(world.meta.current_tick, 0);
 
         add_npc(&mut world, Point::new(1, 0));
-        world.player_mut().wield.clear();
+        world.units.player_mut().wield.clear();
 
-        world.player_mut().action =
+        world.units.player_mut().action =
             Some(Action::new(0, Melee::new(Point::new(1, 0)).into(), &world).unwrap());
         world.tick();
 
@@ -243,9 +245,9 @@ mod tests {
         assert_eq!(world.meta.current_tick, 0);
 
         add_npc(&mut world, Point::new(1, 0));
-        world.player_mut().wield.wield(Item::new(GOD_AXE));
+        world.units.player_mut().wield.wield(Item::new(GOD_AXE));
 
-        world.player_mut().action =
+        world.units.player_mut().action =
             Some(Action::new(0, Melee::new(Point::new(1, 0)).into(), &world).unwrap());
         world.tick();
 
@@ -265,8 +267,8 @@ mod tests {
         assert_eq!(world.meta.current_tick, 0);
 
         world.map().get_tile_mut(Point::new(1, 0)).terrain = Boulder::default().into();
-        world.player_mut().wield.wield(Item::new(DEMONIC_SAP));
-        world.player_mut().action =
+        world.units.player_mut().wield.wield(Item::new(DEMONIC_SAP));
+        world.units.player_mut().action =
             Some(Action::new(0, Melee::new(Point::new(1, 0)).into(), &world).unwrap());
         world.tick();
 
@@ -286,8 +288,8 @@ mod tests {
         assert_eq!(world.meta.current_tick, 0);
 
         world.map().get_tile_mut(Point::new(1, 0)).terrain = Boulder::default().into();
-        world.player_mut().wield.wield(Item::new(STONE_KNIFE));
-        world.player_mut().action =
+        world.units.player_mut().wield.wield(Item::new(STONE_KNIFE));
+        world.units.player_mut().action =
             Some(Action::new(0, Melee::new(Point::new(1, 0)).into(), &world).unwrap());
         world.tick();
 
@@ -305,11 +307,14 @@ mod tests {
     fn test_smash_with_fists() {
         let mut world = prepare_world();
         assert_eq!(world.meta.current_tick, 0);
-        assert_eq!(world.player().personality.appearance.race, Race::Gazan);
+        assert_eq!(
+            world.units.player().personality.appearance.race,
+            Race::Gazan
+        );
 
         world.map().get_tile_mut(Point::new(1, 0)).terrain = Boulder::default().into();
-        world.player_mut().wield.clear();
-        world.player_mut().action =
+        world.units.player_mut().wield.clear();
+        world.units.player_mut().action =
             Some(Action::new(0, Melee::new(Point::new(1, 0)).into(), &world).unwrap());
         world.tick();
 
@@ -326,11 +331,11 @@ mod tests {
     #[test]
     fn test_cant_smash_with_fangs() {
         let mut world = prepare_world();
-        world.player_mut().personality.appearance.race = Race::Lagnam;
-        world.player_mut().wield.clear();
+        world.units.player_mut().personality.appearance.race = Race::Lagnam;
+        world.units.player_mut().wield.clear();
 
         world.map().get_tile_mut(Point::new(1, 0)).terrain = Boulder::default().into();
-        world.player_mut().action =
+        world.units.player_mut().action =
             Some(Action::new(0, Melee::new(Point::new(1, 0)).into(), &world).unwrap());
         world.tick();
 

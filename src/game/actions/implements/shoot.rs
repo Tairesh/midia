@@ -3,6 +3,8 @@ use std::iter::Cloned;
 use geometry::DIR8;
 use rand::seq::SliceRandom;
 
+use crate::game::traits::Name;
+
 use super::super::{
     super::{
         super::lang::a,
@@ -48,7 +50,7 @@ impl ActionImpl for Shoot {
                 return No(format!("You can't shoot from {}.", a(item.name())));
             }
 
-            let target = world.get_unit(self.target);
+            let target = world.units.get_unit(self.target);
             if target.is_dead() {
                 // This should be unreachable, but just in case.
                 return No("You can't shoot to a dead body.".to_string());
@@ -67,7 +69,7 @@ impl ActionImpl for Shoot {
     }
 
     fn on_finish(&self, action: &Action, world: &mut World) {
-        let unit = world.get_unit(self.target);
+        let unit = world.units.get_unit(self.target);
         if unit.is_dead() {
             return;
         }
@@ -82,7 +84,7 @@ impl ActionImpl for Shoot {
         let attack_result = ranged_attack_unit(AttackType::Shoot, owner, unit, world);
         match attack_result {
             UnitRangedAttackResult::InnocentBystander(unit_id, damage) => {
-                let victim = world.get_unit(unit_id);
+                let victim = world.units.get_unit(unit_id);
                 for event in unit_attack_success(
                     owner,
                     victim,
@@ -176,13 +178,18 @@ mod tests {
         assert_eq!(world.meta.current_tick, 0);
 
         add_npc(&mut world, Point::new(3, 0));
-        world.player_mut().wield.wield(Item::new(WOODEN_SHORTBOW));
-        world.player_mut().wear.add(
+        world
+            .units
+            .player_mut()
+            .wield
+            .wield(Item::new(WOODEN_SHORTBOW));
+        world.units.player_mut().wear.add(
             Item::new(QUIVER).with_items_inside([Item::new(WOODEN_ARROW)]),
             0,
         );
 
-        world.player_mut().action = Some(Action::new(0, Shoot::new(1).into(), &world).unwrap());
+        world.units.player_mut().action =
+            Some(Action::new(0, Shoot::new(1).into(), &world).unwrap());
         world.tick();
 
         assert_eq!(world.meta.current_tick, ATTACK_MOVES as u128);
@@ -207,7 +214,7 @@ mod tests {
         assert_eq!(world.meta.current_tick, 0);
 
         add_npc(&mut world, Point::new(3, 0));
-        world.player_mut().wield.clear();
+        world.units.player_mut().wield.clear();
 
         assert!(Action::new(0, Shoot::new(1).into(), &world).is_err());
     }
@@ -218,8 +225,12 @@ mod tests {
         assert_eq!(world.meta.current_tick, 0);
 
         add_npc(&mut world, Point::new(49, 0));
-        world.player_mut().wield.wield(Item::new(WOODEN_SHORTBOW));
-        world.player_mut().wear.add(
+        world
+            .units
+            .player_mut()
+            .wield
+            .wield(Item::new(WOODEN_SHORTBOW));
+        world.units.player_mut().wear.add(
             Item::new(QUIVER).with_items_inside([Item::new(WOODEN_ARROW)]),
             0,
         );
@@ -233,8 +244,12 @@ mod tests {
         assert_eq!(world.meta.current_tick, 0);
 
         add_npc(&mut world, Point::new(3, 0));
-        world.player_mut().wield.wield(Item::new(WOODEN_SHORTBOW));
-        world.player_mut().wear.clear();
+        world
+            .units
+            .player_mut()
+            .wield
+            .wield(Item::new(WOODEN_SHORTBOW));
+        world.units.player_mut().wear.clear();
 
         assert!(Action::new(0, Shoot::new(1).into(), &world).is_err());
     }

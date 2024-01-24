@@ -43,7 +43,7 @@ impl GameModeImpl for Digging {
             DIR9.iter()
                 .copied()
                 .filter(|d| {
-                    let pos = world.player().pos + *d;
+                    let pos = world.units.player().pos + *d;
                     world.map().get_tile(pos).terrain.is_diggable()
                 })
                 .map(|d| (d.into(), Colors::LIGHT_YELLOW, CursorType::Select))
@@ -52,7 +52,7 @@ impl GameModeImpl for Digging {
     }
 
     fn can_push(&self, world: &World) -> Result<(), String> {
-        if world.player().wield.has_quality(&ItemQuality::Dig) {
+        if world.units.player().wield.has_quality(&ItemQuality::Dig) {
             Ok(())
         } else {
             Err("You can't dig without a shovel".to_string())

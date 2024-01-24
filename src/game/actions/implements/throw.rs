@@ -1,6 +1,8 @@
 use geometry::DIR8;
 use rand::seq::SliceRandom;
 
+use crate::game::traits::Name;
+
 use super::super::{
     super::{
         super::lang::a,
@@ -39,7 +41,7 @@ impl ActionImpl for Throw {
                 return No(format!("You can't throw {}.", a(item.name())));
             }
 
-            let target = world.get_unit(self.target);
+            let target = world.units.get_unit(self.target);
             if target.is_dead() {
                 // This should be unreachable, but just in case.
                 return No(format!(
@@ -61,7 +63,7 @@ impl ActionImpl for Throw {
     }
 
     fn on_finish(&self, action: &Action, world: &mut World) {
-        let unit = world.get_unit(self.target);
+        let unit = world.units.get_unit(self.target);
         if unit.is_dead() {
             return;
         }
@@ -76,7 +78,7 @@ impl ActionImpl for Throw {
         let attack_result = ranged_attack_unit(AttackType::Throw, owner, unit, world);
         match attack_result {
             UnitRangedAttackResult::InnocentBystander(unit_id, damage) => {
-                let victim = world.get_unit(unit_id);
+                let victim = world.units.get_unit(unit_id);
                 let target = victim.pos;
                 for event in unit_attack_success(
                     owner,
@@ -182,9 +184,10 @@ mod tests {
         assert_eq!(world.meta.current_tick, 0);
 
         add_npc(&mut world, Point::new(3, 0));
-        world.player_mut().wield.wield(Item::new("rock"));
+        world.units.player_mut().wield.wield(Item::new("rock"));
 
-        world.player_mut().action = Some(Action::new(0, Throw::new(1).into(), &world).unwrap());
+        world.units.player_mut().action =
+            Some(Action::new(0, Throw::new(1).into(), &world).unwrap());
         world.tick();
 
         assert_eq!(world.meta.current_tick, ATTACK_MOVES as u128);
@@ -204,7 +207,7 @@ mod tests {
         assert_eq!(world.meta.current_tick, 0);
 
         add_npc(&mut world, Point::new(3, 0));
-        world.player_mut().wield.clear();
+        world.units.player_mut().wield.clear();
 
         assert!(Action::new(0, Throw::new(1).into(), &world).is_err());
     }
@@ -215,7 +218,7 @@ mod tests {
         assert_eq!(world.meta.current_tick, 0);
 
         add_npc(&mut world, Point::new(15, 0));
-        world.player_mut().wield.wield(Item::new("rock"));
+        world.units.player_mut().wield.wield(Item::new("rock"));
 
         assert!(Action::new(0, Throw::new(1).into(), &world).is_err());
     }
@@ -226,23 +229,27 @@ mod tests {
         assert_eq!(world.meta.current_tick, 0);
 
         add_npc(&mut world, Point::new(3, 0));
-        world.player_mut().wield.wield(Item::custom(ItemPrototype {
-            id: "big_thing".to_string(),
-            name: "big thing".to_string(),
-            looks_like: "rock".to_string(),
-            size: ItemSize::Huge,
-            materials: HashSet::new(),
-            tags: HashSet::new(),
-            qualities: Vec::new(),
-            two_handed_tool: false,
-            wearable: None,
-            melee_damage: None,
-            color_from_material: None,
-            throw_damage: None,
-            ranged_damage: None,
-            ammo_types: HashSet::new(),
-            ammo: None,
-        }));
+        world
+            .units
+            .player_mut()
+            .wield
+            .wield(Item::custom(ItemPrototype {
+                id: "big_thing".to_string(),
+                name: "big thing".to_string(),
+                looks_like: "rock".to_string(),
+                size: ItemSize::Huge,
+                materials: HashSet::new(),
+                tags: HashSet::new(),
+                qualities: Vec::new(),
+                two_handed_tool: false,
+                wearable: None,
+                melee_damage: None,
+                color_from_material: None,
+                throw_damage: None,
+                ranged_damage: None,
+                ammo_types: HashSet::new(),
+                ammo: None,
+            }));
 
         assert!(Action::new(0, Throw::new(1).into(), &world).is_err());
     }

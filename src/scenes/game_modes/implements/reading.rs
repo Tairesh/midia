@@ -43,7 +43,7 @@ impl GameModeImpl for Reading {
             DIR9.iter()
                 .copied()
                 .filter(|d| {
-                    let pos = world.player().pos + *d;
+                    let pos = world.units.player().pos + *d;
                     world.map().get_tile(pos).is_readable()
                 })
                 .map(|d| (d.into(), Colors::LIGHT_YELLOW, CursorType::Select))
@@ -58,7 +58,7 @@ impl GameModeImpl for Reading {
             self.selected = Some(dir);
             game.try_rotate_player(dir);
         } else if let Some(dir) = self.selected {
-            let action = Read::new(dir, game.world.borrow().player()).into();
+            let action = Read::new(dir, game.world.borrow().units.player()).into();
             game.try_start_action(action);
             game.modes.pop();
         }

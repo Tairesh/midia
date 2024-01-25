@@ -1,18 +1,17 @@
 use geometry::Point;
 
-use crate::game::traits::Name;
-use crate::game::AttackType;
-
 use super::super::{
     super::map::{TerrainInteract, TerrainView},
     super::{
+        super::lang::a,
         game_data::DamageType,
         log::helpers::unit_attack_success,
         savage::{
             melee_attack_unit, melee_smash_terrain, TerrainMeleeAttackResult,
             UnitMeleeAttackResult, ATTACK_MOVES,
         },
-        Action, Avatar, Item, LogEvent, World,
+        traits::Name,
+        Action, AttackType, Avatar, Item, LogEvent, World,
     },
     ActionImpl,
     ActionPossibility::{self, No, Yes},
@@ -50,12 +49,20 @@ impl Melee {
                 TerrainMeleeAttackResult::Miss => {
                     world.log().push(LogEvent::info(
                         format!(
-                            "{} {} trying to smash the {} with {} {weapon_name} but miss{}!",
+                            "{} tr{} to break the {} with {} {weapon_name} but miss{}!",
                             owner.name_for_actions(),
-                            if owner.is_player() { "are" } else { "is" },
+                            if owner.pronounce().verb_ends_with_s() {
+                                "ies"
+                            } else {
+                                "y"
+                            },
                             world.map().get_tile(self.target).terrain.name(),
-                            owner.pronounce().2,
-                            if owner.is_player() { "" } else { "es" },
+                            owner.pronounce().possessive_adjective(),
+                            if owner.pronounce().verb_ends_with_s() {
+                                "es"
+                            } else {
+                                ""
+                            },
                         ),
                         self.target,
                     ));
@@ -63,11 +70,15 @@ impl Melee {
                 TerrainMeleeAttackResult::Hit(damage) => {
                     world.log().push(LogEvent::info(
                         format!(
-                            "{} smash{} the {} with {} {weapon_name} for {damage} damage but didn't break it.",
+                            "{} hit{} the {} with {} {weapon_name} dealing {damage} damage but it didn't break it.",
                             owner.name_for_actions(),
-                            if owner.is_player() { "" } else { "es" },
+                            if owner.pronounce().verb_ends_with_s() {
+                                "s"
+                            } else {
+                                ""
+                            },
                             world.map().get_tile(self.target).terrain.name(),
-                            owner.pronounce().2,
+                            owner.pronounce().possessive_adjective(),
                         ),
                         self.target,
                     ));
@@ -75,11 +86,15 @@ impl Melee {
                 TerrainMeleeAttackResult::Success(damage) => {
                     world.log().push(LogEvent::info(
                         format!(
-                            "{} smash{} the {} with {} {weapon_name} for {damage} damage and completely destroyed it.",
+                            "{} hit{} the {} with {} {weapon_name} dealing {damage} damage and completely destroying it.",
                             owner.name_for_actions(),
-                            if owner.is_player() { "" } else { "es" },
+                            if owner.pronounce().verb_ends_with_s() {
+                                "s"
+                            } else {
+                                ""
+                            },
                             world.map().get_tile(self.target).terrain.name(),
-                            owner.pronounce().2,
+                            owner.pronounce().possessive_adjective(),
                         ),
                         self.target,
                     ));
@@ -117,37 +132,56 @@ impl Melee {
             let unit = world.units.get_unit(unit_id);
             let attack = melee_attack_unit(owner, unit);
             match attack {
-                UnitMeleeAttackResult::Hit(damage) => {
+                UnitMeleeAttackResult::Hit(hit) => {
+                    let damage = hit.params.damage.to_string();
                     for event in unit_attack_success(
                         owner,
                         unit,
-                        &damage,
+                        &hit,
                         format!(
-                            "{} attack{} {} with {} {weapon_name}{}",
+                            "{} attack{} {} with {} {weapon_name} dealing {} damage{}.",
                             owner.name_for_actions(),
-                            if owner.is_player() { "" } else { "s" },
-                            unit.name_for_actions(),
-                            owner.pronounce().2,
-                            if damage.params.damage == 0 {
-                                " but it doesn't do any damage"
+                            if owner.pronounce().verb_ends_with_s() {
+                                "s"
                             } else {
                                 ""
                             },
+                            unit.name_for_actions(),
+                            owner.pronounce().possessive_adjective(),
+                            if hit.params.damage == 0 {
+                                "no"
+                            } else {
+                                &damage
+                            },
+                            if hit.params.penetration > 0 {
+                                format!(" and {} armor penetration", hit.params.penetration)
+                            } else {
+                                String::new()
+                            }
                         ),
                     ) {
                         world.log().push(event);
                     }
 
-                    world.apply_damage(unit_id, damage);
+                    world.apply_damage(unit_id, hit);
                 }
                 UnitMeleeAttackResult::Miss => {
                     world.log().push(LogEvent::warning(
                         format!(
-                            "{} attack{} {} with {} {weapon_name} and miss.",
+                            "{} attack{} {} with {} {weapon_name} but miss{}.",
                             owner.name_for_actions(),
-                            if owner.is_player() { "" } else { "s" },
+                            if owner.pronounce().verb_ends_with_s() {
+                                "s"
+                            } else {
+                                ""
+                            },
                             unit.name_for_actions(),
-                            owner.pronounce().2,
+                            owner.pronounce().possessive_adjective(),
+                            if owner.pronounce().verb_ends_with_s() {
+                                "es"
+                            } else {
+                                ""
+                            },
                         ),
                         self.target,
                     ));
@@ -169,10 +203,14 @@ impl Melee {
 
         world.log().push(LogEvent::info(
             format!(
-                "{} swing{} in the air with {} {weapon}.",
+                "{} wave{} {} {weapon} in the air.",
                 owner.name_for_actions(),
-                if owner.is_player() { "" } else { "s" },
-                owner.pronounce().2,
+                if owner.pronounce().verb_ends_with_s() {
+                    "s"
+                } else {
+                    ""
+                },
+                owner.pronounce().possessive_adjective(),
             ),
             self.target,
         ));
@@ -277,8 +315,10 @@ mod tests {
         let mut log = world.log();
         let event = &log.new_events()[0];
         assert!(
-            event.msg.contains("smash the small boulder"),
-            "msg \"{}\" doesn't contains \"smash the small boulder\"",
+            event
+                .msg
+                .contains("the small boulder with your demonic metal sap"),
+            "msg \"{}\" doesn't contains \"the small boulder with your demonic metal sap\"",
             event.msg
         );
     }
@@ -298,8 +338,8 @@ mod tests {
         let mut log = world.log();
         let event = &log.new_events()[0];
         assert!(
-            event.msg.contains("swing in the air with your stone knife"),
-            "msg \"{}\" doesn't contains \"swing in the air with your knife\"",
+            event.msg.contains("wave your stone knife in the air"),
+            "msg \"{}\" doesn't contains \"wave your stone knife in the air\"",
             event.msg
         );
     }
@@ -323,8 +363,8 @@ mod tests {
         let mut log = world.log();
         let event = &log.new_events()[0];
         assert!(
-            event.msg.contains("smash the small boulder"),
-            "msg \"{}\" doesn't contains \"smash the small boulder\"",
+            event.msg.contains("the small boulder with your fists"),
+            "msg \"{}\" doesn't contains \"fists\"",
             event.msg
         );
     }
@@ -344,7 +384,7 @@ mod tests {
         let mut log = world.log();
         let event = &log.new_events()[0];
         assert!(
-            event.msg.contains("swing in the air with your fangs"),
+            event.msg.contains("wave your fangs in the air"),
             "msg \"{}\" doesn't contains \"swing in the air with your fangs\"",
             event.msg
         );

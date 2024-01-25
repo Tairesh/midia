@@ -62,6 +62,8 @@ impl ActionImpl for Throw {
         }
     }
 
+    // TODO: refactor this, code almost the same as in shoot.rs
+    #[allow(clippy::too_many_lines)]
     fn on_finish(&self, action: &Action, world: &mut World) {
         let unit = world.units.get_unit(self.target);
         if unit.is_dead() {
@@ -77,31 +79,51 @@ impl ActionImpl for Throw {
 
         let attack_result = ranged_attack_unit(AttackType::Throw, owner, unit, world);
         match attack_result {
-            UnitRangedAttackResult::InnocentBystander(unit_id, damage) => {
+            UnitRangedAttackResult::InnocentBystander(unit_id, hit) => {
                 let victim = world.units.get_unit(unit_id);
                 let target = victim.pos;
+                let damage = hit.params.damage.to_string();
                 for event in unit_attack_success(
                     owner,
                     victim,
-                    &damage,
+                    &hit,
                     format!(
-                        "{} throw{} {} {weapon_name} to {} but misses and hit {}{}",
+                        "{} throw{} {} at {} but miss{} and hit{} {}, dealing {} damage {}.",
                         owner.name_for_actions(),
-                        if owner.is_player() { "" } else { "s" },
-                        owner.pronounce().2,
-                        unit.name_for_actions(),
-                        victim.name_for_actions(),
-                        if damage.params.damage == 0 {
-                            " but it doesn't do any damage"
+                        if owner.pronounce().verb_ends_with_s() {
+                            "s"
                         } else {
-                            "!"
+                            ""
+                        },
+                        a(weapon_name),
+                        unit.name_for_actions(),
+                        if owner.pronounce().verb_ends_with_s() {
+                            "es"
+                        } else {
+                            ""
+                        },
+                        if owner.pronounce().verb_ends_with_s() {
+                            "s"
+                        } else {
+                            ""
+                        },
+                        victim.name_for_actions(),
+                        if hit.params.damage == 0 {
+                            "no"
+                        } else {
+                            &damage
+                        },
+                        if hit.params.penetration > 0 {
+                            format!(" and {} armor penetration", hit.params.penetration)
+                        } else {
+                            String::new()
                         },
                     ),
                 ) {
                     world.log().push(event);
                 }
 
-                world.apply_damage(victim.id, damage);
+                world.apply_damage(victim.id, hit);
                 let item = action
                     .owner_mut(world)
                     .wield
@@ -112,11 +134,20 @@ impl ActionImpl for Throw {
             UnitRangedAttackResult::Miss => {
                 world.log().push(LogEvent::warning(
                     format!(
-                        "{} throw{} {} {weapon_name} to {} and miss.",
+                        "{} throw{} {} at {} but miss{}.",
                         owner.name_for_actions(),
-                        if owner.is_player() { "" } else { "s" },
-                        owner.pronounce().2,
+                        if owner.pronounce().verb_ends_with_s() {
+                            "s"
+                        } else {
+                            ""
+                        },
+                        a(weapon_name),
                         unit.name_for_actions(),
+                        if owner.pronounce().verb_ends_with_s() {
+                            "es"
+                        } else {
+                            ""
+                        },
                     ),
                     target,
                 ));
@@ -128,28 +159,43 @@ impl ActionImpl for Throw {
                 let random_pos = target + *DIR8.choose(&mut rand::thread_rng()).unwrap();
                 world.map().get_tile_mut(random_pos).items.push(item);
             }
-            UnitRangedAttackResult::Hit(damage) => {
+            UnitRangedAttackResult::Hit(hit) => {
+                let damage = hit.params.damage.to_string();
                 for event in unit_attack_success(
                     owner,
                     unit,
-                    &damage,
+                    &hit,
                     format!(
-                        "{} throw{} {} {weapon_name} to {} and hit{}",
+                        "{} throw{} {} at {} and hit{}, dealing {} damage{}.",
                         owner.name_for_actions(),
-                        if owner.is_player() { "" } else { "s" },
-                        owner.pronounce().2,
-                        unit.name_for_actions(),
-                        if damage.params.damage == 0 {
-                            " but it doesn't do any damage"
+                        if owner.pronounce().verb_ends_with_s() {
+                            "s"
                         } else {
-                            "!"
+                            ""
+                        },
+                        a(weapon_name),
+                        unit.name_for_actions(),
+                        if owner.pronounce().verb_ends_with_s() {
+                            "s"
+                        } else {
+                            ""
+                        },
+                        if hit.params.damage == 0 {
+                            "no"
+                        } else {
+                            &damage
+                        },
+                        if hit.params.penetration > 0 {
+                            format!(" and {} armor penetration", hit.params.penetration)
+                        } else {
+                            String::new()
                         },
                     ),
                 ) {
                     world.log().push(event);
                 }
 
-                world.apply_damage(unit.id, damage);
+                world.apply_damage(unit.id, hit);
                 let item = action
                     .owner_mut(world)
                     .wield
@@ -195,7 +241,7 @@ mod tests {
         let mut log = world.log();
         let event = &log.new_events()[0];
         assert!(
-            event.msg.contains("throw your rock to"),
+            event.msg.contains("throw a rock at"),
             "msg \"{}\" doesn't contains \"throw your rock to\"",
             event.msg
         );

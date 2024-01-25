@@ -2,13 +2,12 @@
 
 use geometry::{Point, TwoDimDirection};
 
-use crate::game::{AttackType, DamageValue, GameData};
-
 use super::super::{
     map::items::helpers::{dead_body, CLOAK, HAT},
+    races::Pronouns,
     savage::HitResult,
     units::Personality,
-    Action, BodySlot, Item, Wear, Wield,
+    Action, AttackType, BodySlot, DamageValue, GameData, Item, Wear, Wield,
 };
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
@@ -73,9 +72,9 @@ impl Avatar {
             .sum()
     }
 
-    pub fn pronounce(&self) -> (&str, &str, &str) {
+    pub fn pronounce(&self) -> Pronouns {
         if self.is_player() {
-            ("you", "you", "your")
+            Pronouns::YouYour
         } else {
             self.personality.mind.gender.pronounce()
         }

@@ -150,7 +150,7 @@ pub mod tests {
                 sex: Sex::Undefined,
             },
             Mind {
-                name: "Old Queer".to_string(),
+                name: "Old Bugger".to_string(),
                 gender: Gender::Custom("X".to_string()),
             },
             CharSheet::default(false, Race::Bug, 99),

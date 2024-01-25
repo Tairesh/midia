@@ -6,7 +6,7 @@ use super::{LogCategory, LogEvent};
 pub fn unit_attack_success(
     owner: &Avatar,
     unit: &Avatar,
-    damage: &HitResult,
+    hit: &HitResult,
     first_message: String,
 ) -> Vec<LogEvent> {
     let mut events = Vec::new();
@@ -20,7 +20,7 @@ pub fn unit_attack_success(
             LogCategory::Danger
         },
     ));
-    if damage.params.critical {
+    if hit.params.critical {
         events.push(LogEvent::new(
             "Critical hit!".to_string(),
             unit.pos,
@@ -31,8 +31,8 @@ pub fn unit_attack_success(
             },
         ));
     }
-    if damage.causes.shock {
-        if damage.causes.wounds.is_empty() {
+    if hit.consequences.shock {
+        if hit.consequences.wounds.is_empty() {
             events.push(LogEvent::new(
                 format!("{} is stunned.", unit.name_for_actions()),
                 unit.pos,
@@ -58,11 +58,11 @@ pub fn unit_attack_success(
     events.push(LogEvent::debug(
         format!(
             "Damage: {}, penetration: {}, crit: {:?}, shock: {:?}, wounds: {:?}",
-            damage.params.damage,
-            damage.params.penetration,
-            damage.params.critical,
-            damage.causes.shock,
-            damage.causes.wounds
+            hit.params.damage,
+            hit.params.penetration,
+            hit.params.critical,
+            hit.consequences.shock,
+            hit.consequences.wounds
         ),
         unit.pos,
     ));

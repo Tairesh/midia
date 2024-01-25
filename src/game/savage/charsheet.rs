@@ -153,11 +153,11 @@ impl CharSheet {
     }
 
     pub fn apply_hit(&mut self, mut hit: HitResult, current_tick: u128) {
-        if hit.causes.shock {
+        if hit.consequences.shock {
             self.shock = true;
             self.last_shock_out_roll = current_tick;
         }
-        self.wounds.append(&mut hit.causes.wounds);
+        self.wounds.append(&mut hit.consequences.wounds);
     }
 
     pub fn is_dead(&self) -> bool {

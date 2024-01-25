@@ -2,6 +2,8 @@ use rand::distributions::{Distribution, Standard};
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 
+use super::pronouns::Pronouns;
+
 #[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq, Hash)]
 pub enum Gender {
     #[serde(rename = "m")]
@@ -13,11 +15,11 @@ pub enum Gender {
 }
 
 impl Gender {
-    pub fn pronounce(&self) -> (&str, &str, &str) {
+    pub fn pronounce(&self) -> Pronouns {
         match self {
-            Gender::Male => ("He", "him", "his"),
-            Gender::Female => ("She", "her", "her"),
-            Gender::Custom(_) => ("They", "them", "their"),
+            Gender::Male => Pronouns::HeHim,
+            Gender::Female => Pronouns::SheHer,
+            Gender::Custom(_) => Pronouns::TheyThem,
         }
     }
 }

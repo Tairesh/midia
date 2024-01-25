@@ -10,6 +10,7 @@ use super::HitResult;
 
 mod distance;
 
+#[derive(Debug)]
 pub enum UnitRangedAttackResult {
     InnocentBystander(usize, HitResult),
     Miss,

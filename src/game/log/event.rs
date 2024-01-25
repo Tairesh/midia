@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 
+use capitalize::Capitalize;
 use geometry::Point;
 
 use super::LogCategory;
@@ -17,7 +18,7 @@ pub struct LogEvent {
 impl LogEvent {
     pub fn new(msg: impl Into<String>, pos: Point, category: LogCategory) -> Self {
         Self {
-            msg: msg.into(),
+            msg: msg.into().capitalize(),
             pos,
             category,
         }

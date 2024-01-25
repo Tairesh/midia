@@ -1,13 +1,17 @@
 use crate::game::{Attribute, Avatar, BodySlot, Wound};
 
+#[derive(Debug)]
 pub struct HitResult {
     pub params: HitParams,
-    pub causes: HitCauses,
+    pub consequences: HitConsequences,
 }
 
 impl HitResult {
-    pub fn new(params: HitParams, causes: HitCauses) -> Self {
-        Self { params, causes }
+    pub fn new(params: HitParams, consequences: HitConsequences) -> Self {
+        Self {
+            params,
+            consequences,
+        }
     }
 
     pub fn calculate(damage: u8, penetration: u8, target: &Avatar, critical: bool) -> Self {
@@ -52,7 +56,7 @@ impl HitResult {
 
         Self::new(
             HitParams::new(damage, penetration, critical),
-            HitCauses::random_wounds(shock, wounds),
+            HitConsequences::random_wounds(shock, wounds),
         )
     }
 
@@ -60,11 +64,12 @@ impl HitResult {
     pub fn ultra_damage() -> Self {
         Self::new(
             HitParams::new(100, 100, true),
-            HitCauses::random_wounds(true, 4),
+            HitConsequences::random_wounds(true, 4),
         )
     }
 }
 
+#[derive(Debug)]
 pub struct HitParams {
     pub damage: u8,
     pub penetration: u8,
@@ -81,12 +86,13 @@ impl HitParams {
     }
 }
 
-pub struct HitCauses {
+#[derive(Debug)]
+pub struct HitConsequences {
     pub shock: bool,
     pub wounds: Vec<Wound>,
 }
 
-impl HitCauses {
+impl HitConsequences {
     pub fn nothing() -> Self {
         Self {
             shock: false,

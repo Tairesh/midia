@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use tetra::Context;
 
 use crate::app::App;
-use crate::game::races::Personality;
+use crate::game::units::Personality;
 
 use super::{
     implements::{

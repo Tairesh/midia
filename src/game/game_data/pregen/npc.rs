@@ -1,6 +1,7 @@
 use crate::game::{
-    races::{Appearance, BodyColor, Gender, Mind, Personality, Race, Sex},
+    races::{BodyColor, Gender, Race, Sex},
     savage::{Attributes, Skills},
+    units::{Appearance, Mind, Personality},
     CharSheet, Dice, SkillLevel,
 };
 

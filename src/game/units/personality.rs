@@ -1,9 +1,10 @@
 use rand::{distributions::Standard, seq::SliceRandom, Rng};
 use serde::{Deserialize, Serialize};
 
-use super::{
-    super::{traits::Name, CharSheet, GameData},
-    BodyColor, Gender, PlayableRace, Race, Sex,
+use super::super::{
+    races::{BodyColor, Gender, PlayableRace, Race, Sex},
+    traits::Name,
+    CharSheet, GameData,
 };
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

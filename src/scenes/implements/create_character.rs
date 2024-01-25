@@ -9,10 +9,9 @@ use crate::{
     app::App,
     colors::Colors,
     game::{
-        races::{
-            next_color, Appearance, BodyColor, Gender, Mind, Personality, PlayableRace, Race, Sex,
-        },
+        races::{next_color, BodyColor, Gender, PlayableRace, Race, Sex},
         traits::Name,
+        units::{Appearance, Mind, Personality},
         CharSheet,
     },
     savefile::{self, Meta},

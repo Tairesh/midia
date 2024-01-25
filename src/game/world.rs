@@ -13,9 +13,10 @@ use super::{
     },
     game_data::pregen,
     map::{field_of_view_set, Fov, TerrainView},
-    races::{Appearance, BodyColor, Gender, Mind, Personality, Race, Sex},
+    races::{BodyColor, Gender, Race, Sex},
     savage::HitResult,
     units::Units,
+    units::{Appearance, Mind, Personality},
     Action, Avatar, CharSheet, Chunk, ChunkPos, Log, LogEvent, Map, TilePos,
 };
 
@@ -374,7 +375,7 @@ pub mod tests {
         super::{
             actions::implements::{Skip, Walk},
             map::terrains::{Boulder, BoulderSize, Dirt},
-            races::tests::personality::{old_bugger, tester_girl},
+            units::tests::helpers::{old_bugger, tester_girl},
         },
         savefile::{GameView, Meta},
         Action, Avatar, Direction, Log, TerrainView, World,

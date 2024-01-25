@@ -22,5 +22,5 @@ pub mod map;
 pub mod races;
 mod savage;
 pub mod traits;
-mod units;
+pub mod units;
 pub mod world;

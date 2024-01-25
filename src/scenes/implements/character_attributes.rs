@@ -9,7 +9,7 @@ use crate::{
     assets::Assets,
     colors::Colors,
     game::{
-        races::Personality, traits::Name, Attribute, Avatar, CharSheet, Dice, Skill, SkillLevel,
+        traits::Name, units::Personality, Attribute, Avatar, CharSheet, Dice, Skill, SkillLevel,
         World,
     },
     savefile::{self, Meta},

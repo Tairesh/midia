@@ -6,8 +6,8 @@ use crate::game::{AttackType, DamageValue, GameData};
 
 use super::super::{
     map::items::helpers::{dead_body, CLOAK, HAT},
-    races::Personality,
     savage::HitResult,
+    units::Personality,
     Action, BodySlot, Item, Wear, Wield,
 };
 
@@ -179,8 +179,8 @@ mod tests {
     use crate::game::map::items::helpers::{
         CLOAK, GOD_AXE, QUIVER, STONE_ARROW, WOODEN_ARROW, WOODEN_SHORTBOW,
     };
-    use crate::game::races::tests::personality::tester_girl;
     use crate::game::traits::Name;
+    use crate::game::units::tests::helpers::tester_girl;
     use crate::game::{AmmoType, AttackType, GameData};
 
     use super::{Avatar, BodySlot, HitResult, Item};

@@ -1,10 +1,12 @@
 use std::collections::{HashMap, HashSet};
 
 pub use avatar::Avatar;
+pub use personality::{Appearance, Mind, Personality};
 pub use wear::Wear;
 pub use wield::Wield;
 
 mod avatar;
+mod personality;
 mod wear;
 mod wield;
 
@@ -89,4 +91,9 @@ impl Units {
     pub fn unload_unit(&mut self, unit_id: usize) {
         self.loaded_units.remove(&unit_id);
     }
+}
+
+#[cfg(test)]
+pub mod tests {
+    pub use super::personality::tests as helpers;
 }

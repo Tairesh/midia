@@ -1,6 +1,7 @@
 use geometry::Point;
 
 use crate::game::traits::Name;
+use crate::game::AttackType;
 
 use super::super::{
     super::map::{TerrainInteract, TerrainView},

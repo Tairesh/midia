@@ -365,7 +365,7 @@ impl CreateCharacter {
 
     fn randomize(&mut self, ctx: &mut Context) {
         let mut rng = rand::thread_rng();
-        let character = Personality::random(&mut rng, true, true, false);
+        let character = Personality::random_playable(&mut rng);
         self.gender_input().set_value(character.mind.gender);
         self.name_input().set_value(character.mind.name);
         self.age_input()

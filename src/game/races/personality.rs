@@ -48,21 +48,12 @@ impl Personality {
         }
     }
 
-    pub fn random<R: Rng + ?Sized>(
-        rng: &mut R,
-        is_player: bool,
-        wild_card: bool,
-        random_char_sheet: bool,
-    ) -> Personality {
+    pub fn random_playable<R: Rng + ?Sized>(rng: &mut R) -> Personality {
         let gender = rng.sample(Standard);
         let sex = Sex::from(&gender);
         let game_data = GameData::instance();
-        let race = if is_player {
-            let race: PlayableRace = rng.sample(Standard);
-            Race::from(race)
-        } else {
-            rng.sample(Standard)
-        };
+        let race: PlayableRace = rng.sample(Standard);
+        let race = Race::from(race);
         let age = rng.gen_range(0..=99);
         let name = game_data
             .names
@@ -89,11 +80,7 @@ impl Personality {
                 gender,
                 main_hand: rng.sample(Standard),
             },
-            if random_char_sheet {
-                CharSheet::random(rng, wild_card, race, age)
-            } else {
-                CharSheet::default(wild_card, race, age)
-            },
+            CharSheet::default(true, race, age),
         )
     }
 

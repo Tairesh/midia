@@ -7,12 +7,11 @@ use serde::{Deserialize, Serialize};
 use tetra::graphics::Color;
 
 use crate::colors::Colors;
-use crate::game::traits::LooksLike;
 use crate::game::{
     game_data::DamageType,
     savage::{DamageDice, Skill},
-    traits::Name,
-    Attribute, Damage, DamageValue, SkillLevel,
+    traits::{LooksLike, Name},
+    AttackType, Attribute, Damage, DamageValue, SkillLevel,
 };
 
 use super::BodyColor;
@@ -177,7 +176,6 @@ impl Race {
     }
 }
 
-// TODO: add looks_like
 impl From<Race> for &str {
     fn from(value: Race) -> Self {
         match value {
@@ -204,19 +202,6 @@ impl LooksLike for Race {
             Race::Totik => "totik",
             Race::Lagnam => "lagnam",
             Race::Bug => "giant_bug",
-        }
-    }
-}
-
-impl Distribution<Race> for Standard {
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Race {
-        match rng.gen_range(0..5) {
-            0 => Race::Gazan,
-            1 => Race::Nyarnik,
-            2 => Race::Totik,
-            3 => Race::Lagnam,
-            4 => Race::Bug,
-            _ => unreachable!(),
         }
     }
 }

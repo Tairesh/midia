@@ -19,7 +19,7 @@ pub struct Drop {
 
 impl ActionImpl for Drop {
     fn is_possible(&self, actor: &Avatar, world: &World) -> ActionPossibility {
-        if actor.wield.active_hand().is_none() {
+        if actor.wield.main_hand().is_none() {
             return No("You have nothing to drop".to_string());
         }
         let pos = actor.pos + self.dir;
@@ -32,7 +32,7 @@ impl ActionImpl for Drop {
             ));
         }
 
-        if let Some(item) = actor.wield.active_hand() {
+        if let Some(item) = actor.wield.main_hand() {
             let k = if matches!(self.dir, Direction::Here) {
                 1.0
             } else {

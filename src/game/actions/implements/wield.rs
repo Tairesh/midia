@@ -105,7 +105,7 @@ mod tests {
         );
         world.tick();
 
-        let item = world.units.player().wield.active_hand().unwrap();
+        let item = world.units.player().wield.main_hand().unwrap();
         assert_eq!(item.proto().id, GOD_AXE);
         assert_eq!(0, world.map().get_tile(Point::new(1, 0)).items.len());
     }
@@ -118,7 +118,7 @@ mod tests {
             .player_mut()
             .wield
             .wield(Item::new(STONE_SHOVEL));
-        world.units.player_mut().wield.swap_items();
+        assert!(world.units.player().wield.can_wield(true).is_err());
         assert!(world.units.player().wield.can_wield(false).is_err());
 
         world.map().get_tile_mut(Point::new(1, 0)).items.clear();
@@ -141,11 +141,9 @@ mod tests {
     #[test]
     fn test_wielding_one_handed_items() {
         let mut world = prepare_world();
-        world.units.player_mut().wield.wield(random_book());
-        assert!(world.units.player().wield.can_wield(false).is_err());
-        world.units.player_mut().wield.swap_items();
-        assert!(world.units.player().wield.can_wield(true).is_err());
+        world.units.player_mut().wield.wield(Item::new(GOD_AXE));
         assert!(world.units.player().wield.can_wield(false).is_ok());
+        assert!(world.units.player().wield.can_wield(true).is_err());
 
         world.map().get_tile_mut(Point::new(1, 0)).items.clear();
         world
@@ -167,7 +165,7 @@ mod tests {
         );
         world.tick();
 
-        let item = world.units.player().wield.active_hand().unwrap();
+        let item = world.units.player().wield.main_hand().unwrap();
         assert_eq!(item.proto().id, random_book().proto().id);
         assert_eq!(0, world.map().get_tile(Point::new(1, 0)).items.len());
         assert!(world.units.player().wield.can_wield(false).is_err());

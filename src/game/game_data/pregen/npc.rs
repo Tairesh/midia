@@ -1,7 +1,7 @@
 use crate::game::{
     races::{Appearance, BodyColor, Gender, Mind, Personality, Race, Sex},
     savage::{Attributes, Skills},
-    CharSheet, Dice, MainHand, SkillLevel,
+    CharSheet, Dice, SkillLevel,
 };
 
 pub fn dragan() -> Personality {
@@ -15,7 +15,6 @@ pub fn dragan() -> Personality {
         Mind {
             name: "Dragan".to_string(),
             gender: Gender::Male,
-            main_hand: MainHand::Right,
         },
         CharSheet::new(
             true,
@@ -61,7 +60,6 @@ pub fn grem() -> Personality {
         Mind {
             name: "Grem".to_string(),
             gender: Gender::Male,
-            main_hand: MainHand::Right,
         },
         CharSheet::new(
             true,
@@ -107,7 +105,6 @@ pub fn yasma() -> Personality {
         Mind {
             name: "Yasma".to_string(),
             gender: Gender::Male,
-            main_hand: MainHand::Ambidexter,
         },
         CharSheet::new(
             true,
@@ -152,7 +149,6 @@ pub fn shasha() -> Personality {
         Mind {
             name: "Shasha".to_string(),
             gender: Gender::Female,
-            main_hand: MainHand::Left,
         },
         CharSheet::new(
             true,

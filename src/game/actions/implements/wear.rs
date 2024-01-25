@@ -17,7 +17,7 @@ impl ActionImpl for Wear {
             return No("You are in shock".to_string());
         }
 
-        if let Some(item) = actor.wield.active_hand() {
+        if let Some(item) = actor.wield.main_hand() {
             if let Some(wearable) = &item.proto().wearable {
                 for variant in 0..wearable.variants.len() {
                     if actor.wear.can_add(item, variant) {

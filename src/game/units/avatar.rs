@@ -6,7 +6,7 @@ use crate::game::{AttackType, DamageValue, GameData};
 
 use super::super::{
     map::items::helpers::{dead_body, CLOAK, HAT},
-    races::{MainHand, Personality},
+    races::Personality,
     savage::HitResult,
     Action, BodySlot, Item, Wear, Wield,
 };
@@ -33,7 +33,7 @@ impl Avatar {
             id: 1,
             action: None,
             vision: TwoDimDirection::East,
-            wield: Wield::new(!matches!(personality.mind.main_hand, MainHand::Left)),
+            wield: Wield::new(personality.appearance.race.hands_count()),
             wear: Wear::default(),
             selected_ammo: None,
             personality,
@@ -91,12 +91,7 @@ impl Avatar {
 
             let mut items = Vec::new();
             items.append(&mut self.wear.take_all());
-            if let Some(item) = self.wield.take_from_active_hand() {
-                items.push(item);
-            }
-            if let Some(item) = self.wield.take_from_off_hand() {
-                items.push(item);
-            }
+            items.append(&mut self.wield.take_all());
             items.push(dead_body(self));
             items
         } else {
@@ -118,17 +113,18 @@ impl Avatar {
         match attack_type {
             AttackType::Melee => Some(
                 self.wield
-                    .active_hand()
+                    .main_hand()
                     .map_or(self.personality.appearance.race.natural_weapon().1, |w| {
                         w.melee_damage()
                     }),
             ),
             AttackType::Shoot => {
-                let weapon = self.wield.active_hand()?;
+                // TODO: natural ranged weapons
+                let weapon = self.wield.main_hand()?;
                 if let Some(ammo) = self.selected_ammo() {
                     let proto = GameData::instance()
                         .items
-                        .get(ammo)
+                        .get(&ammo)
                         .unwrap_or_else(|| panic!("Undefined ammo: `{ammo}`"));
                     if let Some(ammo_value) = &proto.ammo {
                         let mut damage = weapon.ranged_damage().unwrap();
@@ -146,14 +142,14 @@ impl Avatar {
             }
             AttackType::Throw => self
                 .wield
-                .active_hand()
+                .main_hand()
                 .and_then(|weapon| weapon.damage(attack_type)),
         }
     }
 
     // TODO: move this to Wear, probably
-    pub fn selected_ammo(&self) -> Option<&str> {
-        let weapon = self.wield.active_hand()?;
+    pub fn selected_ammo(&self) -> Option<String> {
+        let weapon = self.wield.main_hand()?;
         if let Some(selected_ammo) = &self.selected_ammo {
             let proto = GameData::instance()
                 .items
@@ -165,14 +161,14 @@ impl Avatar {
                     .iter()
                     .any(|t| weapon.ammo_types().contains(t))
                 {
-                    return Some(selected_ammo.as_str());
+                    return Some(selected_ammo.clone());
                 }
             }
         }
 
         self.wear
             .get_ammo(weapon.ammo_types())
-            .map(|a| a.proto().id.as_str())
+            .map(|a| a.proto().id.clone())
     }
 }
 
@@ -300,9 +296,7 @@ mod tests {
         let selected_ammo = avatar.selected_ammo().unwrap();
         assert_eq!(selected_ammo, WOODEN_ARROW);
 
-        let arrow = avatar
-            .wear
-            .remove_ammo(avatar.wield.active_hand().unwrap().ammo_types());
+        let arrow = avatar.wear.remove_by_proto(&selected_ammo);
         assert!(arrow.is_some());
         let arrow = arrow.unwrap();
         assert_eq!(arrow.proto().id, WOODEN_ARROW);
@@ -310,9 +304,7 @@ mod tests {
         let selected_ammo = avatar.selected_ammo().unwrap();
         assert_eq!(selected_ammo, WOODEN_ARROW);
 
-        let arrow = avatar
-            .wear
-            .remove_ammo(avatar.wield.active_hand().unwrap().ammo_types());
+        let arrow = avatar.wear.remove_by_proto(&selected_ammo);
         assert!(arrow.is_some());
         let arrow = arrow.unwrap();
         assert_eq!(arrow.proto().id, WOODEN_ARROW);
@@ -320,9 +312,7 @@ mod tests {
         let selected_ammo = avatar.selected_ammo().unwrap();
         assert_eq!(selected_ammo, STONE_ARROW);
 
-        let arrow = avatar
-            .wear
-            .remove_ammo(avatar.wield.active_hand().unwrap().ammo_types());
+        let arrow = avatar.wear.remove_by_proto(&selected_ammo);
         assert!(arrow.is_some());
         let arrow = arrow.unwrap();
         assert_eq!(arrow.proto().id, STONE_ARROW);

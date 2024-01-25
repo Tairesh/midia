@@ -201,18 +201,14 @@ pub fn draw_unit(
     );
 
     // TODO: draw both items
-    if let Some(item) = avatar.wield.active_hand() {
+    if let Some(item) = avatar.wield.main_hand() {
         let (offset_x, offset_y) = (
             if !rotate || matches!(avatar.vision, TwoDimDirection::East) {
                 5.0
             } else {
                 -5.0
             } * zoom,
-            if item.tool_or_weapon() {
-                0.0
-            } else {
-                3.0 * zoom
-            },
+            3.0 * zoom,
         );
         tileset.draw_region(
             ctx,
@@ -220,11 +216,7 @@ pub fn draw_unit(
             DrawParams::new()
                 .position(position + Vec2::new(offset_x, offset_y))
                 .color(item.color())
-                .scale(if item.tool_or_weapon() {
-                    scale
-                } else {
-                    scale * 0.7
-                }),
+                .scale(scale * 0.7),
         );
     }
 }

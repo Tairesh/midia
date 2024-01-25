@@ -174,6 +174,13 @@ impl Race {
             ),
         }
     }
+
+    pub fn hands_count(self) -> usize {
+        match self {
+            Race::Gazan | Race::Nyarnik | Race::Totik | Race::Lagnam => 2,
+            Race::Bug => 0,
+        }
+    }
 }
 
 impl From<Race> for &str {

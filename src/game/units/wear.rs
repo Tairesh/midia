@@ -101,6 +101,19 @@ impl Wear {
 
         None
     }
+
+    pub fn remove_by_proto(&mut self, proto: &str) -> Option<Item> {
+        for item in self.iter_mut() {
+            if let Some(container) = item.container_mut() {
+                let index = container.items.iter().position(|i| i.proto().id == proto);
+                if let Some(index) = index {
+                    return Some(container.items.remove(index));
+                }
+            }
+        }
+
+        None
+    }
 }
 
 #[cfg(test)]

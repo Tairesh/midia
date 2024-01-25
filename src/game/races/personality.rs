@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 use super::{
     super::{traits::Name, CharSheet, GameData},
-    BodyColor, Gender, MainHand, PlayableRace, Race, Sex,
+    BodyColor, Gender, PlayableRace, Race, Sex,
 };
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -14,6 +14,7 @@ pub struct Appearance {
     pub age: u8,
     #[serde(rename = "c")]
     pub body_color: Option<BodyColor>,
+    // TODO: sexes should be defined by race
     #[serde(rename = "x")]
     pub sex: Sex,
 }
@@ -22,10 +23,9 @@ pub struct Appearance {
 pub struct Mind {
     #[serde(rename = "n")]
     pub name: String,
+    // TODO: remove
     #[serde(rename = "g")]
     pub gender: Gender,
-    #[serde(rename = "m")]
-    pub main_hand: MainHand,
     // TODO: profession
 }
 
@@ -75,11 +75,7 @@ impl Personality {
                 sex,
                 race,
             },
-            Mind {
-                name,
-                gender,
-                main_hand: rng.sample(Standard),
-            },
+            Mind { name, gender },
             CharSheet::default(true, race, age),
         )
     }
@@ -126,7 +122,7 @@ pub fn age_name(appearance: &Appearance) -> String {
 
 #[cfg(test)]
 pub mod tests {
-    use super::{Appearance, BodyColor, CharSheet, Gender, MainHand, Mind, Personality, Race, Sex};
+    use super::{Appearance, BodyColor, CharSheet, Gender, Mind, Personality, Race, Sex};
 
     pub fn tester_girl() -> Personality {
         Personality::new(
@@ -139,7 +135,6 @@ pub mod tests {
             Mind {
                 name: "Dooka".to_string(),
                 gender: Gender::Female,
-                main_hand: MainHand::Left,
             },
             CharSheet::default(true, Race::Gazan, 25),
         )
@@ -156,7 +151,6 @@ pub mod tests {
             Mind {
                 name: "Old Queer".to_string(),
                 gender: Gender::Custom("X".to_string()),
-                main_hand: MainHand::Ambidexter,
             },
             CharSheet::default(false, Race::Bug, 99),
         )

@@ -72,18 +72,14 @@ impl GameModeImpl for Shooting {
         let damage = world
             .units
             .player()
-            .wield
-            .active_hand()
-            .unwrap()
-            .ranged_damage()
+            .attack_damage(AttackType::Shoot)
             .unwrap();
         let distance = RangedDistance::define(pos.distance(Point::default()), damage.distance);
         let color = match distance {
-            RangedDistance::Melee => Colors::ORANGE,
             RangedDistance::Close => Colors::LIME,
             RangedDistance::Medium => Colors::YELLOW,
             RangedDistance::Far => Colors::RED,
-            RangedDistance::Unreachable => Colors::LIGHT_SKY_BLUE,
+            RangedDistance::Melee | RangedDistance::Unreachable => Colors::LIGHT_SKY_BLUE,
         };
 
         let mut cursors: Vec<Cursor> = self
@@ -104,7 +100,7 @@ impl GameModeImpl for Shooting {
     }
 
     fn can_push(&self, world: &World) -> Result<(), String> {
-        world.units.player().wield.active_hand().map_or(
+        world.units.player().wield.main_hand().map_or(
             Err("You have nothing in your hands!".to_string()),
             |item| {
                 if item.ranged_damage().is_none() {

@@ -92,12 +92,7 @@ impl GameModeImpl for Walking {
             game.try_start_action(Wear {}.into());
             None
         } else if input::is_key_with_mod_pressed(ctx, (Key::X, KeyModifier::Shift)) {
-            game.world
-                .borrow_mut()
-                .units
-                .player_mut()
-                .wield
-                .swap_items();
+            game.world.borrow_mut().units.player_mut().wield.swap();
             let event = LogEvent::info(
                 "You swap your hands",
                 game.world.borrow().units.player().pos,

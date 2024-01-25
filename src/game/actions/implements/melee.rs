@@ -30,7 +30,7 @@ impl Melee {
 
     fn smash(self, action: &Action, world: &mut World) -> bool {
         let owner = action.owner(world);
-        let weapon = owner.wield.active_hand();
+        let weapon = owner.wield.main_hand();
         let (weapon_name, can_smash) = if let Some(weapon) = weapon {
             (
                 weapon.name(),
@@ -102,7 +102,7 @@ impl Melee {
 
     fn attack_unit(self, action: &Action, world: &mut World) -> bool {
         let owner = action.owner(world);
-        let weapon_name = owner.wield.active_hand().map_or(
+        let weapon_name = owner.wield.main_hand().map_or(
             owner.personality.appearance.race.natural_weapon().0,
             Item::name,
         );
@@ -162,7 +162,7 @@ impl Melee {
 
     fn swing(self, action: &Action, world: &mut World) {
         let owner = action.owner(world);
-        let weapon = owner.wield.active_hand().map_or(
+        let weapon = owner.wield.main_hand().map_or(
             owner.personality.appearance.race.natural_weapon().0,
             Item::name,
         );
@@ -186,7 +186,7 @@ impl ActionImpl for Melee {
         }
 
         let distance = (actor.pos.distance(self.target).floor() - 1.0) as u8;
-        let weapon = actor.wield.active_hand();
+        let weapon = actor.wield.main_hand();
         if distance > 0 {
             let weapon_distance = weapon.map_or(0, |w| w.melee_damage().distance);
             if distance > weapon_distance {

@@ -31,11 +31,11 @@ impl ActionImpl for Throw {
             return No("You are in shock".to_string());
         }
 
-        if actor.wield.active_hand().is_none() {
+        if actor.wield.main_hand().is_none() {
             return No("You have nothing to throw.".to_string());
         }
 
-        let item = actor.wield.active_hand().unwrap();
+        let item = actor.wield.main_hand().unwrap();
         if let Some(throw_value) = item.throw_damage() {
             if throw_value.distance == 0 {
                 return No(format!("You can't throw {}.", a(item.name())));
@@ -70,7 +70,7 @@ impl ActionImpl for Throw {
         let target = unit.pos;
 
         let owner = action.owner(world);
-        let weapon_name = owner.wield.active_hand().map_or(
+        let weapon_name = owner.wield.main_hand().map_or(
             owner.personality.appearance.race.natural_weapon().0,
             Item::name,
         );

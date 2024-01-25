@@ -10,8 +10,7 @@ use crate::{
     colors::Colors,
     game::{
         races::{
-            next_color, Appearance, BodyColor, Gender, MainHand, Mind, Personality, PlayableRace,
-            Race, Sex,
+            next_color, Appearance, BodyColor, Gender, Mind, Personality, PlayableRace, Race, Sex,
         },
         traits::Name,
         CharSheet,
@@ -39,8 +38,6 @@ enum ButtonEvent {
     GenderRight,
     AgeMinus,
     AgePlus,
-    HandLeft,
-    HandRight,
     ColorLeft,
     ColorRight,
     Randomize,
@@ -55,9 +52,8 @@ impl From<u8> for ButtonEvent {
 
 pub struct CreateCharacter {
     meta: Meta,
-    sprites: [Box<dyn UiSprite>; 31],
+    sprites: [Box<dyn UiSprite>; 27],
     race: PlayableRace,
-    main_hand: MainHand,
     body_color: Option<BodyColor>,
     window_size: (i32, i32),
 }
@@ -216,51 +212,18 @@ impl CreateCharacter {
                     ButtonEvent::AgePlus as u8,
                 ),
                 label(
-                    "Main hand:",
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByRight { offset: -60.0 },
-                        y: Vertical::ByCenter { y: 400.0 },
-                    },
-                ),
-                icon_left(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByLeft { offset: -40.0 },
-                        y: Vertical::ByCenter { y: 400.0 },
-                    },
-                    ButtonEvent::HandLeft as u8,
-                ),
-                Box::new(Label::new(
-                    "Right",
-                    app.assets.fonts.header.clone(),
-                    Colors::DARK_BROWN,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 110.0 },
-                        y: Vertical::ByCenter { y: 400.0 },
-                    },
-                )),
-                icon_right(
-                    &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByRight { offset: 260.0 },
-                        y: Vertical::ByCenter { y: 400.0 },
-                    },
-                    ButtonEvent::HandRight as u8,
-                ),
-                label(
                     "Body color:",
                     &app.assets,
                     Position {
                         x: Horizontal::AtWindowCenterByRight { offset: -60.0 },
-                        y: Vertical::ByCenter { y: 450.0 },
+                        y: Vertical::ByCenter { y: 400.0 },
                     },
                 ),
                 icon_left(
                     &app.assets,
                     Position {
                         x: Horizontal::AtWindowCenterByLeft { offset: -40.0 },
-                        y: Vertical::ByCenter { y: 450.0 },
+                        y: Vertical::ByCenter { y: 400.0 },
                     },
                     ButtonEvent::ColorLeft as u8,
                 ),
@@ -276,7 +239,7 @@ impl CreateCharacter {
                     Vec2::new(200.0, 42.0),
                     Position {
                         x: Horizontal::AtWindowCenterByCenter { offset: 110.0 },
-                        y: Vertical::ByCenter { y: 450.0 },
+                        y: Vertical::ByCenter { y: 400.0 },
                     },
                 )),
                 Box::new(Label::new(
@@ -285,14 +248,14 @@ impl CreateCharacter {
                     body_color.text_color(),
                     Position {
                         x: Horizontal::AtWindowCenterByCenter { offset: 110.0 },
-                        y: Vertical::ByCenter { y: 450.0 },
+                        y: Vertical::ByCenter { y: 400.0 },
                     },
                 )),
                 icon_right(
                     &app.assets,
                     Position {
                         x: Horizontal::AtWindowCenterByRight { offset: 260.0 },
-                        y: Vertical::ByCenter { y: 450.0 },
+                        y: Vertical::ByCenter { y: 400.0 },
                     },
                     ButtonEvent::ColorRight as u8,
                 ),
@@ -312,7 +275,6 @@ impl CreateCharacter {
             ],
             meta,
             race: PlayableRace::Gazan,
-            main_hand: MainHand::Right,
             window_size: app.window_size,
             body_color: Some(body_color),
         }
@@ -333,26 +295,23 @@ impl CreateCharacter {
     fn age_input(&mut self) -> &mut TextInput {
         self.sprites[16].as_text_input().unwrap()
     }
-    fn hand_name(&mut self) -> &mut Label {
-        self.sprites[20].as_label().unwrap()
-    }
     fn color_label(&mut self) -> &mut Label {
-        self.sprites[22].as_label().unwrap()
+        self.sprites[18].as_label().unwrap()
     }
     fn color_left(&mut self) -> &mut Button {
-        self.sprites[23].as_button().unwrap()
+        self.sprites[19].as_button().unwrap()
     }
     fn color_bg(&mut self) -> &mut JustMesh {
-        self.sprites[24].as_just_mesh().unwrap()
+        self.sprites[20].as_just_mesh().unwrap()
     }
     fn color_name(&mut self) -> &mut Label {
-        self.sprites[25].as_label().unwrap()
+        self.sprites[21].as_label().unwrap()
     }
     fn color_right(&mut self) -> &mut Button {
-        self.sprites[26].as_button().unwrap()
+        self.sprites[22].as_button().unwrap()
     }
     fn race_sprite(&mut self) -> &mut TilesetSprite {
-        self.sprites[27].as_tileset_sprite().unwrap()
+        self.sprites[23].as_tileset_sprite().unwrap()
     }
 
     fn hide_color_selectors(&mut self, hide: bool) {
@@ -371,11 +330,8 @@ impl CreateCharacter {
         self.age_input()
             .set_value(character.appearance.age.to_string());
         self.race = character.appearance.race.into();
-        self.main_hand = character.mind.main_hand;
-        let name = self.main_hand.name().to_string();
         let race_name = self.race.name().to_string();
         let window_size = self.window_size;
-        self.hand_name().update(name, ctx, window_size);
         self.race_name().update(race_name, ctx, window_size);
         self.body_color = character.appearance.body_color;
         let race = Race::from(self.race);
@@ -409,11 +365,7 @@ impl CreateCharacter {
                     race,
                     age,
                 },
-                Mind {
-                    name,
-                    gender,
-                    main_hand: self.main_hand,
-                },
+                Mind { name, gender },
                 CharSheet::default(true, race, age),
             );
             Some(vec![Transition::Push(Scene::CharacterAttributes(
@@ -499,17 +451,6 @@ impl SceneImpl for CreateCharacter {
                     }
                     input.set_value(format!("{value}"));
                 }
-                None
-            }
-            ButtonEvent::HandLeft | ButtonEvent::HandRight => {
-                self.main_hand = match event {
-                    ButtonEvent::HandRight => self.main_hand.next(),
-                    ButtonEvent::HandLeft => self.main_hand.prev(),
-                    _ => unreachable!(),
-                };
-                let name = self.main_hand.name().to_string();
-                let window_size = self.window_size;
-                self.hand_name().update(name, ctx, window_size);
                 None
             }
             ButtonEvent::ColorLeft | ButtonEvent::ColorRight => {

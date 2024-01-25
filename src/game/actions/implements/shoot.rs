@@ -35,19 +35,19 @@ impl ActionImpl for Shoot {
             return No("You are in shock".to_string());
         }
 
-        if actor.wield.active_hand().is_none() {
+        if actor.wield.main_hand().is_none() {
             return No("You have nothing to shoot from.".to_string());
         }
 
-        let item = actor.wield.active_hand().unwrap();
+        let weapon = actor.wield.main_hand().unwrap();
 
-        if !item.ammo_types().is_empty() && !actor.wear.has_ammo(item.ammo_types()) {
-            return No(format!("You have no ammo for {}", a(item.name())));
+        if !weapon.ammo_types().is_empty() && !actor.wear.has_ammo(weapon.ammo_types()) {
+            return No(format!("You have no ammo for {}", a(weapon.name())));
         }
 
-        if let Some(ranged_value) = item.ranged_damage() {
+        if let Some(ranged_value) = weapon.ranged_damage() {
             if ranged_value.distance == 0 {
-                return No(format!("You can't shoot from {}.", a(item.name())));
+                return No(format!("You can't shoot from {}.", a(weapon.name())));
             }
 
             let target = world.units.get_unit(self.target);
@@ -59,12 +59,18 @@ impl ActionImpl for Shoot {
             let distance =
                 RangedDistance::define(actor.pos.distance(target.pos), ranged_value.distance);
             if distance == RangedDistance::Unreachable {
-                return No(format!("You can't shoot from {} that far.", a(item.name())));
+                return No(format!(
+                    "You can't shoot from {} that far.",
+                    a(weapon.name())
+                ));
+            }
+            if distance == RangedDistance::Melee {
+                return No("You can't shoot in closed combat.".to_string());
             }
 
             Yes(ATTACK_MOVES)
         } else {
-            No(format!("You can't shoot from {}.", item.name()))
+            No(format!("You can't shoot from {}.", weapon.name()))
         }
     }
 
@@ -76,7 +82,7 @@ impl ActionImpl for Shoot {
         let target = unit.pos;
 
         let owner = action.owner(world);
-        let weapon_name = owner.wield.active_hand().map_or(
+        let weapon_name = owner.wield.main_hand().map_or(
             owner.personality.appearance.race.natural_weapon().0,
             Item::name,
         );
@@ -152,9 +158,13 @@ impl ActionImpl for Shoot {
         }
 
         let owner = action.owner_mut(world);
-        if let Some(weapon) = owner.wield.active_hand() {
+        if let Some(weapon) = owner.wield.main_hand() {
             if !weapon.ammo_types().is_empty() {
-                owner.wear.remove_ammo(weapon.ammo_types());
+                if let Some(proto) = owner.selected_ammo() {
+                    owner.wear.remove_by_proto(&proto);
+                } else {
+                    owner.wear.remove_ammo(weapon.ammo_types());
+                }
             }
         }
     }

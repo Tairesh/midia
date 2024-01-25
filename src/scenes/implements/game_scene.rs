@@ -7,15 +7,14 @@ use tetra::graphics::Canvas;
 use tetra::input::{Key, KeyModifier};
 use tetra::Context;
 
-use crate::game::traits::{LooksLike, Name};
-use crate::game::Item;
-use crate::scenes::Transition;
-use crate::ui::{Button, ButtonBuilder};
 use crate::{
     app::App,
     assets::Assets,
     colors::Colors,
-    game::{Action, ActionType, MainHand, World},
+    game::{
+        traits::{LooksLike, Name},
+        Action, ActionType, Item, World,
+    },
     input,
     scenes::map_view,
     ui::{
@@ -29,10 +28,8 @@ use super::super::{
     SceneImpl, SomeTransitions,
 };
 
-const INVENTORY_UI_ICONS_SCALE: Vec2 = Vec2::new(5.0, 5.0);
-
 pub struct GameScene {
-    sprites: [Box<dyn UiSprite>; 10],
+    sprites: [Box<dyn UiSprite>; 5],
     pub world: Rc<RefCell<World>>,
     pub modes: Vec<Rc<RefCell<GameMode>>>,
     pub log: GameLog,
@@ -63,11 +60,8 @@ impl GameScene {
             Colors::WHITE_SMOKE,
             Position::horizontal_center(0.0, Vertical::ByTop { y: 5.0 }),
         ));
-        let main_hand_label = Box::new(Label::new(
-            match player.personality.mind.main_hand {
-                MainHand::Left => "Left hand:",
-                _ => "Right hand:",
-            },
+        let wield_label = Box::new(Label::new(
+            "Wield:",
             app.assets.fonts.default.clone(),
             Colors::LIME,
             Position {
@@ -75,13 +69,13 @@ impl GameScene {
                 y: Vertical::ByCenter { y: 50.0 },
             },
         ));
-        let main_hand = player.wield.main_hand(player.personality.mind.main_hand);
+        let main_hand = player.wield.main_hand();
         let main_hand_image = Box::new(TilesetSprite::new(
             main_hand.map_or("empty", Item::looks_like),
             app.assets.tileset.clone(),
             Position {
-                x: Horizontal::ByLeft { x: 105.0 },
-                y: Vertical::ByCenter { y: 50.0 },
+                x: Horizontal::ByLeft { x: 60.0 },
+                y: Vertical::ByCenter { y: 47.0 },
             },
             2.0,
             main_hand.map(Item::color),
@@ -91,86 +85,19 @@ impl GameScene {
             app.assets.fonts.default.clone(),
             Colors::LIME,
             Position {
-                x: Horizontal::ByLeft { x: 130.0 },
+                x: Horizontal::ByLeft { x: 83.0 },
                 y: Vertical::ByCenter { y: 50.0 },
             },
         ));
-        let second_hand_label = Box::new(Label::new(
-            match player.personality.mind.main_hand {
-                MainHand::Left => "Right hand:",
-                _ => "Left hand:",
-            },
-            app.assets.fonts.default.clone(),
-            Colors::WHITE_SMOKE,
-            Position {
-                x: Horizontal::ByLeft { x: 5.0 },
-                y: Vertical::ByCenter { y: 70.0 },
-            },
-        ));
-        let second_hand = player.wield.second_hand(player.personality.mind.main_hand);
-        let second_hand_display = Box::new(Label::new(
-            second_hand.map_or("nothing", Item::name),
-            app.assets.fonts.default.clone(),
-            Colors::WHITE_SMOKE,
-            Position {
-                x: Horizontal::ByLeft { x: 130.0 },
-                y: Vertical::ByCenter { y: 70.0 },
-            },
-        ));
-        let second_hand_image = Box::new(TilesetSprite::new(
-            second_hand.map_or("empty", Item::looks_like),
-            app.assets.tileset.clone(),
-            Position {
-                x: Horizontal::ByLeft { x: 105.0 },
-                y: Vertical::ByCenter { y: 70.0 },
-            },
-            2.0,
-            second_hand.map(Item::color),
-        ));
-        let left_hand_button = Box::new(
-            ButtonBuilder::new(app.assets.button.clone())
-                .with_icon(
-                    player.wield.left_hand().map_or("empty", Item::looks_like),
-                    INVENTORY_UI_ICONS_SCALE,
-                    player.wield.left_hand().map(Item::color),
-                    app.assets.tileset.clone(),
-                )
-                .with_position(Position {
-                    x: Horizontal::AtWindowCenterByRight { offset: -10.0 },
-                    y: Vertical::AtWindowBottomByBottom { offset: -20.0 },
-                })
-                .with_transition(Transition::CustomEvent(0))
-                .build(),
-        );
-        let right_hand_button = Box::new(
-            ButtonBuilder::new(app.assets.button.clone())
-                .with_icon(
-                    player.wield.right_hand().map_or("empty", Item::looks_like),
-                    INVENTORY_UI_ICONS_SCALE,
-                    player.wield.right_hand().map(Item::color),
-                    app.assets.tileset.clone(),
-                )
-                .with_position(Position {
-                    x: Horizontal::AtWindowCenterByLeft { offset: 10.0 },
-                    y: Vertical::AtWindowBottomByBottom { offset: -20.0 },
-                })
-                .with_transition(Transition::CustomEvent(1))
-                .build(),
-        );
 
         drop(world_borrow);
         Self {
             sprites: [
                 name_label,
-                main_hand_label,
+                wield_label,
+                main_hand_image,
                 main_hand_display,
                 current_time_label,
-                second_hand_label,
-                second_hand_display,
-                main_hand_image,
-                second_hand_image,
-                left_hand_button,
-                right_hand_button,
             ],
             modes: vec![Rc::new(RefCell::new(Walking::new().into()))],
             log: GameLog::new(app.assets.fonts.default.font.clone()),
@@ -251,31 +178,15 @@ impl GameScene {
     }
 
     fn main_hand_display_label(&mut self) -> &mut Label {
-        self.sprites[2].as_label().unwrap()
+        self.sprites[3].as_label().unwrap()
     }
 
     fn main_hand_display_image(&mut self) -> &mut TilesetSprite {
-        self.sprites[6].as_tileset_sprite().unwrap()
-    }
-
-    fn second_hand_display_label(&mut self) -> &mut Label {
-        self.sprites[5].as_label().unwrap()
-    }
-
-    fn second_hand_display_image(&mut self) -> &mut TilesetSprite {
-        self.sprites[7].as_tileset_sprite().unwrap()
+        self.sprites[2].as_tileset_sprite().unwrap()
     }
 
     fn current_time_label(&mut self) -> &mut Label {
         self.sprites[3].as_label().unwrap()
-    }
-
-    fn left_hand_btn(&mut self) -> &mut Button {
-        self.sprites[8].as_button().unwrap()
-    }
-
-    fn right_hand_btn(&mut self) -> &mut Button {
-        self.sprites[9].as_button().unwrap()
     }
 
     fn cursors(&self) -> Vec<Cursor> {
@@ -297,27 +208,10 @@ impl GameScene {
 
         let world = self.world.borrow();
         let player = world.units.player();
-        let main_hand_item = player.wield.main_hand(player.personality.mind.main_hand);
+        let main_hand_item = player.wield.main_hand();
         let main_hand_item_name = main_hand_item.map_or("nothing", Item::name).to_string();
         let main_hand_item_sprite = main_hand_item.map_or("empty", Item::looks_like).to_string();
         let main_hand_item_color = main_hand_item.map(Item::color).unwrap_or_default();
-
-        let second_hand_item = player.wield.second_hand(player.personality.mind.main_hand);
-        let second_hand_item_name = second_hand_item.map_or("nothing", Item::name).to_string();
-        let second_hand_item_sprite = second_hand_item
-            .map_or("empty", Item::looks_like)
-            .to_string();
-        let second_hand_item_color = second_hand_item.map(Item::color).unwrap_or_default();
-
-        let left_hand_item = player.wield.left_hand();
-        let left_hand_item_sprite = left_hand_item.map_or("empty", Item::looks_like).to_string();
-        let left_hand_item_color = left_hand_item.map(Item::color);
-
-        let right_hand_item = player.wield.right_hand();
-        let right_hand_item_sprite = right_hand_item
-            .map_or("empty", Item::looks_like)
-            .to_string();
-        let rignt_hand_item_color = right_hand_item.map(Item::color);
 
         drop(world);
 
@@ -327,26 +221,6 @@ impl GameScene {
             .set_name(&main_hand_item_sprite);
         self.main_hand_display_image()
             .set_color(main_hand_item_color);
-        self.second_hand_display_label()
-            .update(second_hand_item_name, ctx, window_size);
-        self.second_hand_display_image()
-            .set_name(&second_hand_item_sprite);
-        self.second_hand_display_image()
-            .set_color(second_hand_item_color);
-        self.left_hand_btn().update_icon(
-            left_hand_item_sprite,
-            INVENTORY_UI_ICONS_SCALE,
-            left_hand_item_color,
-            ctx,
-            window_size,
-        );
-        self.right_hand_btn().update_icon(
-            right_hand_item_sprite,
-            INVENTORY_UI_ICONS_SCALE,
-            rignt_hand_item_color,
-            ctx,
-            window_size,
-        );
     }
 }
 

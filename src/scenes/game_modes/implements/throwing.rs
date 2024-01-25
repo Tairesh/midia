@@ -72,10 +72,7 @@ impl GameModeImpl for Throwing {
         let damage = world
             .units
             .player()
-            .wield
-            .active_hand()
-            .unwrap()
-            .throw_damage()
+            .attack_damage(AttackType::Throw)
             .unwrap();
         let distance = RangedDistance::define(pos.distance(Point::default()), damage.distance);
         let color = match distance {
@@ -104,7 +101,7 @@ impl GameModeImpl for Throwing {
     }
 
     fn can_push(&self, world: &World) -> Result<(), String> {
-        world.units.player().wield.active_hand().map_or(
+        world.units.player().wield.main_hand().map_or(
             Err("You have nothing in your hands!".to_string()),
             |item| {
                 item.throw_damage()

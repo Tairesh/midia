@@ -13,7 +13,7 @@ use super::{
     },
     game_data::pregen,
     map::{field_of_view_set, Fov, TerrainView},
-    races::{Appearance, BodyColor, Gender, MainHand, Mind, Personality, Race, Sex},
+    races::{Appearance, BodyColor, Gender, Mind, Personality, Race, Sex},
     savage::HitResult,
     units::Units,
     Action, Avatar, CharSheet, Chunk, ChunkPos, Log, LogEvent, Map, TilePos,
@@ -87,7 +87,6 @@ impl World {
                 Mind {
                     name: "Suh".to_string(),
                     gender: Gender::Male,
-                    main_hand: MainHand::Right,
                 },
                 CharSheet::default(true, Race::Totik, 29),
             ),
@@ -104,7 +103,6 @@ impl World {
                 Mind {
                     name: "bug".to_string(),
                     gender: Gender::Custom("bug".to_string()),
-                    main_hand: MainHand::Right,
                 },
                 CharSheet::default(false, Race::Bug, 99),
             ),
@@ -121,7 +119,6 @@ impl World {
                 Mind {
                     name: "bug queen".to_string(),
                     gender: Gender::Custom("queen".to_string()),
-                    main_hand: MainHand::Right,
                 },
                 CharSheet::default(false, Race::Bug, 12),
             ),

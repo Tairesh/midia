@@ -16,17 +16,14 @@ impl Pronouns {
     }
 
     pub fn plural(self) -> bool {
-        self == Pronouns::Plural || self == Pronouns::TheyThem
-    }
-
-    pub fn pseudo_plural(self) -> bool {
-        self == Pronouns::TheyThem
+        self == Pronouns::Plural
     }
 
     pub fn third_person(self) -> bool {
         self != Pronouns::YouYour
     }
 
+    /// Returns the pronoun's subjective form, like in "*She* went to Grit Gate."
     pub fn subjective(self) -> &'static str {
         match self {
             Pronouns::YouYour => "you",
@@ -38,6 +35,7 @@ impl Pronouns {
         }
     }
 
+    /// Returns the pronoun's objective form, like in "You are water-bonded with *him*."
     pub fn objective(self) -> &'static str {
         match self {
             Pronouns::YouYour => "you",
@@ -49,6 +47,7 @@ impl Pronouns {
         }
     }
 
+    /// Returns the pronoun's possessive form, like in "*Her* Issachar rifle rusted."
     pub fn possessive_adjective(self) -> &'static str {
         match self {
             Pronouns::YouYour => "your",
@@ -60,6 +59,7 @@ impl Pronouns {
         }
     }
 
+    /// Returns the pronoun's possessive form, like in "The rifle is *hers*."
     pub fn substantive_possessive(self) -> &'static str {
         match self {
             Pronouns::YouYour => "yours",
@@ -71,6 +71,7 @@ impl Pronouns {
         }
     }
 
+    /// Returns the pronoun's reflexive form, like in "He can only blame *himself* for eating the Cloaca Surprise."
     pub fn reflexive(self) -> &'static str {
         match self {
             Pronouns::YouYour => "yourself",

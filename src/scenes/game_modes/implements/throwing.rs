@@ -122,29 +122,7 @@ impl GameModeImpl for Throwing {
             let pos = game.world.borrow().units.player().pos
                 + game.shift_of_view()
                 + self.mouse_moved_pos;
-            let unit_in_tile = game
-                .world
-                .borrow()
-                .map()
-                .get_tile(pos)
-                .units
-                .iter()
-                .copied()
-                .next();
-            if let Some(unit_id) = unit_in_tile {
-                game.try_start_action(Throw::new(unit_id).into());
-            } else {
-                // TODO: throw to terrain
-                let item = game
-                    .world
-                    .borrow_mut()
-                    .units
-                    .player_mut()
-                    .wield
-                    .take_from_active_hand()
-                    .unwrap();
-                game.world.borrow().map().get_tile_mut(pos).items.push(item);
-            }
+            game.try_start_action(Throw::new(pos).into());
             game.set_shift_of_view(Point::default());
             game.modes.pop();
             return None;

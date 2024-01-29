@@ -1,6 +1,6 @@
 use std::iter::Cloned;
 
-use geometry::DIR8;
+use geometry::{Point, DIR8};
 use rand::seq::SliceRandom;
 
 use crate::game::savage::HitResult;
@@ -17,16 +17,15 @@ use super::super::{
     ActionPossibility::{self, No, Yes},
 };
 
-// TODO: Shooting should send missiles through entire map when missed target
+// TODO: Shooting should send missiles through entire map when there is no obstacles.
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Copy, Clone)]
 pub struct Shoot {
-    // TODO: shoot to point, not unit
-    target: usize,
+    target: Point,
 }
 
 impl Shoot {
-    pub fn new(target: usize) -> Self {
+    pub fn new(target: Point) -> Self {
         Self { target }
     }
 }
@@ -52,7 +51,16 @@ impl ActionImpl for Shoot {
                 return No(format!("You can't shoot from {}.", a(weapon.name())));
             }
 
-            let target = world.units.get_unit(self.target);
+            let mut map = world.map();
+            let units = &map.get_tile(self.target).units;
+            if units.is_empty() {
+                // TODO: shoot obstacles
+                return No("There is no one to shoot.".to_string());
+            }
+            let unit_id = units.iter().copied().next().unwrap();
+            drop(map);
+
+            let target = world.units.get_unit(unit_id);
             if target.is_dead() {
                 // This should be unreachable, but just in case.
                 return No("You can't shoot to a dead body.".to_string());
@@ -76,7 +84,15 @@ impl ActionImpl for Shoot {
     // TODO: refactor this, code almost the same as in throw.rs
     #[allow(clippy::too_many_lines)]
     fn on_finish(&self, action: &Action, world: &mut World) {
-        let unit = world.units.get_unit(self.target);
+        let mut map = world.map();
+        let units = &map.get_tile(self.target).units;
+        if units.is_empty() {
+            return;
+        }
+        let unit_id = units.iter().copied().next().unwrap();
+        drop(map);
+
+        let unit = world.units.get_unit(unit_id);
         if unit.is_dead() {
             return;
         }
@@ -232,7 +248,8 @@ mod tests {
         let mut world = prepare_world();
         assert_eq!(world.meta.current_tick, 0);
 
-        add_npc(&mut world, Point::new(3, 0));
+        let target = Point::new(3, 0);
+        add_npc(&mut world, target);
         world
             .units
             .player_mut()
@@ -244,7 +261,7 @@ mod tests {
         );
 
         world.units.player_mut().action =
-            Some(Action::new(0, Shoot::new(1).into(), &world).unwrap());
+            Some(Action::new(0, Shoot::new(target).into(), &world).unwrap());
         world.tick();
 
         assert_eq!(world.meta.current_tick, ATTACK_MOVES as u128);
@@ -258,7 +275,7 @@ mod tests {
         );
 
         assert!(
-            Action::new(0, Shoot::new(1).into(), &world).is_err(),
+            Action::new(0, Shoot::new(target).into(), &world).is_err(),
             "Assert we can't shoot second time cause there is no more arrows"
         );
     }
@@ -268,10 +285,11 @@ mod tests {
         let mut world = prepare_world();
         assert_eq!(world.meta.current_tick, 0);
 
-        add_npc(&mut world, Point::new(3, 0));
+        let target = Point::new(3, 0);
+        add_npc(&mut world, target);
         world.units.player_mut().wield.clear();
 
-        assert!(Action::new(0, Shoot::new(1).into(), &world).is_err());
+        assert!(Action::new(0, Shoot::new(target).into(), &world).is_err());
     }
 
     #[test]
@@ -279,7 +297,6 @@ mod tests {
         let mut world = prepare_world();
         assert_eq!(world.meta.current_tick, 0);
 
-        add_npc(&mut world, Point::new(49, 0));
         world
             .units
             .player_mut()
@@ -290,7 +307,14 @@ mod tests {
             0,
         );
 
-        assert!(Action::new(0, Shoot::new(1).into(), &world).is_err());
+        // Distance of wooden shortbow is 12 so we can shoot to 12*4=48 tiles.
+        let target_far = Point::new(48, 0);
+        add_npc(&mut world, target_far);
+        assert!(Action::new(0, Shoot::new(target_far).into(), &world).is_ok());
+
+        let target_too_far = Point::new(49, 0);
+        add_npc(&mut world, target_too_far);
+        assert!(Action::new(0, Shoot::new(target_too_far).into(), &world).is_err());
     }
 
     #[test]
@@ -298,7 +322,8 @@ mod tests {
         let mut world = prepare_world();
         assert_eq!(world.meta.current_tick, 0);
 
-        add_npc(&mut world, Point::new(3, 0));
+        let target = Point::new(3, 0);
+        add_npc(&mut world, target);
         world
             .units
             .player_mut()
@@ -306,6 +331,6 @@ mod tests {
             .wield(Item::new(WOODEN_SHORTBOW));
         world.units.player_mut().wear.clear();
 
-        assert!(Action::new(0, Shoot::new(1).into(), &world).is_err());
+        assert!(Action::new(0, Shoot::new(target).into(), &world).is_err());
     }
 }

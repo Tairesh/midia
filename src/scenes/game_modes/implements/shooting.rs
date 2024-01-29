@@ -127,20 +127,7 @@ impl GameModeImpl for Shooting {
             let pos = game.world.borrow().units.player().pos
                 + game.shift_of_view()
                 + self.mouse_moved_pos;
-            let unit_in_tile = game
-                .world
-                .borrow()
-                .map()
-                .get_tile(pos)
-                .units
-                .iter()
-                .copied()
-                .next();
-            if let Some(unit_id) = unit_in_tile {
-                game.try_start_action(Shoot::new(unit_id).into());
-            } else {
-                // TODO: Fire to terrain
-            }
+            game.try_start_action(Shoot::new(pos).into());
             game.set_shift_of_view(Point::default());
             game.modes.pop();
             return None;

@@ -1,4 +1,4 @@
-use geometry::DIR8;
+use geometry::{Point, DIR8};
 use rand::seq::SliceRandom;
 
 use crate::game::traits::Name;
@@ -16,11 +16,11 @@ use super::super::{
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Copy, Clone)]
 pub struct Throw {
-    target: usize,
+    target: Point,
 }
 
 impl Throw {
-    pub fn new(target: usize) -> Self {
+    pub fn new(target: Point) -> Self {
         Self { target }
     }
 }
@@ -41,7 +41,16 @@ impl ActionImpl for Throw {
                 return No(format!("You can't throw {}.", a(item.name())));
             }
 
-            let target = world.units.get_unit(self.target);
+            let mut map = world.map();
+            let units = &map.get_tile(self.target).units;
+            if units.is_empty() {
+                // TODO: throw to terrain
+                return No("There is no one to throw at.".to_string());
+            }
+            let unit_id = units.iter().copied().next().unwrap();
+            drop(map);
+
+            let target = world.units.get_unit(unit_id);
             if target.is_dead() {
                 // This should be unreachable, but just in case.
                 return No(format!(
@@ -65,7 +74,15 @@ impl ActionImpl for Throw {
     // TODO: refactor this, code almost the same as in shoot.rs
     #[allow(clippy::too_many_lines)]
     fn on_finish(&self, action: &Action, world: &mut World) {
-        let unit = world.units.get_unit(self.target);
+        let mut map = world.map();
+        let units = &map.get_tile(self.target).units;
+        if units.is_empty() {
+            return;
+        }
+        let unit_id = units.iter().copied().next().unwrap();
+        drop(map);
+
+        let unit = world.units.get_unit(unit_id);
         if unit.is_dead() {
             return;
         }
@@ -229,11 +246,12 @@ mod tests {
         let mut world = prepare_world();
         assert_eq!(world.meta.current_tick, 0);
 
-        add_npc(&mut world, Point::new(3, 0));
+        let target = Point::new(3, 0);
+        add_npc(&mut world, target);
         world.units.player_mut().wield.wield(Item::new("rock"));
 
         world.units.player_mut().action =
-            Some(Action::new(0, Throw::new(1).into(), &world).unwrap());
+            Some(Action::new(0, Throw::new(target).into(), &world).unwrap());
         world.tick();
 
         assert_eq!(world.meta.current_tick, ATTACK_MOVES as u128);
@@ -252,10 +270,11 @@ mod tests {
         let mut world = prepare_world();
         assert_eq!(world.meta.current_tick, 0);
 
-        add_npc(&mut world, Point::new(3, 0));
+        let target = Point::new(3, 0);
+        add_npc(&mut world, target);
         world.units.player_mut().wield.clear();
 
-        assert!(Action::new(0, Throw::new(1).into(), &world).is_err());
+        assert!(Action::new(0, Throw::new(target).into(), &world).is_err());
     }
 
     #[test]
@@ -263,10 +282,11 @@ mod tests {
         let mut world = prepare_world();
         assert_eq!(world.meta.current_tick, 0);
 
-        add_npc(&mut world, Point::new(15, 0));
+        let target = Point::new(15, 0);
+        add_npc(&mut world, target);
         world.units.player_mut().wield.wield(Item::new("rock"));
 
-        assert!(Action::new(0, Throw::new(1).into(), &world).is_err());
+        assert!(Action::new(0, Throw::new(target).into(), &world).is_err());
     }
 
     #[test]
@@ -274,7 +294,8 @@ mod tests {
         let mut world = prepare_world();
         assert_eq!(world.meta.current_tick, 0);
 
-        add_npc(&mut world, Point::new(3, 0));
+        let target = Point::new(3, 0);
+        add_npc(&mut world, target);
         world
             .units
             .player_mut()
@@ -297,6 +318,9 @@ mod tests {
                 ammo: None,
             }));
 
-        assert!(Action::new(0, Throw::new(1).into(), &world).is_err());
+        assert!(Action::new(0, Throw::new(target).into(), &world).is_err());
     }
+
+    // TODO: add test for throwing to terrain
+    // TODO: add test for throwing obsidian shards (they should be destroyed)
 }

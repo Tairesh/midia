@@ -6,7 +6,7 @@ use rand::{distributions::Standard, rngs::StdRng, Rng, SeedableRng};
 
 use crate::game::map::items::helpers::{
     random_book, BACKPACK, GOD_AXE, LEATHER_ARM_GUARD, OBSIDIAN_SHARD, QUIVER, RAGS, STONE_KNIFE,
-    STONE_SHOVEL, WOODEN_ARROW, WOODEN_SHORTBOW,
+    STONE_SHOVEL, STONE_SPEAR, WOODEN_ARROW, WOODEN_SHORTBOW,
 };
 use crate::game::AmmoType;
 
@@ -87,19 +87,11 @@ impl Chunk {
                 .get_mut(pos)
                 .unwrap()
                 .items
-                .push(match rng.gen_range(0..8) {
+                .push(match rng.gen_range(0..4) {
                     0 => Item::new(WOODEN_SHORTBOW),
-                    1 => Item::new(QUIVER).with_items_inside(vec![
-                        Item::new(WOODEN_ARROW),
-                        Item::new(WOODEN_ARROW),
-                        Item::new(WOODEN_ARROW),
-                    ]),
+                    1 => Item::new(QUIVER).with_items_inside(vec![Item::new(WOODEN_ARROW); 30]),
                     2 => Item::new(GOD_AXE),
-                    3 => Item::new(STONE_SHOVEL),
-                    4 => random_book(),
-                    5 => Item::new(BACKPACK),
-                    6 => Item::new(LEATHER_ARM_GUARD),
-                    7 => Item::new(RAGS),
+                    3 => Item::new(STONE_SPEAR),
                     _ => unreachable!(),
                 });
         }

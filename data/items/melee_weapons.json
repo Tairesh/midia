@@ -209,5 +209,93 @@
       },
       "damage_types": ["SLASH", "PIERCE"]
     }
+  },
+  {
+    "type": "item",
+    "id": "spear_wood",
+    "name": "wooden spear",
+    "looks_like": "spear_wood",
+    "tags": ["WEAPON"],
+    "size": "MEDIUM",
+    "materials": ["wood"],
+    "melee_damage": {
+      "damage": {
+        "attribute": "STRENGTH",
+        "dices": ["D6/2"]
+      },
+      "damage_types": ["PIERCE"],
+      "distance": 1
+    }
+  },
+  {
+    "type": "item",
+    "id": "spear_stone",
+    "name": "stone spear",
+    "looks_like": "spear_stone",
+    "tags": ["WEAPON"],
+    "size": "MEDIUM",
+    "materials": ["wood", "stone"],
+    "melee_damage": {
+      "damage": {
+        "attribute": "STRENGTH",
+        "dices": ["D6"]
+      },
+      "damage_types": ["PIERCE"],
+      "distance": 1
+    }
+  },
+  {
+    "type": "item",
+    "id": "spear_iron",
+    "name": "iron spear",
+    "looks_like": "spear_metal",
+    "tags": ["WEAPON"],
+    "size": "MEDIUM",
+    "materials": ["wood", "iron"],
+    "melee_damage": {
+      "damage": {
+        "attribute": "STRENGTH",
+        "dices": ["D6"]
+      },
+      "penetration": 1,
+      "damage_types": ["PIERCE"],
+      "distance": 1
+    }
+  },
+  {
+    "type": "item",
+    "id": "spear_steel",
+    "name": "steel spear",
+    "looks_like": "spear_metal",
+    "tags": ["WEAPON"],
+    "size": "MEDIUM",
+    "materials": ["wood", "steel"],
+    "melee_damage": {
+      "damage": {
+        "attribute": "STRENGTH",
+        "dices": ["D6"]
+      },
+      "penetration": 2,
+      "damage_types": ["PIERCE"],
+      "distance": 1
+    }
+  },
+  {
+    "type": "item",
+    "id": "spear_demonic",
+    "name": "demonic metal spear",
+    "looks_like": "spear_demonic",
+    "tags": ["WEAPON"],
+    "size": "MEDIUM",
+    "materials": ["wood", "demonite"],
+    "melee_damage": {
+      "damage": {
+        "attribute": "STRENGTH",
+        "dices": ["D6"]
+      },
+      "penetration": 2,
+      "damage_types": ["PIERCE"],
+      "distance": 1
+    }
   }
 ]

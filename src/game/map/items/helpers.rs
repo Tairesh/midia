@@ -73,11 +73,11 @@ pub const DEMONIC_SAP: &str = "sap_demonic";
 // pub const STEEL_HAMMER: &str = "hammer_steel";
 // pub const DEMONIC_HAMMER: &str = "hammer_demonic";
 
-// pub const WOODEN_SPEAR: &str = "spear_wood";
-// pub const STONE_SPEAR: &str = "spear_stone";
-// pub const IRON_SPEAR: &str = "spear_iron";
-// pub const STEEL_SPEAR: &str = "spear_steel";
-// pub const DEMONIC_SPEAR: &str = "spear_demonic";
+pub const WOODEN_SPEAR: &str = "spear_wood";
+pub const STONE_SPEAR: &str = "spear_stone";
+pub const IRON_SPEAR: &str = "spear_iron";
+pub const STEEL_SPEAR: &str = "spear_steel";
+pub const DEMONIC_SPEAR: &str = "spear_demonic";
 
 // pub const WOODEN_PIKE: &str = "pike_wood";
 // pub const STONE_PIKE: &str = "pike_stone";

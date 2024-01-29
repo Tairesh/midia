@@ -34,3 +34,28 @@ impl RangedDistance {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use geometry::Point;
+    use test_case::test_case;
+
+    use super::*;
+
+    #[test_case(Point::new(0, 0), Point::new(0, 0), 15, RangedDistance::Melee)]
+    #[test_case(Point::new(0, 0), Point::new(1, 0), 15, RangedDistance::Melee)]
+    #[test_case(Point::new(0, 0), Point::new(1, 1), 15, RangedDistance::Melee)]
+    #[test_case(Point::new(0, 0), Point::new(2, 1), 15, RangedDistance::Close)]
+    #[test_case(Point::new(0, 0), Point::new(15, 0), 15, RangedDistance::Close)]
+    #[test_case(Point::new(0, 0), Point::new(16, 0), 15, RangedDistance::Medium)]
+    #[test_case(Point::new(0, 0), Point::new(30, 0), 15, RangedDistance::Medium)]
+    #[test_case(Point::new(0, 0), Point::new(31, 0), 15, RangedDistance::Far)]
+    #[test_case(Point::new(0, 0), Point::new(60, 0), 15, RangedDistance::Far)]
+    #[test_case(Point::new(0, 0), Point::new(61, 0), 15, RangedDistance::Unreachable)]
+    fn test_define(start: Point, target: Point, weapon_distance: u8, expected: RangedDistance) {
+        assert_eq!(
+            RangedDistance::define(start.distance(target), weapon_distance),
+            expected
+        );
+    }
+}

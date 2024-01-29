@@ -21,6 +21,7 @@ use super::super::{
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Copy, Clone)]
 pub struct Shoot {
+    // TODO: shoot to point, not unit
     target: usize,
 }
 
@@ -59,17 +60,14 @@ impl ActionImpl for Shoot {
 
             let distance =
                 RangedDistance::define(actor.pos.distance(target.pos), ranged_value.distance);
-            if distance == RangedDistance::Unreachable {
-                return No(format!(
-                    "You can't shoot from {} that far.",
-                    a(weapon.name())
-                ));
-            }
-            if distance == RangedDistance::Melee {
-                return No("You can't shoot in closed combat.".to_string());
-            }
 
-            Yes(ATTACK_MOVES)
+            match distance {
+                RangedDistance::Unreachable => {
+                    No(format!("You can't shoot {} that far.", a(weapon.name())))
+                }
+                RangedDistance::Melee => No("You can't shoot in closed combat.".to_string()),
+                _ => Yes(ATTACK_MOVES),
+            }
         } else {
             No(format!("You can't shoot from {}.", weapon.name()))
         }

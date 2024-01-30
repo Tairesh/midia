@@ -186,7 +186,7 @@ impl GameScene {
     }
 
     fn current_time_label(&mut self) -> &mut Label {
-        self.sprites[3].as_label().unwrap()
+        self.sprites[4].as_label().unwrap()
     }
 
     fn cursors(&self) -> Vec<Cursor> {

@@ -1,6 +1,6 @@
 use std::time::Instant;
 
-use geometry::{Point, Vec2};
+use geometry::{Direction, Point, Vec2};
 use tetra::{
     input::{Key, KeyModifier},
     Context,
@@ -146,6 +146,7 @@ impl GameModeImpl for Throwing {
                     game.set_shift_of_view(game.shift_of_view() + dir);
                 }
             }
+            game.try_rotate_player(Direction::from(game.shift_of_view() + self.mouse_moved_pos));
         }
 
         self.shift_of_view = game.shift_of_view();

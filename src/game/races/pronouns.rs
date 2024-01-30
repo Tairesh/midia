@@ -23,6 +23,14 @@ impl Pronouns {
         self != Pronouns::YouYour
     }
 
+    pub fn is_are(self) -> &'static str {
+        if self.plural() || self == Pronouns::YouYour {
+            "are"
+        } else {
+            "is"
+        }
+    }
+
     /// Returns the pronoun's subjective form, like in "*She* went to Grit Gate."
     pub fn subjective(self) -> &'static str {
         match self {

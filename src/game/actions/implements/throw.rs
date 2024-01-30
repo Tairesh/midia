@@ -41,14 +41,27 @@ impl ActionImpl for Throw {
                 return No(format!("You can't throw {}.", a(item.name())));
             }
 
+            let distance =
+                RangedDistance::define(actor.pos.distance(self.target), throw_value.distance);
+            if distance == RangedDistance::Unreachable {
+                return No(format!("You can't throw {} that far.", a(item.name())));
+            }
+
             let mut map = world.map();
             let units = &map.get_tile(self.target).units;
             if units.is_empty() {
-                // TODO: throw to terrain
-                return No("There is no one to throw at.".to_string());
+                return Yes(ATTACK_MOVES);
             }
+
             let unit_id = units.iter().copied().next().unwrap();
             drop(map);
+
+            if distance == RangedDistance::Melee {
+                return No(format!(
+                    "You can't throw {} in closed combat.",
+                    a(item.name())
+                ));
+            }
 
             let target = world.units.get_unit(unit_id);
             if target.is_dead() {
@@ -57,12 +70,6 @@ impl ActionImpl for Throw {
                     "You can't throw {} at a dead body.",
                     a(item.name())
                 ));
-            }
-
-            let distance =
-                RangedDistance::define(actor.pos.distance(target.pos), throw_value.distance);
-            if distance == RangedDistance::Unreachable {
-                return No(format!("You can't throw {} that far.", a(item.name())));
             }
 
             Yes(ATTACK_MOVES)
@@ -77,6 +84,26 @@ impl ActionImpl for Throw {
         let mut map = world.map();
         let units = &map.get_tile(self.target).units;
         if units.is_empty() {
+            drop(map);
+            let item = action
+                .owner_mut(world)
+                .wield
+                .take_from_active_hand()
+                .unwrap();
+            world.log().push(LogEvent::info(
+                format!(
+                    "{} throw{} {}.",
+                    action.owner(world).name_for_actions(),
+                    if action.owner(world).pronounce().verb_ends_with_s() {
+                        "s"
+                    } else {
+                        ""
+                    },
+                    a(item.name()),
+                ),
+                self.target,
+            ));
+            world.map().get_tile_mut(self.target).items.push(item);
             return;
         }
         let unit_id = units.iter().copied().next().unwrap();

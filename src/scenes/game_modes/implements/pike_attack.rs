@@ -6,12 +6,11 @@ use tetra::{
     Context,
 };
 
-use crate::game::traits::Name;
 use crate::{
     colors::Colors,
     game::World,
-    game::{actions::implements::Throw, AttackType, RangedDistance},
-    input,
+    game::{actions::implements::Melee, traits::Name, AttackType},
+    input::{self, Zero},
     lang::a,
     settings::Settings,
 };
@@ -21,7 +20,7 @@ use super::super::{
     Cursor, CursorType, GameModeImpl,
 };
 
-pub struct Throwing {
+pub struct PikeAttack {
     last_shift: Instant,
     last_mouse_position: Vec2,
     mouse_moved: bool,
@@ -30,7 +29,7 @@ pub struct Throwing {
     shift_of_view: Point,
 }
 
-impl Throwing {
+impl PikeAttack {
     pub fn new() -> Self {
         Self {
             last_shift: Instant::now(),
@@ -60,27 +59,25 @@ impl Throwing {
     }
 }
 
-impl Default for Throwing {
+impl Default for PikeAttack {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl GameModeImpl for Throwing {
+impl GameModeImpl for PikeAttack {
     fn cursors(&self, world: &World) -> Vec<Cursor> {
         let pos = self.shift_of_view + self.mouse_moved_pos;
         let damage = world
             .units
             .player()
-            .attack_damage(AttackType::Throw)
+            .attack_damage(AttackType::Melee)
             .unwrap();
-        let distance = RangedDistance::define(pos.distance(Point::default()), damage.distance);
-        let color = match distance {
-            RangedDistance::Melee => Colors::ORANGE,
-            RangedDistance::Close => Colors::LIME,
-            RangedDistance::Medium => Colors::YELLOW,
-            RangedDistance::Far => Colors::RED,
-            RangedDistance::Unreachable => Colors::LIGHT_SKY_BLUE,
+        let distance = (pos.distance(Point::default()).floor() - 1.0) as u8;
+        let color = if distance <= damage.distance {
+            Colors::LIGHT_CORAL
+        } else {
+            Colors::LIGHT_SKY_BLUE
         };
 
         let mut cursors: Vec<Cursor> = self
@@ -97,17 +94,37 @@ impl GameModeImpl for Throwing {
             CursorType::Select,
         ));
 
+        let r = damage.distance as i32 + 1;
+        for i in -r..=r {
+            for j in -r..=r {
+                let point = Point::new(i, j);
+                if !point.is_zero()
+                    && !world
+                        .map()
+                        .get_tile(world.units.player().pos + point)
+                        .units
+                        .is_empty()
+                {
+                    cursors.push((point - self.shift_of_view, Colors::RED, CursorType::Select));
+                }
+            }
+        }
+
         cursors
     }
 
     fn can_push(&self, world: &World) -> Result<(), String> {
         world.units.player().wield.main_hand().map_or(
             Err("You have nothing in your hands!".to_string()),
-            |item| {
-                item.throw_damage()
-                    .map_or(Err(format!("You can't throw {}!", a(item.name()))), |_| {
-                        Ok(())
-                    })
+            |weapon| {
+                if weapon.melee_damage().distance == 0 {
+                    return Err(format!(
+                        "You can't use distance attack with {}!",
+                        a(weapon.name())
+                    ));
+                }
+
+                Ok(())
             },
         )
     }
@@ -118,27 +135,21 @@ impl GameModeImpl for Throwing {
             game.set_shift_of_view(Point::default());
             game.modes.pop();
             return None;
-        } else if input::is_some_of_keys_pressed(ctx, &[Key::T, Key::Space, Key::Enter])
+        } else if input::is_some_of_keys_pressed(ctx, &[Key::F, Key::Space, Key::Enter])
             || input::is_mouse_button_down(ctx, MouseButton::Left)
         {
             let pos = game.world.borrow().units.player().pos
                 + game.shift_of_view()
                 + self.mouse_moved_pos;
-            game.try_start_action(Throw::new(pos).into());
+            game.try_start_action(Melee::new(pos).into());
             game.set_shift_of_view(Point::default());
             game.modes.pop();
             return None;
         } else if let Some(dir) = input::get_direction_keys_down(ctx) {
-            let damage = game
-                .world
-                .borrow()
-                .units
-                .player()
-                .attack_damage(AttackType::Throw)
-                .unwrap();
+            let damage = game.world.borrow().units.player().melee_damage();
             let pos = self.shift_of_view + self.mouse_moved_pos + dir;
-            let distance = RangedDistance::define(pos.distance(Point::default()), damage.distance);
-            if distance != RangedDistance::Unreachable {
+            let distance = (pos.distance(Point::default()).floor() - 1.0) as u8;
+            if distance <= damage.distance {
                 let now = Instant::now();
                 if now.duration_since(self.last_shift).subsec_millis()
                     > Settings::instance().input.repeat_interval

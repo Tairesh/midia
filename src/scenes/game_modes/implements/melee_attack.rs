@@ -11,17 +11,17 @@ use crate::scenes::SomeTransitions;
 
 use super::super::{Cursor, CursorType, GameModeImpl};
 
-pub struct ForceAttack {
+pub struct MeleeAttack {
     pub target: Option<Point>,
 }
 
-impl ForceAttack {
+impl MeleeAttack {
     pub fn new() -> Self {
         Self { target: None }
     }
 }
 
-impl GameModeImpl for ForceAttack {
+impl GameModeImpl for MeleeAttack {
     fn cursors(&self, world: &World) -> Vec<Cursor> {
         if let Some(target) = self.target {
             let pos = target - world.units.player().pos;
@@ -45,7 +45,6 @@ impl GameModeImpl for ForceAttack {
     }
 
     fn update(&mut self, ctx: &mut Context, game: &mut GameScene) -> SomeTransitions {
-        // TODO: select targets on distance, with two modes, as in CoQ
         if input::is_key_pressed(ctx, Key::Escape) {
             game.modes.pop();
         } else if let Some(dir) = input::get_direction_keys_down(ctx) {

@@ -249,7 +249,7 @@ impl ActionImpl for Melee {
 mod tests {
     use geometry::Point;
 
-    use crate::game::map::items::helpers::{DEMONIC_SAP, GOD_AXE, STONE_KNIFE};
+    use crate::game::map::items::helpers::{DEMONIC_SAP, GOD_AXE, STONE_KNIFE, STONE_SPEAR};
     use crate::game::map::terrains::Boulder;
     use crate::game::world::tests::{add_npc, prepare_world};
     use crate::game::{Action, Item, Race};
@@ -364,7 +364,7 @@ mod tests {
         let event = &log.new_events()[0];
         assert!(
             event.msg.contains("the small boulder with your fists"),
-            "msg \"{}\" doesn't contains \"fists\"",
+            "msg \"{}\" doesn't contains \"the small boulder with your fists\"",
             event.msg
         );
     }
@@ -385,8 +385,39 @@ mod tests {
         let event = &log.new_events()[0];
         assert!(
             event.msg.contains("wave your fangs in the air"),
-            "msg \"{}\" doesn't contains \"swing in the air with your fangs\"",
+            "msg \"{}\" doesn't contains \"wave your fangs in the air\"",
             event.msg
         );
+    }
+
+    #[test]
+    fn test_spear_attack() {
+        let mut world = prepare_world();
+        world.units.player_mut().wield.wield(Item::new(STONE_SPEAR));
+
+        let target = Point::new(2, 0);
+        add_npc(&mut world, target);
+        world.units.player_mut().action =
+            Some(Action::new(0, Melee::new(target).into(), &world).unwrap());
+        world.tick();
+
+        let mut log = world.log();
+        let event = &log.new_events()[0];
+        assert!(
+            event
+                .msg
+                .contains("You attack old bugger with your stone spear"),
+            "msg \"{}\" doesn't contains \"You attack old bugger with your stone spear\"",
+            event.msg
+        );
+    }
+
+    #[test]
+    fn test_spear_not_attack() {
+        let mut world = prepare_world();
+        world.units.player_mut().wield.wield(Item::new(STONE_SPEAR));
+
+        let target = Point::new(3, 0);
+        assert!(Action::new(0, Melee::new(target).into(), &world).is_err());
     }
 }

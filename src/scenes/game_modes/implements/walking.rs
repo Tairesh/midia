@@ -20,8 +20,8 @@ use crate::{
 use super::super::{
     super::{implements::GameScene, Scene, SomeTransitions, Transition},
     implements::{
-        Closing, Digging, Dropping, Examining, ForceAttack, Observing, Opening, Reading, Shooting,
-        Throwing, WieldingFromGround,
+        Closing, Digging, Dropping, Examining, MeleeAttack, Observing, Opening, PikeAttack,
+        Reading, Shooting, Throwing, WieldingFromGround,
     },
     GameModeImpl,
 };
@@ -86,7 +86,7 @@ impl GameModeImpl for Walking {
             game.push_mode(Closing::new().into());
             None
         } else if input::is_key_with_mod_pressed(ctx, (Key::A, KeyModifier::Ctrl)) {
-            game.push_mode(ForceAttack::new().into());
+            game.push_mode(MeleeAttack::new().into());
             None
         } else if input::is_key_with_mod_pressed(ctx, (Key::W, KeyModifier::Shift)) {
             game.try_start_action(Wear {}.into());
@@ -133,6 +133,15 @@ impl GameModeImpl for Walking {
             game.push_mode(Throwing::new().into());
             None
         } else if input::is_key_with_mod_pressed(ctx, Key::F) {
+            let world = game.world.borrow();
+            if let Some(weapon) = world.units.player().wield.main_hand() {
+                if weapon.melee_damage().distance > 0 {
+                    drop(world);
+                    game.push_mode(PikeAttack::new().into());
+                    return None;
+                }
+            }
+            drop(world);
             game.push_mode(Shooting::new().into());
             None
         } else if let Some(dir) = input::get_direction_keys_down(ctx) {

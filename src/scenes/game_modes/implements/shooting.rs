@@ -2,7 +2,7 @@ use std::time::Instant;
 
 use geometry::{Direction, Point, Vec2};
 use tetra::{
-    input::{Key, KeyModifier},
+    input::{Key, KeyModifier, MouseButton},
     Context,
 };
 
@@ -123,7 +123,9 @@ impl GameModeImpl for Shooting {
             game.set_shift_of_view(Point::default());
             game.modes.pop();
             return None;
-        } else if input::is_some_of_keys_pressed(ctx, &[Key::F, Key::Space, Key::Enter]) {
+        } else if input::is_some_of_keys_pressed(ctx, &[Key::F, Key::Space, Key::Enter])
+            || input::is_mouse_button_down(ctx, MouseButton::Left)
+        {
             let pos = game.world.borrow().units.player().pos
                 + game.shift_of_view()
                 + self.mouse_moved_pos;

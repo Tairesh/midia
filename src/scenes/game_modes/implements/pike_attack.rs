@@ -98,6 +98,11 @@ impl GameModeImpl for PikeAttack {
         for i in -r..=r {
             for j in -r..=r {
                 let point = Point::new(i, j);
+                let distance = (point.distance(Point::default()).floor() - 1.0) as u8;
+                if distance > damage.distance {
+                    continue;
+                }
+
                 if !point.is_zero()
                     && !world
                         .map()

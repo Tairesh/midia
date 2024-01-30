@@ -176,7 +176,7 @@ mod tests {
     use geometry::Point;
 
     use crate::game::map::items::helpers::{
-        CLOAK, GOD_AXE, QUIVER, STONE_ARROW, WOODEN_ARROW, WOODEN_SHORTBOW,
+        CLOAK, GOD_AXE, QUIVER, STONE_ARROW, STONE_PIKE, WOODEN_ARROW, WOODEN_SHORTBOW,
     };
     use crate::game::traits::Name;
     use crate::game::units::tests::helpers::tester_girl;
@@ -317,5 +317,13 @@ mod tests {
         assert_eq!(arrow.proto().id, STONE_ARROW);
 
         assert!(avatar.selected_ammo().is_none());
+    }
+
+    #[test]
+    fn test_parry_modifier() {
+        let mut avatar = Avatar::new(tester_girl(), Point::new(0, 0));
+        let parry = avatar.parry();
+        avatar.wield.wield(Item::new(STONE_PIKE));
+        assert_eq!(avatar.parry(), parry - 1);
     }
 }

@@ -297,5 +297,98 @@
       "damage_types": ["PIERCE"],
       "distance": 1
     }
+  },
+  {
+    "type": "item",
+    "id": "pike_wood",
+    "name": "wooden pike",
+    "looks_like": "pike_wood",
+    "tags": ["WEAPON"],
+    "size": "LARGE",
+    "materials": ["wood"],
+    "melee_damage": {
+      "damage": {
+        "attribute": "STRENGTH",
+        "dices": ["D8/2"]
+      },
+      "damage_types": ["PIERCE"],
+      "distance": 2,
+      "parry_modifier": -1
+    }
+  },
+  {
+    "type": "item",
+    "id": "pike_stone",
+    "name": "stone pike",
+    "looks_like": "pike_stone",
+    "tags": ["WEAPON"],
+    "size": "LARGE",
+    "materials": ["wood", "stone"],
+    "melee_damage": {
+      "damage": {
+        "attribute": "STRENGTH",
+        "dices": ["D8"]
+      },
+      "damage_types": ["PIERCE"],
+      "distance": 2,
+      "parry_modifier": -1
+    }
+  },
+  {
+    "type": "item",
+    "id": "pike_iron",
+    "name": "iron pike",
+    "looks_like": "pike_metal",
+    "tags": ["WEAPON"],
+    "size": "LARGE",
+    "materials": ["wood", "iron"],
+    "melee_damage": {
+      "damage": {
+        "attribute": "STRENGTH",
+        "dices": ["D8"]
+      },
+      "penetration": 1,
+      "damage_types": ["PIERCE"],
+      "distance": 2,
+      "parry_modifier": -1
+    }
+  },
+  {
+    "type": "item",
+    "id": "pike_steel",
+    "name": "steel pike",
+    "looks_like": "pike_metal",
+    "tags": ["WEAPON"],
+    "size": "LARGE",
+    "materials": ["wood", "steel"],
+    "melee_damage": {
+      "damage": {
+        "attribute": "STRENGTH",
+        "dices": ["D8"]
+      },
+      "penetration": 2,
+      "damage_types": ["PIERCE"],
+      "distance": 2,
+      "parry_modifier": -1
+    }
+  },
+  {
+    "type": "item",
+    "id": "pike_demonic",
+    "name": "demonic metal pike",
+    "looks_like": "pike_demonic",
+    "tags": ["WEAPON"],
+    "size": "LARGE",
+    "materials": ["wood", "demonite"],
+    "melee_damage": {
+      "damage": {
+        "attribute": "STRENGTH",
+        "dices": ["D8"]
+      },
+      "penetration": 2,
+      "damage_types": ["PIERCE"],
+      "distance": 2,
+      "parry_modifier": -1
+    }
   }
 ]

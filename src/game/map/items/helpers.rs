@@ -79,11 +79,11 @@ pub const IRON_SPEAR: &str = "spear_iron";
 pub const STEEL_SPEAR: &str = "spear_steel";
 pub const DEMONIC_SPEAR: &str = "spear_demonic";
 
-// pub const WOODEN_PIKE: &str = "pike_wood";
-// pub const STONE_PIKE: &str = "pike_stone";
-// pub const IRON_PIKE: &str = "pike_iron";
-// pub const STEEL_PIKE: &str = "pike_steel";
-// pub const DEMONIC_PIKE: &str = "pike_demonic";
+pub const WOODEN_PIKE: &str = "pike_wood";
+pub const STONE_PIKE: &str = "pike_stone";
+pub const IRON_PIKE: &str = "pike_iron";
+pub const STEEL_PIKE: &str = "pike_steel";
+pub const DEMONIC_PIKE: &str = "pike_demonic";
 
 pub const WOODEN_SHORTBOW: &str = "shortbow_wood";
 // pub const DEMONIC_BOW: &str = "bow_demonic";

@@ -7,8 +7,8 @@
     "looks_like": "arrow_wood",
     "size": "SMALL",
     "materials": ["wood"],
-    "ammo": {
-      "typ": ["ARROW"],
+    "is_ammo": {
+      "typ": "ARROW",
       "damage_modifier": {
         "damage": -1
       }
@@ -22,10 +22,192 @@
     "looks_like": "arrow_stone",
     "size": "SMALL",
     "materials": ["wood", "stone"],
-    "ammo": {
-      "typ": ["ARROW"],
+    "is_ammo": {
+      "typ": "ARROW",
       "damage_modifier": {
         "damage": 0
+      }
+    }
+  },
+  {
+    "type": "item",
+    "id": "arrow_iron",
+    "name": "iron arrow",
+    "description": "Arrows with an iron tip.",
+    "looks_like": "arrow_metal",
+    "size": "SMALL",
+    "materials": ["wood", "iron"],
+    "is_ammo": {
+      "typ": "ARROW",
+      "damage_modifier": {
+        "penetration": 2
+      }
+    }
+  },
+  {
+    "type": "item",
+    "id": "arrow_steel",
+    "name": "steel arrow",
+    "description": "Arrows with a steel tip.",
+    "looks_like": "arrow_metal",
+    "size": "SMALL",
+    "materials": ["wood", "steel"],
+    "is_ammo": {
+      "typ": "ARROW",
+      "damage_modifier": {
+        "penetration": 4
+      }
+    }
+  },
+  {
+    "type": "item",
+    "id": "arrow_demonic",
+    "name": "demonic metal arrow",
+    "description": "Arrows with a demonic metal tip.",
+    "looks_like": "arrow_metal",
+    "size": "SMALL",
+    "materials": ["wood", "demonite"],
+    "is_ammo": {
+      "typ": "ARROW",
+      "damage_modifier": {
+        "penetration": 2,
+        "damage": 2
+      }
+    }
+  },
+  {
+    "type": "item",
+    "id": "arrow_obsidian",
+    "name": "obsidian arrow",
+    "description": "Arrows with an obsidian tip.",
+    "looks_like": "arrow_obsidian",
+    "size": "SMALL",
+    "materials": ["wood", "obsidian"],
+    "is_ammo": {
+      "typ": "ARROW",
+      "damage_modifier": {
+        "damage": 1
+      }
+    }
+  },
+  {
+    "type": "item",
+    "id": "arrow_bone",
+    "name": "bone arrow",
+    "description": "Arrows with a bone tip.",
+    "looks_like": "arrow_bone",
+    "size": "SMALL",
+    "materials": ["wood", "bone"],
+    "is_ammo": {
+      "typ": "ARROW",
+      "damage_modifier": {
+        "damage": -1
+      }
+    }
+  },
+  {
+    "type": "item",
+    "id": "bolt_wood",
+    "name": "wooden bolt",
+    "description": "Weakest bolt, made entirely from wood.",
+    "looks_like": "arrow_wood",
+    "size": "SMALL",
+    "materials": ["wood"],
+    "is_ammo": {
+      "typ": "BOLT",
+      "damage_modifier": {
+        "damage": -1
+      }
+    }
+  },
+  {
+    "type": "item",
+    "id": "bolt_stone",
+    "name": "stone bolt",
+    "description": "Most common type of bolts, with a flint tip.",
+    "looks_like": "arrow_stone",
+    "size": "SMALL",
+    "materials": ["wood", "stone"],
+    "is_ammo": {
+      "typ": "BOLT",
+      "damage_modifier": {
+        "damage": 0
+      }
+    }
+  },
+  {
+    "type": "item",
+    "id": "bolt_iron",
+    "name": "iron bolt",
+    "description": "Bolts with an iron tip.",
+    "looks_like": "arrow_metal",
+    "size": "SMALL",
+    "materials": ["wood", "iron"],
+    "is_ammo": {
+      "typ": "BOLT",
+      "damage_modifier": {
+        "penetration": 2
+      }
+    }
+  },
+  {
+    "type": "item",
+    "id": "bolt_steel",
+    "name": "steel bolt",
+    "description": "Bolts with a steel tip.",
+    "looks_like": "arrow_metal",
+    "size": "SMALL",
+    "materials": ["wood", "steel"],
+    "is_ammo": {
+      "typ": "BOLT",
+      "damage_modifier": {
+        "penetration": 4
+      }
+    }
+  },
+  {
+    "type": "item",
+    "id": "bolt_demonic",
+    "name": "demonic metal bolt",
+    "description": "Bolts with a demonic metal tip.",
+    "looks_like": "arrow_demonic",
+    "size": "SMALL",
+    "materials": ["wood", "demonite"],
+    "is_ammo": {
+      "typ": "BOLT",
+      "damage_modifier": {
+        "penetration": 2,
+        "damage": 2
+      }
+    }
+  },
+  {
+    "type": "item",
+    "id": "bolt_obsidian",
+    "name": "obsidian bolt",
+    "description": "Bolts with an obsidian tip.",
+    "looks_like": "arrow_obsidian",
+    "size": "SMALL",
+    "materials": ["wood", "obsidian"],
+    "is_ammo": {
+      "typ": "BOLT",
+      "damage_modifier": {
+        "damage": 1
+      }
+    }
+  },
+  {
+    "type": "item",
+    "id": "bolt_bone",
+    "name": "bone bolt",
+    "description": "Bolts with a bone tip.",
+    "looks_like": "arrow_bone",
+    "size": "SMALL",
+    "materials": ["wood", "bone"],
+    "is_ammo": {
+      "typ": "BOLT",
+      "damage_modifier": {
+        "damage": -1
       }
     }
   }

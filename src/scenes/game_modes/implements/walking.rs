@@ -144,6 +144,10 @@ impl GameModeImpl for Walking {
             drop(world);
             game.push_mode(Shooting::new().into());
             None
+        } else if input::is_key_with_mod_pressed(ctx, Key::R) {
+            game.world.borrow_mut().units.player_mut().reload();
+            game.log.log("Reloading", Colors::WHITE_SMOKE);
+            None
         } else if let Some(dir) = input::get_direction_keys_down(ctx) {
             let now = Instant::now();
             if now.duration_since(self.last_walk).subsec_millis()

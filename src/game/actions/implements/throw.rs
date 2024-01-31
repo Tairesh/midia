@@ -341,8 +341,8 @@ mod tests {
                 color_from_material: None,
                 throw_damage: None,
                 ranged_damage: None,
-                ammo_types: HashSet::new(),
-                ammo: None,
+                need_ammo: None,
+                is_ammo: None,
             }));
 
         assert!(Action::new(0, Throw::new(target).into(), &world).is_err());

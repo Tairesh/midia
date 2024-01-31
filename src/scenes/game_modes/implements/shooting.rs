@@ -106,10 +106,10 @@ impl GameModeImpl for Shooting {
                 if item.ranged_damage().is_none() {
                     return Err(format!("You can't shoot from {}!", a(item.name())));
                 }
-                if !item.ammo_types().is_empty()
-                    && !world.units.player().wear.has_ammo(item.ammo_types())
-                {
-                    return Err(format!("You have no ammo for {}!", a(item.name())));
+                if let Some(need_ammo) = item.need_ammo() {
+                    if !item.has_ammo(need_ammo.typ) {
+                        return Err(format!("You have no ammo in {}!", a(item.name())));
+                    }
                 }
 
                 Ok(())

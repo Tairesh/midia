@@ -3,6 +3,7 @@ use std::iter::Cloned;
 use geometry::{Point, DIR8};
 use rand::seq::SliceRandom;
 
+use crate::game::game_data::NeedAmmoValue;
 use crate::game::savage::HitResult;
 use crate::game::traits::Name;
 
@@ -42,8 +43,10 @@ impl ActionImpl for Shoot {
 
         let weapon = actor.wield.main_hand().unwrap();
 
-        if !weapon.ammo_types().is_empty() && !actor.wear.has_ammo(weapon.ammo_types()) {
-            return No(format!("You have no ammo for {}", a(weapon.name())));
+        if let Some(NeedAmmoValue { typ, .. }) = weapon.need_ammo() {
+            if !weapon.has_ammo(typ) {
+                return No(format!("You have no ammo in {}!", a(weapon.name())));
+            }
         }
 
         if let Some(ranged_value) = weapon.ranged_damage() {
@@ -219,14 +222,18 @@ impl ActionImpl for Shoot {
         }
 
         let owner = action.owner_mut(world);
-        if let Some(weapon) = owner.wield.main_hand() {
-            if !weapon.ammo_types().is_empty() {
-                if let Some(proto) = owner.selected_ammo() {
-                    owner.wear.remove_by_proto(&proto);
-                } else {
-                    owner.wear.remove_ammo(weapon.ammo_types());
-                }
+        if let Some(weapon) = owner.wield.main_hand_mut() {
+            if weapon.need_ammo().is_some() {
+                weapon.container_mut().unwrap().items.pop();
             }
+        }
+        let auto_reload = owner.wield.main_hand().map_or(false, |weapon| {
+            weapon
+                .need_ammo()
+                .map_or(false, |need_ammo| need_ammo.reload == 0)
+        });
+        if auto_reload {
+            owner.reload();
         }
     }
 }
@@ -237,7 +244,9 @@ mod tests {
 
     use geometry::Point;
 
-    use crate::game::map::items::helpers::{QUIVER, WOODEN_ARROW, WOODEN_SHORTBOW};
+    use crate::game::map::items::helpers::{
+        QUIVER, WOODEN_ARROW, WOODEN_BOLT, WOODEN_CROSSBOW, WOODEN_SHORTBOW,
+    };
     use crate::game::world::tests::{add_npc, prepare_world};
     use crate::game::{Action, Item, ItemPrototype, ItemSize};
 
@@ -260,6 +269,10 @@ mod tests {
             0,
         );
 
+        // Can't shoot before loading arrow to bow.
+        assert!(Action::new(0, Shoot::new(target).into(), &world).is_err());
+        world.units.player_mut().reload();
+
         world.units.player_mut().action =
             Some(Action::new(0, Shoot::new(target).into(), &world).unwrap());
         world.tick();
@@ -270,7 +283,7 @@ mod tests {
         let event = &log.new_events()[0];
         assert!(
             event.msg.contains("shoot a wooden short bow at"),
-            "msg \"{}\" doesn't contains \"shoot from your wooden short bow to\"",
+            "msg \"{}\" doesn't contains \"shoot from your wooden short bow at\"",
             event.msg
         );
 
@@ -306,6 +319,7 @@ mod tests {
             Item::new(QUIVER).with_items_inside([Item::new(WOODEN_ARROW)]),
             0,
         );
+        world.units.player_mut().reload();
 
         // Distance of wooden shortbow is 12 so we can shoot to 12*4=48 tiles.
         let target_far = Point::new(48, 0);
@@ -320,7 +334,6 @@ mod tests {
     #[test]
     fn test_cant_shoot_without_arrows() {
         let mut world = prepare_world();
-        assert_eq!(world.meta.current_tick, 0);
 
         let target = Point::new(3, 0);
         add_npc(&mut world, target);
@@ -330,7 +343,45 @@ mod tests {
             .wield
             .wield(Item::new(WOODEN_SHORTBOW));
         world.units.player_mut().wear.clear();
+        world.units.player_mut().reload();
 
         assert!(Action::new(0, Shoot::new(target).into(), &world).is_err());
+    }
+
+    #[test]
+    fn test_cant_shoot_crossbow_without_reloading() {
+        // TODO: reloading action
+        let mut world = prepare_world();
+        let target = Point::new(3, 0);
+        add_npc(&mut world, target);
+        world
+            .units
+            .player_mut()
+            .wield
+            .wield(Item::new(WOODEN_CROSSBOW));
+        world.units.player_mut().wear.add(
+            Item::new(QUIVER).with_items_inside(vec![Item::new(WOODEN_BOLT); 10]),
+            0,
+        );
+        world.units.player_mut().reload();
+
+        world.units.player_mut().action =
+            Some(Action::new(0, Shoot::new(target).into(), &world).unwrap());
+        world.tick();
+
+        assert_eq!(world.meta.current_tick, ATTACK_MOVES as u128);
+
+        let mut log = world.log();
+        let event = &log.new_events()[0];
+        assert!(
+            event.msg.contains("shoot a wooden crossbow at"),
+            "msg \"{}\" doesn't contains \"shoot from your wooden crossbow at\"",
+            event.msg
+        );
+
+        assert!(
+            Action::new(0, Shoot::new(target).into(), &world).is_err(),
+            "Assert we can't shoot second time cause there is no more bolts in a crossbow"
+        );
     }
 }

@@ -15,7 +15,10 @@
     "looks_like": "rock",
     "size": "SMALL",
     "materials": ["stone"],
-    "//": "add sharp rocks and rubble"
+    "//": "add sharp rocks and rubble",
+    "is_ammo": {
+      "typ": "ROCK"
+    }
   },
   {
     "type": "item",

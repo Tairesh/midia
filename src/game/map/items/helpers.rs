@@ -87,7 +87,7 @@ pub const DEMONIC_PIKE: &str = "pike_demonic";
 
 pub const WOODEN_SHORTBOW: &str = "shortbow_wood";
 // pub const DEMONIC_BOW: &str = "bow_demonic";
-// pub const WOODEN_CROSSBOW: &str = "crossbow_wood";
+pub const WOODEN_CROSSBOW: &str = "crossbow_wood";
 // pub const IRON_CROSSBOW: &str = "crossbow_iron";
 // pub const STEEL_CROSSBOW: &str = "crossbow_steel";
 // pub const DEMONIC_CROSSBOW: &str = "crossbow_demonic";
@@ -99,12 +99,20 @@ pub const WOODEN_SHORTBOW: &str = "shortbow_wood";
 
 pub const WOODEN_ARROW: &str = "arrow_wood";
 pub const STONE_ARROW: &str = "arrow_stone";
-// pub const IRON_ARROW: &str = "arrow_iron";
-// pub const STEEL_ARROW: &str = "arrow_steel";
-// pub const DEMONIC_ARROW: &str = "arrow_demonic";
-// pub const OBSIDIAN_ARROW: &str = "arrow_obsidian";
+pub const IRON_ARROW: &str = "arrow_iron";
+pub const STEEL_ARROW: &str = "arrow_steel";
+pub const DEMONIC_ARROW: &str = "arrow_demonic";
+pub const OBSIDIAN_ARROW: &str = "arrow_obsidian";
 // pub const BONE_ARROW: &str = "arrow_bone";
 // pub const BOOM_ARROW: &str = "arrow_boom";
+pub const WOODEN_BOLT: &str = "bolt_wood";
+pub const STONE_BOLT: &str = "bolt_stone";
+pub const IRON_BOLT: &str = "bolt_iron";
+pub const STEEL_BOLT: &str = "bolt_steel";
+pub const DEMONIC_BOLT: &str = "bolt_demonic";
+pub const OBSIDIAN_BOLT: &str = "bolt_obsidian";
+// pub const BONE_BOLT: &str = "bolt_bone";
+// pub const BOOM_BOLT: &str = "bolt_boom";
 
 // pub const BOOMGRANATE_FRUIT: &str = "boomgranate_fruit";
 
@@ -153,8 +161,8 @@ pub fn dead_body(unit: &Avatar) -> Item {
         melee_damage: None,
         throw_damage: None,
         ranged_damage: None,
-        ammo: None,
-        ammo_types: HashSet::default(),
+        is_ammo: None,
+        need_ammo: None,
         // TODO: body color
         color_from_material: Some(Material::Flesh),
     })

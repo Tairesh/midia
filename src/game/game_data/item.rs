@@ -220,12 +220,20 @@ pub enum AmmoType {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct AmmoValue {
-    pub typ: HashSet<AmmoType>,
+pub struct IsAmmoValue {
+    pub typ: AmmoType,
+    #[serde(default)]
     pub damage_modifier: DamageModifier,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Copy, Clone)]
+pub struct NeedAmmoValue {
+    pub typ: AmmoType,
+    pub capacity: u8,
+    pub reload: u8,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct DamageModifier {
     #[serde(default)]
     pub damage: i8,
@@ -335,7 +343,7 @@ pub struct ItemPrototype {
     #[serde(default)]
     pub ranged_damage: Option<DamageValue>,
     #[serde(default)]
-    pub ammo_types: HashSet<AmmoType>,
+    pub need_ammo: Option<NeedAmmoValue>,
     #[serde(default)]
-    pub ammo: Option<AmmoValue>,
+    pub is_ammo: Option<IsAmmoValue>,
 }

@@ -5,8 +5,9 @@ use arrayvec::ArrayVec;
 use rand::{distributions::Standard, rngs::StdRng, Rng, SeedableRng};
 
 use crate::game::map::items::helpers::{
-    random_book, BACKPACK, DEMONIC_PIKE, GOD_AXE, LEATHER_ARM_GUARD, OBSIDIAN_SHARD, QUIVER, RAGS,
-    STONE_KNIFE, STONE_SHOVEL, STONE_SPEAR, WOODEN_ARROW, WOODEN_SHORTBOW,
+    random_book, BACKPACK, DEMONIC_PIKE, GOD_AXE, LEATHER_ARM_GUARD, OBSIDIAN_BOLT, OBSIDIAN_SHARD,
+    QUIVER, RAGS, STONE_KNIFE, STONE_SHOVEL, STONE_SPEAR, WOODEN_ARROW, WOODEN_CROSSBOW,
+    WOODEN_SHORTBOW,
 };
 use crate::game::AmmoType;
 
@@ -47,13 +48,16 @@ impl Chunk {
             } else if rng.gen_bool(0.003) {
                 Chest::new(
                     vec![
-                        Item::new(WOODEN_SHORTBOW),
                         random_book(),
                         Item::new(STONE_KNIFE),
                         Item::new(OBSIDIAN_SHARD),
-                        Item::new(QUIVER).with_items_inside(vec![Item::new(WOODEN_ARROW); 30]),
                         Item::new(GOD_AXE),
                         Item::new(DEMONIC_PIKE),
+                        Item::new(QUIVER)
+                            .with_items_inside(vec![Item::new(OBSIDIAN_BOLT); 3])
+                            .with_items_inside(vec![Item::new(WOODEN_ARROW); 3]),
+                        Item::new(WOODEN_CROSSBOW),
+                        Item::new(WOODEN_SHORTBOW),
                     ],
                     false,
                 )

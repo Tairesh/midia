@@ -7,8 +7,8 @@ use once_cell::sync::OnceCell;
 
 use data_entity::DataEntity;
 pub use item::{
-    AmmoType, AmmoValue, DamageType, DamageValue, ItemPrototype, ItemQuality, ItemSize, ItemTag,
-    Material, WearLayer,
+    AmmoType, DamageType, DamageValue, IsAmmoValue, ItemPrototype, ItemQuality, ItemSize, ItemTag,
+    Material, NeedAmmoValue, WearLayer,
 };
 
 use crate::game::races::{Race, Sex};
@@ -45,7 +45,7 @@ impl GameData {
             names: Race::iterator()
                 .map(|r| (r, Sex::iterator().map(|s| (s, Vec::new())).collect()))
                 .collect(),
-            items: HashMap::with_capacity(10),
+            items: HashMap::with_capacity(100),
         };
 
         data.load_dir(&PathBuf::from(PATH));
@@ -127,6 +127,6 @@ mod tests {
             .unwrap()
             .contains(&"Dragan".to_string()));
         assert!(data.items.len() > 0);
-        assert!(data.items.contains_key("hat"));
+        assert!(data.items.contains_key("book"));
     }
 }

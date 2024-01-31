@@ -5,7 +5,7 @@ use std::collections::HashSet;
 use serde::{Deserialize, Serialize};
 use tetra::graphics::Color;
 
-use crate::game::game_data::AmmoType;
+use crate::game::game_data::{AmmoType, NeedAmmoValue};
 use crate::game::traits::{LooksLike, Name};
 use crate::game::{
     AttackType, DamageValue, GameData, ItemPrototype, ItemQuality, ItemSize, ItemTag,
@@ -58,6 +58,10 @@ impl Item {
             .cloned();
         if let Some(ItemQuality::Container { volume, for_ammo }) = container {
             item = item.with_container([], volume, for_ammo);
+        }
+
+        if let Some(NeedAmmoValue { capacity, typ, .. }) = item.proto().need_ammo {
+            item = item.with_container([], capacity, HashSet::from([typ]));
         }
 
         item
@@ -247,13 +251,13 @@ impl Item {
         self.damage(AttackType::Shoot)
     }
 
-    pub fn ammo_types(&self) -> &HashSet<AmmoType> {
-        &self.proto().ammo_types
+    pub fn need_ammo(&self) -> Option<NeedAmmoValue> {
+        self.proto().need_ammo
     }
 
     pub fn is_ammo(&self, ammo_type: AmmoType) -> bool {
-        if let Some(ammo) = &self.proto().ammo {
-            ammo.typ.contains(&ammo_type)
+        if let Some(ammo) = &self.proto().is_ammo {
+            ammo.typ == ammo_type
         } else {
             false
         }

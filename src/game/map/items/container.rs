@@ -41,6 +41,9 @@ impl Container {
         if self.is_for_ammo() && !self.for_ammo.iter().any(|t| item.is_ammo(*t)) {
             return;
         }
+        if self.free_volume() == 0 {
+            return;
+        }
 
         self.items.push(item);
     }

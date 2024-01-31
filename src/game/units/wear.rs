@@ -66,20 +66,16 @@ impl Wear {
         self.items.clear();
     }
 
-    pub fn has_ammo(&self, ammo_types: &HashSet<AmmoType>) -> bool {
-        ammo_types
-            .iter()
-            .any(|&ammo_type| self.iter().any(|wear| wear.has_ammo(ammo_type)))
+    pub fn has_ammo(&self, ammo_type: AmmoType) -> bool {
+        self.iter().any(|wear| wear.has_ammo(ammo_type))
     }
 
-    pub fn get_ammo(&self, ammo_types: &HashSet<AmmoType>) -> Option<&Item> {
-        for &ammo_type in ammo_types {
-            for item in self.iter() {
-                if let Some(container) = item.container() {
-                    let index = container.items.iter().position(|i| i.is_ammo(ammo_type));
-                    if let Some(index) = index {
-                        return Some(&container.items[index]);
-                    }
+    pub fn get_ammo(&self, ammo_type: AmmoType) -> Option<&Item> {
+        for item in self.iter() {
+            if let Some(container) = item.container() {
+                let index = container.items.iter().position(|i| i.is_ammo(ammo_type));
+                if let Some(index) = index {
+                    return Some(&container.items[index]);
                 }
             }
         }
@@ -87,14 +83,12 @@ impl Wear {
         None
     }
 
-    pub fn remove_ammo(&mut self, ammo_types: &HashSet<AmmoType>) -> Option<Item> {
-        for &ammo_type in ammo_types {
-            for item in self.iter_mut() {
-                if let Some(container) = item.container_mut() {
-                    let index = container.items.iter().position(|i| i.is_ammo(ammo_type));
-                    if let Some(index) = index {
-                        return Some(container.items.remove(index));
-                    }
+    fn remove_ammo(&mut self, ammo_type: AmmoType) -> Option<Item> {
+        for item in self.iter_mut() {
+            if let Some(container) = item.container_mut() {
+                let index = container.items.iter().position(|i| i.is_ammo(ammo_type));
+                if let Some(index) = index {
+                    return Some(container.items.remove(index));
                 }
             }
         }
@@ -102,7 +96,7 @@ impl Wear {
         None
     }
 
-    pub fn remove_by_proto(&mut self, proto: &str) -> Option<Item> {
+    pub fn remove_by_proto(&mut self, proto: &str, ammo_type: AmmoType) -> Option<Item> {
         for item in self.iter_mut() {
             if let Some(container) = item.container_mut() {
                 let index = container.items.iter().position(|i| i.proto().id == proto);
@@ -112,7 +106,7 @@ impl Wear {
             }
         }
 
-        None
+        self.remove_ammo(ammo_type)
     }
 }
 
@@ -161,11 +155,11 @@ mod tests {
             Item::new(QUIVER).with_items_inside([Item::new(WOODEN_ARROW)]),
             0,
         )]);
-        assert!(wear.has_ammo(&[AmmoType::Arrow].into()));
-        assert!(!wear.has_ammo(&[AmmoType::Bolt].into()));
+        assert!(wear.has_ammo(AmmoType::Arrow));
+        assert!(!wear.has_ammo(AmmoType::Bolt));
 
         let wear = Wear::new([(Item::new(QUIVER), 0)]);
-        assert!(!wear.has_ammo(&[AmmoType::Arrow].into()));
+        assert!(!wear.has_ammo(AmmoType::Arrow));
     }
 
     #[test]
@@ -174,10 +168,10 @@ mod tests {
             Item::new(QUIVER).with_items_inside([Item::new(WOODEN_ARROW)]),
             0,
         )]);
-        assert!(wear.get_ammo(&[AmmoType::Arrow].into()).is_some());
-        assert!(wear.get_ammo(&[AmmoType::Bolt].into()).is_none());
+        assert!(wear.get_ammo(AmmoType::Arrow).is_some());
+        assert!(wear.get_ammo(AmmoType::Bolt).is_none());
 
-        let arrow = wear.get_ammo(&[AmmoType::Arrow].into()).unwrap();
+        let arrow = wear.get_ammo(AmmoType::Arrow).unwrap();
         assert_eq!(arrow.proto().id, WOODEN_ARROW);
     }
 
@@ -187,12 +181,12 @@ mod tests {
             Item::new(QUIVER).with_items_inside([Item::new(WOODEN_ARROW)]),
             0,
         )]);
-        let arrow = wear.remove_ammo(&[AmmoType::Arrow].into());
+        let arrow = wear.remove_ammo(AmmoType::Arrow);
         assert!(arrow.is_some());
         let arrow = arrow.unwrap();
         assert_eq!(arrow.proto().id, WOODEN_ARROW);
 
-        assert!(wear.remove_ammo(&[AmmoType::Bolt].into()).is_none());
-        assert!(wear.remove_ammo(&[AmmoType::Arrow].into()).is_none());
+        assert!(wear.remove_ammo(AmmoType::Bolt).is_none());
+        assert!(wear.remove_ammo(AmmoType::Arrow).is_none());
     }
 }

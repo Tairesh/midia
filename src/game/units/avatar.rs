@@ -125,7 +125,7 @@ impl Avatar {
                         .items
                         .get(&ammo)
                         .unwrap_or_else(|| panic!("Undefined ammo: `{ammo}`"));
-                    if let Some(ammo_value) = &proto.ammo {
+                    if let Some(ammo_value) = &proto.is_ammo {
                         let mut damage = weapon.ranged_damage().unwrap();
                         damage.damage.modifier += ammo_value.damage_modifier.damage;
                         damage.penetration += ammo_value.damage_modifier.penetration;
@@ -154,20 +154,48 @@ impl Avatar {
                 .items
                 .get(selected_ammo.as_str())
                 .unwrap();
-            if let Some(ammo_value) = &proto.ammo {
-                if ammo_value
-                    .typ
-                    .iter()
-                    .any(|t| weapon.ammo_types().contains(t))
-                {
+            if let Some(ammo_value) = &proto.is_ammo {
+                if weapon.need_ammo().as_ref().unwrap().typ == ammo_value.typ {
                     return Some(selected_ammo.clone());
                 }
             }
         }
 
         self.wear
-            .get_ammo(weapon.ammo_types())
+            .get_ammo(weapon.need_ammo().as_ref().unwrap().typ)
             .map(|a| a.proto().id.clone())
+    }
+
+    pub fn reload(&mut self) {
+        if self.wield.main_hand().is_none()
+            || self.wield.main_hand().unwrap().need_ammo().is_none()
+            || self.wield.main_hand().unwrap().container().is_none()
+            || self.selected_ammo().is_none()
+        {
+            return;
+        }
+
+        let capacity = self
+            .wield
+            .main_hand()
+            .unwrap()
+            .need_ammo()
+            .unwrap()
+            .capacity;
+        for _ in 0..capacity {
+            let new_ammo = self.wear.remove_by_proto(
+                &self.selected_ammo().unwrap(),
+                self.wield.main_hand().unwrap().need_ammo().unwrap().typ,
+            );
+            if let Some(new_ammo) = new_ammo {
+                self.wield
+                    .main_hand_mut()
+                    .unwrap()
+                    .container_mut()
+                    .unwrap()
+                    .push_item(new_ammo);
+            }
+        }
     }
 }
 
@@ -260,7 +288,7 @@ mod tests {
             .items
             .get(WOODEN_ARROW)
             .unwrap()
-            .ammo
+            .is_ammo
             .clone()
             .unwrap();
 
@@ -295,7 +323,7 @@ mod tests {
         let selected_ammo = avatar.selected_ammo().unwrap();
         assert_eq!(selected_ammo, WOODEN_ARROW);
 
-        let arrow = avatar.wear.remove_by_proto(&selected_ammo);
+        let arrow = avatar.wear.remove_by_proto(&selected_ammo, AmmoType::Arrow);
         assert!(arrow.is_some());
         let arrow = arrow.unwrap();
         assert_eq!(arrow.proto().id, WOODEN_ARROW);
@@ -303,7 +331,7 @@ mod tests {
         let selected_ammo = avatar.selected_ammo().unwrap();
         assert_eq!(selected_ammo, WOODEN_ARROW);
 
-        let arrow = avatar.wear.remove_by_proto(&selected_ammo);
+        let arrow = avatar.wear.remove_by_proto(&selected_ammo, AmmoType::Arrow);
         assert!(arrow.is_some());
         let arrow = arrow.unwrap();
         assert_eq!(arrow.proto().id, WOODEN_ARROW);
@@ -311,7 +339,7 @@ mod tests {
         let selected_ammo = avatar.selected_ammo().unwrap();
         assert_eq!(selected_ammo, STONE_ARROW);
 
-        let arrow = avatar.wear.remove_by_proto(&selected_ammo);
+        let arrow = avatar.wear.remove_by_proto(&selected_ammo, AmmoType::Arrow);
         assert!(arrow.is_some());
         let arrow = arrow.unwrap();
         assert_eq!(arrow.proto().id, STONE_ARROW);

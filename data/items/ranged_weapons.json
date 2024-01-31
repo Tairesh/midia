@@ -34,6 +34,33 @@
       "damage_types": ["PIERCE"],
       "distance": 12
     },
-    "ammo_types": ["ARROW"]
+    "need_ammo": {
+      "typ": "ARROW",
+      "capacity": 1,
+      "reload": 0
+    }
+  },
+  {
+    "type": "item",
+    "id": "crossbow_wood",
+    "name": "wooden crossbow",
+    "description": "A simple crossbow made of wood.",
+    "looks_like": "crossbow_wood",
+    "size": "MEDIUM",
+    "materials": ["wood"],
+    "tags": ["WEAPON"],
+    "two_handed_tool": true,
+    "ranged_damage": {
+      "damage": {
+        "dices": ["D6", "D6"]
+      },
+      "damage_types": ["PIERCE"],
+      "distance": 15
+    },
+    "need_ammo": {
+      "typ": "BOLT",
+      "capacity": 1,
+      "reload": 10
+    }
   }
 ]

@@ -2,7 +2,7 @@
 
 pub use actions::{Action, ActionType};
 pub use game_data::{
-    AmmoType, AmmoValue, DamageType, DamageValue, GameData, ItemPrototype, ItemQuality, ItemSize,
+    AmmoType, DamageType, DamageValue, GameData, IsAmmoValue, ItemPrototype, ItemQuality, ItemSize,
     ItemTag, Material, WearLayer,
 };
 pub use log::{Log, LogEvent};

@@ -26,6 +26,10 @@ impl Wield {
         self.items.front()
     }
 
+    pub fn main_hand_mut(&mut self) -> Option<&mut Item> {
+        self.items.front_mut()
+    }
+
     pub fn off_hands(&self) -> Vec<&Item> {
         self.items.iter().skip(1).collect()
     }

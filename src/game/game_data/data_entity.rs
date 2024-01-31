@@ -281,7 +281,11 @@ mod tests {
               "damage_types": ["PIERCE"],
               "distance": 12
             },
-            "ammo_types": ["ARROW"]
+            "need_ammo": {
+              "typ": "ARROW",
+              "capacity": 1,
+              "reload": 0
+            }
           },
           {
             "type": "item",
@@ -291,8 +295,8 @@ mod tests {
             "looks_like": "arrow_wood",
             "size": "SMALL",
             "materials": ["wood"],
-            "ammo": {
-              "typ": ["ARROW"],
+            "is_ammo": {
+              "typ": "ARROW",
               "damage_modifier": {
                 "damage": -1
               }
@@ -324,8 +328,8 @@ mod tests {
             assert!(item.materials.contains(&Material::Wood));
             assert_eq!(item.size, ItemSize::Medium);
             assert!(item.two_handed_tool);
-            assert_eq!(item.ammo_types.len(), 1);
-            assert!(item.ammo_types.contains(&AmmoType::Arrow));
+            assert_eq!(item.need_ammo.as_ref().unwrap().typ, AmmoType::Arrow);
+            assert_eq!(item.need_ammo.as_ref().unwrap().capacity, 1);
         } else {
             panic!("Expected DataEntity::Item, got {:?}", slice[0]);
         }
@@ -336,9 +340,8 @@ mod tests {
             assert!(!item.tags.contains(&ItemTag::Weapon));
             assert!(item.qualities.is_empty());
             assert!(item.ranged_damage.is_none());
-            if let Some(ammo_value) = &item.ammo {
-                assert_eq!(ammo_value.typ.len(), 1);
-                assert!(ammo_value.typ.contains(&AmmoType::Arrow));
+            if let Some(ammo_value) = &item.is_ammo {
+                assert_eq!(ammo_value.typ, AmmoType::Arrow);
                 assert!(ammo_value.damage_modifier.damage_dice.is_none());
                 assert_eq!(ammo_value.damage_modifier.damage, -1);
                 assert_eq!(ammo_value.damage_modifier.penetration, 0);
@@ -349,7 +352,7 @@ mod tests {
             assert!(item.materials.contains(&Material::Wood));
             assert_eq!(item.size, ItemSize::Small);
             assert!(!&item.two_handed_tool);
-            assert!(item.ammo_types.is_empty());
+            assert!(item.need_ammo.is_none());
         } else {
             panic!("Expected DataEntity::Item, got {:?}", slice[0]);
         }

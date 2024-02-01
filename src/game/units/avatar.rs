@@ -17,6 +17,7 @@ pub struct Avatar {
     pub pos: Point,
     pub action: Option<Action>,
     pub vision: TwoDimDirection,
+    // TODO: merge wield and wear into one struct, move functions like reload() there
     // TODO: monsters with no hands
     pub wield: Wield,
     // TODO: custom struct with layers for dress and methods to return names and icons for UI

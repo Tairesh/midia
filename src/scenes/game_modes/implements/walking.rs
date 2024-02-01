@@ -10,7 +10,7 @@ use crate::game::traits::Name;
 use crate::{
     colors::Colors,
     game::{
-        actions::implements::{Drop, Skip, Walk, Wear},
+        actions::implements::{Drop, Reload, Skip, Walk, Wear},
         BodySlot, LogEvent,
     },
     input,
@@ -145,8 +145,7 @@ impl GameModeImpl for Walking {
             game.push_mode(Shooting::new().into());
             None
         } else if input::is_key_with_mod_pressed(ctx, Key::R) {
-            game.world.borrow_mut().units.player_mut().reload();
-            game.log.log("Reloading", Colors::WHITE_SMOKE);
+            game.try_start_action(Reload {}.into());
             None
         } else if let Some(dir) = input::get_direction_keys_down(ctx) {
             let now = Instant::now();

@@ -1,10 +1,7 @@
 use std::time::Instant;
 
 use geometry::Direction;
-use tetra::{
-    input::{Key, KeyModifier},
-    Context,
-};
+use tetra::{input::KeyModifier, Context};
 
 use crate::game::traits::Name;
 use crate::{
@@ -14,14 +11,14 @@ use crate::{
         BodySlot, LogEvent,
     },
     input,
-    settings::Settings,
+    settings::{KeyBindingAction, Settings},
 };
 
 use super::super::{
     super::{implements::GameScene, Scene, SomeTransitions, Transition},
     implements::{
-        Closing, Digging, Dropping, Examining, MeleeAttack, Observing, Opening, PikeAttack,
-        Reading, Shooting, Throwing, WieldingFromGround,
+        Closing, Digging, Dropping, Examining, MeleeAttack, Observing, Opening, PickingUp,
+        PikeAttack, Reading, Shooting, Throwing,
     },
     GameModeImpl,
 };
@@ -48,106 +45,117 @@ impl GameModeImpl for Walking {
     // TODO: refactor this method
     #[allow(clippy::too_many_lines)]
     fn update(&mut self, ctx: &mut Context, game: &mut GameScene) -> SomeTransitions {
-        if input::is_key_pressed(ctx, Key::Escape) {
-            Some(vec![Transition::Push(Scene::GameMenu)])
-        } else if input::is_key_with_mod_pressed(ctx, Key::E) {
-            game.push_mode(Examining::new().into());
-            None
-        } else if input::is_key_with_mod_pressed(ctx, Key::D) {
-            game.try_start_action(
-                Drop {
-                    dir: Direction::Here,
-                }
-                .into(),
-            );
-            None
-        } else if input::is_key_with_mod_pressed(ctx, (Key::D, KeyModifier::Shift)) {
-            game.push_mode(Dropping::new().into());
-            None
-        } else if input::is_key_with_mod_pressed(ctx, Key::G) {
-            game.push_mode(WieldingFromGround::new().into());
-            None
-        } else if input::is_key_with_mod_pressed(ctx, (Key::C, KeyModifier::Shift)) {
-            game.log.clear();
-            None
-        } else if input::is_key_with_mod_pressed(ctx, (Key::G, KeyModifier::Shift)) {
-            game.push_mode(Digging::new().into());
-            None
-        } else if input::is_key_with_mod_pressed(ctx, Key::X) {
-            game.push_mode(Observing::new().into());
-            None
-        } else if input::is_key_with_mod_pressed(ctx, (Key::R, KeyModifier::Shift)) {
-            game.push_mode(Reading::new().into());
-            None
-        } else if input::is_key_with_mod_pressed(ctx, Key::O) {
-            game.push_mode(Opening::new().into());
-            None
-        } else if input::is_key_with_mod_pressed(ctx, Key::C) {
-            game.push_mode(Closing::new().into());
-            None
-        } else if input::is_key_with_mod_pressed(ctx, (Key::A, KeyModifier::Ctrl)) {
-            game.push_mode(MeleeAttack::new().into());
-            None
-        } else if input::is_key_with_mod_pressed(ctx, (Key::W, KeyModifier::Shift)) {
-            game.try_start_action(Wear {}.into());
-            None
-        } else if input::is_key_with_mod_pressed(ctx, (Key::X, KeyModifier::Shift)) {
-            game.world.borrow_mut().units.player_mut().wield.swap();
-            let event = LogEvent::info(
-                "You swap your hands",
-                game.world.borrow().units.player().pos,
-            );
-            game.world.borrow_mut().log().push(event);
-            game.update_ui(ctx);
-            None
-        } else if input::is_key_with_mod_pressed(ctx, Key::I) {
-            // TODO: inventory game scene
-            let items: Vec<String> = game
-                .world
-                .borrow()
-                .units
-                .player()
-                .wear
-                .iter()
-                .map(|i| i.name().to_string())
-                .collect();
-            let armor = game.world.borrow().units.player().armor(BodySlot::Torso);
-            let toughness = game
-                .world
-                .borrow()
-                .units
-                .player()
-                .personality
-                .char_sheet
-                .toughness();
-            let parry = game.world.borrow().units.player().parry();
-            game.log.log(
-                format!(
-                    "You wear: {}, armor value is {armor}, toughness: {toughness}, parry: {parry}",
-                    items.join(", ")
-                ),
-                Colors::WHITE_SMOKE,
-            );
-            None
-        } else if input::is_key_with_mod_pressed(ctx, Key::T) {
-            game.push_mode(Throwing::new().into());
-            None
-        } else if input::is_key_with_mod_pressed(ctx, Key::F) {
-            let world = game.world.borrow();
-            if let Some(weapon) = world.units.player().wield.main_hand() {
-                if weapon.melee_damage().distance > 0 {
-                    drop(world);
-                    game.push_mode(PikeAttack::new().into());
-                    return None;
+        for key in input::get_key_with_mod_pressed(ctx) {
+            if let Some(&action) = Settings::instance().input.keybindings.get(&key) {
+                match action {
+                    KeyBindingAction::MainMenu => {
+                        return Some(vec![Transition::Push(Scene::GameMenu)]);
+                    }
+                    KeyBindingAction::Examine => {
+                        game.push_mode(Examining::new().into());
+                    }
+                    KeyBindingAction::DropHere => {
+                        game.try_start_action(
+                            Drop {
+                                dir: Direction::Here,
+                            }
+                            .into(),
+                        );
+                    }
+                    KeyBindingAction::Drop => {
+                        game.push_mode(Dropping::new().into());
+                    }
+                    KeyBindingAction::PickUp => {
+                        game.push_mode(PickingUp::new().into());
+                    }
+                    KeyBindingAction::ClearLog => {
+                        game.log.clear();
+                    }
+                    KeyBindingAction::Dig => {
+                        game.push_mode(Digging::new().into());
+                    }
+                    KeyBindingAction::Observe => {
+                        game.push_mode(Observing::new().into());
+                    }
+                    KeyBindingAction::Open => {
+                        game.push_mode(Opening::new().into());
+                    }
+                    KeyBindingAction::Read => {
+                        game.push_mode(Reading::new().into());
+                    }
+                    KeyBindingAction::Close => {
+                        game.push_mode(Closing::new().into());
+                    }
+                    KeyBindingAction::Wear => {
+                        game.try_start_action(Wear {}.into());
+                    }
+                    KeyBindingAction::MeleeAttack => {
+                        game.push_mode(MeleeAttack::new().into());
+                    }
+                    KeyBindingAction::Throw => {
+                        game.push_mode(Throwing::new().into());
+                    }
+                    KeyBindingAction::RangeAttack => {
+                        let world = game.world.borrow();
+                        if let Some(weapon) = world.units.player().wield.main_hand() {
+                            if weapon.melee_damage().distance > 0 {
+                                drop(world);
+                                game.push_mode(PikeAttack::new().into());
+                                return None;
+                            }
+                        }
+                        drop(world);
+                        game.push_mode(Shooting::new().into());
+                    }
+                    KeyBindingAction::Reload => {
+                        game.try_start_action(Reload {}.into());
+                    }
+                    KeyBindingAction::SwapHands => {
+                        game.world.borrow_mut().units.player_mut().wield.swap();
+                        let event = LogEvent::info(
+                            "You swap your hands",
+                            game.world.borrow().units.player().pos,
+                        );
+                        game.world.borrow_mut().log().push(event);
+                        game.update_ui(ctx);
+                    }
+                    KeyBindingAction::Inventory => {
+                        // TODO: inventory game scene
+                        let items: Vec<String> = game
+                            .world
+                            .borrow()
+                            .units
+                            .player()
+                            .wear
+                            .iter()
+                            .map(|i| i.name().to_string())
+                            .collect();
+                        let armor = game.world.borrow().units.player().armor(BodySlot::Torso);
+                        let toughness = game
+                            .world
+                            .borrow()
+                            .units
+                            .player()
+                            .personality
+                            .char_sheet
+                            .toughness();
+                        let parry = game.world.borrow().units.player().parry();
+                        game.log.log(
+                            format!(
+                                "You wear: {}, armor value is {armor}, toughness: {toughness}, parry: {parry}",
+                                items.join(", ")
+                            ),
+                            Colors::WHITE_SMOKE,
+                        );
+                    }
+                    KeyBindingAction::Skip => {
+                        game.try_start_action(Skip {}.into());
+                    }
                 }
             }
-            drop(world);
-            game.push_mode(Shooting::new().into());
-            None
-        } else if input::is_key_with_mod_pressed(ctx, Key::R) {
-            game.try_start_action(Reload {}.into());
-            None
-        } else if let Some(dir) = input::get_direction_keys_down(ctx) {
+        }
+
+        if let Some(dir) = input::get_direction_keys_down(ctx) {
             let now = Instant::now();
             if now.duration_since(self.last_walk).subsec_millis()
                 > Settings::instance().input.repeat_interval
@@ -161,9 +169,8 @@ impl GameModeImpl for Walking {
                     game.try_start_action(Walk { dir }.into());
                 }
             }
-            None
-        } else {
-            None
         }
+
+        None
     }
 }

@@ -5,6 +5,8 @@ use std::sync::{Mutex, MutexGuard};
 
 use once_cell::sync::OnceCell;
 
+pub use input::KeyBindingAction;
+
 use self::{debug::DebugSettings, input::InputSettings, window::WindowSettings};
 
 mod debug;

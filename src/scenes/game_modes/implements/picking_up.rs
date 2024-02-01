@@ -12,23 +12,23 @@ use super::super::{
     Cursor, CursorType, GameModeImpl,
 };
 
-pub struct WieldingFromGround {
+pub struct PickingUp {
     selected: Option<Direction>,
 }
 
-impl WieldingFromGround {
+impl PickingUp {
     pub fn new() -> Self {
         Self { selected: None }
     }
 }
 
-impl Default for WieldingFromGround {
+impl Default for PickingUp {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl GameModeImpl for WieldingFromGround {
+impl GameModeImpl for PickingUp {
     fn cursors(&self, world: &World) -> Vec<Cursor> {
         if let Some(selected) = self.selected {
             vec![

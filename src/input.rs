@@ -156,6 +156,27 @@ pub fn is_some_of_keys_pressed(ctx: &mut Context, keys: &[Key]) -> bool {
     keys.iter().any(|&k| is_key_pressed(ctx, k))
 }
 
+pub fn get_key_with_mod_pressed(ctx: &mut Context) -> Vec<KeyWithMod> {
+    let mut keys = Vec::new();
+    for &key in get_keys_pressed(ctx) {
+        if is_no_key_modifiers(ctx) {
+            keys.push(KeyWithMod::key(key));
+        } else {
+            if is_key_modifier_down(ctx, KeyModifier::Shift) {
+                keys.push(KeyWithMod::new(key, KeyModifier::Shift));
+            }
+            if is_key_modifier_down(ctx, KeyModifier::Alt) {
+                keys.push(KeyWithMod::new(key, KeyModifier::Alt));
+            }
+            if is_key_modifier_down(ctx, KeyModifier::Ctrl) {
+                keys.push(KeyWithMod::new(key, KeyModifier::Ctrl));
+            }
+        }
+    }
+
+    keys
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

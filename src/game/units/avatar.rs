@@ -65,14 +65,6 @@ impl Avatar {
         self.personality.char_sheet.is_dead()
     }
 
-    pub fn armor(&self, slot: BodySlot) -> u8 {
-        self.wear
-            .get_items_by_slot(slot)
-            .into_iter()
-            .map(Item::armor)
-            .sum()
-    }
-
     pub fn pronounce(&self) -> Pronouns {
         if self.is_player() {
             Pronouns::YouYour
@@ -97,6 +89,22 @@ impl Avatar {
         } else {
             Vec::new()
         }
+    }
+
+    // TODO: trait bonuses for armor, toughness, parry
+    pub fn armor(&self, slot: BodySlot) -> u8 {
+        (self
+            .wear
+            .get_items_by_slot(slot)
+            .into_iter()
+            .map(|item| item.armor() as i8)
+            .sum::<i8>()
+            + self.personality.char_sheet.race.armor_bonus())
+        .max(0) as u8
+    }
+
+    pub fn toughness(&self) -> u8 {
+        self.personality.char_sheet.toughness()
     }
 
     pub fn parry(&self) -> u8 {

@@ -35,24 +35,13 @@ impl HitResult {
             }
             shock = true;
             // add wound for every Ace
-            while total_damage > 4 {
+            while total_damage >= 4 {
                 wounds += 1;
                 total_damage -= 4;
             }
         }
 
-        // target can do a Vigor roll to avoid wounds
-        let vigor_roll = target
-            .personality
-            .char_sheet
-            .get_attribute_with_modifiers(Attribute::Vigor)
-            .roll();
-        if vigor_roll.successes() >= wounds {
-            wounds = 0;
-            shock = false;
-        } else {
-            wounds -= vigor_roll.successes();
-        }
+        // TODO: wild cards can do a Vigor roll to avoid wounds
 
         Self::new(
             HitParams::new(damage, penetration, critical),
@@ -105,5 +94,38 @@ impl HitConsequences {
             shock,
             wounds: (0..wounds).map(|_| Wound::random()).collect(),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use geometry::Point;
+    use test_case::test_case;
+
+    use crate::game::game_data::pregen;
+
+    use super::*;
+
+    #[test_case(4, 0, false, 0)]
+    #[test_case(5, 0, false, 0)]
+    #[test_case(7, 0, true, 0)]
+    #[test_case(5, 2, true, 0)]
+    #[test_case(5, 10, true, 0)]
+    #[test_case(8, 2, true, 0)]
+    #[test_case(9, 2, true, 1)]
+    #[test_case(10, 0, true, 0)]
+    #[test_case(11, 0, true, 1)]
+    fn test_hit_result(damage: u8, penetration: u8, shock: bool, wounds: usize) {
+        let avatar = Avatar::new(pregen::npc::shasha(), Point::default());
+        let parry = avatar.parry();
+        assert_eq!(parry, 8);
+        let toughness = avatar.toughness();
+        assert_eq!(toughness, 5);
+        let armor = avatar.armor(BodySlot::Torso);
+        assert_eq!(armor, 2);
+
+        let hit_result = HitResult::calculate(damage, penetration, &avatar, false);
+        assert_eq!(hit_result.consequences.shock, shock);
+        assert_eq!(hit_result.consequences.wounds.len(), wounds);
     }
 }

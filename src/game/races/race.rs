@@ -90,7 +90,7 @@ impl Race {
         })
     }
 
-    pub fn toughness_bonus(self) -> i8 {
+    pub fn armor_bonus(self) -> i8 {
         match self {
             Race::Nyarnik => 2,
             _ => 0,

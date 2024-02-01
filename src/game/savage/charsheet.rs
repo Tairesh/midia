@@ -77,9 +77,7 @@ impl CharSheet {
     }
 
     pub fn toughness(&self) -> u8 {
-        (2 + self.attributes.get_attribute(Attribute::Vigor).value() as i8 / 2
-            + self.race.toughness_bonus())
-        .max(0) as u8
+        2 + self.attributes.get_attribute(Attribute::Vigor).value() / 2
     }
 
     pub fn walk_koeff(&self) -> f32 {

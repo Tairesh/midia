@@ -1,3 +1,6 @@
+use std::fmt::format;
+
+use crate::game::game_data::NeedAmmoValue;
 use crate::game::{Action, LogEvent};
 
 use super::super::{
@@ -11,23 +14,30 @@ pub struct Reload {}
 
 impl ActionImpl for Reload {
     fn is_possible(&self, actor: &Avatar, _world: &World) -> ActionPossibility {
-        if actor.wield.main_hand().map_or(false, |weapon| {
-            weapon.need_ammo().is_some()
-                && weapon.container().map_or(false, |container| {
-                    container.is_for_ammo() && container.free_volume() > 0
-                })
-        }) {
-            let weapon = actor.wield.main_hand().unwrap();
-            let need_ammo = weapon.need_ammo().unwrap();
-
-            if !actor.wear.has_ammo(need_ammo.typ) {
-                return No(format!("You don't have ammo for {}", a(weapon.name())));
-            }
-
-            Yes(need_ammo.reload as u32)
-        } else {
-            No("You can't reload".to_string())
-        }
+        actor
+            .wield
+            .main_hand()
+            .map_or(No("You have nothing to reload".to_string()), |weapon| {
+                weapon.need_ammo().map_or(
+                    No(format!("Your {} can't be reloaded", weapon.name())),
+                    |NeedAmmoValue { typ, reload, .. }| {
+                        weapon.container().map_or(
+                            No(format!("Your {} can't be reloaded", weapon.name())),
+                            |container| {
+                                if container.free_volume() > 0 {
+                                    if actor.wear.has_ammo(typ) {
+                                        Yes(reload as u32)
+                                    } else {
+                                        No(format!("You don't have ammo for {}!", a(weapon.name())))
+                                    }
+                                } else {
+                                    No(format!("Your {} is fully loaded", weapon.name()))
+                                }
+                            },
+                        )
+                    },
+                )
+            })
     }
 
     fn on_finish(&self, action: &Action, world: &mut World) {

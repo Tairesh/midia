@@ -41,11 +41,27 @@ impl ActionImpl for Reload {
     }
 
     fn on_finish(&self, action: &Action, world: &mut World) {
-        action.owner_mut(world).reload();
-        let weapon_name = action.owner(world).wield.main_hand().unwrap().name();
+        let mut units = world.units_mut();
+        action.owner_mut(&mut units).reload();
+        let weapon_name = action.owner(&units).wield.main_hand().unwrap().name();
         world.log().push(LogEvent::success(
-            format!("You reload your {weapon_name}"),
-            action.owner(world).pos,
+            format!(
+                "{} reload{} your {weapon_name}",
+                action.owner(&units).name_for_actions(),
+                if action
+                    .owner(&units)
+                    .personality
+                    .mind
+                    .gender
+                    .pronounce()
+                    .verb_ends_with_s()
+                {
+                    "s"
+                } else {
+                    ""
+                }
+            ),
+            action.owner(&units).pos,
         ));
     }
 }
@@ -62,34 +78,34 @@ mod tests {
 
     #[test]
     fn test_cant_reload_without_weapon() {
-        let mut world = prepare_world();
-        world.units.player_mut().wield.clear();
+        let world = prepare_world();
+        world.units_mut().player_mut().wield.clear();
 
         assert!(Action::new(0, Reload {}.into(), &world).is_err());
     }
 
     #[test]
     fn test_cant_reload_without_ammo() {
-        let mut world = prepare_world();
+        let world = prepare_world();
         world
-            .units
+            .units_mut()
             .player_mut()
             .wield
             .wield(Item::new(WOODEN_SHORTBOW));
-        world.units.player_mut().wear.clear();
+        world.units_mut().player_mut().wear.clear();
 
         assert!(Action::new(0, Reload {}.into(), &world).is_err());
     }
 
     #[test]
     fn test_cant_reload_when_weapon_is_full() {
-        let mut world = prepare_world();
+        let world = prepare_world();
         world
-            .units
+            .units_mut()
             .player_mut()
             .wield
             .wield(Item::new(WOODEN_SHORTBOW).with_items_inside([Item::new(WOODEN_ARROW)]));
-        world.units.player_mut().wear.add(
+        world.units_mut().player_mut().wear.add(
             Item::new(QUIVER).with_items_inside([Item::new(WOODEN_ARROW)]),
             0,
         );
@@ -101,17 +117,17 @@ mod tests {
     fn test_reload_bow() {
         let mut world = prepare_world();
         world
-            .units
+            .units_mut()
             .player_mut()
             .wield
             .wield(Item::new(WOODEN_SHORTBOW));
-        world.units.player_mut().wear.add(
+        world.units_mut().player_mut().wear.add(
             Item::new(QUIVER).with_items_inside([Item::new(WOODEN_ARROW)]),
             0,
         );
         assert_eq!(
             world
-                .units
+                .units()
                 .player()
                 .wield
                 .main_hand()
@@ -124,12 +140,12 @@ mod tests {
         );
 
         let action = Action::new(0, Reload {}.into(), &world).unwrap();
-        world.units.player_mut().action = Some(action);
+        world.units_mut().player_mut().action = Some(action);
         world.tick();
 
         assert_eq!(
             world
-                .units
+                .units()
                 .player()
                 .wield
                 .main_hand()
@@ -147,17 +163,17 @@ mod tests {
     fn test_reload_crossbow() {
         let mut world = prepare_world();
         world
-            .units
+            .units_mut()
             .player_mut()
             .wield
             .wield(Item::new(WOODEN_CROSSBOW));
-        world.units.player_mut().wear.add(
+        world.units_mut().player_mut().wear.add(
             Item::new(QUIVER).with_items_inside([Item::new(WOODEN_BOLT)]),
             0,
         );
         assert_eq!(
             world
-                .units
+                .units()
                 .player()
                 .wield
                 .main_hand()
@@ -170,12 +186,12 @@ mod tests {
         );
 
         let action = Action::new(0, Reload {}.into(), &world).unwrap();
-        world.units.player_mut().action = Some(action);
+        world.units_mut().player_mut().action = Some(action);
         world.tick();
 
         assert_eq!(
             world
-                .units
+                .units()
                 .player()
                 .wield
                 .main_hand()

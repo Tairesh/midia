@@ -3,11 +3,11 @@ use std::time::Instant;
 use geometry::Direction;
 use tetra::{input::KeyModifier, Context};
 
-use crate::game::traits::Name;
 use crate::{
     colors::Colors,
     game::{
         actions::implements::{Drop, Reload, Skip, Walk, Wear},
+        traits::Name,
         BodySlot, LogEvent,
     },
     input,
@@ -97,13 +97,16 @@ impl GameModeImpl for Walking {
                     }
                     KeyBindingAction::RangeAttack => {
                         let world = game.world.borrow();
-                        if let Some(weapon) = world.units.player().wield.main_hand() {
+                        let units = world.units();
+                        if let Some(weapon) = units.player().wield.main_hand() {
                             if weapon.melee_damage().distance > 0 {
+                                drop(units);
                                 drop(world);
                                 game.push_mode(PikeAttack::new().into());
                                 return None;
                             }
                         }
+                        drop(units);
                         drop(world);
                         game.push_mode(Shooting::new().into());
                     }
@@ -111,10 +114,15 @@ impl GameModeImpl for Walking {
                         game.try_start_action(Reload {}.into());
                     }
                     KeyBindingAction::SwapHands => {
-                        game.world.borrow_mut().units.player_mut().wield.swap();
+                        game.world
+                            .borrow_mut()
+                            .units_mut()
+                            .player_mut()
+                            .wield
+                            .swap();
                         let event = LogEvent::info(
                             "You swap your hands",
-                            game.world.borrow().units.player().pos,
+                            game.world.borrow().units().player().pos,
                         );
                         game.world.borrow_mut().log().push(event);
                         game.update_ui(ctx);
@@ -124,22 +132,22 @@ impl GameModeImpl for Walking {
                         let items: Vec<String> = game
                             .world
                             .borrow()
-                            .units
+                            .units()
                             .player()
                             .wear
                             .iter()
                             .map(|i| i.name().to_string())
                             .collect();
-                        let armor = game.world.borrow().units.player().armor(BodySlot::Torso);
+                        let armor = game.world.borrow().units().player().armor(BodySlot::Torso);
                         let toughness = game
                             .world
                             .borrow()
-                            .units
+                            .units()
                             .player()
                             .personality
                             .char_sheet
                             .toughness();
-                        let parry = game.world.borrow().units.player().parry();
+                        let parry = game.world.borrow().units().player().parry();
                         game.log.log(
                             format!(
                                 "You wear: {}, armor value is {armor}, toughness: {toughness}, parry: {parry}",

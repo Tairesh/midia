@@ -63,7 +63,8 @@ impl ActionImpl for Shoot {
             let unit_id = units.iter().copied().next().unwrap();
             drop(map);
 
-            let target = world.units.get_unit(unit_id);
+            let units = world.units();
+            let target = units.get_unit(unit_id);
             if target.is_dead() {
                 // This should be unreachable, but just in case.
                 return No("You can't shoot to a dead body.".to_string());
@@ -95,13 +96,14 @@ impl ActionImpl for Shoot {
         let unit_id = units.iter().copied().next().unwrap();
         drop(map);
 
-        let unit = world.units.get_unit(unit_id);
+        let units = world.units();
+        let unit = units.get_unit(unit_id);
         if unit.is_dead() {
             return;
         }
         let target = unit.pos;
 
-        let owner = action.owner(world);
+        let owner = action.owner(&units);
         let weapon_name = owner.wield.main_hand().map_or(
             owner.personality.appearance.race.natural_weapon().0,
             Item::name,
@@ -110,7 +112,7 @@ impl ActionImpl for Shoot {
         let attack_result = ranged_attack_unit(AttackType::Shoot, owner, unit, world);
         match attack_result {
             UnitRangedAttackResult::InnocentBystander(unit_id, hit) => {
-                let victim = world.units.get_unit(unit_id);
+                let victim = units.get_unit(unit_id);
                 let damage = hit.params.damage.to_string();
                 for event in unit_attack_success(
                     owner,
@@ -152,7 +154,9 @@ impl ActionImpl for Shoot {
                     world.log().push(event);
                 }
 
-                world.apply_damage(victim.id, hit);
+                let victim_id = victim.id;
+                drop(units);
+                world.apply_damage(victim_id, hit);
             }
             UnitRangedAttackResult::Miss => {
                 world.log().push(LogEvent::warning(
@@ -174,6 +178,7 @@ impl ActionImpl for Shoot {
                     ),
                     target,
                 ));
+                drop(units);
             }
             UnitRangedAttackResult::Hit(hit) => {
                 let damage = hit.params.damage.to_string();
@@ -211,17 +216,21 @@ impl ActionImpl for Shoot {
                     world.log().push(event);
                 }
 
-                world.apply_damage(unit.id, hit);
+                let unit_id = unit.id;
+                drop(units);
+                world.apply_damage(unit_id, hit);
             }
             UnitRangedAttackResult::Explosion(_, _) => {
-                todo!()
+                drop(units);
+                todo!();
             }
             UnitRangedAttackResult::Impossible => {
                 panic!("Impossible ranged attack");
             }
         }
 
-        let owner = action.owner_mut(world);
+        let mut units = world.units_mut();
+        let owner = action.owner_mut(&mut units);
         if let Some(weapon) = owner.wield.main_hand_mut() {
             if weapon.need_ammo().is_some() {
                 weapon.container_mut().unwrap().items.pop();
@@ -260,20 +269,20 @@ mod tests {
         let target = Point::new(3, 0);
         add_npc(&mut world, target);
         world
-            .units
+            .units_mut()
             .player_mut()
             .wield
             .wield(Item::new(WOODEN_SHORTBOW));
-        world.units.player_mut().wear.add(
+        world.units_mut().player_mut().wear.add(
             Item::new(QUIVER).with_items_inside([Item::new(WOODEN_ARROW)]),
             0,
         );
 
         // Can't shoot before loading arrow to bow.
         assert!(Action::new(0, Shoot::new(target).into(), &world).is_err());
-        world.units.player_mut().reload();
+        world.units_mut().player_mut().reload();
 
-        world.units.player_mut().action =
+        world.units_mut().player_mut().action =
             Some(Action::new(0, Shoot::new(target).into(), &world).unwrap());
         world.tick();
 
@@ -300,7 +309,7 @@ mod tests {
 
         let target = Point::new(3, 0);
         add_npc(&mut world, target);
-        world.units.player_mut().wield.clear();
+        world.units_mut().player_mut().wield.clear();
 
         assert!(Action::new(0, Shoot::new(target).into(), &world).is_err());
     }
@@ -311,15 +320,15 @@ mod tests {
         assert_eq!(world.meta.current_tick, 0);
 
         world
-            .units
+            .units_mut()
             .player_mut()
             .wield
             .wield(Item::new(WOODEN_SHORTBOW));
-        world.units.player_mut().wear.add(
+        world.units_mut().player_mut().wear.add(
             Item::new(QUIVER).with_items_inside([Item::new(WOODEN_ARROW)]),
             0,
         );
-        world.units.player_mut().reload();
+        world.units_mut().player_mut().reload();
 
         // Distance of wooden shortbow is 12 so we can shoot to 12*4=48 tiles.
         let target_far = Point::new(48, 0);
@@ -338,12 +347,12 @@ mod tests {
         let target = Point::new(3, 0);
         add_npc(&mut world, target);
         world
-            .units
+            .units_mut()
             .player_mut()
             .wield
             .wield(Item::new(WOODEN_SHORTBOW));
-        world.units.player_mut().wear.clear();
-        world.units.player_mut().reload();
+        world.units_mut().player_mut().wear.clear();
+        world.units_mut().player_mut().reload();
 
         assert!(Action::new(0, Shoot::new(target).into(), &world).is_err());
     }
@@ -355,17 +364,17 @@ mod tests {
         let target = Point::new(3, 0);
         add_npc(&mut world, target);
         world
-            .units
+            .units_mut()
             .player_mut()
             .wield
             .wield(Item::new(WOODEN_CROSSBOW));
-        world.units.player_mut().wear.add(
+        world.units_mut().player_mut().wear.add(
             Item::new(QUIVER).with_items_inside(vec![Item::new(WOODEN_BOLT); 10]),
             0,
         );
-        world.units.player_mut().reload();
+        world.units_mut().player_mut().reload();
 
-        world.units.player_mut().action =
+        world.units_mut().player_mut().action =
             Some(Action::new(0, Shoot::new(target).into(), &world).unwrap());
         world.tick();
 

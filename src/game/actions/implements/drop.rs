@@ -45,9 +45,13 @@ impl ActionImpl for Drop {
     }
 
     fn on_finish(&self, action: &Action, world: &mut World) {
-        let owner = action.owner_mut(world);
-        let item = owner.wield.take_from_active_hand().unwrap();
-        let owner = action.owner(world);
+        let item = action
+            .owner_mut(&mut world.units_mut())
+            .wield
+            .take_from_active_hand()
+            .unwrap();
+        let units = world.units();
+        let owner = action.owner(&units);
         let pos = owner.pos + self.dir;
         let name = item.name().to_string();
         world.map().get_tile_mut(pos).items.push(item);
@@ -75,10 +79,14 @@ mod tests {
         let mut world = prepare_world();
         world.map().get_tile_mut(Point::new(0, 0)).terrain = Dirt::default().into();
         world.map().get_tile_mut(Point::new(0, 0)).items.clear();
-        world.units.player_mut().wield.clear();
-        world.units.player_mut().wield.wield(Item::new(GOD_AXE));
+        world.units_mut().player_mut().wield.clear();
+        world
+            .units_mut()
+            .player_mut()
+            .wield
+            .wield(Item::new(GOD_AXE));
 
-        world.units.player_mut().action = Some(
+        world.units_mut().player_mut().action = Some(
             Action::new(
                 0,
                 Drop {
@@ -91,8 +99,8 @@ mod tests {
         );
         world.tick();
 
-        assert_eq!(Point::new(0, 0), world.units.player().pos);
-        assert!(world.units.player().wield.is_empty());
+        assert_eq!(Point::new(0, 0), world.units().player().pos);
+        assert!(world.units().player().wield.is_empty());
         let mut map = world.map();
         assert_eq!(1, map.get_tile(Point::new(0, 0)).items.len());
         let item = map.get_tile(Point::new(0, 0)).items.first().unwrap();

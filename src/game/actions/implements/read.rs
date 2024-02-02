@@ -56,8 +56,10 @@ impl ActionImpl for Read {
         }
     }
     fn on_finish(&self, action: &Action, world: &mut World) {
-        if action.owner(world).is_player() {
-            let pos = action.owner(world).pos + self.dir;
+        let units = world.units();
+        let owner = action.owner(&units);
+        if owner.is_player() {
+            let pos = owner.pos + self.dir;
             world.log().push(LogEvent::new(
                 world.map().get_tile(pos).read(),
                 pos,
@@ -89,8 +91,8 @@ mod tests {
 
         let typ = Read::new_test(Direction::East, RollResult::new(4, 4));
         if let Ok(action) = Action::new(0, typ.into(), &world) {
-            world.units.player_mut().action = Some(action);
-            while world.units.player().action.is_some() {
+            world.units_mut().player_mut().action = Some(action);
+            while world.units().player().action.is_some() {
                 world.tick();
             }
         } else {

@@ -1,10 +1,9 @@
 use geometry::Direction;
 
-use crate::game::traits::Name;
-
 use super::super::{
     super::{
         log::{LogCategory, LogEvent},
+        traits::Name,
         Attribute, Avatar, World,
     },
     Action, ActionImpl,
@@ -34,23 +33,20 @@ impl ActionImpl for WieldFromGround {
     }
 
     fn on_finish(&self, action: &Action, world: &mut World) {
-        let pos = action.owner(world).pos + self.dir;
+        let mut units = world.units_mut();
+        let owner = action.owner_mut(&mut units);
+        let pos = owner.pos + self.dir;
         let item = world.map().get_tile_mut(pos).items.pop();
         if let Some(item) = item {
             let mut msg = format!(
                 "{} wield{} the {}.",
-                action.owner(world).name_for_actions(),
-                if action.owner(world).is_player() {
-                    ""
-                } else {
-                    "s"
-                },
+                owner.name_for_actions(),
+                if owner.is_player() { "" } else { "s" },
                 item.name()
             );
-            if action.owner(world).is_player() {
+            if owner.is_player() {
                 if let Some(dice) = item.melee_damage().minimum_strength {
-                    if action
-                        .owner(world)
+                    if owner
                         .personality
                         .char_sheet
                         .get_attribute_with_modifiers(Attribute::Strength)
@@ -61,7 +57,7 @@ impl ActionImpl for WieldFromGround {
                     }
                 }
             }
-            action.owner_mut(world).wield.wield(item);
+            owner.wield.wield(item);
             world
                 .log()
                 .push(LogEvent::new(msg, pos, LogCategory::Success));
@@ -89,10 +85,10 @@ mod tests {
             .items
             .push(Item::new(GOD_AXE));
 
-        assert!(world.units.player().wield.is_empty());
+        assert!(world.units().player().wield.is_empty());
         assert_eq!(0, world.meta.current_tick);
 
-        world.units.player_mut().action = Some(
+        world.units_mut().player_mut().action = Some(
             Action::new(
                 0,
                 WieldFromGround {
@@ -105,21 +101,22 @@ mod tests {
         );
         world.tick();
 
-        let item = world.units.player().wield.main_hand().unwrap();
+        let units = world.units();
+        let item = units.player().wield.main_hand().unwrap();
         assert_eq!(item.proto().id, GOD_AXE);
         assert_eq!(0, world.map().get_tile(Point::new(1, 0)).items.len());
     }
 
     #[test]
     fn test_wielding_two_handed_items() {
-        let mut world = prepare_world();
+        let world = prepare_world();
         world
-            .units
+            .units_mut()
             .player_mut()
             .wield
             .wield(Item::new(STONE_SHOVEL));
-        assert!(world.units.player().wield.can_wield(true).is_err());
-        assert!(world.units.player().wield.can_wield(false).is_err());
+        assert!(world.units().player().wield.can_wield(true).is_err());
+        assert!(world.units().player().wield.can_wield(false).is_err());
 
         world.map().get_tile_mut(Point::new(1, 0)).items.clear();
         world
@@ -141,9 +138,13 @@ mod tests {
     #[test]
     fn test_wielding_one_handed_items() {
         let mut world = prepare_world();
-        world.units.player_mut().wield.wield(Item::new(GOD_AXE));
-        assert!(world.units.player().wield.can_wield(false).is_ok());
-        assert!(world.units.player().wield.can_wield(true).is_err());
+        world
+            .units_mut()
+            .player_mut()
+            .wield
+            .wield(Item::new(GOD_AXE));
+        assert!(world.units().player().wield.can_wield(false).is_ok());
+        assert!(world.units().player().wield.can_wield(true).is_err());
 
         world.map().get_tile_mut(Point::new(1, 0)).items.clear();
         world
@@ -152,7 +153,7 @@ mod tests {
             .items
             .push(random_book());
 
-        world.units.player_mut().action = Some(
+        world.units_mut().player_mut().action = Some(
             Action::new(
                 0,
                 WieldFromGround {
@@ -165,9 +166,10 @@ mod tests {
         );
         world.tick();
 
-        let item = world.units.player().wield.main_hand().unwrap();
+        let units = world.units();
+        let item = units.player().wield.main_hand().unwrap();
         assert_eq!(item.proto().id, random_book().proto().id);
         assert_eq!(0, world.map().get_tile(Point::new(1, 0)).items.len());
-        assert!(world.units.player().wield.can_wield(false).is_err());
+        assert!(world.units().player().wield.can_wield(false).is_err());
     }
 }

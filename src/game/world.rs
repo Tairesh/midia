@@ -1,10 +1,9 @@
-use std::cell::{RefCell, RefMut};
+use std::cell::{Ref, RefCell, RefMut};
 use std::collections::{HashMap, HashSet};
 use std::convert::TryFrom;
+use std::rc::Rc;
 
 use geometry::{Direction, Point, TwoDimDirection};
-
-use crate::game::traits::Name;
 
 use super::{
     super::{
@@ -15,6 +14,7 @@ use super::{
     map::{field_of_view_set, Fov, TerrainView},
     races::{BodyColor, Gender, Race, Sex},
     savage::HitResult,
+    traits::Name,
     units::Units,
     units::{Appearance, Mind, Personality},
     Action, Avatar, CharSheet, Chunk, ChunkPos, Log, LogEvent, Map, TilePos,
@@ -26,7 +26,7 @@ const VISION_RANGE: i32 = 64;
 pub struct World {
     pub meta: Meta,
     pub game_view: GameView,
-    pub units: Units,
+    units: Rc<RefCell<Units>>,
     map: RefCell<Map>,
     fov: Fov,
     log: RefCell<Log>,
@@ -51,11 +51,11 @@ impl World {
             }),
             meta,
             game_view,
-            units: Units::new(units),
+            units: Rc::new(RefCell::new(Units::new(units))),
             fov: Fov::default(),
             log: RefCell::new(log),
         };
-        world.units.load_units();
+        world.units_mut().load_units();
         world.calc_fov();
         world
     }
@@ -126,18 +126,16 @@ impl World {
             Point::new(2, 5),
         ));
 
-        self.units.iter().for_each(|(&i, unit)| {
+        self.units().iter().for_each(|(&i, unit)| {
             self.map.borrow_mut().get_tile_mut(unit.pos).on_step(i);
         });
         self
     }
 
     pub fn calc_fov(&mut self) {
-        self.fov.set_visible(field_of_view_set(
-            self.units.player().pos,
-            VISION_RANGE,
-            &self.map.borrow(),
-        ));
+        let center = self.units().player().pos;
+        self.fov
+            .set_visible(field_of_view_set(center, VISION_RANGE, &self.map.borrow()));
     }
 
     // TODO: move this to savefile::save
@@ -155,7 +153,7 @@ impl World {
                 .map_err(SaveError::from)?
                 .as_str(),
         );
-        for (_, unit) in self.units.iter() {
+        for (_, unit) in self.units().iter() {
             data.push('\n');
             data.push_str(
                 serde_json::to_string(unit)
@@ -199,25 +197,40 @@ impl World {
         self.fov.visible().contains(&pos.into())
     }
 
+    pub fn units_clone(&self) -> Rc<RefCell<Units>> {
+        self.units.clone()
+    }
+
+    pub fn units_mut(&self) -> RefMut<Units> {
+        self.units.borrow_mut()
+    }
+
+    pub fn units(&self) -> Ref<Units> {
+        self.units.borrow()
+    }
+
     pub fn is_observable(&self, pos: impl Into<Point>) -> bool {
-        self.units.player().pos.square_distance(pos.into()) <= (VISION_RANGE * VISION_RANGE) as u32
+        self.units().player().pos.square_distance(pos.into())
+            <= (VISION_RANGE * VISION_RANGE) as u32
     }
 
     pub fn move_avatar(&mut self, unit_id: usize, dir: Direction) {
-        let mut pos = self.units.get_unit(unit_id).pos;
+        let mut pos = self.units().get_unit(unit_id).pos;
         let (old_chunk, _) = pos.to_chunk();
         self.map().get_tile_mut(pos).off_step(unit_id);
         pos += dir;
-        let unit = self.units.get_unit_mut(unit_id);
+        let mut units = self.units_mut();
+        let unit = units.get_unit_mut(unit_id);
         unit.pos = pos;
         if let Ok(dir) = TwoDimDirection::try_from(dir) {
             unit.vision = dir;
         }
         self.map().get_tile_mut(pos).on_step(unit_id);
         if unit_id == 0 && old_chunk != pos.to_chunk().0 {
-            self.units.load_units();
+            units.load_units();
         }
         if unit_id == 0 {
+            drop(units);
             self.calc_fov();
         }
     }
@@ -260,9 +273,8 @@ impl World {
                     .iter()
                     .copied()
                     .map(|i| {
-                        let unit = self.units.get_unit(i);
                         (if multiline { " - " } else { "" }).to_string()
-                            + unit.name_for_actions().as_str()
+                            + self.units().get_unit(i).name_for_actions().as_str()
                     })
                     .collect(),
             );
@@ -274,7 +286,7 @@ impl World {
 
     pub fn add_unit(&mut self, unit: Avatar) -> usize {
         let pos = unit.pos;
-        let new_id = self.units.add_unit(unit);
+        let new_id = self.units_mut().add_unit(unit);
         self.map().get_tile_mut(pos).units.insert(new_id);
 
         new_id
@@ -284,6 +296,7 @@ impl World {
     fn act(&mut self) {
         let actions: Vec<Action> = self
             .units
+            .borrow()
             .iter()
             .filter(|(_, u)| u.action.is_some())
             .map(|(_, u)| u.action.as_ref().unwrap().clone())
@@ -291,7 +304,7 @@ impl World {
         for action in actions {
             action.act(self);
             if self.meta.current_tick >= action.finish {
-                self.units.get_unit_mut(action.owner).action = None;
+                self.units_mut().get_unit_mut(action.owner).action = None;
             }
         }
     }
@@ -303,7 +316,7 @@ impl World {
     fn shock_out(&mut self) {
         let current_tick = self.meta.current_tick;
         let mut units_to_shock_out = Vec::new();
-        for unit in self.units.loaded_units() {
+        for unit in self.units().loaded_units() {
             if unit
                 .personality
                 .char_sheet
@@ -312,10 +325,10 @@ impl World {
                 units_to_shock_out.push(unit.id);
             }
         }
+        let mut units = self.units_mut();
         for unit_id in units_to_shock_out {
-            let unit = self.units.get_unit_mut(unit_id);
+            let unit = units.get_unit_mut(unit_id);
             if unit.personality.char_sheet.try_to_shock_out(current_tick) {
-                let unit = self.units.get_unit(unit_id);
                 self.log().push(LogEvent::info(
                     format!("{} is out of the shock!", unit.name_for_actions()),
                     unit.pos,
@@ -326,25 +339,26 @@ impl World {
 
     pub fn apply_damage(&mut self, unit_id: usize, hit: HitResult) {
         let current_tick = self.meta.current_tick;
-        let pos = self.units.get_unit(unit_id).pos;
+        let pos = self.units().get_unit(unit_id).pos;
         let items_dropped = self
             .units
+            .borrow_mut()
             .get_unit_mut(unit_id)
             .apply_hit(hit, current_tick);
         for item in items_dropped {
             self.map().get_tile_mut(pos).items.push(item);
         }
 
-        if self.units.get_unit(unit_id).is_dead() {
+        if self.units().get_unit(unit_id).is_dead() {
             self.log().push(LogEvent::danger(
                 format!(
                     "{} is dead!",
-                    self.units.get_unit(unit_id).name_for_actions()
+                    self.units().get_unit(unit_id).name_for_actions()
                 ),
                 pos,
             ));
             self.map().get_tile_mut(pos).units.remove(&unit_id);
-            self.units.unload_unit(unit_id);
+            self.units_mut().unload_unit(unit_id);
         }
     }
 
@@ -353,7 +367,7 @@ impl World {
         self.act();
 
         let mut spend = 0;
-        while self.units.player().action.is_some() && spend < Self::SPEND_LIMIT {
+        while self.units().player().action.is_some() && spend < Self::SPEND_LIMIT {
             self.meta.current_tick += 1;
             spend += 1;
             self.act();
@@ -411,16 +425,20 @@ pub mod tests {
         )
         .unwrap();
         let length = action.length;
-        let npc = world.units.get_unit_mut(1);
+        let mut units = world.units_mut();
+        let npc = units.get_unit_mut(1);
         npc.action = Some(action);
-        assert_eq!(Point::new(0, 0), world.units.player().pos);
-        assert_eq!(Point::new(1, 0), world.units.get_unit(1).pos);
+        assert_eq!(Point::new(0, 0), units.player().pos);
+        assert_eq!(Point::new(1, 0), units.get_unit(1).pos);
+        drop(units);
         for _ in 0..length {
-            world.units.player_mut().action = Some(Action::new(0, Skip {}.into(), &world).unwrap());
+            world.units_mut().player_mut().action =
+                Some(Action::new(0, Skip {}.into(), &world).unwrap());
             world.tick();
         }
-        assert_eq!(Point::new(0, 0), world.units.player().pos);
-        assert_eq!(Point::new(2, 0), world.units.get_unit(1).pos)
+        let units = world.units();
+        assert_eq!(Point::new(0, 0), units.player().pos);
+        assert_eq!(Point::new(2, 0), units.get_unit(1).pos)
     }
 
     #[test]
@@ -429,7 +447,7 @@ pub mod tests {
         assert!(world
             .fov
             .visible()
-            .contains(&world.units.player().pos.into()));
+            .contains(&world.units().player().pos.into()));
 
         world.map().get_tile_mut(Point::new(1, 0)).terrain = Dirt::default().into();
         world.map().get_tile_mut(Point::new(2, 0)).terrain = Boulder::new(BoulderSize::Huge).into();

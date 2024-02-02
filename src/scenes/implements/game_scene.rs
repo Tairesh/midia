@@ -46,7 +46,8 @@ impl GameScene {
     pub fn new(app: &App) -> Self {
         let world = app.get_world();
         let world_borrow = world.borrow();
-        let player = world_borrow.units.player();
+        let units = world_borrow.units();
+        let player = units.player();
         let name_label = Box::new(Label::new(
             player.personality.mind.name.as_str(),
             app.assets.fonts.header.clone(),
@@ -90,6 +91,7 @@ impl GameScene {
             },
         ));
 
+        drop(units);
         drop(world_borrow);
         Self {
             sprites: [
@@ -125,13 +127,13 @@ impl GameScene {
 
     pub fn try_rotate_player(&mut self, dir: Direction) {
         if let Ok(dir) = TwoDimDirection::try_from(dir) {
-            self.world.borrow_mut().units.player_mut().vision = dir;
+            self.world.borrow_mut().units_mut().player_mut().vision = dir;
             self.need_redraw = true;
         }
     }
 
     pub fn examine(&mut self, dir: Direction) {
-        let pos = self.world.borrow().units.player().pos + dir;
+        let pos = self.world.borrow().units().player().pos + dir;
         self.log
             .log(self.world.borrow().this_is(pos, false), Colors::WHITE_SMOKE);
         self.need_redraw = true;
@@ -147,7 +149,7 @@ impl GameScene {
         let action = Action::new(0, typ, &self.world.borrow());
         match action {
             Ok(action) => {
-                self.world.borrow_mut().units.player_mut().action = Some(action);
+                self.world.borrow_mut().units_mut().player_mut().action = Some(action);
                 self.need_redraw = true;
             }
             Err(msg) => self.cancel_action_msg(msg),
@@ -207,12 +209,13 @@ impl GameScene {
             .update(current_time, ctx, window_size);
 
         let world = self.world.borrow();
-        let player = world.units.player();
-        let main_hand_item = player.wield.main_hand();
+        let units = world.units();
+        let main_hand_item = units.player().wield.main_hand();
         let main_hand_item_name = main_hand_item.map_or("nothing", Item::name).to_string();
         let main_hand_item_sprite = main_hand_item.map_or("empty", Item::looks_like).to_string();
         let main_hand_item_color = main_hand_item.map(Item::color).unwrap_or_default();
 
+        drop(units);
         drop(world);
 
         self.main_hand_display_label()
@@ -236,7 +239,7 @@ impl SceneImpl for GameScene {
             self.need_redraw = true;
         }
 
-        if self.world.borrow().units.player().action.is_some() {
+        if self.world.borrow().units().player().action.is_some() {
             self.make_world_tick(ctx);
             self.need_redraw = true;
 
@@ -278,7 +281,7 @@ impl SceneImpl for GameScene {
             Vec2::new(5.0, 5.0),
             3.0,
             false,
-            self.world.borrow().units.player(),
+            self.world.borrow().units().player(),
         );
         self.current_mode().borrow_mut().draw(ctx, self);
     }

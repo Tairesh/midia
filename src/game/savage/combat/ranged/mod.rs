@@ -41,11 +41,15 @@ pub fn ranged_attack_unit(
             return UnitRangedAttackResult::Miss;
         }
         let random_target = units_to_hit[rand::random::<usize>() % units_to_hit.len()];
-        let target = world.units.get_unit(random_target);
 
         UnitRangedAttackResult::InnocentBystander(
             random_target,
-            calculate_hit(attack_type, attacker, target, false),
+            calculate_hit(
+                attack_type,
+                attacker,
+                world.units().get_unit(random_target),
+                false,
+            ),
         )
     } else if throw_roll.total < 4 {
         UnitRangedAttackResult::Miss

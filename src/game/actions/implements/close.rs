@@ -29,15 +29,21 @@ impl ActionImpl for Close {
     }
 
     fn on_finish(&self, action: &Action, world: &mut World) {
-        let owner = action.owner(world);
+        let units = world.units();
+        let owner = action.owner(&units);
         let pos = owner.pos + self.dir;
         let mut map = world.map();
         let tile = map.get_tile_mut(pos);
 
         world.log().push(LogEvent::new(
             format!(
-                "{} closed the {}",
-                action.owner(world).name_for_actions(),
+                "{} close{} the {}",
+                action.owner(&units).name_for_actions(),
+                if action.owner(&units).pronounce().verb_ends_with_s() {
+                    "s"
+                } else {
+                    ""
+                },
                 tile.terrain.name()
             ),
             pos,
@@ -52,6 +58,7 @@ impl ActionImpl for Close {
         tile.terrain = new_terrain;
 
         drop(map);
+        drop(units);
         world.calc_fov();
     }
 }
@@ -75,15 +82,21 @@ mod tests {
             dir: Direction::East,
         };
         if let Ok(action) = Action::new(0, typ.into(), &world) {
-            world.units.player_mut().action = Some(action);
-            while world.units.player().action.is_some() {
+            world.units_mut().player_mut().action = Some(action);
+            while world.units().player().action.is_some() {
                 world.tick();
             }
         } else {
             panic!("Cannot close");
         }
 
-        assert!(world.log().new_events()[0].msg.contains("closed"));
+        let mut log = world.log();
+        let event = &log.new_events()[0];
+        assert!(
+            event.msg.contains("You close the chest"),
+            "event: {:?}",
+            event
+        );
         assert!(world
             .map()
             .get_tile(Point::new(1, 0))

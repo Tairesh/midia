@@ -41,7 +41,7 @@ impl GameModeImpl for Closing {
         } else {
             DIR9.into_iter()
                 .filter(|&d| {
-                    let pos = world.units.player().pos + d;
+                    let pos = world.units().player().pos + d;
                     world.map().get_tile(pos).terrain.can_be_closed()
                 })
                 .map(|d| (d.into(), Colors::WHITE_SMOKE, CursorType::Select))

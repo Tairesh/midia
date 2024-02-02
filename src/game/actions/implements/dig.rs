@@ -42,7 +42,8 @@ impl ActionImpl for Dig {
     }
 
     fn on_start(&self, action: &Action, world: &mut World) {
-        let owner = action.owner(world);
+        let units = world.units();
+        let owner = action.owner(&units);
         world.log().push(LogEvent::new(
             format!("{} started digging", owner.name_for_actions()),
             owner.pos,
@@ -51,7 +52,8 @@ impl ActionImpl for Dig {
     }
 
     fn on_finish(&self, action: &Action, world: &mut World) {
-        let owner = action.owner(world);
+        let units = world.units();
+        let owner = action.owner(&units);
         let pos = owner.pos + self.dir;
         let mut map = world.map();
         let tile = map.get_tile_mut(pos);
@@ -76,6 +78,7 @@ impl ActionImpl for Dig {
             pos,
             LogCategory::Info,
         ));
+        drop(units);
         world.calc_fov();
     }
 }
@@ -94,7 +97,7 @@ mod tests {
     #[test]
     fn test_digging() {
         let mut world = prepare_world();
-        world.units.player_mut().wield.clear();
+        world.units_mut().player_mut().wield.clear();
         world.map().get_tile_mut(Point::new(1, 0)).terrain = Dirt::default().into();
 
         let typ = Dig {
@@ -103,16 +106,16 @@ mod tests {
         assert!(Action::new(0, typ.into(), &world).is_err());
 
         world
-            .units
+            .units_mut()
             .player_mut()
             .wield
             .wield(Item::new(STONE_SHOVEL));
-        world.units.player_mut().action = Some(Action::new(0, typ.into(), &world).unwrap());
-        while world.units.player().action.is_some() {
+        world.units_mut().player_mut().action = Some(Action::new(0, typ.into(), &world).unwrap());
+        while world.units().player().action.is_some() {
             world.tick();
         }
 
-        assert_eq!(Point::new(0, 0), world.units.player().pos);
+        assert_eq!(Point::new(0, 0), world.units().player().pos);
         assert!(matches!(
             world.map().get_tile(Point::new(1, 0)).terrain,
             Terrain::Pit(..)

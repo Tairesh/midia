@@ -43,7 +43,7 @@ impl GameModeImpl for PickingUp {
             DIR9.iter()
                 .copied()
                 .filter(|d| {
-                    let pos = world.units.player().pos + *d;
+                    let pos = world.units().player().pos + *d;
                     !world.map().get_tile(pos).items.is_empty()
                 })
                 .map(|d| (d.into(), Colors::WHITE_SMOKE, CursorType::Select))
@@ -52,7 +52,7 @@ impl GameModeImpl for PickingUp {
     }
 
     fn can_push(&self, world: &World) -> Result<(), String> {
-        world.units.player().wield.can_wield(false)
+        world.units().player().wield.can_wield(false)
     }
 
     fn update(&mut self, ctx: &mut Context, game: &mut GameScene) -> SomeTransitions {

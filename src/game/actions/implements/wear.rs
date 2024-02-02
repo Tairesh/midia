@@ -38,8 +38,9 @@ impl ActionImpl for Wear {
     }
 
     fn on_finish(&self, action: &Action, world: &mut World) {
-        if let Some(item) = action.owner_mut(world).wield.take_from_active_hand() {
-            let owner = action.owner(world);
+        let mut units = world.units_mut();
+        if let Some(item) = action.owner_mut(&mut units).wield.take_from_active_hand() {
+            let owner = action.owner(&units);
             world.log().push(LogEvent::success(
                 format!(
                     "{} put{} on the {}.",
@@ -52,7 +53,7 @@ impl ActionImpl for Wear {
             // TODO: use variant
             for variant in 0..item.proto().wearable.as_ref().unwrap().variants.len() {
                 if owner.wear.can_add(&item, variant) {
-                    action.owner_mut(world).wear.add(item, 0);
+                    action.owner_mut(&mut units).wear.add(item, 0);
                     break;
                 }
             }
@@ -71,12 +72,12 @@ mod tests {
     #[test]
     fn test_wear() {
         let mut world = prepare_world();
-        world.units.player_mut().wield.wield(Item::new(CLOAK));
-        world.units.player_mut().wear.clear();
+        world.units_mut().player_mut().wield.wield(Item::new(CLOAK));
+        world.units_mut().player_mut().wear.clear();
 
         if let Ok(action) = Action::new(0, Wear {}.into(), &world) {
-            world.units.player_mut().action = Some(action);
-            while world.units.player().action.is_some() {
+            world.units_mut().player_mut().action = Some(action);
+            while world.units().player().action.is_some() {
                 world.tick();
             }
         } else {
@@ -84,9 +85,9 @@ mod tests {
         }
 
         assert!(world.log().new_events()[0].msg.contains("put on the cloak"));
-        assert!(world.units.player().wield.is_empty());
+        assert!(world.units().player().wield.is_empty());
         assert!(world
-            .units
+            .units()
             .player()
             .wear
             .iter()
@@ -95,11 +96,15 @@ mod tests {
 
     #[test]
     fn test_wear_invalid_items() {
-        let mut world = prepare_world();
-        world.units.player_mut().wield.clear();
+        let world = prepare_world();
+        world.units_mut().player_mut().wield.clear();
         assert!(Action::new(0, Wear {}.into(), &world).is_err());
 
-        world.units.player_mut().wield.wield(Item::new(GOD_AXE));
+        world
+            .units_mut()
+            .player_mut()
+            .wield
+            .wield(Item::new(GOD_AXE));
         assert!(Action::new(0, Wear {}.into(), &world).is_err());
     }
 }

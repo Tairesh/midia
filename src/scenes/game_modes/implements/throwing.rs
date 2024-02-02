@@ -70,7 +70,7 @@ impl GameModeImpl for Throwing {
     fn cursors(&self, world: &World) -> Vec<Cursor> {
         let pos = self.shift_of_view + self.mouse_moved_pos;
         let damage = world
-            .units
+            .units()
             .player()
             .attack_damage(AttackType::Throw)
             .unwrap();
@@ -101,7 +101,7 @@ impl GameModeImpl for Throwing {
     }
 
     fn can_push(&self, world: &World) -> Result<(), String> {
-        world.units.player().wield.main_hand().map_or(
+        world.units().player().wield.main_hand().map_or(
             Err("You have nothing in your hands!".to_string()),
             |item| {
                 item.throw_damage()
@@ -121,7 +121,7 @@ impl GameModeImpl for Throwing {
         } else if input::is_some_of_keys_pressed(ctx, &[Key::T, Key::Space, Key::Enter])
             || input::is_mouse_button_down(ctx, MouseButton::Left)
         {
-            let pos = game.world.borrow().units.player().pos
+            let pos = game.world.borrow().units().player().pos
                 + game.shift_of_view()
                 + self.mouse_moved_pos;
             game.try_start_action(Throw::new(pos).into());
@@ -132,7 +132,7 @@ impl GameModeImpl for Throwing {
             let damage = game
                 .world
                 .borrow()
-                .units
+                .units()
                 .player()
                 .attack_damage(AttackType::Throw)
                 .unwrap();

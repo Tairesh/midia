@@ -63,8 +63,7 @@ impl ActionImpl for Throw {
                 ));
             }
 
-            let target = world.units.get_unit(unit_id);
-            if target.is_dead() {
+            if world.units().get_unit(unit_id).is_dead() {
                 // This should be unreachable, but just in case.
                 return No(format!(
                     "You can't throw {} at a dead body.",
@@ -86,15 +85,15 @@ impl ActionImpl for Throw {
         if units.is_empty() {
             drop(map);
             let item = action
-                .owner_mut(world)
+                .owner_mut(&mut world.units_mut())
                 .wield
                 .take_from_active_hand()
                 .unwrap();
             world.log().push(LogEvent::info(
                 format!(
                     "{} throw{} {}.",
-                    action.owner(world).name_for_actions(),
-                    if action.owner(world).pronounce().verb_ends_with_s() {
+                    action.owner(&world.units()).name_for_actions(),
+                    if action.owner(&world.units()).pronounce().verb_ends_with_s() {
                         "s"
                     } else {
                         ""
@@ -109,13 +108,14 @@ impl ActionImpl for Throw {
         let unit_id = units.iter().copied().next().unwrap();
         drop(map);
 
-        let unit = world.units.get_unit(unit_id);
+        let units = world.units();
+        let unit = units.get_unit(unit_id);
         if unit.is_dead() {
             return;
         }
         let target = unit.pos;
 
-        let owner = action.owner(world);
+        let owner = action.owner(&units);
         let weapon_name = owner.wield.main_hand().map_or(
             owner.personality.appearance.race.natural_weapon().0,
             Item::name,
@@ -124,7 +124,7 @@ impl ActionImpl for Throw {
         let attack_result = ranged_attack_unit(AttackType::Throw, owner, unit, world);
         match attack_result {
             UnitRangedAttackResult::InnocentBystander(unit_id, hit) => {
-                let victim = world.units.get_unit(unit_id);
+                let victim = units.get_unit(unit_id);
                 let target = victim.pos;
                 let damage = hit.params.damage.to_string();
                 for event in unit_attack_success(
@@ -167,9 +167,11 @@ impl ActionImpl for Throw {
                     world.log().push(event);
                 }
 
-                world.apply_damage(victim.id, hit);
+                let victim_id = victim.id;
+                drop(units);
+                world.apply_damage(victim_id, hit);
                 let item = action
-                    .owner_mut(world)
+                    .owner_mut(&mut world.units_mut())
                     .wield
                     .take_from_active_hand()
                     .unwrap();
@@ -195,8 +197,9 @@ impl ActionImpl for Throw {
                     ),
                     target,
                 ));
+                drop(units);
                 let item = action
-                    .owner_mut(world)
+                    .owner_mut(&mut world.units_mut())
                     .wield
                     .take_from_active_hand()
                     .unwrap();
@@ -239,15 +242,18 @@ impl ActionImpl for Throw {
                     world.log().push(event);
                 }
 
-                world.apply_damage(unit.id, hit);
+                let unit_id = unit.id;
+                drop(units);
+                world.apply_damage(unit_id, hit);
                 let item = action
-                    .owner_mut(world)
+                    .owner_mut(&mut world.units_mut())
                     .wield
                     .take_from_active_hand()
                     .unwrap();
                 world.map().get_tile_mut(target).items.push(item);
             }
             UnitRangedAttackResult::Explosion(_, _) => {
+                drop(units);
                 todo!()
             }
             UnitRangedAttackResult::Impossible => {
@@ -275,9 +281,13 @@ mod tests {
 
         let target = Point::new(3, 0);
         add_npc(&mut world, target);
-        world.units.player_mut().wield.wield(Item::new("rock"));
+        world
+            .units_mut()
+            .player_mut()
+            .wield
+            .wield(Item::new("rock"));
 
-        world.units.player_mut().action =
+        world.units_mut().player_mut().action =
             Some(Action::new(0, Throw::new(target).into(), &world).unwrap());
         world.tick();
 
@@ -299,7 +309,7 @@ mod tests {
 
         let target = Point::new(3, 0);
         add_npc(&mut world, target);
-        world.units.player_mut().wield.clear();
+        world.units_mut().player_mut().wield.clear();
 
         assert!(Action::new(0, Throw::new(target).into(), &world).is_err());
     }
@@ -311,7 +321,11 @@ mod tests {
 
         let target = Point::new(15, 0);
         add_npc(&mut world, target);
-        world.units.player_mut().wield.wield(Item::new("rock"));
+        world
+            .units_mut()
+            .player_mut()
+            .wield
+            .wield(Item::new("rock"));
 
         assert!(Action::new(0, Throw::new(target).into(), &world).is_err());
     }
@@ -324,7 +338,7 @@ mod tests {
         let target = Point::new(3, 0);
         add_npc(&mut world, target);
         world
-            .units
+            .units_mut()
             .player_mut()
             .wield
             .wield(Item::custom(ItemPrototype {

@@ -15,7 +15,7 @@ pub struct Reload {}
 impl ActionImpl for Reload {
     fn is_possible(&self, actor: &Avatar, _world: &World) -> ActionPossibility {
         actor
-            .wield
+            .inventory
             .main_hand()
             .map_or(No("You have nothing to reload".to_string()), |weapon| {
                 weapon.need_ammo().map_or(
@@ -25,7 +25,7 @@ impl ActionImpl for Reload {
                             No(format!("Your {} can't be reloaded", weapon.name())),
                             |container| {
                                 if container.free_volume() > 0 {
-                                    if actor.wear.has_ammo(typ) {
+                                    if actor.inventory.has_ammo(typ) {
                                         Yes(reload as u32)
                                     } else {
                                         No(format!("You don't have ammo for {}!", a(weapon.name())))
@@ -43,7 +43,7 @@ impl ActionImpl for Reload {
     fn on_finish(&self, action: &Action, world: &mut World) {
         let mut units = world.units_mut();
         action.owner_mut(&mut units).reload();
-        let weapon_name = action.owner(&units).wield.main_hand().unwrap().name();
+        let weapon_name = action.owner(&units).inventory.main_hand().unwrap().name();
         world.log().push(LogEvent::success(
             format!(
                 "{} reload{} your {weapon_name}",
@@ -79,7 +79,7 @@ mod tests {
     #[test]
     fn test_cant_reload_without_weapon() {
         let world = prepare_world();
-        world.units_mut().player_mut().wield.clear();
+        world.units_mut().player_mut().inventory.clear();
 
         assert!(Action::new(0, Reload {}.into(), &world).is_err());
     }
@@ -87,12 +87,12 @@ mod tests {
     #[test]
     fn test_cant_reload_without_ammo() {
         let world = prepare_world();
+        world.units_mut().player_mut().inventory.clear();
         world
             .units_mut()
             .player_mut()
-            .wield
+            .inventory
             .wield(Item::new(WOODEN_SHORTBOW));
-        world.units_mut().player_mut().wear.clear();
 
         assert!(Action::new(0, Reload {}.into(), &world).is_err());
     }
@@ -103,9 +103,9 @@ mod tests {
         world
             .units_mut()
             .player_mut()
-            .wield
+            .inventory
             .wield(Item::new(WOODEN_SHORTBOW).with_items_inside([Item::new(WOODEN_ARROW)]));
-        world.units_mut().player_mut().wear.add(
+        world.units_mut().player_mut().inventory.wear(
             Item::new(QUIVER).with_items_inside([Item::new(WOODEN_ARROW)]),
             0,
         );
@@ -119,9 +119,9 @@ mod tests {
         world
             .units_mut()
             .player_mut()
-            .wield
+            .inventory
             .wield(Item::new(WOODEN_SHORTBOW));
-        world.units_mut().player_mut().wear.add(
+        world.units_mut().player_mut().inventory.wear(
             Item::new(QUIVER).with_items_inside([Item::new(WOODEN_ARROW)]),
             0,
         );
@@ -129,7 +129,7 @@ mod tests {
             world
                 .units()
                 .player()
-                .wield
+                .inventory
                 .main_hand()
                 .unwrap()
                 .container()
@@ -147,7 +147,7 @@ mod tests {
             world
                 .units()
                 .player()
-                .wield
+                .inventory
                 .main_hand()
                 .unwrap()
                 .container()
@@ -165,9 +165,9 @@ mod tests {
         world
             .units_mut()
             .player_mut()
-            .wield
+            .inventory
             .wield(Item::new(WOODEN_CROSSBOW));
-        world.units_mut().player_mut().wear.add(
+        world.units_mut().player_mut().inventory.wear(
             Item::new(QUIVER).with_items_inside([Item::new(WOODEN_BOLT)]),
             0,
         );
@@ -175,7 +175,7 @@ mod tests {
             world
                 .units()
                 .player()
-                .wield
+                .inventory
                 .main_hand()
                 .unwrap()
                 .container()
@@ -193,7 +193,7 @@ mod tests {
             world
                 .units()
                 .player()
-                .wield
+                .inventory
                 .main_hand()
                 .unwrap()
                 .container()

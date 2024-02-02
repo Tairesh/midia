@@ -12,7 +12,7 @@ pub use savage::{
     AttackType, Attribute, CharSheet, Damage, DamageDice, Dice, DiceWithModifier, RangedDistance,
     RollResult, Skill, SkillLevel, Wound,
 };
-pub use units::{Avatar, Wear, Wield};
+pub use units::Avatar;
 pub use world::World;
 
 pub mod actions;

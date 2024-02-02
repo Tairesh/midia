@@ -52,7 +52,7 @@ impl GameModeImpl for Dropping {
     }
 
     fn can_push(&self, world: &World) -> Result<(), String> {
-        if world.units().player().wield.is_empty() {
+        if world.units().player().inventory.main_hand().is_none() {
             Err("You have nothing to drop!".to_string())
         } else {
             Ok(())

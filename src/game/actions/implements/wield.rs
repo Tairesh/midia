@@ -23,7 +23,7 @@ impl ActionImpl for WieldFromGround {
 
         let pos = actor.pos + self.dir;
         if let Some(item) = world.map().get_tile(pos).items.last() {
-            match actor.wield.can_wield(item.is_two_handed()) {
+            match actor.inventory.can_wield(item) {
                 Ok(..) => Yes(item.wield_time().round() as u32),
                 Err(e) => No(e),
             }
@@ -57,7 +57,7 @@ impl ActionImpl for WieldFromGround {
                     }
                 }
             }
-            owner.wield.wield(item);
+            owner.inventory.wield(item);
             world
                 .log()
                 .push(LogEvent::new(msg, pos, LogCategory::Success));
@@ -69,7 +69,7 @@ impl ActionImpl for WieldFromGround {
 mod tests {
     use geometry::{Direction, Point};
 
-    use crate::game::map::items::helpers::{random_book, GOD_AXE, STONE_SHOVEL};
+    use crate::game::map::items::helpers::{random_book, GOD_AXE, ROCK, STONE_SHOVEL};
     use crate::game::world::tests::prepare_world;
     use crate::game::{Action, Item};
 
@@ -85,7 +85,7 @@ mod tests {
             .items
             .push(Item::new(GOD_AXE));
 
-        assert!(world.units().player().wield.is_empty());
+        assert!(world.units().player().inventory.main_hand().is_none());
         assert_eq!(0, world.meta.current_tick);
 
         world.units_mut().player_mut().action = Some(
@@ -102,7 +102,7 @@ mod tests {
         world.tick();
 
         let units = world.units();
-        let item = units.player().wield.main_hand().unwrap();
+        let item = units.player().inventory.main_hand().unwrap();
         assert_eq!(item.proto().id, GOD_AXE);
         assert_eq!(0, world.map().get_tile(Point::new(1, 0)).items.len());
     }
@@ -113,10 +113,20 @@ mod tests {
         world
             .units_mut()
             .player_mut()
-            .wield
+            .inventory
             .wield(Item::new(STONE_SHOVEL));
-        assert!(world.units().player().wield.can_wield(true).is_err());
-        assert!(world.units().player().wield.can_wield(false).is_err());
+        assert!(world
+            .units()
+            .player()
+            .inventory
+            .can_wield(&Item::new(STONE_SHOVEL))
+            .is_err());
+        assert!(world
+            .units()
+            .player()
+            .inventory
+            .can_wield(&Item::new(ROCK))
+            .is_err());
 
         world.map().get_tile_mut(Point::new(1, 0)).items.clear();
         world
@@ -141,10 +151,20 @@ mod tests {
         world
             .units_mut()
             .player_mut()
-            .wield
+            .inventory
             .wield(Item::new(GOD_AXE));
-        assert!(world.units().player().wield.can_wield(false).is_ok());
-        assert!(world.units().player().wield.can_wield(true).is_err());
+        assert!(world
+            .units()
+            .player()
+            .inventory
+            .can_wield(&Item::new(ROCK))
+            .is_ok());
+        assert!(world
+            .units()
+            .player()
+            .inventory
+            .can_wield(&Item::new(STONE_SHOVEL))
+            .is_err());
 
         world.map().get_tile_mut(Point::new(1, 0)).items.clear();
         world
@@ -167,9 +187,14 @@ mod tests {
         world.tick();
 
         let units = world.units();
-        let item = units.player().wield.main_hand().unwrap();
+        let item = units.player().inventory.main_hand().unwrap();
         assert_eq!(item.proto().id, random_book().proto().id);
         assert_eq!(0, world.map().get_tile(Point::new(1, 0)).items.len());
-        assert!(world.units().player().wield.can_wield(false).is_err());
+        assert!(world
+            .units()
+            .player()
+            .inventory
+            .can_wield(&Item::new(ROCK))
+            .is_err());
     }
 }

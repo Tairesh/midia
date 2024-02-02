@@ -30,7 +30,7 @@ impl Melee {
     fn smash(self, action: &Action, world: &mut World) -> bool {
         let units = world.units();
         let owner = action.owner(&units);
-        let weapon = owner.wield.main_hand();
+        let weapon = owner.inventory.main_hand();
         let (weapon_name, can_smash) = if let Some(weapon) = weapon {
             (
                 weapon.name(),
@@ -119,7 +119,7 @@ impl Melee {
     fn attack_unit(self, action: &Action, world: &mut World) -> bool {
         let units = world.units();
         let owner = action.owner(&units);
-        let weapon_name = owner.wield.main_hand().map_or(
+        let weapon_name = owner.inventory.main_hand().map_or(
             owner.personality.appearance.race.natural_weapon().0,
             Item::name,
         );
@@ -200,7 +200,7 @@ impl Melee {
     fn swing(self, action: &Action, world: &mut World) {
         let units = world.units();
         let owner = action.owner(&units);
-        let weapon = owner.wield.main_hand().map_or(
+        let weapon = owner.inventory.main_hand().map_or(
             owner.personality.appearance.race.natural_weapon().0,
             Item::name,
         );
@@ -228,7 +228,7 @@ impl ActionImpl for Melee {
         }
 
         let distance = (actor.pos.distance(self.target).floor() - 1.0) as u8;
-        let weapon = actor.wield.main_hand();
+        let weapon = actor.inventory.main_hand();
         if distance > 0 {
             let weapon_distance = weapon.map_or(0, |w| w.melee_damage().distance);
             if distance > weapon_distance {
@@ -266,7 +266,7 @@ mod tests {
         assert_eq!(world.meta.current_tick, 0);
 
         add_npc(&mut world, Point::new(1, 0));
-        world.units_mut().player_mut().wield.clear();
+        world.units_mut().player_mut().inventory.clear();
 
         world.units_mut().player_mut().action =
             Some(Action::new(0, Melee::new(Point::new(1, 0)).into(), &world).unwrap());
@@ -291,7 +291,7 @@ mod tests {
         world
             .units_mut()
             .player_mut()
-            .wield
+            .inventory
             .wield(Item::new(GOD_AXE));
 
         world.units_mut().player_mut().action =
@@ -317,7 +317,7 @@ mod tests {
         world
             .units_mut()
             .player_mut()
-            .wield
+            .inventory
             .wield(Item::new(DEMONIC_SAP));
         world.units_mut().player_mut().action =
             Some(Action::new(0, Melee::new(Point::new(1, 0)).into(), &world).unwrap());
@@ -344,7 +344,7 @@ mod tests {
         world
             .units_mut()
             .player_mut()
-            .wield
+            .inventory
             .wield(Item::new(STONE_KNIFE));
         world.units_mut().player_mut().action =
             Some(Action::new(0, Melee::new(Point::new(1, 0)).into(), &world).unwrap());
@@ -370,7 +370,7 @@ mod tests {
         );
 
         world.map().get_tile_mut(Point::new(1, 0)).terrain = Boulder::default().into();
-        world.units_mut().player_mut().wield.clear();
+        world.units_mut().player_mut().inventory.clear();
         world.units_mut().player_mut().action =
             Some(Action::new(0, Melee::new(Point::new(1, 0)).into(), &world).unwrap());
         world.tick();
@@ -389,7 +389,7 @@ mod tests {
     fn test_cant_smash_with_fangs() {
         let mut world = prepare_world();
         world.units_mut().player_mut().personality.appearance.race = Race::Lagnam;
-        world.units_mut().player_mut().wield.clear();
+        world.units_mut().player_mut().inventory.clear();
 
         world.map().get_tile_mut(Point::new(1, 0)).terrain = Boulder::default().into();
         world.units_mut().player_mut().action =
@@ -412,7 +412,7 @@ mod tests {
         world
             .units_mut()
             .player_mut()
-            .wield
+            .inventory
             .wield(Item::new(STONE_SPEAR));
 
         let target = Point::new(2, 0);
@@ -433,12 +433,12 @@ mod tests {
     }
 
     #[test]
-    fn test_spear_not_attack() {
+    fn test_spear_cant_attack_on_distance_3() {
         let world = prepare_world();
         world
             .units_mut()
             .player_mut()
-            .wield
+            .inventory
             .wield(Item::new(STONE_SPEAR));
 
         let target = Point::new(3, 0);

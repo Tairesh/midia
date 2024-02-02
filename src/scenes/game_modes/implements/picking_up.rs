@@ -52,7 +52,7 @@ impl GameModeImpl for PickingUp {
     }
 
     fn can_push(&self, world: &World) -> Result<(), String> {
-        world.units().player().wield.can_wield(false)
+        world.units().player().inventory.can_wield_any()
     }
 
     fn update(&mut self, ctx: &mut Context, game: &mut GameScene) -> SomeTransitions {

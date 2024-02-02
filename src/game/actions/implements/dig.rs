@@ -1,3 +1,5 @@
+// TODO: Do we really need digging as a separate action? Maybe it's better to have a single action "interact with terrain"?
+// Also do we really need digging in a roguelike game about killing big bugs in a cave?
 use geometry::{Direction, DIR8};
 use rand::seq::SliceRandom;
 
@@ -34,7 +36,7 @@ impl ActionImpl for Dig {
                 No(format!("You can't dig the {}", tile.terrain.name()))
             };
         }
-        if !actor.wield.has_quality(&ItemQuality::Dig) {
+        if !actor.inventory.wield.has_quality(&ItemQuality::Dig) {
             return No("You need a shovel to dig!".to_string());
         }
 
@@ -97,7 +99,7 @@ mod tests {
     #[test]
     fn test_digging() {
         let mut world = prepare_world();
-        world.units_mut().player_mut().wield.clear();
+        world.units_mut().player_mut().inventory.clear();
         world.map().get_tile_mut(Point::new(1, 0)).terrain = Dirt::default().into();
 
         let typ = Dig {
@@ -108,7 +110,7 @@ mod tests {
         world
             .units_mut()
             .player_mut()
-            .wield
+            .inventory
             .wield(Item::new(STONE_SHOVEL));
         world.units_mut().player_mut().action = Some(Action::new(0, typ.into(), &world).unwrap());
         while world.units().player().action.is_some() {

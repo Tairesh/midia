@@ -37,11 +37,12 @@ impl ActionImpl for Shoot {
             return No("You are in shock".to_string());
         }
 
-        if actor.wield.main_hand().is_none() {
+        // TODO: check for natural weapon
+        if actor.inventory.main_hand().is_none() {
             return No("You have nothing to shoot from.".to_string());
         }
 
-        let weapon = actor.wield.main_hand().unwrap();
+        let weapon = actor.inventory.main_hand().unwrap();
 
         if let Some(NeedAmmoValue { typ, .. }) = weapon.need_ammo() {
             if !weapon.has_ammo(typ) {
@@ -104,7 +105,7 @@ impl ActionImpl for Shoot {
         let target = unit.pos;
 
         let owner = action.owner(&units);
-        let weapon_name = owner.wield.main_hand().map_or(
+        let weapon_name = owner.inventory.main_hand().map_or(
             owner.personality.appearance.race.natural_weapon().0,
             Item::name,
         );
@@ -231,12 +232,12 @@ impl ActionImpl for Shoot {
 
         let mut units = world.units_mut();
         let owner = action.owner_mut(&mut units);
-        if let Some(weapon) = owner.wield.main_hand_mut() {
+        if let Some(weapon) = owner.inventory.main_hand_mut() {
             if weapon.need_ammo().is_some() {
                 weapon.container_mut().unwrap().items.pop();
             }
         }
-        let auto_reload = owner.wield.main_hand().map_or(false, |weapon| {
+        let auto_reload = owner.inventory.main_hand().map_or(false, |weapon| {
             weapon
                 .need_ammo()
                 .map_or(false, |need_ammo| need_ammo.reload == 0)
@@ -271,9 +272,9 @@ mod tests {
         world
             .units_mut()
             .player_mut()
-            .wield
+            .inventory
             .wield(Item::new(WOODEN_SHORTBOW));
-        world.units_mut().player_mut().wear.add(
+        world.units_mut().player_mut().inventory.wear(
             Item::new(QUIVER).with_items_inside([Item::new(WOODEN_ARROW)]),
             0,
         );
@@ -309,7 +310,7 @@ mod tests {
 
         let target = Point::new(3, 0);
         add_npc(&mut world, target);
-        world.units_mut().player_mut().wield.clear();
+        world.units_mut().player_mut().inventory.clear();
 
         assert!(Action::new(0, Shoot::new(target).into(), &world).is_err());
     }
@@ -322,9 +323,9 @@ mod tests {
         world
             .units_mut()
             .player_mut()
-            .wield
+            .inventory
             .wield(Item::new(WOODEN_SHORTBOW));
-        world.units_mut().player_mut().wear.add(
+        world.units_mut().player_mut().inventory.wear(
             Item::new(QUIVER).with_items_inside([Item::new(WOODEN_ARROW)]),
             0,
         );
@@ -346,12 +347,12 @@ mod tests {
 
         let target = Point::new(3, 0);
         add_npc(&mut world, target);
+        world.units_mut().player_mut().inventory.clear();
         world
             .units_mut()
             .player_mut()
-            .wield
+            .inventory
             .wield(Item::new(WOODEN_SHORTBOW));
-        world.units_mut().player_mut().wear.clear();
         world.units_mut().player_mut().reload();
 
         assert!(Action::new(0, Shoot::new(target).into(), &world).is_err());
@@ -366,13 +367,13 @@ mod tests {
         world
             .units_mut()
             .player_mut()
-            .wield
+            .inventory
             .wield(Item::new(WOODEN_CROSSBOW));
-        world.units_mut().player_mut().wear.add(
+        world.units_mut().player_mut().inventory.wear(
             Item::new(QUIVER).with_items_inside(vec![Item::new(WOODEN_BOLT); 10]),
             0,
         );
-        world.units_mut().player_mut().reload();
+        assert_eq!(world.units_mut().player_mut().reload(), true);
 
         world.units_mut().player_mut().action =
             Some(Action::new(0, Shoot::new(target).into(), &world).unwrap());

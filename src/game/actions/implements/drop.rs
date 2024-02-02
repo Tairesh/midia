@@ -19,7 +19,7 @@ pub struct Drop {
 
 impl ActionImpl for Drop {
     fn is_possible(&self, actor: &Avatar, world: &World) -> ActionPossibility {
-        if actor.wield.main_hand().is_none() {
+        if actor.inventory.main_hand().is_none() {
             return No("You have nothing to drop".to_string());
         }
         let pos = actor.pos + self.dir;
@@ -32,7 +32,7 @@ impl ActionImpl for Drop {
             ));
         }
 
-        if let Some(item) = actor.wield.main_hand() {
+        if let Some(item) = actor.inventory.main_hand() {
             let k = if matches!(self.dir, Direction::Here) {
                 1.0
             } else {
@@ -47,8 +47,8 @@ impl ActionImpl for Drop {
     fn on_finish(&self, action: &Action, world: &mut World) {
         let item = action
             .owner_mut(&mut world.units_mut())
-            .wield
-            .take_from_active_hand()
+            .inventory
+            .main_hand_take()
             .unwrap();
         let units = world.units();
         let owner = action.owner(&units);
@@ -79,12 +79,11 @@ mod tests {
         let mut world = prepare_world();
         world.map().get_tile_mut(Point::new(0, 0)).terrain = Dirt::default().into();
         world.map().get_tile_mut(Point::new(0, 0)).items.clear();
-        world.units_mut().player_mut().wield.clear();
-        world
-            .units_mut()
-            .player_mut()
-            .wield
-            .wield(Item::new(GOD_AXE));
+        let mut units = world.units_mut();
+        let player = units.player_mut();
+        player.inventory.clear();
+        player.inventory.wield(Item::new(GOD_AXE));
+        drop(units);
 
         world.units_mut().player_mut().action = Some(
             Action::new(
@@ -100,7 +99,7 @@ mod tests {
         world.tick();
 
         assert_eq!(Point::new(0, 0), world.units().player().pos);
-        assert!(world.units().player().wield.is_empty());
+        assert!(world.units().player().inventory.main_hand().is_none());
         let mut map = world.map();
         assert_eq!(1, map.get_tile(Point::new(0, 0)).items.len());
         let item = map.get_tile(Point::new(0, 0)).items.first().unwrap();

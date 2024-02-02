@@ -98,7 +98,7 @@ impl GameModeImpl for Walking {
                     KeyBindingAction::RangeAttack => {
                         let world = game.world.borrow();
                         let units = world.units();
-                        if let Some(weapon) = units.player().wield.main_hand() {
+                        if let Some(weapon) = units.player().inventory.main_hand() {
                             if weapon.melee_damage().distance > 0 {
                                 drop(units);
                                 drop(world);
@@ -118,8 +118,8 @@ impl GameModeImpl for Walking {
                             .borrow_mut()
                             .units_mut()
                             .player_mut()
-                            .wield
-                            .swap();
+                            .inventory
+                            .swap_hands();
                         let event = LogEvent::info(
                             "You swap your hands",
                             game.world.borrow().units().player().pos,
@@ -134,8 +134,8 @@ impl GameModeImpl for Walking {
                             .borrow()
                             .units()
                             .player()
-                            .wear
-                            .iter()
+                            .inventory
+                            .iter_wear()
                             .map(|i| i.name().to_string())
                             .collect();
                         let armor = game.world.borrow().units().player().armor(BodySlot::Torso);

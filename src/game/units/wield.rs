@@ -38,7 +38,7 @@ impl Wield {
         self.items.iter().any(|i| i.qualities().contains(quality))
     }
 
-    pub fn take_from_active_hand(&mut self) -> Option<Item> {
+    pub fn main_hand_take(&mut self) -> Option<Item> {
         self.items.pop_front()
     }
 
@@ -63,7 +63,9 @@ impl Wield {
     }
 
     pub fn wield(&mut self, item: Item) {
-        self.items.push_front(item);
+        if self.can_wield(item.is_two_handed()).is_ok() {
+            self.items.push_front(item);
+        }
     }
 
     pub fn swap(&mut self) {

@@ -201,7 +201,7 @@ pub fn draw_unit(
     );
 
     // TODO: draw both items
-    if let Some(item) = avatar.wield.main_hand() {
+    if let Some(item) = avatar.inventory.main_hand() {
         let (offset_x, offset_y) = (
             if !rotate || matches!(avatar.vision, TwoDimDirection::East) {
                 5.0

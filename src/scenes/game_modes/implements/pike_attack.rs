@@ -119,7 +119,7 @@ impl GameModeImpl for PikeAttack {
     }
 
     fn can_push(&self, world: &World) -> Result<(), String> {
-        world.units().player().wield.main_hand().map_or(
+        world.units().player().inventory.main_hand().map_or(
             Err("You have nothing in your hands!".to_string()),
             |weapon| {
                 if weapon.melee_damage().distance == 0 {

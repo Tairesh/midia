@@ -70,7 +70,7 @@ impl GameScene {
                 y: Vertical::ByCenter { y: 50.0 },
             },
         ));
-        let main_hand = player.wield.main_hand();
+        let main_hand = player.inventory.main_hand();
         let main_hand_image = Box::new(TilesetSprite::new(
             main_hand.map_or("empty", Item::looks_like),
             app.assets.tileset.clone(),
@@ -210,7 +210,7 @@ impl GameScene {
 
         let world = self.world.borrow();
         let units = world.units();
-        let main_hand_item = units.player().wield.main_hand();
+        let main_hand_item = units.player().inventory.main_hand();
         let main_hand_item_name = main_hand_item.map_or("nothing", Item::name).to_string();
         let main_hand_item_sprite = main_hand_item.map_or("empty", Item::looks_like).to_string();
         let main_hand_item_color = main_hand_item.map(Item::color).unwrap_or_default();

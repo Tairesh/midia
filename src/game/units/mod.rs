@@ -1,11 +1,13 @@
 use std::collections::{HashMap, HashSet};
 
 pub use avatar::Avatar;
+pub use inventory::Inventory;
 pub use personality::{Appearance, Mind, Personality};
 pub use wear::Wear;
 pub use wield::Wield;
 
 mod avatar;
+mod inventory;
 mod personality;
 mod wear;
 mod wield;

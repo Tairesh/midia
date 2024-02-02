@@ -31,11 +31,11 @@ impl ActionImpl for Throw {
             return No("You are in shock".to_string());
         }
 
-        if actor.wield.main_hand().is_none() {
+        if actor.inventory.main_hand().is_none() {
             return No("You have nothing to throw.".to_string());
         }
 
-        let item = actor.wield.main_hand().unwrap();
+        let item = actor.inventory.main_hand().unwrap();
         if let Some(throw_value) = item.throw_damage() {
             if throw_value.distance == 0 {
                 return No(format!("You can't throw {}.", a(item.name())));
@@ -86,8 +86,8 @@ impl ActionImpl for Throw {
             drop(map);
             let item = action
                 .owner_mut(&mut world.units_mut())
-                .wield
-                .take_from_active_hand()
+                .inventory
+                .main_hand_take()
                 .unwrap();
             world.log().push(LogEvent::info(
                 format!(
@@ -116,10 +116,7 @@ impl ActionImpl for Throw {
         let target = unit.pos;
 
         let owner = action.owner(&units);
-        let weapon_name = owner.wield.main_hand().map_or(
-            owner.personality.appearance.race.natural_weapon().0,
-            Item::name,
-        );
+        let weapon_name = owner.inventory.main_hand().unwrap().name();
 
         let attack_result = ranged_attack_unit(AttackType::Throw, owner, unit, world);
         match attack_result {
@@ -172,8 +169,8 @@ impl ActionImpl for Throw {
                 world.apply_damage(victim_id, hit);
                 let item = action
                     .owner_mut(&mut world.units_mut())
-                    .wield
-                    .take_from_active_hand()
+                    .inventory
+                    .main_hand_take()
                     .unwrap();
                 world.map().get_tile_mut(target).items.push(item);
             }
@@ -200,8 +197,8 @@ impl ActionImpl for Throw {
                 drop(units);
                 let item = action
                     .owner_mut(&mut world.units_mut())
-                    .wield
-                    .take_from_active_hand()
+                    .inventory
+                    .main_hand_take()
                     .unwrap();
                 let random_pos = target + *DIR8.choose(&mut rand::thread_rng()).unwrap();
                 world.map().get_tile_mut(random_pos).items.push(item);
@@ -247,8 +244,8 @@ impl ActionImpl for Throw {
                 world.apply_damage(unit_id, hit);
                 let item = action
                     .owner_mut(&mut world.units_mut())
-                    .wield
-                    .take_from_active_hand()
+                    .inventory
+                    .main_hand_take()
                     .unwrap();
                 world.map().get_tile_mut(target).items.push(item);
             }
@@ -269,6 +266,8 @@ mod tests {
 
     use geometry::Point;
 
+    use crate::game::map::items::helpers::ROCK;
+    use crate::game::traits::Name;
     use crate::game::world::tests::{add_npc, prepare_world};
     use crate::game::{Action, Item, ItemPrototype, ItemSize};
 
@@ -284,8 +283,8 @@ mod tests {
         world
             .units_mut()
             .player_mut()
-            .wield
-            .wield(Item::new("rock"));
+            .inventory
+            .wield(Item::new(ROCK));
 
         world.units_mut().player_mut().action =
             Some(Action::new(0, Throw::new(target).into(), &world).unwrap());
@@ -309,7 +308,7 @@ mod tests {
 
         let target = Point::new(3, 0);
         add_npc(&mut world, target);
-        world.units_mut().player_mut().wield.clear();
+        world.units_mut().player_mut().inventory.clear();
 
         assert!(Action::new(0, Throw::new(target).into(), &world).is_err());
     }
@@ -324,8 +323,8 @@ mod tests {
         world
             .units_mut()
             .player_mut()
-            .wield
-            .wield(Item::new("rock"));
+            .inventory
+            .wield(Item::new(ROCK));
 
         assert!(Action::new(0, Throw::new(target).into(), &world).is_err());
     }
@@ -340,7 +339,7 @@ mod tests {
         world
             .units_mut()
             .player_mut()
-            .wield
+            .inventory
             .wield(Item::custom(ItemPrototype {
                 id: "big_thing".to_string(),
                 name: "big thing".to_string(),

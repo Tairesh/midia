@@ -100,7 +100,7 @@ impl GameModeImpl for Shooting {
     }
 
     fn can_push(&self, world: &World) -> Result<(), String> {
-        world.units().player().wield.main_hand().map_or(
+        world.units().player().inventory.main_hand().map_or(
             Err("You have nothing in your hands!".to_string()),
             |item| {
                 if item.ranged_damage().is_none() {

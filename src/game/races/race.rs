@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 use tetra::graphics::Color;
 
 use crate::colors::Colors;
+use crate::game::units::Inventory;
 use crate::game::{
     game_data::DamageType,
     savage::{DamageDice, Skill},
@@ -175,10 +176,10 @@ impl Race {
         }
     }
 
-    pub fn hands_count(self) -> usize {
+    pub fn inventory(self) -> Inventory {
         match self {
-            Race::Gazan | Race::Nyarnik | Race::Totik | Race::Lagnam => 2,
-            Race::Bug => 0,
+            Race::Gazan | Race::Nyarnik | Race::Totik | Race::Lagnam => Inventory::humanoid(),
+            Race::Bug => Inventory::monster(),
         }
     }
 }

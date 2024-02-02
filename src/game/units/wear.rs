@@ -32,7 +32,9 @@ impl Wear {
     }
 
     pub fn add(&mut self, item: Item, variant: usize) {
-        self.items.push((item, variant));
+        if self.can_add(&item, variant) {
+            self.items.push((item, variant));
+        }
     }
 
     pub fn take_all(&mut self) -> Vec<Item> {

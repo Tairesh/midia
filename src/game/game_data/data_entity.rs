@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-use super::{item::ItemPrototype, names_pack::NamesPack};
+use super::{names_pack::NamesPack, ItemPrototype};
 
 #[allow(clippy::large_enum_variant)]
 #[derive(Deserialize, Debug)]
@@ -8,19 +8,17 @@ use super::{item::ItemPrototype, names_pack::NamesPack};
 #[serde(rename_all = "snake_case")]
 pub enum DataEntity {
     Item(ItemPrototype),
-    // TODO: terrains
     NamesPack(NamesPack),
+    // TODO: terrains, creatures, etc.
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::game::game_data::item::AmmoType;
-    use crate::game::game_data::DamageType;
     use crate::game::races::{BodySlot, Race, Sex};
-    use crate::game::savage::DamageDice;
+    use crate::game::savage::{DamageDice, DamageType};
     use crate::game::Attribute;
 
-    use super::super::item::{ItemQuality, ItemSize, Material, WearLayer};
+    use super::super::{AmmoType, ItemQuality, ItemSize, Material, WearLayer};
     use super::DataEntity;
 
     fn check_shovel(shovel: &DataEntity) {

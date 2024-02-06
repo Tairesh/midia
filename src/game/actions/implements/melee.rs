@@ -4,10 +4,9 @@ use super::super::{
     super::map::{TerrainInteract, TerrainView},
     super::{
         super::lang::a,
-        game_data::DamageType,
         log::helpers::unit_attack_success,
         savage::{
-            melee_attack_unit, melee_smash_terrain, TerrainMeleeAttackResult,
+            melee_attack_unit, melee_smash_terrain, DamageType, TerrainMeleeAttackResult,
             UnitMeleeAttackResult, ATTACK_MOVES,
         },
         traits::Name,

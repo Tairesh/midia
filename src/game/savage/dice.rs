@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 use crate::game::traits::Name;
 
 // TODO: it's getting a bit messy here, maybe it's time to split this file
+// TODO: use world's rng instead of thread_rng
 
 #[derive(Serialize, Deserialize, Sequence, Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd)]
 pub enum Dice {

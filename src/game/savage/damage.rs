@@ -67,6 +67,50 @@ impl From<Dice> for DamageDice {
     }
 }
 
+#[derive(Serialize, Deserialize, Debug, Hash, Eq, PartialEq, Copy, Clone)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum DamageType {
+    Blunt,
+    Pierce,
+    Slash,
+    Fire,
+    Cold,
+    Acid,
+    Electric,
+    Poison,
+    Magic,
+}
+
+pub struct DamageRollResult {
+    pub damage: u8,
+    pub damage_type: Option<DamageType>,
+    pub penetration: u8,
+}
+
+impl DamageRollResult {
+    pub fn new(damage: u8, damage_type: DamageType, penetration: u8) -> Self {
+        Self {
+            damage,
+            penetration,
+            damage_type: Some(damage_type),
+        }
+    }
+
+    pub fn empty() -> Self {
+        Self {
+            damage: 0,
+            damage_type: None,
+            penetration: 0,
+        }
+    }
+}
+
+impl Default for DamageRollResult {
+    fn default() -> Self {
+        Self::empty()
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Damage {
     pub dices: Vec<DamageDice>,

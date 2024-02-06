@@ -4,7 +4,7 @@ pub use combat::{
     melee_attack_unit, melee_smash_terrain, ranged_attack_unit, AttackType, HitResult,
     RangedDistance, TerrainMeleeAttackResult, UnitMeleeAttackResult, UnitRangedAttackResult,
 };
-pub use damage::{Damage, DamageDice};
+pub use damage::{Damage, DamageDice, DamageRollResult, DamageType};
 pub use dice::{Dice, DiceWithModifier, RollResult, SkillLevel};
 pub use skills::{Skill, Skills};
 pub use wound::Wound;

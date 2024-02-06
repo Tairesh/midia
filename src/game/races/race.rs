@@ -9,8 +9,7 @@ use tetra::graphics::Color;
 use crate::colors::Colors;
 use crate::game::units::Inventory;
 use crate::game::{
-    game_data::DamageType,
-    savage::{DamageDice, Skill},
+    savage::{DamageDice, DamageType, Skill},
     traits::{LooksLike, Name},
     AttackType, Attribute, Damage, DamageValue, SkillLevel,
 };

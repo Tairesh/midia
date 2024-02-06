@@ -6,15 +6,15 @@ use std::path::{Path, PathBuf};
 use once_cell::sync::OnceCell;
 
 use data_entity::DataEntity;
-pub use item::{
-    AmmoType, DamageType, DamageValue, IsAmmoValue, ItemPrototype, ItemQuality, ItemSize, Material,
+pub use items::{
+    AmmoType, DamageValue, IsAmmoValue, ItemPrototype, ItemQuality, ItemSize, Material,
     NeedAmmoValue, WearLayer,
 };
 
 use crate::game::races::{Race, Sex};
 
 mod data_entity;
-mod item;
+mod items;
 mod names_pack;
 pub mod pregen;
 

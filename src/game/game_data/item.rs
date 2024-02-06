@@ -323,6 +323,7 @@ pub struct ItemPrototype {
     pub two_handed: bool,
     #[serde(default)]
     pub wearable: Option<WearableValue>,
+    // TODO: color_from_material sounds stupid, probably should be removed
     #[serde(default)]
     pub color_from_material: Option<Material>,
     #[serde(default)]

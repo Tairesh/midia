@@ -148,21 +148,49 @@ pub fn random_book() -> Item {
 }
 
 pub fn dead_body(unit: &Avatar) -> Item {
-    Item::custom(ItemPrototype {
+    let body = Item::custom(ItemPrototype {
         id: CORPSE.to_string(),
         name: format!("dead {}", unit.personality.age_name()),
         looks_like: "corpse".to_string(),
         size: ItemSize::Huge,
         materials: HashSet::from([Material::Flesh]),
         qualities: Vec::default(),
-        two_handed: false,
+        two_handed: true,
         wearable: None,
         melee_damage: None,
         throw_damage: None,
         ranged_damage: None,
         is_ammo: None,
         need_ammo: None,
-        // TODO: body color
         color_from_material: Some(Material::Flesh),
-    })
+    });
+    if let Some(color) = unit.personality.appearance.body_color {
+        body.with_colored(color)
+    } else {
+        body
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use geometry::Point;
+
+    use crate::game::traits::{LooksLike, Name};
+    use crate::game::units::tests::helpers::tester_girl;
+
+    use super::*;
+
+    #[test]
+    fn test_dead_body() {
+        let unit = Avatar::new(tester_girl(), Point::default());
+        let body = dead_body(&unit);
+        assert_eq!(body.name(), "dead gazan girl");
+        assert_eq!(body.looks_like(), "corpse");
+        assert_eq!(body.size(), ItemSize::Huge);
+        assert_eq!(body.proto().color_from_material, Some(Material::Flesh));
+        assert_eq!(
+            body.color(),
+            unit.personality.appearance.body_color.unwrap().into()
+        )
+    }
 }

@@ -360,7 +360,6 @@ mod tests {
 
     #[test]
     fn test_cant_shoot_crossbow_without_reloading() {
-        // TODO: reloading action
         let mut world = prepare_world();
         let target = Point::new(3, 0);
         add_npc(&mut world, target);

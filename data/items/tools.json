@@ -7,7 +7,7 @@
     "tags": ["TOOL"],
     "qualities": ["DIG"],
     "size": "MEDIUM",
-    "two_handed_tool": true,
+    "two_handed": true,
     "materials": ["wood", "stone"],
     "melee_damage": {
       "damage": {

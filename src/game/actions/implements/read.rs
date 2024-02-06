@@ -99,7 +99,15 @@ mod tests {
             panic!("Cannot read");
         }
 
-        assert!(world.log().new_events()[0].msg.contains("book is called"));
+        let mut log = world.log();
+        let event = &log.new_events()[0];
+        assert!(
+            event
+                .msg
+                .contains("Text on this strange book says «Lore Of The Midia»"),
+            "Event: {:?}",
+            event
+        );
     }
 
     #[test]

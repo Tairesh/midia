@@ -20,7 +20,7 @@ mod tests {
     use crate::game::savage::DamageDice;
     use crate::game::Attribute;
 
-    use super::super::item::{ItemQuality, ItemSize, ItemTag, Material, WearLayer};
+    use super::super::item::{ItemQuality, ItemSize, Material, WearLayer};
     use super::DataEntity;
 
     fn check_shovel(shovel: &DataEntity) {
@@ -28,11 +28,9 @@ mod tests {
             assert_eq!("shovel_stone", item.id);
             assert_eq!("stone shovel", item.name);
             assert_eq!(ItemSize::Medium, item.size);
-            assert_eq!(1, item.tags.len());
-            assert!(item.tags.contains(&ItemTag::Tool));
             assert_eq!(1, item.qualities.len());
             assert!(item.qualities.contains(&ItemQuality::Dig));
-            assert_eq!(true, item.two_handed_tool);
+            assert_eq!(true, item.two_handed);
             assert!(item.wearable.is_none());
             assert!(item.melee_damage.is_some());
             assert_eq!(2, item.materials.len());
@@ -73,7 +71,7 @@ mod tests {
             "tags": ["TOOL"],
             "qualities": ["DIG"],
             "size": "MEDIUM",
-            "two_handed_tool": true,
+            "two_handed": true,
             "materials": ["wood", "stone"],
             "melee_damage": {
               "damage": {
@@ -130,7 +128,7 @@ mod tests {
             "tags": ["TOOL"],
             "qualities": ["DIG"],
             "size": "MEDIUM",
-            "two_handed_tool": true,
+            "two_handed": true,
             "materials": ["wood", "stone"],
             "melee_damage": {
               "damage": {
@@ -215,7 +213,7 @@ mod tests {
             "tags": ["TOOL", "WEAPON"],
             "qualities": ["BUTCH", "CUT"],
             "size": "SMALL",
-            "two_handed_tool": false,
+            "two_handed": false,
             "materials": ["wood", "stone"],
             "melee_damage": {
               "damage": {
@@ -233,8 +231,6 @@ mod tests {
         assert!(matches!(slice[0], DataEntity::Item(..)));
         if let DataEntity::Item(item) = &slice[0] {
             assert_eq!(item.id, "knife_stone");
-            assert!(item.tags.contains(&ItemTag::Tool));
-            assert!(item.tags.contains(&ItemTag::Weapon));
             assert!(item.qualities.contains(&ItemQuality::Butch));
             assert!(item.qualities.contains(&ItemQuality::Cut));
             assert!(item.melee_damage.is_some());
@@ -253,7 +249,7 @@ mod tests {
             assert!(item.materials.contains(&Material::Wood));
             assert!(item.materials.contains(&Material::Stone));
             assert_eq!(item.size, ItemSize::Small);
-            assert!(!item.two_handed_tool);
+            assert!(!item.two_handed);
         } else {
             panic!("Expected DataEntity::Item, got {:?}", slice[0]);
         }
@@ -272,7 +268,7 @@ mod tests {
             "size": "MEDIUM",
             "materials": ["wood"],
             "tags": ["WEAPON"],
-            "two_handed_tool": true,
+            "two_handed": true,
             "ranged_damage": {
               "damage": {
                 "attribute": "STRENGTH",
@@ -310,8 +306,6 @@ mod tests {
         assert!(matches!(slice[0], DataEntity::Item(..)));
         if let DataEntity::Item(item) = &slice[0] {
             assert_eq!(item.id, "shortbow_wood");
-            assert!(!item.tags.contains(&ItemTag::Tool));
-            assert!(item.tags.contains(&ItemTag::Weapon));
             assert!(item.qualities.is_empty());
             assert!(item.ranged_damage.is_some());
             if let Some(ranged_damage) = &item.ranged_damage {
@@ -327,7 +321,7 @@ mod tests {
             assert_eq!(item.materials.len(), 1);
             assert!(item.materials.contains(&Material::Wood));
             assert_eq!(item.size, ItemSize::Medium);
-            assert!(item.two_handed_tool);
+            assert!(item.two_handed);
             assert_eq!(item.need_ammo.as_ref().unwrap().typ, AmmoType::Arrow);
             assert_eq!(item.need_ammo.as_ref().unwrap().capacity, 1);
         } else {
@@ -336,8 +330,6 @@ mod tests {
         assert!(matches!(slice[1], DataEntity::Item(..)));
         if let DataEntity::Item(item) = &slice[1] {
             assert_eq!(item.id, "arrow_wood");
-            assert!(!item.tags.contains(&ItemTag::Tool));
-            assert!(!item.tags.contains(&ItemTag::Weapon));
             assert!(item.qualities.is_empty());
             assert!(item.ranged_damage.is_none());
             if let Some(ammo_value) = &item.is_ammo {
@@ -351,7 +343,7 @@ mod tests {
             assert_eq!(item.materials.len(), 1);
             assert!(item.materials.contains(&Material::Wood));
             assert_eq!(item.size, ItemSize::Small);
-            assert!(!&item.two_handed_tool);
+            assert!(!&item.two_handed);
             assert!(item.need_ammo.is_none());
         } else {
             panic!("Expected DataEntity::Item, got {:?}", slice[0]);

@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use std::collections::HashSet;
 
 use serde::{Deserialize, Serialize};
@@ -7,9 +5,7 @@ use tetra::graphics::Color;
 
 use crate::game::game_data::{AmmoType, NeedAmmoValue};
 use crate::game::traits::{LooksLike, Name};
-use crate::game::{
-    AttackType, DamageValue, GameData, ItemPrototype, ItemQuality, ItemSize, ItemTag,
-};
+use crate::game::{AttackType, DamageValue, GameData, ItemPrototype, ItemQuality, ItemSize};
 
 use super::container::Container;
 
@@ -137,11 +133,7 @@ impl Item {
     }
 
     pub fn read(&self) -> Option<&str> {
-        if let Some(readable) = &self.readable {
-            return Some(readable);
-        }
-
-        None
+        self.readable.as_deref()
     }
 
     pub fn container(&self) -> Option<&Container> {
@@ -156,29 +148,12 @@ impl Item {
         &self.proto().qualities
     }
 
-    pub fn tags(&self) -> &HashSet<ItemTag> {
-        &self.proto().tags
-    }
-
     pub fn size(&self) -> ItemSize {
         self.proto().size
     }
 
     pub fn is_two_handed(&self) -> bool {
-        self.proto().two_handed_tool || self.size() > ItemSize::Medium
-    }
-
-    pub fn is_tool(&self) -> bool {
-        self.tags().contains(&ItemTag::Tool)
-    }
-
-    pub fn is_weapon(&self) -> bool {
-        self.tags().contains(&ItemTag::Weapon)
-    }
-
-    /// Used for determining if an item should be displayed in full size when wielded.
-    pub fn tool_or_weapon(&self) -> bool {
-        self.is_tool() || self.is_weapon()
+        self.proto().two_handed || self.size() > ItemSize::Medium
     }
 
     pub fn is_wearable(&self) -> bool {
@@ -191,10 +166,6 @@ impl Item {
 
     pub fn is_readable(&self) -> bool {
         self.readable.is_some()
-    }
-
-    pub fn is_book(&self) -> bool {
-        self.tags().contains(&ItemTag::Book)
     }
 
     pub fn is_container(&self) -> bool {

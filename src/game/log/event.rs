@@ -1,7 +1,8 @@
 #![allow(dead_code)]
 
-use capitalize::Capitalize;
 use geometry::Point;
+
+use crate::lang::Capitalize;
 
 use super::LogCategory;
 

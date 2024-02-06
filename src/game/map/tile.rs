@@ -73,13 +73,7 @@ impl Tile {
             .filter(|i| i.is_readable())
             .map(|i| {
                 if let Some(text) = i.read() {
-                    if i.is_book() {
-                        format!("This {} is called «{text}»", i.name())
-                    } else {
-                        format!("Text on this {} says «{text}»", i.name())
-                    }
-                } else if i.is_book() {
-                    format!("This {} has no title on the cover", i.name())
+                    format!("Text on this {} says «{text}»", i.name())
                 } else {
                     format!("This {} is unreadable", i.name())
                 }

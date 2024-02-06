@@ -19,11 +19,26 @@ pub fn a(word: impl Into<String>) -> String {
     }
 }
 
+pub trait Capitalize: AsRef<str> {
+    /// Change first character to upper case and the rest to lower case.
+    fn capitalize(&self) -> String;
+}
+
+impl<T: AsRef<str>> Capitalize for T {
+    fn capitalize(&self) -> String {
+        let mut chars = self.as_ref().chars();
+        match chars.next() {
+            None => String::new(),
+            Some(first) => first.to_uppercase().chain(chars).collect(),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use test_case::test_case;
 
-    use super::a;
+    use super::*;
 
     #[test_case("cat", "a cat")]
     #[test_case("axe", "an axe")]
@@ -32,5 +47,11 @@ mod tests {
     #[test_case("unit", "a unit")]
     fn test_a(word: &str, result: &str) {
         assert_eq!(a(word), result);
+    }
+
+    #[test_case("you pet the cat", "You pet the cat")]
+    #[test_case("this book is called 'The Cat'", "This book is called 'The Cat'")]
+    fn test_capitalize(sentence: &str, result: &str) {
+        assert_eq!(sentence.capitalize(), result);
     }
 }

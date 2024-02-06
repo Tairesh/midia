@@ -11,15 +11,6 @@ use crate::game::{Attribute, CharSheet, DamageDice, Dice, Item};
 
 // TODO: move this to subfolder
 
-#[derive(Serialize, Deserialize, Debug, Hash, Eq, PartialEq, Copy, Clone)]
-#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-pub enum ItemTag {
-    Tool,
-    Weapon,
-    Book,
-    Corpse,
-}
-
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum ItemQuality {
@@ -327,11 +318,9 @@ pub struct ItemPrototype {
     pub size: ItemSize,
     pub materials: HashSet<Material>,
     #[serde(default)]
-    pub tags: HashSet<ItemTag>,
-    #[serde(default)]
     pub qualities: Vec<ItemQuality>,
     #[serde(default)]
-    pub two_handed_tool: bool,
+    pub two_handed: bool,
     #[serde(default)]
     pub wearable: Option<WearableValue>,
     #[serde(default)]

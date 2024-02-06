@@ -3,7 +3,7 @@
 pub use actions::{Action, ActionType};
 pub use game_data::{
     AmmoType, DamageType, DamageValue, GameData, IsAmmoValue, ItemPrototype, ItemQuality, ItemSize,
-    ItemTag, Material, WearLayer,
+    Material, WearLayer,
 };
 pub use log::{Log, LogEvent};
 pub use map::{Chunk, ChunkPos, Item, Map, Terrain, TerrainInteract, TerrainView, Tile, TilePos};

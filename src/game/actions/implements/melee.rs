@@ -426,8 +426,8 @@ mod tests {
         assert!(
             event
                 .msg
-                .contains("You attack old bugger with your stone spear"),
-            "msg \"{}\" doesn't contains \"You attack old bugger with your stone spear\"",
+                .contains("You attack Old Bugger with your stone spear"),
+            "msg \"{}\" doesn't contains \"You attack Old Bugger with your stone spear\"",
             event.msg
         );
     }

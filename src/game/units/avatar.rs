@@ -2,13 +2,11 @@
 
 use geometry::{Point, TwoDimDirection};
 
-use crate::game::units::Inventory;
-
 use super::super::{
     map::items::helpers::{dead_body, CLOAK, HAT},
     races::Pronouns,
     savage::HitResult,
-    units::Personality,
+    units::{Inventory, Personality},
     Action, AttackType, BodySlot, DamageValue, GameData, Item,
 };
 

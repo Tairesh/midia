@@ -90,6 +90,17 @@ impl Units {
         self.loaded_units.iter().map(|&i| self.get_unit(i))
     }
 
+    pub fn loaded_units_mut(&mut self) -> impl Iterator<Item = &mut Avatar> {
+        let loaded_units = self.loaded_units.clone();
+        self.iter_mut().filter_map(move |(i, u)| {
+            if loaded_units.contains(i) {
+                Some(u)
+            } else {
+                None
+            }
+        })
+    }
+
     pub fn unload_unit(&mut self, unit_id: usize) {
         self.loaded_units.remove(&unit_id);
     }

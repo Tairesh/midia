@@ -292,8 +292,15 @@ impl World {
         new_id
     }
 
+    fn plan(&mut self) {
+        // TODO
+    }
+
     /// Doing actions that should be done
     fn act(&mut self) {
+        self.shock_out();
+        self.plan();
+
         let actions: Vec<Action> = self
             .units
             .borrow()
@@ -370,11 +377,7 @@ impl World {
         while self.units().player().action.is_some() && spend < Self::SPEND_LIMIT {
             self.meta.current_tick += 1;
             spend += 1;
-            self.act();
-
-            self.shock_out();
-
-            // TODO: npcs AI for loaded units
+            self.act()
         }
     }
 }

@@ -20,6 +20,43 @@ pub struct Appearance {
     pub sex: Sex,
 }
 
+impl Appearance {
+    pub fn body_name(&self) -> String {
+        // TODO: race-specific sexes and ages
+        let race_name = self.race.name().to_lowercase();
+        if self.race.is_intelligent() {
+            match self.age {
+                0..=3 => format!("baby {race_name}"),
+                4..=15 => {
+                    race_name
+                        + " "
+                        + match self.sex {
+                            Sex::Male => "boy",
+                            Sex::Female => "girl",
+                            Sex::Undefined => "child",
+                        }
+                }
+                16.. => {
+                    race_name
+                        + match self.sex {
+                            Sex::Male => " man",
+                            Sex::Female => " woman",
+                            Sex::Undefined => "",
+                        }
+                }
+            }
+        } else {
+            match self.age {
+                0..=5 => format!("young {race_name}"),
+                _ => match self.sex {
+                    Sex::Female => format!("{race_name} queen"),
+                    _ => race_name,
+                },
+            }
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Mind {
     #[serde(rename = "n")]
@@ -31,7 +68,7 @@ pub struct Mind {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Personality {
+pub struct PlayerPersonality {
     #[serde(rename = "a")]
     pub appearance: Appearance,
     #[serde(rename = "m")]
@@ -40,7 +77,7 @@ pub struct Personality {
     pub char_sheet: CharSheet,
 }
 
-impl Personality {
+impl PlayerPersonality {
     pub fn new(appearance: Appearance, mind: Mind, char_sheet: CharSheet) -> Self {
         Self {
             appearance,
@@ -49,7 +86,7 @@ impl Personality {
         }
     }
 
-    pub fn random_playable<R: Rng + ?Sized>(rng: &mut R) -> Personality {
+    pub fn random_playable<R: Rng + ?Sized>(rng: &mut R) -> PlayerPersonality {
         let gender = rng.sample(Standard);
         let sex = Sex::from(&gender);
         let game_data = GameData::instance();
@@ -65,7 +102,7 @@ impl Personality {
             .choose(rng)
             .cloned()
             .unwrap_or_default();
-        Personality::new(
+        PlayerPersonality::new(
             Appearance {
                 body_color: if race.custom_colors().is_empty() {
                     None
@@ -80,53 +117,17 @@ impl Personality {
             CharSheet::default(true, race, age),
         )
     }
-
-    #[allow(dead_code)]
-    pub fn age_name(&self) -> String {
-        age_name(&self.appearance)
-    }
-}
-
-pub fn age_name(appearance: &Appearance) -> String {
-    let race_name = appearance.race.name().to_lowercase();
-    if appearance.race.is_intelligent() {
-        match appearance.age {
-            0..=3 => format!("baby {race_name}"),
-            4..=15 => {
-                race_name
-                    + " "
-                    + match appearance.sex {
-                        Sex::Male => "boy",
-                        Sex::Female => "girl",
-                        Sex::Undefined => "child",
-                    }
-            }
-            16.. => {
-                race_name
-                    + match appearance.sex {
-                        Sex::Male => " man",
-                        Sex::Female => " woman",
-                        Sex::Undefined => "",
-                    }
-            }
-        }
-    } else {
-        match appearance.age {
-            0..=5 => format!("young {race_name}"),
-            _ => match appearance.sex {
-                Sex::Female => format!("{race_name} queen"),
-                _ => race_name,
-            },
-        }
-    }
 }
 
 #[cfg(test)]
 pub mod tests {
-    use super::{Appearance, BodyColor, CharSheet, Gender, Mind, Personality, Race, Sex};
+    use crate::game::savage::{Attributes, Skills};
+    use crate::game::{Dice, SkillLevel};
 
-    pub fn tester_girl() -> Personality {
-        Personality::new(
+    use super::{Appearance, BodyColor, CharSheet, Gender, Mind, PlayerPersonality, Race, Sex};
+
+    pub fn tester_girl() -> PlayerPersonality {
+        PlayerPersonality::new(
             Appearance {
                 race: Race::Gazan,
                 age: 15,
@@ -141,25 +142,56 @@ pub mod tests {
         )
     }
 
-    pub fn old_bugger() -> Personality {
-        Personality::new(
+    pub fn shasha() -> PlayerPersonality {
+        PlayerPersonality::new(
             Appearance {
-                race: Race::Bug,
-                age: 99,
-                body_color: None,
-                sex: Sex::Undefined,
+                race: Race::Nyarnik,
+                age: 22,
+                body_color: Some(BodyColor::LightGreen),
+                sex: Sex::Female,
             },
             Mind {
-                name: "Old Bugger".to_string(),
-                gender: Gender::Custom("X".to_string()),
+                name: "Shasha".to_string(),
+                gender: Gender::Female,
             },
-            CharSheet::default(false, Race::Bug, 99),
+            CharSheet::new(
+                true,
+                Race::Nyarnik,
+                22,
+                Attributes {
+                    agility: Dice::D8,
+                    smarts: Dice::D6,
+                    spirit: Dice::D6,
+                    strength: Dice::D10,
+                    vigor: Dice::D6,
+                },
+                Skills {
+                    athletics: SkillLevel::None,
+                    fighting: SkillLevel::D12,
+                    shooting: SkillLevel::None,
+                    stealth: SkillLevel::None,
+                    thievery: SkillLevel::None,
+                    swimming: SkillLevel::None,
+                    gambling: SkillLevel::D6,
+                    notice: SkillLevel::None,
+                    survival: SkillLevel::None,
+                    healing: SkillLevel::None,
+                    repair: SkillLevel::None,
+                    reading: SkillLevel::None,
+                    persuasion: SkillLevel::D8,
+                    intimidation: SkillLevel::None,
+                    climbing: SkillLevel::None,
+                    // TODO: streetwise
+                    // TODO: cooking
+                    // TODO: taunt
+                },
+            ),
         )
     }
 
     #[test]
-    fn test_age_name() {
+    fn test_body_name() {
         let character = tester_girl();
-        assert_eq!("gazan girl", character.age_name());
+        assert_eq!("gazan girl", character.appearance.body_name());
     }
 }

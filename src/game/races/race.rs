@@ -7,10 +7,10 @@ use serde::{Deserialize, Serialize};
 use tetra::graphics::Color;
 
 use crate::colors::Colors;
-use crate::game::units::Inventory;
 use crate::game::{
     savage::{DamageDice, DamageType, Skill},
     traits::{LooksLike, Name},
+    units::{Inventory, Weapon},
     AttackType, Attribute, Damage, DamageValue, SkillLevel,
 };
 
@@ -90,7 +90,7 @@ impl Race {
         })
     }
 
-    pub fn armor_bonus(self) -> i8 {
+    pub fn natural_armor(self) -> i8 {
         match self {
             Race::Nyarnik => 2,
             _ => 0,
@@ -118,60 +118,22 @@ impl Race {
         .copied()
     }
 
-    pub fn natural_weapon(self) -> (&'static str, DamageValue) {
+    pub fn natural_weapon(self) -> Weapon {
+        // TODO: consts for names
         match self {
-            Race::Gazan | Race::Nyarnik => (
-                "fists",
-                DamageValue {
-                    damage: Damage {
-                        dices: Vec::new(),
-                        attribute: Some(Attribute::Strength),
-                        modifier: 0,
-                        crit_dice: None,
-                    },
-                    damage_types: HashSet::from([DamageType::Blunt]),
-                    distance: 0,
-                    penetration: 0,
-                    attack_modifier: 0,
-                    parry_modifier: 0,
-                    minimum_strength: None,
-                },
-            ),
-            Race::Totik | Race::Lagnam => (
-                "fangs",
-                DamageValue {
-                    damage: Damage {
-                        dices: vec![DamageDice::D4],
-                        attribute: Some(Attribute::Strength),
-                        modifier: 0,
-                        crit_dice: None,
-                    },
-                    damage_types: HashSet::from([DamageType::Pierce]),
-                    distance: 0,
-                    penetration: 0,
-                    attack_modifier: 0,
-                    parry_modifier: 0,
-                    minimum_strength: None,
-                },
-            ),
-            Race::Bug => (
-                "mandibles",
+            Race::Gazan | Race::Nyarnik => Weapon {
+                name: "fists".to_string(),
+                damage: DamageValue::strength(DamageType::Blunt),
+            },
+            Race::Totik | Race::Lagnam => Weapon {
+                name: "fangs".to_string(),
+                damage: DamageValue::simple(DamageDice::D4, DamageType::Pierce),
+            },
+            Race::Bug => Weapon {
+                name: "mandibles".to_string(),
                 // TODO: poison
-                DamageValue {
-                    damage: Damage {
-                        dices: vec![DamageDice::D6],
-                        attribute: Some(Attribute::Strength),
-                        modifier: 0,
-                        crit_dice: None,
-                    },
-                    damage_types: HashSet::from([DamageType::Pierce]),
-                    distance: 0,
-                    penetration: 0,
-                    attack_modifier: 0,
-                    parry_modifier: 0,
-                    minimum_strength: None,
-                },
-            ),
+                damage: DamageValue::simple(DamageDice::D6, DamageType::Pierce),
+            },
         }
     }
 

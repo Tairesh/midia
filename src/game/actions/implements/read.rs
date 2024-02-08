@@ -16,10 +16,9 @@ pub struct Read {
 }
 
 impl Read {
-    pub fn new(dir: Direction, avatar: &Avatar) -> Self {
+    pub fn new(dir: Direction, avatar: &dyn Avatar) -> Self {
         let reading_roll = avatar
-            .personality
-            .char_sheet
+            .char_sheet()
             .get_skill_with_modifiers(Skill::Reading)
             .roll_explosive();
         Self { dir, reading_roll }
@@ -32,12 +31,14 @@ impl Read {
 }
 
 impl ActionImpl for Read {
-    fn is_possible(&self, actor: &Avatar, world: &World) -> ActionPossibility {
-        if actor.personality.char_sheet.shock {
+    fn is_possible(&self, actor_id: usize, world: &World) -> ActionPossibility {
+        let units = world.units();
+        let actor = units.get_unit(actor_id);
+        if actor.char_sheet().shock {
             return No("You are in shock".to_string());
         }
 
-        let pos = actor.pos + self.dir;
+        let pos = actor.pos() + self.dir;
         let mut map = world.map();
         let tile = map.get_tile(pos);
         if tile.is_readable() {
@@ -46,10 +47,10 @@ impl ActionImpl for Read {
             if self.reading_roll.natural == 1 {
                 return No("You tried to read it but failed".to_string());
             }
-            match self.reading_roll.total {
-                ..=3 => Yes((reading_time * 2.0).round() as u32),
-                4..=7 => Yes(reading_time.round() as u32),
-                8.. => Yes((reading_time * 0.5).round() as u32),
+            match self.reading_roll.successes() {
+                0 => Yes((reading_time * 2.0).round() as u32),
+                1 => Yes(reading_time.round() as u32),
+                2.. => Yes((reading_time * 0.5).round() as u32),
             }
         } else {
             No("There is nothing to read".to_string())
@@ -59,7 +60,7 @@ impl ActionImpl for Read {
         let units = world.units();
         let owner = action.owner(&units);
         if owner.is_player() {
-            let pos = owner.pos + self.dir;
+            let pos = owner.pos() + self.dir;
             world.log().push(LogEvent::new(
                 world.map().get_tile(pos).read(),
                 pos,
@@ -75,7 +76,7 @@ mod tests {
 
     use crate::game::map::items::helpers::random_book;
     use crate::game::world::tests::prepare_world;
-    use crate::game::{Action, RollResult};
+    use crate::game::{Action, Avatar, RollResult};
 
     use super::Read;
 
@@ -91,8 +92,8 @@ mod tests {
 
         let typ = Read::new_test(Direction::East, RollResult::new(4, 4));
         if let Ok(action) = Action::new(0, typ.into(), &world) {
-            world.units_mut().player_mut().action = Some(action);
-            while world.units().player().action.is_some() {
+            world.units_mut().player_mut().set_action(Some(action));
+            while world.units().player().action().is_some() {
                 world.tick();
             }
         } else {

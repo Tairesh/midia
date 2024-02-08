@@ -1,9 +1,9 @@
-use crate::game::Avatar;
+use crate::game::{AttackType, Avatar, Fighter};
 
 use super::{super::HitResult, fighting_roll};
 
 // TODO: special attacks: both hands, kick, agressive, etc.
-pub fn melee_attack_unit(attacker: &Avatar, defender: &Avatar) -> UnitMeleeAttackResult {
+pub fn melee_attack_unit(attacker: &dyn Fighter, defender: &dyn Fighter) -> UnitMeleeAttackResult {
     // TODO: add +1 to hit for every ally
     // TODO: Attack of unarmed enemy while attacker is armed causes +2 to Fighting skill rolls
     // TODO: some traits make some avatars armed even if they don't have weapons
@@ -14,8 +14,8 @@ pub fn melee_attack_unit(attacker: &Avatar, defender: &Avatar) -> UnitMeleeAttac
         let delta = hit_roll - parry;
         let critical = delta >= 4;
 
-        let melee_damage = attacker.melee_damage();
-        let damage = melee_damage.roll(&attacker.personality.char_sheet, critical, true);
+        let melee_damage = attacker.weapon(AttackType::Melee).unwrap().damage;
+        let damage = melee_damage.roll(attacker.as_avatar().char_sheet(), critical, true);
 
         UnitMeleeAttackResult::Hit(HitResult::calculate(
             damage.damage,

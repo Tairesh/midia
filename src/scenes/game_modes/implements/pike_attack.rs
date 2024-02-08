@@ -9,7 +9,7 @@ use tetra::{
 use crate::{
     colors::Colors,
     game::World,
-    game::{actions::implements::Melee, traits::Name, AttackType},
+    game::{actions::implements::Melee, traits::Name, AttackType, Fighter},
     input::{self, Zero},
     lang::a,
     settings::Settings,
@@ -71,8 +71,9 @@ impl GameModeImpl for PikeAttack {
         let damage = world
             .units()
             .player()
-            .attack_damage(AttackType::Melee)
-            .unwrap();
+            .weapon(AttackType::Melee)
+            .unwrap()
+            .damage;
         let distance = (pos.distance(Point::default()).floor() - 1.0) as u8;
         let color = if distance <= damage.distance {
             Colors::LIGHT_CORAL
@@ -151,7 +152,14 @@ impl GameModeImpl for PikeAttack {
             game.modes.pop();
             return None;
         } else if let Some(dir) = input::get_direction_keys_down(ctx) {
-            let damage = game.world.borrow().units().player().melee_damage();
+            let damage = game
+                .world
+                .borrow()
+                .units()
+                .player()
+                .weapon(AttackType::Melee)
+                .unwrap()
+                .damage;
             let pos = self.shift_of_view + self.mouse_moved_pos + dir;
             let distance = (pos.distance(Point::default()).floor() - 1.0) as u8;
             if distance <= damage.distance {

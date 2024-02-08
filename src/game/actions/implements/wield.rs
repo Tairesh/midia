@@ -16,14 +16,16 @@ pub struct WieldFromGround {
 }
 
 impl ActionImpl for WieldFromGround {
-    fn is_possible(&self, actor: &Avatar, world: &World) -> ActionPossibility {
-        if actor.personality.char_sheet.shock {
+    fn is_possible(&self, actor_id: usize, world: &World) -> ActionPossibility {
+        let units = world.units();
+        let actor = units.get_unit(actor_id);
+        if actor.char_sheet().shock {
             return No("You are in shock".to_string());
         }
 
-        let pos = actor.pos + self.dir;
+        let pos = actor.pos() + self.dir;
         if let Some(item) = world.map().get_tile(pos).items.last() {
-            match actor.inventory.can_wield(item) {
+            match actor.inventory().unwrap().can_wield(item) {
                 Ok(..) => Yes(item.wield_time().round() as u32),
                 Err(e) => No(e),
             }
@@ -35,7 +37,7 @@ impl ActionImpl for WieldFromGround {
     fn on_finish(&self, action: &Action, world: &mut World) {
         let mut units = world.units_mut();
         let owner = action.owner_mut(&mut units);
-        let pos = owner.pos + self.dir;
+        let pos = owner.pos() + self.dir;
         let item = world.map().get_tile_mut(pos).items.pop();
         if let Some(item) = item {
             let mut msg = format!(
@@ -47,8 +49,7 @@ impl ActionImpl for WieldFromGround {
             if owner.is_player() {
                 if let Some(dice) = item.melee_damage().minimum_strength {
                     if owner
-                        .personality
-                        .char_sheet
+                        .char_sheet()
                         .get_attribute_with_modifiers(Attribute::Strength)
                         .dice()
                         < dice
@@ -57,7 +58,7 @@ impl ActionImpl for WieldFromGround {
                     }
                 }
             }
-            owner.inventory.wield(item);
+            owner.inventory_mut().unwrap().wield(item);
             world
                 .log()
                 .push(LogEvent::new(msg, pos, LogCategory::Success));
@@ -71,7 +72,7 @@ mod tests {
 
     use crate::game::map::items::helpers::{random_book, GOD_AXE, ROCK, STONE_SHOVEL};
     use crate::game::world::tests::prepare_world;
-    use crate::game::{Action, Item};
+    use crate::game::{Action, Avatar, Item};
 
     use super::WieldFromGround;
 
@@ -85,24 +86,29 @@ mod tests {
             .items
             .push(Item::new(GOD_AXE));
 
-        assert!(world.units().player().inventory.main_hand().is_none());
+        assert!(world
+            .units()
+            .player()
+            .inventory()
+            .unwrap()
+            .main_hand()
+            .is_none());
         assert_eq!(0, world.meta.current_tick);
 
-        world.units_mut().player_mut().action = Some(
-            Action::new(
-                0,
-                WieldFromGround {
-                    dir: Direction::East,
-                }
-                .into(),
-                &world,
-            )
-            .unwrap(),
-        );
+        let action = Action::new(
+            0,
+            WieldFromGround {
+                dir: Direction::East,
+            }
+            .into(),
+            &world,
+        )
+        .unwrap();
+        world.units_mut().player_mut().set_action(Some(action));
         world.tick();
 
         let units = world.units();
-        let item = units.player().inventory.main_hand().unwrap();
+        let item = units.player().inventory().unwrap().main_hand().unwrap();
         assert_eq!(item.proto().id, GOD_AXE);
         assert_eq!(0, world.map().get_tile(Point::new(1, 0)).items.len());
     }
@@ -113,7 +119,8 @@ mod tests {
         world
             .units_mut()
             .player_mut()
-            .inventory
+            .inventory_mut()
+            .unwrap()
             .wield(Item::new(STONE_SHOVEL));
         assert!(world
             .units()
@@ -151,7 +158,8 @@ mod tests {
         world
             .units_mut()
             .player_mut()
-            .inventory
+            .inventory_mut()
+            .unwrap()
             .wield(Item::new(GOD_AXE));
         assert!(world
             .units()
@@ -173,17 +181,16 @@ mod tests {
             .items
             .push(random_book());
 
-        world.units_mut().player_mut().action = Some(
-            Action::new(
-                0,
-                WieldFromGround {
-                    dir: Direction::East,
-                }
-                .into(),
-                &world,
-            )
-            .unwrap(),
-        );
+        let action = Action::new(
+            0,
+            WieldFromGround {
+                dir: Direction::East,
+            }
+            .into(),
+            &world,
+        )
+        .unwrap();
+        world.units_mut().player_mut().set_action(Some(action));
         world.tick();
 
         let units = world.units();

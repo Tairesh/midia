@@ -24,6 +24,7 @@ arrayvec = { version = "0.7", features = ["serde"] }
 phf = { version = "0.11", features = ["macros"] }
 once_cell = "1.10"
 enum-iterator = "1.1"
+typetag = "0.2"
 
 [build-dependencies]
 winres = "0.1"

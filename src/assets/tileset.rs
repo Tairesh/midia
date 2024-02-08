@@ -4,6 +4,7 @@ use tetra::{
     Context,
 };
 
+// TODO: use Enum
 const REGIONS: phf::Map<&'static str, Rectangle> = phf::phf_map! {
     "empty" => Rectangle::new(0.0, 0.0, 10.0, 10.0),
     "highlight" => Rectangle::new(10.0, 0.0, 10.0, 10.0),

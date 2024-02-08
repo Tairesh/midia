@@ -1,6 +1,6 @@
 use std::cell::RefCell;
 
-use geometry::{Point, TwoDimDirection, Vec2};
+use geometry::{Point, Vec2};
 use tetra::graphics::{Canvas, DrawParams};
 use tetra::Context;
 
@@ -8,7 +8,7 @@ use crate::assets::{Assets, Tileset};
 use crate::colors::Colors;
 use crate::game::map::TerrainView;
 use crate::game::traits::LooksLike;
-use crate::game::{Avatar, World};
+use crate::game::{Avatar, Tile, World};
 use crate::scenes::game_modes::Cursor;
 
 // TODO: refactor this shit
@@ -44,11 +44,13 @@ pub fn draw(
     let mut map = world.map();
     map.load_tiles_between(left_top, right_bottom);
 
-    let tiles = map.tiles_between(left_top, right_bottom);
+    // TODO: is_visible takes like 12% of the time
+    let tiles = map
+        .tiles_between(left_top, right_bottom)
+        .into_iter()
+        .filter(|(pos, _)| world.is_visible(*pos))
+        .collect::<Vec<(Point, &Tile)>>();
     for &(pos, tile) in &tiles {
-        if !world.is_visible(pos) {
-            continue; // TODO: remembering tiles that are not in FOV
-        }
         let delta = Vec2::from(pos - center_tile);
         let position = center + delta * tile_size;
 
@@ -90,9 +92,6 @@ pub fn draw(
         }
     }
     for &(pos, tile) in &tiles {
-        if !world.is_visible(pos) {
-            continue;
-        }
         let position = center + Vec2::from(pos - center_tile) * tile_size;
 
         for i in tile.units.iter().copied() {
@@ -102,7 +101,7 @@ pub fn draw(
                 position,
                 zoom,
                 true,
-                world.units().get_unit(i),
+                world.units().get_unit(i).as_fighter().as_avatar(),
             );
             if !tile.items.is_empty() {
                 assets.tileset.draw_region(
@@ -114,9 +113,6 @@ pub fn draw(
         }
     }
     for &(pos, tile) in &tiles {
-        if !world.is_visible(pos) {
-            continue;
-        }
         let position = center + Vec2::from(pos - center_tile) * tile_size;
 
         let this_tile_size = Tileset::get_size(tile.terrain.looks_like());
@@ -182,41 +178,39 @@ pub fn draw_unit(
     mut position: Vec2,
     zoom: f32,
     rotate: bool,
-    avatar: &Avatar,
+    avatar: &dyn Avatar,
 ) {
-    let scale = if !rotate || matches!(avatar.vision, TwoDimDirection::East) {
+    let scale = if !rotate || avatar.view().direction().is_default() {
         Vec2::new(zoom, zoom)
     } else {
         position.x += 10.0 * zoom;
         Vec2::new(-zoom, zoom)
     };
     let mut draw_params = DrawParams::new().position(position).scale(scale);
-    if let Some(body_color) = avatar.personality.appearance.body_color {
-        draw_params = draw_params.color(body_color.into());
+    if let Some(color) = avatar.view().fg() {
+        draw_params = draw_params.color(color);
     }
-    tileset.draw_region(
-        ctx,
-        avatar.personality.appearance.race.looks_like(),
-        draw_params,
-    );
+    tileset.draw_region(ctx, avatar.view().looks_like(), draw_params);
 
     // TODO: draw both items
-    if let Some(item) = avatar.inventory.main_hand() {
-        let (offset_x, offset_y) = (
-            if !rotate || matches!(avatar.vision, TwoDimDirection::East) {
-                5.0
-            } else {
-                -5.0
-            } * zoom,
-            3.0 * zoom,
-        );
-        tileset.draw_region(
-            ctx,
-            item.looks_like(),
-            DrawParams::new()
-                .position(position + Vec2::new(offset_x, offset_y))
-                .color(item.color())
-                .scale(scale * 0.7),
-        );
+    if avatar.inventory().is_none() || avatar.inventory().unwrap().main_hand().is_none() {
+        return;
     }
+    let item = avatar.inventory().unwrap().main_hand().unwrap();
+    let (offset_x, offset_y) = (
+        if !rotate || avatar.view().direction().is_default() {
+            5.0
+        } else {
+            -5.0
+        } * zoom,
+        3.0 * zoom,
+    );
+    tileset.draw_region(
+        ctx,
+        item.looks_like(),
+        DrawParams::new()
+            .position(position + Vec2::new(offset_x, offset_y))
+            .color(item.color())
+            .scale(scale * 0.7),
+    );
 }

@@ -9,8 +9,9 @@ use crate::{
     assets::Assets,
     colors::Colors,
     game::{
-        traits::Name, units::Personality, Attribute, Avatar, CharSheet, Dice, Skill, SkillLevel,
-        World,
+        traits::Name,
+        units::{Player, PlayerPersonality},
+        Attribute, CharSheet, Dice, Skill, SkillLevel, World,
     },
     savefile::{self, Meta},
     scenes::{
@@ -188,7 +189,7 @@ impl TryFrom<ButtonEvent> for Skill {
 
 pub struct CharacterAttributes {
     meta: Meta,
-    personality: Personality,
+    personality: PlayerPersonality,
     attributes_points: u8,
     skills_points: i8,
     window_size: (i32, i32),
@@ -312,7 +313,7 @@ fn skill_sprites(
 }
 
 impl CharacterAttributes {
-    pub fn new(path: &Path, personality: Personality, app: &App, ctx: &mut Context) -> Self {
+    pub fn new(path: &Path, personality: PlayerPersonality, app: &App, ctx: &mut Context) -> Self {
         let meta = savefile::load(path).unwrap();
 
         let mut sprites: Vec<Box<dyn UiSprite>> = vec![
@@ -563,8 +564,8 @@ impl CharacterAttributes {
     fn next(&self) -> Vec<Transition> {
         // TODO: traits, skills, etc.
         // TODO: find available starting pos in the world
-        let avatar = Avatar::dressed_default(self.personality.clone(), Point::new(0, 0));
-        let mut world = World::create(self.meta.clone(), avatar).init();
+        let avatar = Player::new(self.personality.clone(), Point::new(0, 0));
+        let mut world = World::create(self.meta.clone(), avatar);
         world.save();
 
         vec![

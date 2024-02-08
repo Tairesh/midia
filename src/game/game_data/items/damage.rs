@@ -61,6 +61,40 @@ impl DamageValue {
         }
     }
 
+    pub fn strength(damage_type: DamageType) -> Self {
+        Self {
+            damage: Damage {
+                dices: Vec::new(),
+                attribute: Some(Attribute::Strength),
+                modifier: 0,
+                crit_dice: None,
+            },
+            damage_types: HashSet::from([damage_type]),
+            distance: 0,
+            penetration: 0,
+            attack_modifier: 0,
+            parry_modifier: 0,
+            minimum_strength: None,
+        }
+    }
+
+    pub fn simple(dice: DamageDice, damage_type: DamageType) -> Self {
+        Self {
+            damage: Damage {
+                dices: vec![dice],
+                attribute: Some(Attribute::Strength),
+                modifier: 0,
+                crit_dice: None,
+            },
+            damage_types: HashSet::from([damage_type]),
+            distance: 0,
+            penetration: 0,
+            attack_modifier: 0,
+            parry_modifier: 0,
+            minimum_strength: None,
+        }
+    }
+
     pub fn improvised_melee(item: &Item) -> Self {
         Self {
             damage: Damage {

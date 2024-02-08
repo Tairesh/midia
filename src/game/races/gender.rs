@@ -15,7 +15,7 @@ pub enum Gender {
 }
 
 impl Gender {
-    pub fn pronounce(&self) -> Pronouns {
+    pub fn pronouns(&self) -> Pronouns {
         match self {
             Gender::Male => Pronouns::HeHim,
             Gender::Female => Pronouns::SheHer,

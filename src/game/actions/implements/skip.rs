@@ -8,7 +8,7 @@ use super::super::{
 pub struct Skip {}
 
 impl ActionImpl for Skip {
-    fn is_possible(&self, _actor: &Avatar, _world: &World) -> ActionPossibility {
+    fn is_possible(&self, _actor_id: usize, _world: &World) -> ActionPossibility {
         Yes(1)
     }
 }
@@ -16,7 +16,7 @@ impl ActionImpl for Skip {
 #[cfg(test)]
 mod tests {
     use crate::game::world::tests::prepare_world;
-    use crate::game::Action;
+    use crate::game::{Action, Avatar};
 
     use super::Skip;
 
@@ -25,8 +25,10 @@ mod tests {
         let mut world = prepare_world();
 
         assert_eq!(0, world.meta.current_tick);
-        world.units_mut().player_mut().action =
-            Some(Action::new(0, Skip {}.into(), &world).unwrap());
+        world
+            .units_mut()
+            .player_mut()
+            .set_action(Some(Action::new(0, Skip {}.into(), &world).unwrap()));
         world.tick();
         assert_eq!(1, world.meta.current_tick);
     }

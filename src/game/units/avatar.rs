@@ -1,212 +1,116 @@
-#![allow(dead_code)]
+use geometry::{Direction, Point, TwoDimDirection};
+use serde::{Deserialize, Serialize};
+use tetra::graphics::Color;
 
-use geometry::{Point, TwoDimDirection};
+use crate::game::BodySlot;
 
-use super::super::{
-    map::items::helpers::{dead_body, CLOAK, HAT},
-    races::Pronouns,
-    savage::HitResult,
-    units::{Inventory, Personality},
-    Action, AttackType, BodySlot, DamageValue, GameData, Item,
+use super::{
+    super::{
+        map::items::helpers::dead_body, races::Pronouns, savage::HitResult, Action, AttackType,
+        CharSheet, Item,
+    },
+    Appearance, Fighter, Inventory, Monster, Player, Weapon,
 };
 
-#[derive(serde::Serialize, serde::Deserialize, Debug)]
-pub struct Avatar {
-    pub id: usize,
-    pub personality: Personality,
-    pub pos: Point,
-    pub action: Option<Action>,
-    pub vision: TwoDimDirection,
-    // TODO: move functions like reload() there
-    pub inventory: Inventory,
-    // TODO: stamina
-    // TODO: traits
-    selected_ammo: Option<String>,
-}
-
-impl Avatar {
-    pub fn new(personality: Personality, pos: Point) -> Self {
-        Avatar {
-            id: 1,
-            action: None,
-            vision: TwoDimDirection::East,
-            inventory: personality.appearance.race.inventory(),
-            selected_ammo: None,
-            personality,
-            pos,
-        }
+#[typetag::serde(tag = "Avatar")]
+pub trait Avatar {
+    fn id(&self) -> usize;
+    fn set_id(&mut self, id: usize);
+    fn pos(&self) -> Point;
+    fn set_pos(&mut self, pos: Point);
+    fn name(&self) -> &str;
+    fn name_for_actions(&self) -> &str {
+        self.name()
     }
-
-    // TODO: remove this and select dress in create character scene
-    pub fn dressed_default(personality: Personality, pos: Point) -> Self {
-        let mut avatar = Self::new(personality, pos);
-        avatar.inventory.wear(Item::new(HAT), 0);
-        avatar.inventory.wear(Item::new(CLOAK), 0);
-
-        avatar
+    fn appearance(&self) -> &Appearance;
+    fn is_player(&self) -> bool {
+        false
     }
-
-    pub fn name_for_actions(&self) -> String {
-        if self.is_player() {
-            "you".to_string()
-        } else {
-            self.personality.mind.name.clone()
-        }
+    fn pronouns(&self) -> Pronouns;
+    fn view(&self) -> &AvatarView;
+    fn view_mut(&mut self) -> &mut AvatarView;
+    fn char_sheet(&self) -> &CharSheet;
+    fn char_sheet_mut(&mut self) -> &mut CharSheet;
+    fn action(&self) -> Option<&Action>;
+    fn set_action(&mut self, action: Option<Action>);
+    fn inventory(&self) -> Option<&Inventory> {
+        None
     }
-
-    pub fn is_player(&self) -> bool {
-        self.id == 0
+    fn inventory_mut(&mut self) -> Option<&mut Inventory> {
+        None
     }
-
-    pub fn is_dead(&self) -> bool {
-        self.personality.char_sheet.is_dead()
+    fn as_player(&self) -> Option<&Player> {
+        None
     }
-
-    pub fn pronounce(&self) -> Pronouns {
-        if self.is_player() {
-            Pronouns::YouYour
-        } else {
-            self.personality.mind.gender.pronounce()
-        }
+    fn as_player_mut(&mut self) -> Option<&mut Player> {
+        None
     }
-
-    pub fn apply_hit(&mut self, hit: HitResult, current_tick: u128) -> Vec<Item> {
-        self.personality.char_sheet.apply_hit(hit, current_tick);
+    fn as_monster(&self) -> Option<&Monster> {
+        None
+    }
+    fn as_monster_mut(&mut self) -> Option<&mut Monster> {
+        None
+    }
+    fn as_fighter(&self) -> &dyn Fighter;
+    fn apply_hit(&mut self, hit: HitResult, current_tick: u128) -> Option<Vec<Item>> {
+        self.char_sheet_mut().apply_hit(hit, current_tick);
 
         // TODO: drop weapons if arm is wounded
 
-        if self.is_dead() {
-            self.action = None;
+        if self.char_sheet().is_dead() {
+            self.set_action(None);
 
             let mut items = Vec::new();
-            items.append(&mut self.inventory.take_all());
-            items.push(dead_body(self));
-            items
-        } else {
-            Vec::new()
-        }
-    }
-
-    // TODO: trait bonuses for armor, toughness, parry
-    pub fn armor(&self, slot: BodySlot) -> u8 {
-        (self
-            .inventory
-            .get_items_by_slot(slot)
-            .into_iter()
-            .map(|item| item.armor() as i8)
-            .sum::<i8>()
-            + self.personality.char_sheet.race.armor_bonus())
-        .max(0) as u8
-    }
-
-    pub fn toughness(&self) -> u8 {
-        self.personality.char_sheet.toughness()
-    }
-
-    pub fn parry(&self) -> u8 {
-        (self.personality.char_sheet.parry() as i8 + self.melee_damage().parry_modifier).max(0)
-            as u8
-    }
-
-    pub fn melee_damage(&self) -> DamageValue {
-        self.attack_damage(AttackType::Melee).unwrap()
-    }
-
-    // TODO: move this somewhere else
-    pub fn attack_damage(&self, attack_type: AttackType) -> Option<DamageValue> {
-        match attack_type {
-            AttackType::Melee => Some(
-                self.inventory
-                    .main_hand()
-                    .map_or(self.personality.appearance.race.natural_weapon().1, |w| {
-                        w.melee_damage()
-                    }),
-            ),
-            AttackType::Shoot => {
-                // TODO: natural ranged weapons
-                let weapon = self.inventory.main_hand()?;
-                if let Some(ammo) = self.selected_ammo() {
-                    let proto = GameData::instance()
-                        .items
-                        .get(&ammo)
-                        .unwrap_or_else(|| panic!("Undefined ammo: `{ammo}`"));
-                    if let Some(ammo_value) = &proto.is_ammo {
-                        let mut damage = weapon.ranged_damage().unwrap();
-                        damage.damage.modifier += ammo_value.damage_modifier.damage;
-                        damage.penetration += ammo_value.damage_modifier.penetration;
-                        if let Some(dice) = ammo_value.damage_modifier.damage_dice {
-                            damage.damage.dices.push(dice);
-                        }
-
-                        return Some(damage);
-                    }
-                }
-
-                weapon.ranged_damage()
+            if let Some(inventory) = self.inventory_mut() {
+                items.append(&mut inventory.take_all());
             }
-            AttackType::Throw => self
-                .inventory
-                .main_hand()
-                .and_then(|weapon| weapon.damage(attack_type)),
+            items.push(dead_body(self.appearance()));
+            return Some(items);
+        }
+
+        None
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct AvatarView {
+    direction: TwoDimDirection,
+    tile: String,
+    fg: Option<Color>,
+}
+
+impl AvatarView {
+    pub fn new(tile: String, fg: Option<Color>) -> Self {
+        Self {
+            direction: TwoDimDirection::default(),
+            tile,
+            fg,
         }
     }
 
-    // TODO: get rid of selected_ammo
-    pub fn selected_ammo(&self) -> Option<String> {
-        let weapon = self.inventory.main_hand()?;
-        if let Some(selected_ammo) = &self.selected_ammo {
-            let proto = GameData::instance()
-                .items
-                .get(selected_ammo.as_str())
-                .unwrap();
-            if let Some(ammo_value) = &proto.is_ammo {
-                if weapon.need_ammo().as_ref().unwrap().typ == ammo_value.typ {
-                    return Some(selected_ammo.clone());
-                }
-            }
-        }
-
-        self.inventory
-            .get_ammo(weapon.need_ammo().as_ref().unwrap().typ)
-            .map(|a| a.proto().id.clone())
+    pub fn direction(&self) -> TwoDimDirection {
+        self.direction
     }
 
-    pub fn reload(&mut self) -> bool {
-        if self.inventory.main_hand().is_none()
-            || self.inventory.main_hand().unwrap().need_ammo().is_none()
-            || self.inventory.main_hand().unwrap().container().is_none()
-            || self.selected_ammo().is_none()
-        {
-            return false;
+    pub fn set_direction(&mut self, direction: TwoDimDirection) {
+        self.direction = direction;
+    }
+
+    pub fn try_set_direction(&mut self, direction: Direction) -> bool {
+        if let Ok(direction) = direction.try_into() {
+            self.direction = direction;
+            return true;
         }
 
-        let capacity = self
-            .inventory
-            .main_hand()
-            .unwrap()
-            .need_ammo()
-            .unwrap()
-            .capacity;
-        if capacity == 0 {
-            return false;
-        }
+        false
+    }
 
-        for _ in 0..capacity {
-            let new_ammo = self.inventory.remove_by_proto(
-                &self.selected_ammo().unwrap(),
-                self.inventory.main_hand().unwrap().need_ammo().unwrap().typ,
-            );
-            if let Some(new_ammo) = new_ammo {
-                self.inventory
-                    .main_hand_mut()
-                    .unwrap()
-                    .container_mut()
-                    .unwrap()
-                    .push_item(new_ammo);
-            }
-        }
+    pub fn looks_like(&self) -> &str {
+        &self.tile
+    }
 
-        true
+    pub fn fg(&self) -> Option<Color> {
+        self.fg
     }
 }
 
@@ -214,163 +118,32 @@ impl Avatar {
 mod tests {
     use geometry::Point;
 
-    use crate::game::map::items::helpers::{
-        CLOAK, GOD_AXE, QUIVER, STONE_ARROW, STONE_PIKE, WOODEN_ARROW, WOODEN_SHORTBOW,
-    };
+    use crate::game::map::items::helpers::{CLOAK, GOD_AXE};
     use crate::game::traits::Name;
-    use crate::game::units::tests::helpers::tester_girl;
-    use crate::game::{AmmoType, AttackType, GameData};
 
-    use super::{Avatar, BodySlot, HitResult, Item};
-
-    #[test]
-    fn test_npc_name() {
-        let npc = Avatar::new(tester_girl(), Point::new(0, 0));
-
-        assert_eq!(npc.name_for_actions(), "Dooka");
-    }
+    use super::{super::tests::helpers::tester_girl, *};
 
     #[test]
     fn test_player_name() {
-        let mut player = Avatar::new(tester_girl(), Point::new(0, 0));
+        let mut player = Player::new(tester_girl(), Point::new(0, 0));
         player.id = 0;
 
         assert_eq!(player.name_for_actions(), "you");
     }
 
-    #[test]
-    fn test_armor() {
-        let mut avatar = Avatar::new(tester_girl(), Point::new(0, 0));
-        avatar.inventory.wear(Item::new(CLOAK), 0);
-
-        assert_eq!(avatar.armor(BodySlot::Torso), 1);
-    }
+    // TODO: test_npc_name
 
     #[test]
     fn test_die() {
-        let mut avatar = Avatar::new(tester_girl(), Point::new(0, 0));
-        avatar.inventory.wield(Item::new(GOD_AXE));
-        avatar.inventory.wear(Item::new(CLOAK), 0);
+        let mut avatar = Player::new(tester_girl(), Point::new(0, 0));
+        avatar.inventory_mut().unwrap().wield(Item::new(GOD_AXE));
+        avatar.inventory_mut().unwrap().wear(Item::new(CLOAK), 0);
         let items = avatar.apply_hit(HitResult::ultra_damage(), 0);
+        assert!(items.is_some());
+        let items = items.unwrap();
         assert_eq!(items.len(), 3);
-        assert!(items.iter().any(|i| i.name() == "cloak"));
-        assert!(items.iter().any(|i| i.name() == "god axe"));
+        assert!(items.iter().any(|i| i.proto().id == CLOAK));
+        assert!(items.iter().any(|i| i.proto().id == GOD_AXE));
         assert_eq!(items[2].name(), "dead gazan girl");
-    }
-
-    #[test]
-    fn test_melee_damage() {
-        let mut avatar = Avatar::new(tester_girl(), Point::new(0, 0));
-        avatar.inventory.wield(Item::new(GOD_AXE));
-
-        let damage = avatar.melee_damage();
-        let proto = GameData::instance()
-            .items
-            .get(GOD_AXE)
-            .unwrap()
-            .melee_damage
-            .clone()
-            .unwrap();
-
-        assert_eq!(damage.damage.dices, proto.damage.dices);
-        assert_eq!(damage.penetration, proto.penetration);
-        assert_eq!(damage.attack_modifier, proto.attack_modifier);
-        assert_eq!(damage.parry_modifier, proto.parry_modifier);
-    }
-
-    #[test]
-    fn test_ranged_damage() {
-        // TODO: test damage for selected ammo
-        let mut avatar = Avatar::new(tester_girl(), Point::new(0, 0));
-        avatar.inventory.wield(Item::new(WOODEN_SHORTBOW));
-        avatar.inventory.wear(
-            Item::new(QUIVER).with_items_inside([Item::new(WOODEN_ARROW)]),
-            0,
-        );
-
-        let damage = avatar.attack_damage(AttackType::Shoot).unwrap();
-        let proto = GameData::instance()
-            .items
-            .get(WOODEN_SHORTBOW)
-            .unwrap()
-            .ranged_damage
-            .clone()
-            .unwrap();
-        let arrow_proto = GameData::instance()
-            .items
-            .get(WOODEN_ARROW)
-            .unwrap()
-            .is_ammo
-            .clone()
-            .unwrap();
-
-        let mut dices = proto.damage.dices;
-        if let Some(dice) = arrow_proto.damage_modifier.damage_dice {
-            dices.push(dice);
-        }
-        assert_eq!(damage.damage.dices, dices);
-        assert_eq!(
-            damage.penetration,
-            proto.penetration + arrow_proto.damage_modifier.penetration
-        );
-        assert_eq!(
-            damage.damage.modifier,
-            proto.damage.modifier + arrow_proto.damage_modifier.damage
-        );
-    }
-
-    // TODO: remove this test
-    #[test]
-    fn test_keep_selected_ammo() {
-        let mut avatar = Avatar::new(tester_girl(), Point::new(0, 0));
-        avatar.inventory.wield(Item::new(WOODEN_SHORTBOW));
-        avatar.inventory.wear(
-            Item::new(QUIVER).with_items_inside([
-                Item::new(WOODEN_ARROW),
-                Item::new(WOODEN_ARROW),
-                Item::new(STONE_ARROW),
-            ]),
-            0,
-        );
-
-        let selected_ammo = avatar.selected_ammo().unwrap();
-        assert_eq!(selected_ammo, WOODEN_ARROW);
-
-        let arrow = avatar
-            .inventory
-            .remove_by_proto(&selected_ammo, AmmoType::Arrow);
-        assert!(arrow.is_some());
-        let arrow = arrow.unwrap();
-        assert_eq!(arrow.proto().id, WOODEN_ARROW);
-
-        let selected_ammo = avatar.selected_ammo().unwrap();
-        assert_eq!(selected_ammo, WOODEN_ARROW);
-
-        let arrow = avatar
-            .inventory
-            .remove_by_proto(&selected_ammo, AmmoType::Arrow);
-        assert!(arrow.is_some());
-        let arrow = arrow.unwrap();
-        assert_eq!(arrow.proto().id, WOODEN_ARROW);
-
-        let selected_ammo = avatar.selected_ammo().unwrap();
-        assert_eq!(selected_ammo, STONE_ARROW);
-
-        let arrow = avatar
-            .inventory
-            .remove_by_proto(&selected_ammo, AmmoType::Arrow);
-        assert!(arrow.is_some());
-        let arrow = arrow.unwrap();
-        assert_eq!(arrow.proto().id, STONE_ARROW);
-
-        assert!(avatar.selected_ammo().is_none());
-    }
-
-    #[test]
-    fn test_parry_modifier() {
-        let mut avatar = Avatar::new(tester_girl(), Point::new(0, 0));
-        let parry = avatar.parry();
-        avatar.inventory.wield(Item::new(STONE_PIKE));
-        assert_eq!(avatar.parry(), parry - 1);
     }
 }

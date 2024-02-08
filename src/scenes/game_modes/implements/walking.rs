@@ -3,6 +3,7 @@ use std::time::Instant;
 use geometry::Direction;
 use tetra::{input::KeyModifier, Context};
 
+use crate::game::Fighter;
 use crate::{
     colors::Colors,
     game::{

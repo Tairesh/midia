@@ -1,11 +1,10 @@
-use crate::game::savage::HitResult;
-use crate::game::Avatar;
+use crate::game::{savage::HitResult, Avatar};
 
 use super::{LogCategory, LogEvent};
 
 pub fn unit_attack_success(
-    owner: &Avatar,
-    unit: &Avatar,
+    owner: &dyn Avatar,
+    unit: &dyn Avatar,
     hit: &HitResult,
     first_message: String,
 ) -> Vec<LogEvent> {
@@ -13,7 +12,7 @@ pub fn unit_attack_success(
 
     events.push(LogEvent::new(
         first_message,
-        unit.pos,
+        unit.pos(),
         if owner.is_player() {
             LogCategory::Success
         } else {
@@ -23,7 +22,7 @@ pub fn unit_attack_success(
     if hit.params.critical {
         events.push(LogEvent::new(
             "Critical hit!".to_string(),
-            unit.pos,
+            unit.pos(),
             if owner.is_player() {
                 LogCategory::Success
             } else {
@@ -35,7 +34,7 @@ pub fn unit_attack_success(
         if hit.consequences.wounds.is_empty() {
             events.push(LogEvent::new(
                 format!("{} is stunned.", unit.name_for_actions()),
-                unit.pos,
+                unit.pos(),
                 if owner.is_player() {
                     LogCategory::Success
                 } else {
@@ -45,7 +44,7 @@ pub fn unit_attack_success(
         } else {
             events.push(LogEvent::new(
                 format!("{} is stunned and wounded.", unit.name_for_actions()),
-                unit.pos,
+                unit.pos(),
                 if owner.is_player() {
                     LogCategory::Success
                 } else {
@@ -64,7 +63,7 @@ pub fn unit_attack_success(
             hit.consequences.shock,
             hit.consequences.wounds
         ),
-        unit.pos,
+        unit.pos(),
     ));
 
     events

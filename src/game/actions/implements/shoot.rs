@@ -32,17 +32,19 @@ impl Shoot {
 }
 
 impl ActionImpl for Shoot {
-    fn is_possible(&self, actor: &Avatar, world: &World) -> ActionPossibility {
-        if actor.personality.char_sheet.shock {
+    fn is_possible(&self, actor_id: usize, world: &World) -> ActionPossibility {
+        let units = world.units();
+        let actor = units.get_unit(actor_id);
+        if actor.char_sheet().shock {
             return No("You are in shock".to_string());
         }
 
-        // TODO: check for natural weapon
-        if actor.inventory.main_hand().is_none() {
+        if actor.as_fighter().weapon(AttackType::Shoot).is_none() {
             return No("You have nothing to shoot from.".to_string());
         }
 
-        let weapon = actor.inventory.main_hand().unwrap();
+        // TODO: check for natural weapon
+        let weapon = actor.inventory().unwrap().main_hand().unwrap();
 
         if let Some(NeedAmmoValue { typ, .. }) = weapon.need_ammo() {
             if !weapon.has_ammo(typ) {
@@ -66,13 +68,13 @@ impl ActionImpl for Shoot {
 
             let units = world.units();
             let target = units.get_unit(unit_id);
-            if target.is_dead() {
+            if target.char_sheet().is_dead() {
                 // This should be unreachable, but just in case.
                 return No("You can't shoot to a dead body.".to_string());
             }
 
             let distance =
-                RangedDistance::define(actor.pos.distance(target.pos), ranged_value.distance);
+                RangedDistance::define(actor.pos().distance(target.pos()), ranged_value.distance);
 
             match distance {
                 RangedDistance::Unreachable => {
@@ -99,18 +101,20 @@ impl ActionImpl for Shoot {
 
         let units = world.units();
         let unit = units.get_unit(unit_id);
-        if unit.is_dead() {
+        if unit.char_sheet().is_dead() {
             return;
         }
-        let target = unit.pos;
+        let target = unit.pos();
 
         let owner = action.owner(&units);
-        let weapon_name = owner.inventory.main_hand().map_or(
-            owner.personality.appearance.race.natural_weapon().0,
-            Item::name,
-        );
+        let weapon_name = owner.as_fighter().weapon(AttackType::Shoot).unwrap().name;
 
-        let attack_result = ranged_attack_unit(AttackType::Shoot, owner, unit, world);
+        let attack_result = ranged_attack_unit(
+            AttackType::Shoot,
+            owner.as_fighter(),
+            unit.as_fighter(),
+            world,
+        );
         match attack_result {
             UnitRangedAttackResult::InnocentBystander(unit_id, hit) => {
                 let victim = units.get_unit(unit_id);
@@ -122,19 +126,19 @@ impl ActionImpl for Shoot {
                     format!(
                         "{} shoot{} {} at {} but miss{} and hit{} {}, dealing {} damage{}.",
                         owner.name_for_actions(),
-                        if owner.pronounce().verb_ends_with_s() {
+                        if owner.pronouns().verb_ends_with_s() {
                             "s"
                         } else {
                             ""
                         },
                         a(weapon_name),
                         unit.name_for_actions(),
-                        if owner.pronounce().verb_ends_with_s() {
+                        if owner.pronouns().verb_ends_with_s() {
                             "es"
                         } else {
                             ""
                         },
-                        if owner.pronounce().verb_ends_with_s() {
+                        if owner.pronouns().verb_ends_with_s() {
                             "s"
                         } else {
                             ""
@@ -155,7 +159,7 @@ impl ActionImpl for Shoot {
                     world.log().push(event);
                 }
 
-                let victim_id = victim.id;
+                let victim_id = victim.id();
                 drop(units);
                 world.apply_damage(victim_id, hit);
             }
@@ -164,14 +168,14 @@ impl ActionImpl for Shoot {
                     format!(
                         "{} shoot{} {} at {} but miss{}.",
                         owner.name_for_actions(),
-                        if owner.pronounce().verb_ends_with_s() {
+                        if owner.pronouns().verb_ends_with_s() {
                             "s"
                         } else {
                             ""
                         },
                         a(weapon_name),
                         unit.name_for_actions(),
-                        if owner.pronounce().verb_ends_with_s() {
+                        if owner.pronouns().verb_ends_with_s() {
                             "es"
                         } else {
                             ""
@@ -190,14 +194,14 @@ impl ActionImpl for Shoot {
                     format!(
                         "{} shoot{} {} at {} and hit{}, dealing {} damage{}.",
                         owner.name_for_actions(),
-                        if owner.pronounce().verb_ends_with_s() {
+                        if owner.pronouns().verb_ends_with_s() {
                             "s"
                         } else {
                             ""
                         },
                         a(weapon_name),
                         unit.name_for_actions(),
-                        if owner.pronounce().verb_ends_with_s() {
+                        if owner.pronouns().verb_ends_with_s() {
                             "s"
                         } else {
                             ""
@@ -217,7 +221,7 @@ impl ActionImpl for Shoot {
                     world.log().push(event);
                 }
 
-                let unit_id = unit.id;
+                let unit_id = unit.id();
                 drop(units);
                 world.apply_damage(unit_id, hit);
             }
@@ -232,18 +236,22 @@ impl ActionImpl for Shoot {
 
         let mut units = world.units_mut();
         let owner = action.owner_mut(&mut units);
-        if let Some(weapon) = owner.inventory.main_hand_mut() {
+        if let Some(weapon) = owner.inventory_mut().unwrap().main_hand_mut() {
             if weapon.need_ammo().is_some() {
                 weapon.container_mut().unwrap().items.pop();
             }
         }
-        let auto_reload = owner.inventory.main_hand().map_or(false, |weapon| {
-            weapon
-                .need_ammo()
-                .map_or(false, |need_ammo| need_ammo.reload == 0)
-        });
+        let auto_reload = owner
+            .inventory()
+            .unwrap()
+            .main_hand()
+            .map_or(false, |weapon| {
+                weapon
+                    .need_ammo()
+                    .map_or(false, |need_ammo| need_ammo.reload == 0)
+            });
         if auto_reload {
-            owner.reload();
+            owner.inventory_mut().unwrap().reload().ok();
         }
     }
 }
@@ -257,8 +265,8 @@ mod tests {
     use crate::game::map::items::helpers::{
         QUIVER, WOODEN_ARROW, WOODEN_BOLT, WOODEN_CROSSBOW, WOODEN_SHORTBOW,
     };
-    use crate::game::world::tests::{add_npc, prepare_world};
-    use crate::game::{Action, Item, ItemPrototype, ItemSize};
+    use crate::game::world::tests::{add_monster, prepare_world};
+    use crate::game::{Action, Avatar, Item, ItemPrototype, ItemSize};
 
     use super::{Shoot, ATTACK_MOVES};
 
@@ -268,23 +276,35 @@ mod tests {
         assert_eq!(world.meta.current_tick, 0);
 
         let target = Point::new(3, 0);
-        add_npc(&mut world, target);
+        add_monster(&mut world, target);
         world
             .units_mut()
             .player_mut()
-            .inventory
+            .inventory_mut()
+            .unwrap()
             .wield(Item::new(WOODEN_SHORTBOW));
-        world.units_mut().player_mut().inventory.wear(
-            Item::new(QUIVER).with_items_inside([Item::new(WOODEN_ARROW)]),
-            0,
-        );
+        world
+            .units_mut()
+            .player_mut()
+            .inventory_mut()
+            .unwrap()
+            .wear(
+                Item::new(QUIVER).with_items_inside([Item::new(WOODEN_ARROW)]),
+                0,
+            );
 
         // Can't shoot before loading arrow to bow.
         assert!(Action::new(0, Shoot::new(target).into(), &world).is_err());
-        world.units_mut().player_mut().reload();
+        world
+            .units_mut()
+            .player_mut()
+            .inventory_mut()
+            .unwrap()
+            .reload()
+            .ok();
 
-        world.units_mut().player_mut().action =
-            Some(Action::new(0, Shoot::new(target).into(), &world).unwrap());
+        let action = Action::new(0, Shoot::new(target).into(), &world).unwrap();
+        world.units_mut().player_mut().set_action(Some(action));
         world.tick();
 
         assert_eq!(world.meta.current_tick, ATTACK_MOVES as u128);
@@ -292,8 +312,10 @@ mod tests {
         let mut log = world.log();
         let event = &log.new_events()[0];
         assert!(
-            event.msg.contains("shoot a wooden short bow at"),
-            "msg \"{}\" doesn't contains \"shoot from your wooden short bow at\"",
+            event
+                .msg
+                .contains("shoot a wooden short bow (wooden arrow) at"),
+            "msg \"{}\" doesn't contains \"shoot a wooden short bow (wooden arrow) at\"",
             event.msg
         );
 
@@ -309,8 +331,13 @@ mod tests {
         assert_eq!(world.meta.current_tick, 0);
 
         let target = Point::new(3, 0);
-        add_npc(&mut world, target);
-        world.units_mut().player_mut().inventory.clear();
+        add_monster(&mut world, target);
+        world
+            .units_mut()
+            .player_mut()
+            .inventory_mut()
+            .unwrap()
+            .clear();
 
         assert!(Action::new(0, Shoot::new(target).into(), &world).is_err());
     }
@@ -323,21 +350,27 @@ mod tests {
         world
             .units_mut()
             .player_mut()
-            .inventory
+            .inventory_mut()
+            .unwrap()
             .wield(Item::new(WOODEN_SHORTBOW));
-        world.units_mut().player_mut().inventory.wear(
-            Item::new(QUIVER).with_items_inside([Item::new(WOODEN_ARROW)]),
-            0,
-        );
-        world.units_mut().player_mut().reload();
+        world
+            .units_mut()
+            .player_mut()
+            .inventory_mut()
+            .unwrap()
+            .wear(
+                Item::new(QUIVER).with_items_inside([Item::new(WOODEN_ARROW)]),
+                0,
+            );
+        world.units_mut().player_mut().inventory.reload().ok();
 
         // Distance of wooden shortbow is 12 so we can shoot to 12*4=48 tiles.
         let target_far = Point::new(48, 0);
-        add_npc(&mut world, target_far);
+        add_monster(&mut world, target_far);
         assert!(Action::new(0, Shoot::new(target_far).into(), &world).is_ok());
 
         let target_too_far = Point::new(49, 0);
-        add_npc(&mut world, target_too_far);
+        add_monster(&mut world, target_too_far);
         assert!(Action::new(0, Shoot::new(target_too_far).into(), &world).is_err());
     }
 
@@ -346,14 +379,26 @@ mod tests {
         let mut world = prepare_world();
 
         let target = Point::new(3, 0);
-        add_npc(&mut world, target);
-        world.units_mut().player_mut().inventory.clear();
+        add_monster(&mut world, target);
         world
             .units_mut()
             .player_mut()
-            .inventory
+            .inventory_mut()
+            .unwrap()
+            .clear();
+        world
+            .units_mut()
+            .player_mut()
+            .inventory_mut()
+            .unwrap()
             .wield(Item::new(WOODEN_SHORTBOW));
-        world.units_mut().player_mut().reload();
+        world
+            .units_mut()
+            .player_mut()
+            .inventory_mut()
+            .unwrap()
+            .reload()
+            .ok();
 
         assert!(Action::new(0, Shoot::new(target).into(), &world).is_err());
     }
@@ -362,20 +407,32 @@ mod tests {
     fn test_cant_shoot_crossbow_without_reloading() {
         let mut world = prepare_world();
         let target = Point::new(3, 0);
-        add_npc(&mut world, target);
+        add_monster(&mut world, target);
         world
             .units_mut()
             .player_mut()
-            .inventory
+            .inventory_mut()
+            .unwrap()
             .wield(Item::new(WOODEN_CROSSBOW));
-        world.units_mut().player_mut().inventory.wear(
-            Item::new(QUIVER).with_items_inside(vec![Item::new(WOODEN_BOLT); 10]),
-            0,
-        );
-        assert_eq!(world.units_mut().player_mut().reload(), true);
+        world
+            .units_mut()
+            .player_mut()
+            .inventory_mut()
+            .unwrap()
+            .wear(
+                Item::new(QUIVER).with_items_inside(vec![Item::new(WOODEN_BOLT); 10]),
+                0,
+            );
+        assert!(world
+            .units_mut()
+            .player_mut()
+            .inventory_mut()
+            .unwrap()
+            .reload()
+            .is_ok());
 
-        world.units_mut().player_mut().action =
-            Some(Action::new(0, Shoot::new(target).into(), &world).unwrap());
+        let action = Action::new(0, Shoot::new(target).into(), &world).unwrap();
+        world.units_mut().player_mut().set_action(Some(action));
         world.tick();
 
         assert_eq!(world.meta.current_tick, ATTACK_MOVES as u128);
@@ -383,8 +440,8 @@ mod tests {
         let mut log = world.log();
         let event = &log.new_events()[0];
         assert!(
-            event.msg.contains("shoot a wooden crossbow at"),
-            "msg \"{}\" doesn't contains \"shoot from your wooden crossbow at\"",
+            event.msg.contains("shoot a wooden crossbow (wooden bolt)"),
+            "msg \"{}\" doesn't contains \"shoot a wooden crossbow (wooden bolt)\"",
             event.msg
         );
 

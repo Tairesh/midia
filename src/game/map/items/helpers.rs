@@ -3,6 +3,7 @@
 use std::collections::HashSet;
 
 use crate::colors::Colors;
+use crate::game::units::Appearance;
 use crate::game::{Avatar, ItemPrototype, ItemSize, Material};
 
 use super::Item;
@@ -147,11 +148,11 @@ pub fn random_book() -> Item {
         .with_readable("Lore Of The Midia")
 }
 
-pub fn dead_body(unit: &Avatar) -> Item {
+pub fn dead_body(appearance: &Appearance) -> Item {
     let body = Item::custom(ItemPrototype {
         id: CORPSE.to_string(),
-        name: format!("dead {}", unit.personality.age_name()),
-        looks_like: "corpse".to_string(),
+        name: format!("dead {}", appearance.body_name()),
+        looks_like: CORPSE.to_string(),
         size: ItemSize::Huge,
         materials: HashSet::from([Material::Flesh]),
         qualities: Vec::default(),
@@ -164,7 +165,7 @@ pub fn dead_body(unit: &Avatar) -> Item {
         need_ammo: None,
         color_from_material: Some(Material::Flesh),
     });
-    if let Some(color) = unit.personality.appearance.body_color {
+    if let Some(color) = appearance.body_color {
         body.with_colored(color)
     } else {
         body
@@ -177,20 +178,18 @@ mod tests {
 
     use crate::game::traits::{LooksLike, Name};
     use crate::game::units::tests::helpers::tester_girl;
+    use crate::game::units::Player;
 
     use super::*;
 
     #[test]
     fn test_dead_body() {
-        let unit = Avatar::new(tester_girl(), Point::default());
-        let body = dead_body(&unit);
+        let unit = Player::new(tester_girl(), Point::default());
+        let body = dead_body(unit.appearance());
         assert_eq!(body.name(), "dead gazan girl");
         assert_eq!(body.looks_like(), "corpse");
         assert_eq!(body.size(), ItemSize::Huge);
         assert_eq!(body.proto().color_from_material, Some(Material::Flesh));
-        assert_eq!(
-            body.color(),
-            unit.personality.appearance.body_color.unwrap().into()
-        )
+        assert_eq!(body.color(), unit.view().fg().unwrap())
     }
 }

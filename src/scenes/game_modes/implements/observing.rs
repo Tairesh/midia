@@ -158,7 +158,7 @@ impl GameModeImpl for Observing {
                 + game.shift_of_view()
                 + self.mouse_moved_pos
                 + dir;
-            if game.world.borrow().is_observable(pos) {
+            if game.world.borrow().is_visible(pos) {
                 let now = Instant::now();
                 if now.duration_since(self.last_shift).subsec_millis()
                     > Settings::instance().input.repeat_interval

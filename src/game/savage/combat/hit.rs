@@ -1,4 +1,4 @@
-use crate::game::{Attribute, Avatar, BodySlot, Wound};
+use crate::game::{Attribute, Avatar, BodySlot, Fighter, Wound};
 
 #[derive(Debug)]
 pub struct HitResult {
@@ -14,12 +14,12 @@ impl HitResult {
         }
     }
 
-    pub fn calculate(damage: u8, penetration: u8, target: &Avatar, critical: bool) -> Self {
-        let toughness = target.personality.char_sheet.toughness() as i8;
+    pub fn calculate(damage: u8, penetration: u8, target: &dyn Fighter, critical: bool) -> Self {
+        let toughness = target.toughness() as i8;
 
         // TODO: attack random parts of the body
         // TODO: add damage_type and armor types
-        let mut armor = target.armor(BodySlot::Torso) as i8;
+        let mut armor = target.armor(BodySlot::Torso);
         armor -= penetration as i8;
         if armor < 0 {
             armor = 0;
@@ -30,7 +30,7 @@ impl HitResult {
         let mut wounds = 0;
         if total_damage >= 0 {
             // add wound if target already shocked
-            if target.personality.char_sheet.shock {
+            if target.as_avatar().char_sheet().shock {
                 wounds += 1;
             }
             shock = true;
@@ -102,7 +102,8 @@ mod tests {
     use geometry::Point;
     use test_case::test_case;
 
-    use crate::game::game_data::pregen;
+    use crate::game::units::tests::helpers::shasha;
+    use crate::game::units::{Fighter, Player};
 
     use super::*;
 
@@ -116,7 +117,7 @@ mod tests {
     #[test_case(10, 0, true, 0)]
     #[test_case(11, 0, true, 1)]
     fn test_hit_result(damage: u8, penetration: u8, shock: bool, wounds: usize) {
-        let avatar = Avatar::new(pregen::npc::shasha(), Point::default());
+        let avatar = Player::new(shasha(), Point::default());
         let parry = avatar.parry();
         assert_eq!(parry, 8);
         let toughness = avatar.toughness();

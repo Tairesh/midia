@@ -1,15 +1,16 @@
-// TODO: Do we really need digging as a separate action? Maybe it's better to have a single action "interact with terrain"?
-// Also do we really need digging in a roguelike game about killing big bugs in a cave?
 use geometry::{Direction, DIR8};
 use rand::seq::SliceRandom;
 
+use crate::game::Avatar;
+// TODO: Do we really need digging as a separate action? Maybe it's better to have a single action "interact with terrain"?
+// Also do we really need digging in a roguelike game about killing big bugs in a cave?
 use crate::game::traits::Name;
 
 use super::super::{
     super::{
         log::{LogCategory, LogEvent},
         map::{Terrain, TerrainInteract, TerrainView},
-        Avatar, ItemQuality, World,
+        ItemQuality, World,
     },
     Action, ActionImpl,
     ActionPossibility::{self, No, Yes},
@@ -21,12 +22,14 @@ pub struct Dig {
 }
 
 impl ActionImpl for Dig {
-    fn is_possible(&self, actor: &Avatar, world: &World) -> ActionPossibility {
-        if actor.personality.char_sheet.shock {
+    fn is_possible(&self, actor_id: usize, world: &World) -> ActionPossibility {
+        let units = world.units();
+        let actor = units.get_unit(actor_id);
+        if actor.char_sheet().shock {
             return No("You are in shock".to_string());
         }
 
-        let pos = actor.pos + self.dir;
+        let pos = actor.pos() + self.dir;
         let mut map = world.map();
         let tile = map.get_tile(pos);
         if !tile.terrain.is_diggable() {
@@ -36,7 +39,13 @@ impl ActionImpl for Dig {
                 No(format!("You can't dig the {}", tile.terrain.name()))
             };
         }
-        if !actor.inventory.wield.has_quality(&ItemQuality::Dig) {
+        if actor.inventory().is_none()
+            || !actor
+                .inventory()
+                .unwrap()
+                .wield
+                .has_quality(&ItemQuality::Dig)
+        {
             return No("You need a shovel to dig!".to_string());
         }
 
@@ -48,7 +57,7 @@ impl ActionImpl for Dig {
         let owner = action.owner(&units);
         world.log().push(LogEvent::new(
             format!("{} started digging", owner.name_for_actions()),
-            owner.pos,
+            owner.pos(),
             LogCategory::Info,
         ));
     }
@@ -56,7 +65,7 @@ impl ActionImpl for Dig {
     fn on_finish(&self, action: &Action, world: &mut World) {
         let units = world.units();
         let owner = action.owner(&units);
-        let pos = owner.pos + self.dir;
+        let pos = owner.pos() + self.dir;
         let mut map = world.map();
         let tile = map.get_tile_mut(pos);
         let (terrain, items) = tile.terrain.dig_result();
@@ -66,7 +75,9 @@ impl ActionImpl for Dig {
             let places: Vec<Direction> = DIR8
                 .iter()
                 .copied()
-                .filter(|d| (pos + *d != owner.pos) && map.get_tile(pos + *d).terrain.is_passable())
+                .filter(|d| {
+                    (pos + *d != owner.pos()) && map.get_tile(pos + *d).terrain.is_passable()
+                })
                 .collect();
             for item in items {
                 let delta = places.choose(&mut rng).copied().unwrap();
@@ -92,14 +103,19 @@ mod tests {
     use crate::game::map::items::helpers::STONE_SHOVEL;
     use crate::game::map::{terrains::Dirt, Terrain};
     use crate::game::world::tests::prepare_world;
-    use crate::game::{Action, Item};
+    use crate::game::{Action, Avatar, Item};
 
     use super::Dig;
 
     #[test]
     fn test_digging() {
         let mut world = prepare_world();
-        world.units_mut().player_mut().inventory.clear();
+        world
+            .units_mut()
+            .player_mut()
+            .inventory_mut()
+            .unwrap()
+            .clear();
         world.map().get_tile_mut(Point::new(1, 0)).terrain = Dirt::default().into();
 
         let typ = Dig {
@@ -110,14 +126,16 @@ mod tests {
         world
             .units_mut()
             .player_mut()
-            .inventory
+            .inventory_mut()
+            .unwrap()
             .wield(Item::new(STONE_SHOVEL));
-        world.units_mut().player_mut().action = Some(Action::new(0, typ.into(), &world).unwrap());
-        while world.units().player().action.is_some() {
+        let action = Action::new(0, typ.into(), &world).unwrap();
+        world.units_mut().player_mut().set_action(Some(action));
+        while world.units().player().action().is_some() {
             world.tick();
         }
 
-        assert_eq!(Point::new(0, 0), world.units().player().pos);
+        assert_eq!(Point::new(0, 0), world.units().player().pos());
         assert!(matches!(
             world.map().get_tile(Point::new(1, 0)).terrain,
             Terrain::Pit(..)

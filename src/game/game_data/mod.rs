@@ -16,7 +16,6 @@ use crate::game::races::{Race, Sex};
 mod data_entity;
 mod items;
 mod names_pack;
-pub mod pregen;
 
 const PATH: &str = "data";
 static INSTANCE: OnceCell<GameData> = OnceCell::new();

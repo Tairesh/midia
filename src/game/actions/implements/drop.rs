@@ -18,11 +18,14 @@ pub struct Drop {
 }
 
 impl ActionImpl for Drop {
-    fn is_possible(&self, actor: &Avatar, world: &World) -> ActionPossibility {
-        if actor.inventory.main_hand().is_none() {
+    fn is_possible(&self, actor_id: usize, world: &World) -> ActionPossibility {
+        let units = world.units();
+        let actor = units.get_unit(actor_id);
+        let inventory = actor.inventory();
+        if inventory.is_none() || inventory.unwrap().main_hand().is_none() {
             return No("You have nothing to drop".to_string());
         }
-        let pos = actor.pos + self.dir;
+        let pos = actor.pos() + self.dir;
         let mut map = world.map();
         let tile = map.get_tile(pos);
         if !tile.terrain.can_stock_items() {
@@ -32,7 +35,7 @@ impl ActionImpl for Drop {
             ));
         }
 
-        if let Some(item) = actor.inventory.main_hand() {
+        if let Some(item) = inventory.unwrap().main_hand() {
             let k = if matches!(self.dir, Direction::Here) {
                 1.0
             } else {
@@ -47,12 +50,13 @@ impl ActionImpl for Drop {
     fn on_finish(&self, action: &Action, world: &mut World) {
         let item = action
             .owner_mut(&mut world.units_mut())
-            .inventory
+            .inventory_mut()
+            .unwrap()
             .main_hand_take()
             .unwrap();
         let units = world.units();
         let owner = action.owner(&units);
-        let pos = owner.pos + self.dir;
+        let pos = owner.pos() + self.dir;
         let name = item.name().to_string();
         world.map().get_tile_mut(pos).items.push(item);
         world.log().push(LogEvent::new(
@@ -70,7 +74,7 @@ mod tests {
     use crate::game::map::items::helpers::GOD_AXE;
     use crate::game::map::terrains::Dirt;
     use crate::game::world::tests::prepare_world;
-    use crate::game::{Action, Item};
+    use crate::game::{Action, Avatar, Item};
 
     use super::Drop;
 
@@ -81,25 +85,30 @@ mod tests {
         world.map().get_tile_mut(Point::new(0, 0)).items.clear();
         let mut units = world.units_mut();
         let player = units.player_mut();
-        player.inventory.clear();
-        player.inventory.wield(Item::new(GOD_AXE));
+        player.inventory_mut().unwrap().clear();
+        player.inventory_mut().unwrap().wield(Item::new(GOD_AXE));
         drop(units);
 
-        world.units_mut().player_mut().action = Some(
-            Action::new(
-                0,
-                Drop {
-                    dir: Direction::Here,
-                }
-                .into(),
-                &world,
-            )
-            .unwrap(),
-        );
+        let action = Action::new(
+            0,
+            Drop {
+                dir: Direction::Here,
+            }
+            .into(),
+            &world,
+        )
+        .unwrap();
+        world.units_mut().player_mut().set_action(Some(action));
         world.tick();
 
-        assert_eq!(Point::new(0, 0), world.units().player().pos);
-        assert!(world.units().player().inventory.main_hand().is_none());
+        assert_eq!(Point::new(0, 0), world.units().player().pos());
+        assert!(world
+            .units()
+            .player()
+            .inventory()
+            .unwrap()
+            .main_hand()
+            .is_none());
         let mut map = world.map();
         assert_eq!(1, map.get_tile(Point::new(0, 0)).items.len());
         let item = map.get_tile(Point::new(0, 0)).items.first().unwrap();

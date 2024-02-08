@@ -6,11 +6,9 @@ use tetra::{
     Context,
 };
 
-use crate::game::traits::Name;
 use crate::{
     colors::Colors,
-    game::World,
-    game::{actions::implements::Throw, AttackType, RangedDistance},
+    game::{actions::implements::Throw, traits::Name, AttackType, Fighter, RangedDistance, World},
     input,
     lang::a,
     settings::Settings,
@@ -72,8 +70,9 @@ impl GameModeImpl for Throwing {
         let damage = world
             .units()
             .player()
-            .attack_damage(AttackType::Throw)
-            .unwrap();
+            .weapon(AttackType::Throw)
+            .unwrap()
+            .damage;
         let distance = RangedDistance::define(pos.distance(Point::default()), damage.distance);
         let color = match distance {
             RangedDistance::Melee => Colors::ORANGE,
@@ -134,8 +133,9 @@ impl GameModeImpl for Throwing {
                 .borrow()
                 .units()
                 .player()
-                .attack_damage(AttackType::Throw)
-                .unwrap();
+                .weapon(AttackType::Throw)
+                .unwrap()
+                .damage;
             let pos = self.shift_of_view + self.mouse_moved_pos + dir;
             let distance = RangedDistance::define(pos.distance(Point::default()), damage.distance);
             if distance != RangedDistance::Unreachable {

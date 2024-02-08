@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use tetra::Context;
 
 use crate::app::App;
-use crate::game::units::Personality;
+use crate::game::units::PlayerPersonality;
 
 use super::{
     implements::{
@@ -22,7 +22,7 @@ pub enum Scene {
     CreateWorld,
     LoadWorld,
     CreateCharacter(PathBuf),
-    CharacterAttributes(PathBuf, Personality),
+    CharacterAttributes(PathBuf, PlayerPersonality),
     Game,
     GameMenu,
 }

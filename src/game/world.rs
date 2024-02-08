@@ -10,14 +10,12 @@ use super::{
         lang,
         savefile::{self, GameView, Meta, SaveError},
     },
-    game_data::pregen,
     map::{field_of_view_set, Fov, TerrainView},
-    races::{BodyColor, Gender, Race, Sex},
+    races::{BodyColor, Gender, Pronouns, Race, Sex},
     savage::HitResult,
     traits::Name,
-    units::Units,
-    units::{Appearance, Mind, Personality},
-    Action, Avatar, CharSheet, Chunk, ChunkPos, Log, LogEvent, Map, TilePos,
+    units::{Appearance, Avatar, Mind, Monster, Player, PlayerPersonality, Units},
+    Action, CharSheet, Chunk, ChunkPos, Log, LogEvent, Map, TilePos,
 };
 
 // TODO: weather and outside lighting system
@@ -39,7 +37,7 @@ impl World {
         meta: Meta,
         game_view: GameView,
         log: Log,
-        units: HashMap<usize, Avatar>,
+        units: HashMap<usize, Box<dyn Avatar>>,
         chunks: HashMap<ChunkPos, Chunk>,
     ) -> Self {
         let changed = chunks.keys().copied().collect();
@@ -60,80 +58,46 @@ impl World {
         world
     }
 
-    pub fn create(meta: Meta, avatar: Avatar) -> Self {
-        Self::new(
-            meta,
-            GameView::default(),
-            Log::new(),
-            HashMap::from([(0, avatar)]),
-            HashMap::new(),
-        )
-    }
+    pub fn create(meta: Meta, avatar: Player) -> Self {
+        let mut units = HashMap::new();
+        units.insert(0, Box::new(avatar) as Box<dyn Avatar>);
+        let mut world = Self::new(meta, GameView::default(), Log::new(), units, HashMap::new());
 
-    /// Calls one time after world is created
-    pub fn init(mut self) -> Self {
         // TODO: don't forget to remove
-        self.add_unit(Avatar::new(pregen::npc::dragan(), Point::new(0, -5)));
-        self.add_unit(Avatar::new(pregen::npc::shasha(), Point::new(-3, -5)));
-        self.add_unit(Avatar::new(pregen::npc::yasma(), Point::new(3, -5)));
-        self.add_unit(Avatar::new(pregen::npc::grem(), Point::new(6, -5)));
-        self.add_unit(Avatar::new(
-            Personality::new(
-                Appearance {
-                    race: Race::Totik,
-                    age: 29,
-                    body_color: Some(BodyColor::GreenBlue),
-                    sex: Sex::Male,
-                },
-                Mind {
-                    name: "Suh".to_string(),
-                    gender: Gender::Male,
-                },
-                CharSheet::default(true, Race::Totik, 29),
-            ),
-            Point::new(-6, -5),
-        ));
-        self.add_unit(Avatar::new(
-            Personality::new(
-                Appearance {
-                    race: Race::Bug,
-                    age: 99,
-                    body_color: Some(BodyColor::Lime),
-                    sex: Sex::Undefined,
-                },
-                Mind {
-                    name: "bug".to_string(),
-                    gender: Gender::Custom("bug".to_string()),
-                },
-                CharSheet::default(false, Race::Bug, 99),
-            ),
+        world.add_unit(Box::new(Monster::new(
             Point::new(0, 5),
-        ));
-        self.add_unit(Avatar::new(
-            Personality::new(
-                Appearance {
-                    race: Race::Bug,
-                    age: 12,
-                    body_color: Some(BodyColor::Red),
-                    sex: Sex::Female,
-                },
-                Mind {
-                    name: "bug queen".to_string(),
-                    gender: Gender::Custom("queen".to_string()),
-                },
-                CharSheet::default(false, Race::Bug, 12),
-            ),
-            Point::new(2, 5),
-        ));
+            "green bug".to_string(),
+            Appearance {
+                race: Race::Bug,
+                age: 1,
+                body_color: Some(BodyColor::Lime),
+                sex: Sex::Undefined,
+            },
+            Pronouns::ItIts,
+            CharSheet::default(false, Race::Bug, 1),
+        )));
+        world.add_unit(Box::new(Monster::new(
+            Point::new(0, 7),
+            "mutant bug queen".to_string(),
+            Appearance {
+                race: Race::Bug,
+                age: 2,
+                body_color: Some(BodyColor::Red),
+                sex: Sex::Female,
+            },
+            Pronouns::SheHer,
+            CharSheet::default(false, Race::Bug, 2),
+        )));
 
-        self.units().iter().for_each(|(&i, unit)| {
-            self.map.borrow_mut().get_tile_mut(unit.pos).on_step(i);
+        world.units().iter().for_each(|(&i, unit)| {
+            world.map.borrow_mut().get_tile_mut(unit.pos()).on_step(i);
         });
-        self
+
+        world
     }
 
     pub fn calc_fov(&mut self) {
-        let center = self.units().player().pos;
+        let center = self.units().player().pos();
         self.fov
             .set_visible(field_of_view_set(center, VISION_RANGE, &self.map.borrow()));
     }
@@ -209,28 +173,21 @@ impl World {
         self.units.borrow()
     }
 
-    pub fn is_observable(&self, pos: impl Into<Point>) -> bool {
-        self.units().player().pos.square_distance(pos.into())
-            <= (VISION_RANGE * VISION_RANGE) as u32
-    }
-
     pub fn move_avatar(&mut self, unit_id: usize, dir: Direction) {
-        let mut pos = self.units().get_unit(unit_id).pos;
+        let mut pos = self.units().get_unit(unit_id).pos();
         let (old_chunk, _) = pos.to_chunk();
         self.map().get_tile_mut(pos).off_step(unit_id);
         pos += dir;
         let mut units = self.units_mut();
         let unit = units.get_unit_mut(unit_id);
-        unit.pos = pos;
-        if let Ok(dir) = TwoDimDirection::try_from(dir) {
-            unit.vision = dir;
-        }
+        unit.set_pos(pos);
+        unit.view_mut().try_set_direction(dir);
         self.map().get_tile_mut(pos).on_step(unit_id);
-        if unit_id == 0 && old_chunk != pos.to_chunk().0 {
+        if unit.is_player() && old_chunk != pos.to_chunk().0 {
             units.load_units();
         }
-        if unit_id == 0 {
-            drop(units);
+        drop(units);
+        if self.units().get_unit(unit_id).is_player() {
             self.calc_fov();
         }
     }
@@ -274,7 +231,7 @@ impl World {
                     .copied()
                     .map(|i| {
                         (if multiline { " - " } else { "" }).to_string()
-                            + self.units().get_unit(i).name_for_actions().as_str()
+                            + self.units().get_unit(i).name()
                     })
                     .collect(),
             );
@@ -284,14 +241,15 @@ impl World {
         this_is
     }
 
-    pub fn add_unit(&mut self, unit: Avatar) -> usize {
-        let pos = unit.pos;
+    pub fn add_unit(&mut self, unit: Box<dyn Avatar>) -> usize {
+        let pos = unit.pos();
         let new_id = self.units_mut().add_unit(unit);
         self.map().get_tile_mut(pos).units.insert(new_id);
 
         new_id
     }
 
+    #[allow(clippy::unused_self)]
     fn plan(&mut self) {
         // TODO
     }
@@ -305,13 +263,12 @@ impl World {
             .units
             .borrow()
             .iter()
-            .filter(|(_, u)| u.action.is_some())
-            .map(|(_, u)| u.action.as_ref().unwrap().clone())
+            .filter_map(|(_, u)| u.action().cloned())
             .collect();
         for action in actions {
             action.act(self);
             if self.meta.current_tick >= action.finish {
-                self.units_mut().get_unit_mut(action.owner).action = None;
+                self.units_mut().get_unit_mut(action.owner).set_action(None);
             }
         }
     }
@@ -324,21 +281,17 @@ impl World {
         let current_tick = self.meta.current_tick;
         let mut units_to_shock_out = Vec::new();
         for unit in self.units().loaded_units() {
-            if unit
-                .personality
-                .char_sheet
-                .can_try_to_shock_out(current_tick)
-            {
-                units_to_shock_out.push(unit.id);
+            if unit.char_sheet().can_try_to_shock_out(current_tick) {
+                units_to_shock_out.push(unit.id());
             }
         }
         let mut units = self.units_mut();
         for unit_id in units_to_shock_out {
             let unit = units.get_unit_mut(unit_id);
-            if unit.personality.char_sheet.try_to_shock_out(current_tick) {
+            if unit.char_sheet_mut().try_to_shock_out(current_tick) {
                 self.log().push(LogEvent::info(
                     format!("{} is out of the shock!", unit.name_for_actions()),
-                    unit.pos,
+                    unit.pos(),
                 ));
             }
         }
@@ -346,21 +299,24 @@ impl World {
 
     pub fn apply_damage(&mut self, unit_id: usize, hit: HitResult) {
         let current_tick = self.meta.current_tick;
-        let pos = self.units().get_unit(unit_id).pos;
+        let pos = self.units().get_unit(unit_id).pos();
         let items_dropped = self
             .units
             .borrow_mut()
             .get_unit_mut(unit_id)
             .apply_hit(hit, current_tick);
-        for item in items_dropped {
-            self.map().get_tile_mut(pos).items.push(item);
+        if let Some(items_dropped) = items_dropped {
+            for item in items_dropped {
+                self.map().get_tile_mut(pos).items.push(item);
+            }
         }
 
-        if self.units().get_unit(unit_id).is_dead() {
+        if self.units().get_unit(unit_id).char_sheet().is_dead() {
             self.log().push(LogEvent::danger(
                 format!(
-                    "{} is dead!",
-                    self.units().get_unit(unit_id).name_for_actions()
+                    "{} {} dead!",
+                    self.units().get_unit(unit_id).name_for_actions(),
+                    self.units().get_unit(unit_id).pronouns().is_are(),
                 ),
                 pos,
             ));
@@ -370,14 +326,13 @@ impl World {
     }
 
     pub fn tick(&mut self) {
-        // TODO: test some zero-ticks actions
         self.act();
 
         let mut spend = 0;
-        while self.units().player().action.is_some() && spend < Self::SPEND_LIMIT {
+        while self.units().player().action().is_some() && spend < Self::SPEND_LIMIT {
             self.meta.current_tick += 1;
             spend += 1;
-            self.act()
+            self.act();
         }
     }
 }
@@ -388,14 +343,19 @@ pub mod tests {
 
     use geometry::Point;
 
+    use crate::game::races::Sex;
+    use crate::game::units::Appearance;
+
     use super::{
         super::{
             actions::implements::{Skip, Walk},
             map::terrains::{Boulder, BoulderSize, Dirt},
-            units::tests::helpers::{old_bugger, tester_girl},
+            races::Pronouns,
+            units::{tests::helpers::tester_girl, Avatar, Monster},
+            CharSheet, Race,
         },
         savefile::{GameView, Meta},
-        Action, Avatar, Direction, Log, TerrainView, World,
+        Action, Direction, Log, Player, TerrainView, World,
     };
 
     pub fn prepare_world() -> World {
@@ -403,19 +363,33 @@ pub mod tests {
             Meta::new("test", "test"),
             GameView::default(),
             Log::new(),
-            HashMap::from([(0, Avatar::dressed_default(tester_girl(), Point::new(0, 0)))]),
+            HashMap::from([(
+                0 as usize,
+                Box::new(Player::new(tester_girl(), Point::new(0, 0))) as Box<dyn Avatar>,
+            )]),
             HashMap::new(),
         )
     }
 
-    pub fn add_npc(world: &mut World, pos: Point) -> usize {
-        world.add_unit(Avatar::new(old_bugger(), pos))
+    pub fn add_monster(world: &mut World, pos: Point) -> usize {
+        world.add_unit(Box::new(Monster::new(
+            pos,
+            "Old Bugger".to_string(),
+            Appearance {
+                race: Race::Bug,
+                age: 99,
+                body_color: None,
+                sex: Sex::Undefined,
+            },
+            Pronouns::ItIts,
+            CharSheet::default(false, Race::Bug, 99),
+        )))
     }
 
     #[test]
     pub fn test_moving_other_unit() {
         let mut world = prepare_world();
-        add_npc(&mut world, Point::new(1, 0));
+        let monster_id = add_monster(&mut world, Point::new(1, 0));
 
         world.map().get_tile_mut(Point::new(2, 0)).terrain = Dirt::default().into();
         let action = Action::new(
@@ -429,19 +403,21 @@ pub mod tests {
         .unwrap();
         let length = action.length;
         let mut units = world.units_mut();
-        let npc = units.get_unit_mut(1);
-        npc.action = Some(action);
-        assert_eq!(Point::new(0, 0), units.player().pos);
-        assert_eq!(Point::new(1, 0), units.get_unit(1).pos);
+        let monster = units.get_unit_mut(monster_id);
+        monster.set_action(Some(action));
+        assert_eq!(Point::new(0, 0), units.player().pos());
+        assert_eq!(Point::new(1, 0), units.get_unit(monster_id).pos());
         drop(units);
         for _ in 0..length {
-            world.units_mut().player_mut().action =
-                Some(Action::new(0, Skip {}.into(), &world).unwrap());
+            world
+                .units_mut()
+                .player_mut()
+                .set_action(Some(Action::new(0, Skip {}.into(), &world).unwrap()));
             world.tick();
         }
         let units = world.units();
-        assert_eq!(Point::new(0, 0), units.player().pos);
-        assert_eq!(Point::new(2, 0), units.get_unit(1).pos)
+        assert_eq!(Point::new(0, 0), units.player().pos());
+        assert_eq!(Point::new(2, 0), units.get_unit(monster_id).pos())
     }
 
     #[test]
@@ -450,7 +426,7 @@ pub mod tests {
         assert!(world
             .fov
             .visible()
-            .contains(&world.units().player().pos.into()));
+            .contains(&world.units().player().pos().into()));
 
         world.map().get_tile_mut(Point::new(1, 0)).terrain = Dirt::default().into();
         world.map().get_tile_mut(Point::new(2, 0)).terrain = Boulder::new(BoulderSize::Huge).into();

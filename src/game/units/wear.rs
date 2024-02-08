@@ -85,7 +85,7 @@ impl Wear {
         None
     }
 
-    fn remove_ammo(&mut self, ammo_type: AmmoType) -> Option<Item> {
+    pub fn remove_ammo(&mut self, ammo_type: AmmoType) -> Option<Item> {
         for item in self.iter_mut() {
             if let Some(container) = item.container_mut() {
                 let index = container.items.iter().position(|i| i.is_ammo(ammo_type));
@@ -98,7 +98,8 @@ impl Wear {
         None
     }
 
-    pub fn remove_by_proto(&mut self, proto: &str, ammo_type: AmmoType) -> Option<Item> {
+    #[allow(dead_code)]
+    pub fn remove_by_proto(&mut self, proto: &str) -> Option<Item> {
         for item in self.iter_mut() {
             if let Some(container) = item.container_mut() {
                 let index = container.items.iter().position(|i| i.proto().id == proto);
@@ -108,7 +109,7 @@ impl Wear {
             }
         }
 
-        self.remove_ammo(ammo_type)
+        None
     }
 }
 

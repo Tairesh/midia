@@ -87,11 +87,29 @@ impl Inventory {
         self.wear.get_ammo(ammo_type)
     }
 
-    pub fn remove_by_proto(&mut self, proto_id: &str, ammo_type: AmmoType) -> Option<Item> {
-        self.wear.remove_by_proto(proto_id, ammo_type)
-    }
-
     pub fn swap_hands(&mut self) {
         self.wield.swap();
+    }
+
+    pub fn reload(&mut self) -> Result<(), ()> {
+        let weapon = self.main_hand().ok_or(())?;
+        let need_ammo = weapon.need_ammo().ok_or(())?;
+
+        if need_ammo.capacity == 0 {
+            return Err(());
+        }
+
+        for _ in 0..need_ammo.capacity {
+            let new_ammo = self.wear.remove_ammo(need_ammo.typ);
+            if let Some(new_ammo) = new_ammo {
+                self.main_hand_mut()
+                    .unwrap()
+                    .container_mut()
+                    .unwrap()
+                    .push_item(new_ammo);
+            }
+        }
+
+        Ok(())
     }
 }

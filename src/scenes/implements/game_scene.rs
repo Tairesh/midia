@@ -1,12 +1,12 @@
 use std::cell::RefCell;
-use std::convert::TryFrom;
 use std::rc::Rc;
 
-use geometry::{Direction, Point, TwoDimDirection, Vec2};
+use geometry::{Direction, Point, Vec2};
 use tetra::graphics::Canvas;
 use tetra::input::{Key, KeyModifier};
 use tetra::Context;
 
+use crate::game::Avatar;
 use crate::{
     app::App,
     assets::Assets,
@@ -126,8 +126,14 @@ impl GameScene {
     }
 
     pub fn try_rotate_player(&mut self, dir: Direction) {
-        if let Ok(dir) = TwoDimDirection::try_from(dir) {
-            self.world.borrow_mut().units_mut().player_mut().vision = dir;
+        if self
+            .world
+            .borrow_mut()
+            .units_mut()
+            .player_mut()
+            .view
+            .try_set_direction(dir)
+        {
             self.need_redraw = true;
         }
     }
@@ -149,7 +155,11 @@ impl GameScene {
         let action = Action::new(0, typ, &self.world.borrow());
         match action {
             Ok(action) => {
-                self.world.borrow_mut().units_mut().player_mut().action = Some(action);
+                self.world
+                    .borrow_mut()
+                    .units_mut()
+                    .player_mut()
+                    .set_action(Some(action));
                 self.need_redraw = true;
             }
             Err(msg) => self.cancel_action_msg(msg),
@@ -281,7 +291,7 @@ impl SceneImpl for GameScene {
             Vec2::new(5.0, 5.0),
             3.0,
             false,
-            self.world.borrow().units().player(),
+            self.world.borrow().units().player_as_avatar(),
         );
         self.current_mode().borrow_mut().draw(ctx, self);
     }

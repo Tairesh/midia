@@ -1,8 +1,10 @@
+use crate::game::units::Avatar;
+
 use super::{
     super::{
         log::{LogCategory, LogEvent},
         units::Units,
-        Avatar, World,
+        World,
     },
     ActionImpl, ActionPossibility, ActionType,
 };
@@ -17,7 +19,7 @@ pub struct Action {
 
 impl Action {
     pub fn new(owner: usize, typ: ActionType, world: &World) -> Result<Self, String> {
-        match typ.is_possible(world.units().get_unit(owner), world) {
+        match typ.is_possible(owner, world) {
             ActionPossibility::Yes(length) => {
                 let finish = world.meta.current_tick + length as u128;
                 Ok(Self {
@@ -31,20 +33,20 @@ impl Action {
         }
     }
 
-    pub fn owner<'a>(&self, units: &'a Units) -> &'a Avatar {
+    pub fn owner<'a>(&self, units: &'a Units) -> &'a dyn Avatar {
         units.get_unit(self.owner)
     }
 
-    pub fn owner_mut<'a>(&self, units: &'a mut Units) -> &'a mut Avatar {
+    pub fn owner_mut<'a>(&self, units: &'a mut Units) -> &'a mut dyn Avatar {
         units.get_unit_mut(self.owner)
     }
 
     fn cancel_action(&self, world: &mut World, reason: String) {
-        self.owner_mut(&mut world.units_mut()).action = None;
+        self.owner_mut(&mut world.units_mut()).set_action(None);
         if self.owner == 0 {
             world.log().push(LogEvent::new(
                 reason,
-                self.owner(&world.units()).pos,
+                self.owner(&world.units()).pos(),
                 LogCategory::Warning,
             ));
         }
@@ -52,13 +54,8 @@ impl Action {
 
     /// called every tick
     pub fn act(&self, world: &mut World) {
-        let units = world.units();
-        let owner = self.owner(&units);
-        if let ActionPossibility::No(reason) = self.typ.is_possible(owner, world) {
-            drop(units);
+        if let ActionPossibility::No(reason) = self.typ.is_possible(self.owner, world) {
             self.cancel_action(world, reason);
-        } else {
-            drop(units);
         }
         // TODO: draw stamina
 

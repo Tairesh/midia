@@ -11,7 +11,7 @@ use crate::{
     game::{
         races::{next_color, BodyColor, Gender, PlayableRace, Race, Sex},
         traits::Name,
-        units::{Appearance, Mind, Personality},
+        units::{Appearance, Mind, PlayerPersonality},
         CharSheet,
     },
     savefile::{self, Meta},
@@ -323,7 +323,7 @@ impl CreateCharacter {
 
     fn randomize(&mut self, ctx: &mut Context) {
         let mut rng = rand::thread_rng();
-        let character = Personality::random_playable(&mut rng);
+        let character = PlayerPersonality::random_playable(&mut rng);
         self.gender_input().set_value(character.mind.gender);
         self.name_input().set_value(character.mind.name);
         self.age_input()
@@ -357,7 +357,7 @@ impl CreateCharacter {
             let gender: Gender = self.gender_input().value().into();
             let age = self.age_input().value().parse::<u8>().unwrap();
             let race = Race::from(self.race);
-            let character = Personality::new(
+            let character = PlayerPersonality::new(
                 Appearance {
                     body_color: self.body_color,
                     sex: Sex::from(&gender),

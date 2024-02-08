@@ -16,8 +16,10 @@ pub struct Open {
 }
 
 impl ActionImpl for Open {
-    fn is_possible(&self, actor: &Avatar, world: &World) -> ActionPossibility {
-        let pos = actor.pos + self.dir;
+    fn is_possible(&self, actor_id: usize, world: &World) -> ActionPossibility {
+        let units = world.units();
+        let actor = units.get_unit(actor_id);
+        let pos = actor.pos() + self.dir;
         let mut map = world.map();
         let tile = map.get_tile(pos);
 
@@ -31,7 +33,7 @@ impl ActionImpl for Open {
     fn on_finish(&self, action: &Action, world: &mut World) {
         let units = world.units();
         let owner = action.owner(&units);
-        let pos = owner.pos + self.dir;
+        let pos = owner.pos() + self.dir;
         let mut map = world.map();
         let tile = map.get_tile_mut(pos);
 
@@ -39,7 +41,7 @@ impl ActionImpl for Open {
             format!(
                 "{} open{} the {}",
                 owner.name_for_actions(),
-                if owner.pronounce().verb_ends_with_s() {
+                if owner.pronouns().verb_ends_with_s() {
                     "S"
                 } else {
                     ""
@@ -65,7 +67,7 @@ mod tests {
 
     use crate::game::map::{terrains::Chest, TerrainInteract};
     use crate::game::world::tests::prepare_world;
-    use crate::game::Action;
+    use crate::game::{Action, Avatar};
 
     use super::Open;
 
@@ -78,8 +80,8 @@ mod tests {
             dir: Direction::East,
         };
         if let Ok(action) = Action::new(0, typ.into(), &world) {
-            world.units_mut().player_mut().action = Some(action);
-            while world.units().player().action.is_some() {
+            world.units_mut().player_mut().set_action(Some(action));
+            while world.units().player().action().is_some() {
                 world.tick();
             }
         } else {

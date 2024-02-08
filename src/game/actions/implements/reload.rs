@@ -13,26 +13,35 @@ use super::super::{
 pub struct Reload {}
 
 impl ActionImpl for Reload {
-    fn is_possible(&self, actor: &Avatar, _world: &World) -> ActionPossibility {
+    fn is_possible(&self, actor_id: usize, world: &World) -> ActionPossibility {
+        let units = world.units();
+        let actor = units.get_unit(actor_id);
         actor
-            .inventory
-            .main_hand()
-            .map_or(No("You have nothing to reload".to_string()), |weapon| {
-                weapon.need_ammo().map_or(
-                    No(format!("Your {} can't be reloaded", weapon.name())),
-                    |NeedAmmoValue { typ, reload, .. }| {
-                        weapon.container().map_or(
+            .inventory()
+            .map_or(No("You have no inventory".to_string()), |inventory| {
+                inventory.main_hand().map_or(
+                    No("You have nothing to reload".to_string()),
+                    |weapon| {
+                        weapon.need_ammo().map_or(
                             No(format!("Your {} can't be reloaded", weapon.name())),
-                            |container| {
-                                if container.free_volume() > 0 {
-                                    if actor.inventory.has_ammo(typ) {
-                                        Yes(reload as u32)
-                                    } else {
-                                        No(format!("You don't have ammo for {}!", a(weapon.name())))
-                                    }
-                                } else {
-                                    No(format!("Your {} is fully loaded", weapon.name()))
-                                }
+                            |NeedAmmoValue { typ, reload, .. }| {
+                                weapon.container().map_or(
+                                    No(format!("Your {} can't be reloaded", weapon.name())),
+                                    |container| {
+                                        if container.free_volume() > 0 {
+                                            if actor.inventory().unwrap().has_ammo(typ) {
+                                                Yes(reload as u32)
+                                            } else {
+                                                No(format!(
+                                                    "You don't have ammo for {}!",
+                                                    a(weapon.name())
+                                                ))
+                                            }
+                                        } else {
+                                            No(format!("Your {} is fully loaded", weapon.name()))
+                                        }
+                                    },
+                                )
                             },
                         )
                     },
@@ -42,26 +51,30 @@ impl ActionImpl for Reload {
 
     fn on_finish(&self, action: &Action, world: &mut World) {
         let mut units = world.units_mut();
-        action.owner_mut(&mut units).reload();
-        let weapon_name = action.owner(&units).inventory.main_hand().unwrap().name();
+        action
+            .owner_mut(&mut units)
+            .inventory_mut()
+            .unwrap()
+            .reload()
+            .ok();
+        let weapon_name = action
+            .owner(&units)
+            .inventory()
+            .unwrap()
+            .main_hand()
+            .unwrap()
+            .name();
         world.log().push(LogEvent::success(
             format!(
                 "{} reload{} your {weapon_name}",
                 action.owner(&units).name_for_actions(),
-                if action
-                    .owner(&units)
-                    .personality
-                    .mind
-                    .gender
-                    .pronounce()
-                    .verb_ends_with_s()
-                {
+                if action.owner(&units).pronouns().verb_ends_with_s() {
                     "s"
                 } else {
                     ""
                 }
             ),
-            action.owner(&units).pos,
+            action.owner(&units).pos(),
         ));
     }
 }
@@ -72,14 +85,19 @@ mod tests {
         QUIVER, WOODEN_ARROW, WOODEN_BOLT, WOODEN_CROSSBOW, WOODEN_SHORTBOW,
     };
     use crate::game::world::tests::prepare_world;
-    use crate::game::{Action, Item};
+    use crate::game::{Action, Avatar, Item};
 
     use super::Reload;
 
     #[test]
     fn test_cant_reload_without_weapon() {
         let world = prepare_world();
-        world.units_mut().player_mut().inventory.clear();
+        world
+            .units_mut()
+            .player_mut()
+            .inventory_mut()
+            .unwrap()
+            .clear();
 
         assert!(Action::new(0, Reload {}.into(), &world).is_err());
     }
@@ -87,11 +105,17 @@ mod tests {
     #[test]
     fn test_cant_reload_without_ammo() {
         let world = prepare_world();
-        world.units_mut().player_mut().inventory.clear();
         world
             .units_mut()
             .player_mut()
-            .inventory
+            .inventory_mut()
+            .unwrap()
+            .clear();
+        world
+            .units_mut()
+            .player_mut()
+            .inventory_mut()
+            .unwrap()
             .wield(Item::new(WOODEN_SHORTBOW));
 
         assert!(Action::new(0, Reload {}.into(), &world).is_err());
@@ -103,12 +127,18 @@ mod tests {
         world
             .units_mut()
             .player_mut()
-            .inventory
+            .inventory_mut()
+            .unwrap()
             .wield(Item::new(WOODEN_SHORTBOW).with_items_inside([Item::new(WOODEN_ARROW)]));
-        world.units_mut().player_mut().inventory.wear(
-            Item::new(QUIVER).with_items_inside([Item::new(WOODEN_ARROW)]),
-            0,
-        );
+        world
+            .units_mut()
+            .player_mut()
+            .inventory_mut()
+            .unwrap()
+            .wear(
+                Item::new(QUIVER).with_items_inside([Item::new(WOODEN_ARROW)]),
+                0,
+            );
 
         assert!(Action::new(0, Reload {}.into(), &world).is_err());
     }
@@ -119,17 +149,24 @@ mod tests {
         world
             .units_mut()
             .player_mut()
-            .inventory
+            .inventory_mut()
+            .unwrap()
             .wield(Item::new(WOODEN_SHORTBOW));
-        world.units_mut().player_mut().inventory.wear(
-            Item::new(QUIVER).with_items_inside([Item::new(WOODEN_ARROW)]),
-            0,
-        );
+        world
+            .units_mut()
+            .player_mut()
+            .inventory_mut()
+            .unwrap()
+            .wear(
+                Item::new(QUIVER).with_items_inside([Item::new(WOODEN_ARROW)]),
+                0,
+            );
         assert_eq!(
             world
                 .units()
                 .player()
-                .inventory
+                .inventory()
+                .unwrap()
                 .main_hand()
                 .unwrap()
                 .container()
@@ -140,14 +177,15 @@ mod tests {
         );
 
         let action = Action::new(0, Reload {}.into(), &world).unwrap();
-        world.units_mut().player_mut().action = Some(action);
+        world.units_mut().player_mut().set_action(Some(action));
         world.tick();
 
         assert_eq!(
             world
                 .units()
                 .player()
-                .inventory
+                .inventory()
+                .unwrap()
                 .main_hand()
                 .unwrap()
                 .container()
@@ -165,17 +203,24 @@ mod tests {
         world
             .units_mut()
             .player_mut()
-            .inventory
+            .inventory_mut()
+            .unwrap()
             .wield(Item::new(WOODEN_CROSSBOW));
-        world.units_mut().player_mut().inventory.wear(
-            Item::new(QUIVER).with_items_inside([Item::new(WOODEN_BOLT)]),
-            0,
-        );
+        world
+            .units_mut()
+            .player_mut()
+            .inventory_mut()
+            .unwrap()
+            .wear(
+                Item::new(QUIVER).with_items_inside([Item::new(WOODEN_BOLT)]),
+                0,
+            );
         assert_eq!(
             world
                 .units()
                 .player()
-                .inventory
+                .inventory()
+                .unwrap()
                 .main_hand()
                 .unwrap()
                 .container()
@@ -186,14 +231,15 @@ mod tests {
         );
 
         let action = Action::new(0, Reload {}.into(), &world).unwrap();
-        world.units_mut().player_mut().action = Some(action);
+        world.units_mut().player_mut().set_action(Some(action));
         world.tick();
 
         assert_eq!(
             world
                 .units()
                 .player()
-                .inventory
+                .inventory()
+                .unwrap()
                 .main_hand()
                 .unwrap()
                 .container()

@@ -4,6 +4,7 @@ use rand::{
 };
 use tetra::graphics::Color;
 
+use crate::assets::Sprite;
 use crate::colors::Colors;
 use crate::game::traits::{LooksLike, Name};
 
@@ -39,28 +40,28 @@ impl TerrainView for Grass {
         }
     }
 
-    fn looks_like(&self) -> &'static str {
+    fn looks_like(&self) -> Sprite {
         match self.variant {
-            GrassVariant::Grass1 => "grass1",
-            GrassVariant::Grass2 => "grass2",
-            GrassVariant::Grass3 => "grass3",
-            GrassVariant::Grass4 => "grass4",
-            GrassVariant::Grass5 => "grass5",
-            GrassVariant::Grass6 => "grass6",
-            GrassVariant::Grass7 => "grass7",
-            GrassVariant::Grass8 => "grass8",
-            GrassVariant::Grass9 => "grass9",
-            GrassVariant::Grass10 => "grass10",
-            GrassVariant::Grass11 => "grass11",
-            GrassVariant::Grass12 => "grass12",
-            GrassVariant::Grass13 => "grass13",
-            GrassVariant::Grass14 => "grass14",
-            GrassVariant::Grass15 => "grass15",
-            GrassVariant::Grass16 => "grass16",
-            GrassVariant::Grass17 => "grass17",
-            GrassVariant::Grass18 => "grass18",
-            GrassVariant::Grass19 => "grass19",
-            GrassVariant::Grass20 => "grass20",
+            GrassVariant::Grass1 => Sprite::Grass1,
+            GrassVariant::Grass2 => Sprite::Grass2,
+            GrassVariant::Grass3 => Sprite::Grass3,
+            GrassVariant::Grass4 => Sprite::Grass4,
+            GrassVariant::Grass5 => Sprite::Grass5,
+            GrassVariant::Grass6 => Sprite::Grass6,
+            GrassVariant::Grass7 => Sprite::Grass7,
+            GrassVariant::Grass8 => Sprite::Grass8,
+            GrassVariant::Grass9 => Sprite::Grass9,
+            GrassVariant::Grass10 => Sprite::Grass10,
+            GrassVariant::Grass11 => Sprite::Grass11,
+            GrassVariant::Grass12 => Sprite::Grass12,
+            GrassVariant::Grass13 => Sprite::Grass13,
+            GrassVariant::Grass14 => Sprite::Grass14,
+            GrassVariant::Grass15 => Sprite::Grass15,
+            GrassVariant::Grass16 => Sprite::Grass16,
+            GrassVariant::Grass17 => Sprite::Grass17,
+            GrassVariant::Grass18 => Sprite::Grass18,
+            GrassVariant::Grass19 => Sprite::Grass19,
+            GrassVariant::Grass20 => Sprite::Grass20,
         }
     }
 

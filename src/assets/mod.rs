@@ -3,8 +3,12 @@ use std::rc::Rc;
 use tetra::Context;
 
 pub use self::{
-    alert::Alert, button::Button, fonts::Fonts, images::Images, prepared_font::PreparedFont,
-    tileset::Tileset,
+    alert::Alert,
+    button::Button,
+    fonts::Fonts,
+    images::Images,
+    prepared_font::PreparedFont,
+    tileset::{Sprite, Tileset},
 };
 
 mod alert;

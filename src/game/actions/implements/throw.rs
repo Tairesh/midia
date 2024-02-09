@@ -277,6 +277,7 @@ mod tests {
 
     use geometry::Point;
 
+    use crate::assets::Sprite;
     use crate::game::map::items::helpers::ROCK;
     use crate::game::traits::Name;
     use crate::game::world::tests::{add_monster, prepare_world};
@@ -362,7 +363,7 @@ mod tests {
             .wield(Item::custom(ItemPrototype {
                 id: "big_thing".to_string(),
                 name: "big thing".to_string(),
-                looks_like: "rock".to_string(),
+                looks_like: Sprite::Rock,
                 size: ItemSize::Huge,
                 materials: HashSet::new(),
                 qualities: Vec::new(),

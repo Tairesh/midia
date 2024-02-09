@@ -3,6 +3,7 @@ use rand::{
     Rng,
 };
 
+use crate::assets::Sprite;
 use crate::game::map::items::helpers::ROCK;
 use crate::game::map::terrains::{Dirt, DirtVariant};
 use crate::game::traits::{LooksLike, Name};
@@ -38,11 +39,11 @@ impl TerrainView for Boulder {
         }
     }
 
-    fn looks_like(&self) -> &'static str {
+    fn looks_like(&self) -> Sprite {
         match self.size {
-            BoulderSize::Huge => "boulder_huge",
-            BoulderSize::Middle => "boulder",
-            BoulderSize::Small => "boulder_small",
+            BoulderSize::Huge => Sprite::BoulderHuge,
+            BoulderSize::Middle => Sprite::Boulder,
+            BoulderSize::Small => Sprite::BoulderSmall,
         }
     }
 

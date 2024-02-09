@@ -4,7 +4,7 @@ use geometry::{Point, Vec2};
 use tetra::graphics::{Canvas, DrawParams};
 use tetra::Context;
 
-use crate::assets::{Assets, Tileset};
+use crate::assets::{Assets, Sprite, Tileset};
 use crate::colors::Colors;
 use crate::game::map::TerrainView;
 use crate::game::traits::LooksLike;
@@ -60,7 +60,7 @@ pub fn draw(
             assets.tileset.tile_size as f32,
         );
         if this_tile_size == asset_tile_size {
-            assets.tileset.draw_region(
+            assets.tileset.draw_sprite(
                 ctx,
                 tile.terrain.looks_like(),
                 DrawParams::new()
@@ -74,7 +74,7 @@ pub fn draw(
             let mut correction = -(this_tile_size - asset_tile_size) * zoom;
             correction.x /= 2.0;
 
-            assets.tileset.draw_region(
+            assets.tileset.draw_sprite(
                 ctx,
                 item.looks_like(),
                 DrawParams::new()
@@ -83,9 +83,9 @@ pub fn draw(
                     .color(item.color()),
             );
             if tile.items.len() > 1 {
-                assets.tileset.draw_region(
+                assets.tileset.draw_sprite(
                     ctx,
-                    "highlight",
+                    Sprite::Highlight,
                     DrawParams::new().position(position).scale(scale),
                 );
             }
@@ -104,9 +104,9 @@ pub fn draw(
                 world.units().get_unit(i).as_fighter().as_avatar(),
             );
             if !tile.items.is_empty() {
-                assets.tileset.draw_region(
+                assets.tileset.draw_sprite(
                     ctx,
-                    "highlight",
+                    Sprite::Highlight,
                     DrawParams::new().position(position).scale(scale),
                 );
             }
@@ -124,7 +124,7 @@ pub fn draw(
             let mut correction = -(this_tile_size - asset_tile_size) * zoom;
             correction.x /= 2.0;
 
-            assets.tileset.draw_region(
+            assets.tileset.draw_sprite(
                 ctx,
                 tile.terrain.looks_like(),
                 DrawParams::new()
@@ -168,7 +168,7 @@ pub fn draw_cursors(
             .position(position)
             .scale(scale)
             .color(color);
-        assets.tileset.draw_region(ctx, typ.looks_like(), params);
+        assets.tileset.draw_sprite(ctx, typ.looks_like(), params);
     }
 }
 
@@ -190,7 +190,7 @@ pub fn draw_unit(
     if let Some(color) = avatar.view().fg() {
         draw_params = draw_params.color(color);
     }
-    tileset.draw_region(ctx, avatar.view().looks_like(), draw_params);
+    tileset.draw_sprite(ctx, avatar.view().looks_like(), draw_params);
 
     // TODO: draw both items
     if avatar.inventory().is_none() || avatar.inventory().unwrap().main_hand().is_none() {
@@ -205,7 +205,7 @@ pub fn draw_unit(
         } * zoom,
         3.0 * zoom,
     );
-    tileset.draw_region(
+    tileset.draw_sprite(
         ctx,
         item.looks_like(),
         DrawParams::new()

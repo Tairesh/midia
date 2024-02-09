@@ -1,5 +1,6 @@
 use rand::Rng;
 
+use crate::assets::Sprite;
 use crate::game::map::items::helpers::WOODEN_SPLINTER;
 use crate::game::map::terrains::{Dirt, DirtVariant};
 use crate::game::map::Passage;
@@ -31,11 +32,11 @@ impl TerrainView for Chest {
         }
     }
 
-    fn looks_like(&self) -> &'static str {
+    fn looks_like(&self) -> Sprite {
         if self.open {
-            "chest_open"
+            Sprite::ChestOpen
         } else {
-            "chest"
+            Sprite::Chest
         }
     }
 

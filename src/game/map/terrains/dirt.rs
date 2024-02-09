@@ -4,6 +4,7 @@ use rand::{
 };
 use tetra::graphics::Color;
 
+use crate::assets::Sprite;
 use crate::colors::Colors;
 use crate::game::traits::{LooksLike, Name};
 
@@ -32,18 +33,18 @@ impl TerrainView for Dirt {
         "dirt"
     }
 
-    fn looks_like(&self) -> &'static str {
+    fn looks_like(&self) -> Sprite {
         match self.variant {
-            DirtVariant::Dirt1 => "dirt1",
-            DirtVariant::Dirt2 => "dirt2",
-            DirtVariant::Dirt3 => "dirt3",
-            DirtVariant::Dirt4 => "dirt4",
-            DirtVariant::Dirt5 => "dirt5",
-            DirtVariant::Dirt6 => "dirt6",
-            DirtVariant::Dirt7 => "dirt7",
-            DirtVariant::Dirt8 => "dirt8",
-            DirtVariant::Dirt9 => "dirt9",
-            DirtVariant::Dirt10 => "dirt10",
+            DirtVariant::Dirt1 => Sprite::Dirt1,
+            DirtVariant::Dirt2 => Sprite::Dirt2,
+            DirtVariant::Dirt3 => Sprite::Dirt3,
+            DirtVariant::Dirt4 => Sprite::Dirt4,
+            DirtVariant::Dirt5 => Sprite::Dirt5,
+            DirtVariant::Dirt6 => Sprite::Dirt6,
+            DirtVariant::Dirt7 => Sprite::Dirt7,
+            DirtVariant::Dirt8 => Sprite::Dirt8,
+            DirtVariant::Dirt9 => Sprite::Dirt9,
+            DirtVariant::Dirt10 => Sprite::Dirt10,
         }
     }
 

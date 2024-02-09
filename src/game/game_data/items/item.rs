@@ -2,6 +2,8 @@ use std::collections::HashSet;
 
 use serde::{Deserialize, Serialize};
 
+use crate::assets::Sprite;
+
 use super::{DamageValue, IsAmmoValue, ItemQuality, Material, NeedAmmoValue, WearableValue};
 
 #[derive(Serialize, Deserialize, Debug, Hash, Eq, PartialEq, Copy, Clone, Ord, PartialOrd)]
@@ -23,7 +25,7 @@ pub enum ItemSize {
 pub struct ItemPrototype {
     pub id: String,
     pub name: String,
-    pub looks_like: String,
+    pub looks_like: Sprite,
     pub size: ItemSize,
     pub materials: HashSet<Material>,
     #[serde(default)]

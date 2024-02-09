@@ -8,6 +8,7 @@ use tetra::{
     Context,
 };
 
+use crate::assets::Sprite;
 use crate::game::traits::{LooksLike, Name};
 use crate::{
     assets::{PreparedFont, Tileset},
@@ -142,7 +143,7 @@ pub struct ItemDisplay {
     color: Color,
     icon: bool,
     tileset: Rc<Tileset>,
-    looks_like: String,
+    looks_like: Sprite,
     scale: Vec2,
     position: Position,
     rect: Option<Rect>,
@@ -161,14 +162,14 @@ impl ItemDisplay {
         let (name, looks_like) = if let Some(item) = item {
             (item.name(), item.looks_like())
         } else {
-            ("(empty)", "")
+            ("(empty)", Sprite::Empty)
         };
         Self {
             text: Text::new(name, font.font),
             color,
             icon: item.is_some(),
             tileset,
-            looks_like: looks_like.to_string(),
+            looks_like,
             scale,
             position,
             rect: None,
@@ -185,7 +186,7 @@ impl ItemDisplay {
         if name != self.text.content() || looks_like.is_some() != self.icon {
             if let Some(looks_like) = looks_like {
                 self.icon = true;
-                self.looks_like = looks_like.to_string();
+                self.looks_like = looks_like;
             } else {
                 self.icon = false;
             }
@@ -199,9 +200,9 @@ impl Draw for ItemDisplay {
     fn draw(&mut self, ctx: &mut Context) {
         let rect = self.rect.unwrap();
         let text_pos = if self.icon {
-            self.tileset.draw_region(
+            self.tileset.draw_sprite(
                 ctx,
-                &self.looks_like,
+                self.looks_like,
                 DrawParams::new()
                     .position(Vec2::new(rect.x, rect.y))
                     .scale(self.scale),

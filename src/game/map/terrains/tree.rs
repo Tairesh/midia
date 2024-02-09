@@ -3,6 +3,7 @@ use rand::{
     Rng,
 };
 
+use crate::assets::Sprite;
 use crate::game::traits::{LooksLike, Name};
 
 use super::super::{Passage, TerrainInteract, TerrainView};
@@ -35,18 +36,18 @@ impl TerrainView for Tree {
         }
     }
 
-    fn looks_like(&self) -> &'static str {
+    fn looks_like(&self) -> Sprite {
         match self.variant {
-            TreeVariant::DeadTree => "tree_dead",
-            TreeVariant::DeadPine => "pine_dead",
-            TreeVariant::DeadHickory => "hickory_dead",
-            TreeVariant::DeadWillow => "willow_dead",
-            TreeVariant::DeadBirch => "birch_dead",
-            TreeVariant::Tree => "tree",
-            TreeVariant::Pine => "pine",
-            TreeVariant::Hickory => "hickory",
-            TreeVariant::Willow => "willow",
-            TreeVariant::Birch => "birch",
+            TreeVariant::DeadTree => Sprite::TreeDead,
+            TreeVariant::DeadPine => Sprite::PineDead,
+            TreeVariant::DeadHickory => Sprite::HickoryDead,
+            TreeVariant::DeadWillow => Sprite::WillowDead,
+            TreeVariant::DeadBirch => Sprite::BirchDead,
+            TreeVariant::Tree => Sprite::Tree,
+            TreeVariant::Pine => Sprite::Pine,
+            TreeVariant::Hickory => Sprite::Hickory,
+            TreeVariant::Willow => Sprite::Willow,
+            TreeVariant::Birch => Sprite::Birch,
         }
     }
 

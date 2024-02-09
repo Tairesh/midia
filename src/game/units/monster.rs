@@ -34,7 +34,7 @@ impl Monster {
         Self {
             id: 0,
             view: AvatarView::new(
-                appearance.race.looks_like().to_string(),
+                appearance.race.looks_like(),
                 appearance.body_color.map(Color::from),
             ),
             pos,

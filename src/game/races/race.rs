@@ -6,6 +6,7 @@ use rand::Rng;
 use serde::{Deserialize, Serialize};
 use tetra::graphics::Color;
 
+use crate::assets::Sprite;
 use crate::colors::Colors;
 use crate::game::{
     savage::{DamageDice, DamageType, Skill},
@@ -164,13 +165,13 @@ impl Name for Race {
 }
 
 impl LooksLike for Race {
-    fn looks_like(&self) -> &str {
+    fn looks_like(&self) -> Sprite {
         match self {
-            Race::Gazan => "gazan",
-            Race::Nyarnik => "nyarnik",
-            Race::Totik => "totik",
-            Race::Lagnam => "lagnam",
-            Race::Bug => "giant_bug",
+            Race::Gazan => Sprite::Gazan,
+            Race::Nyarnik => Sprite::Nyarnik,
+            Race::Totik => Sprite::Totik,
+            Race::Lagnam => Sprite::Lagnam,
+            Race::Bug => Sprite::GiantBug,
         }
     }
 }

@@ -2,12 +2,10 @@ use geometry::{Direction, Point, TwoDimDirection};
 use serde::{Deserialize, Serialize};
 use tetra::graphics::Color;
 
-use crate::game::BodySlot;
-
 use super::{
     super::{
-        map::items::helpers::dead_body, races::Pronouns, savage::HitResult, Action, AttackType,
-        CharSheet, Item,
+        super::assets::Sprite, map::items::helpers::dead_body, races::Pronouns, savage::HitResult,
+        traits::LooksLike, Action, AttackType, BodySlot, CharSheet, Item,
     },
     Appearance, Fighter, Inventory, Monster, Player, Weapon,
 };
@@ -75,15 +73,15 @@ pub trait Avatar {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct AvatarView {
     direction: TwoDimDirection,
-    tile: String,
+    sprite: Sprite,
     fg: Option<Color>,
 }
 
 impl AvatarView {
-    pub fn new(tile: String, fg: Option<Color>) -> Self {
+    pub fn new(sprite: Sprite, fg: Option<Color>) -> Self {
         Self {
             direction: TwoDimDirection::default(),
-            tile,
+            sprite,
             fg,
         }
     }
@@ -105,12 +103,14 @@ impl AvatarView {
         false
     }
 
-    pub fn looks_like(&self) -> &str {
-        &self.tile
-    }
-
     pub fn fg(&self) -> Option<Color> {
         self.fg
+    }
+}
+
+impl LooksLike for AvatarView {
+    fn looks_like(&self) -> Sprite {
+        self.sprite
     }
 }
 

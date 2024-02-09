@@ -7,7 +7,7 @@ use tetra::{
 
 use crate::ui::{ButtonBuilder, UiSprite};
 use crate::{
-    assets::Assets,
+    assets::{Assets, Sprite},
     colors::Colors,
     ui::{Button, Image, Label, Position, Positionate, TextInput, Vertical},
 };
@@ -257,13 +257,13 @@ pub(crate) fn back_randomize_reset_next(
 
 pub fn icon_button(
     assets: &Assets,
-    name: impl Into<String>,
+    sprite: impl Into<Sprite>,
     position: Position,
     custom_event: u8,
 ) -> Box<Button> {
     Box::new(
         ButtonBuilder::new(assets.button.clone())
-            .with_icon(name, UI_ICONS_SCALE, None, assets.tileset.clone())
+            .with_icon(sprite, UI_ICONS_SCALE, None, assets.tileset.clone())
             .with_position(position)
             .with_transition(Transition::CustomEvent(custom_event))
             .build(),
@@ -271,17 +271,17 @@ pub fn icon_button(
 }
 
 pub(crate) fn icon_left(assets: &Assets, position: Position, custom_event: u8) -> Box<Button> {
-    icon_button(assets, "lt", position, custom_event)
+    icon_button(assets, Sprite::LessThan, position, custom_event)
 }
 
 pub(crate) fn icon_right(assets: &Assets, position: Position, custom_event: u8) -> Box<Button> {
-    icon_button(assets, "mt", position, custom_event)
+    icon_button(assets, Sprite::MoreThan, position, custom_event)
 }
 
 pub(crate) fn icon_plus(assets: &Assets, position: Position, custom_event: u8) -> Box<Button> {
-    icon_button(assets, "plus", position, custom_event)
+    icon_button(assets, Sprite::Plus, position, custom_event)
 }
 
 pub(crate) fn icon_minus(assets: &Assets, position: Position, custom_event: u8) -> Box<Button> {
-    icon_button(assets, "minus", position, custom_event)
+    icon_button(assets, Sprite::Minus, position, custom_event)
 }

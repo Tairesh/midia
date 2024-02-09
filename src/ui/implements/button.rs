@@ -8,6 +8,7 @@ use tetra::{
     Context,
 };
 
+use crate::assets::Sprite;
 use crate::{
     assets::{Button as ButtonAsset, PreparedFont, Tileset},
     colors::Colors,
@@ -20,7 +21,7 @@ use super::super::{Disable, Draw, Focus, Hover, Position, Positionate, Press, Ui
 enum ButtonContent {
     Text(Text, f32),
     Icon {
-        name: String,
+        sprite: Sprite,
         scale: Vec2,
         color: Option<Color>,
         tileset: Rc<Tileset>,
@@ -96,7 +97,7 @@ pub struct Button {
 impl Button {
     pub fn update_icon(
         &mut self,
-        name: impl Into<String>,
+        sprite: impl Into<Sprite>,
         scale: Vec2,
         color: Option<Color>,
         ctx: &mut Context,
@@ -104,7 +105,7 @@ impl Button {
     ) {
         if let ButtonContent::Icon { tileset, .. } = &self.content {
             self.content = ButtonContent::Icon {
-                name: name.into(),
+                sprite: sprite.into(),
                 scale,
                 color,
                 tileset: tileset.clone(),
@@ -173,7 +174,7 @@ impl Draw for Button {
                 );
             }
             ButtonContent::Icon {
-                name,
+                sprite,
                 scale,
                 tileset,
                 color,
@@ -183,7 +184,7 @@ impl Draw for Button {
                 if let Some(color) = color {
                     params = params.color(*color);
                 }
-                tileset.draw_region(ctx, name, params);
+                tileset.draw_sprite(ctx, *sprite, params);
             }
             ButtonContent::Empty(_) => {}
         }
@@ -212,8 +213,8 @@ impl Positionate for Button {
         let offset_x = self.content.offset();
         Vec2::new(
             content_size.x + offset_x,
-            if let ButtonContent::Icon { name, scale, .. } = &self.content {
-                Tileset::get_size(name).y * scale.y + self.content.offset()
+            if let ButtonContent::Icon { sprite, scale, .. } = &self.content {
+                Tileset::get_size(*sprite).y * scale.y + self.content.offset()
             } else {
                 42.0
             },
@@ -389,13 +390,13 @@ impl ButtonBuilder {
 
     pub fn with_icon(
         mut self,
-        name: impl Into<String>,
+        sprite: impl Into<Sprite>,
         scale: Vec2,
         color: Option<Color>,
         tileset: Rc<Tileset>,
     ) -> Self {
         self.content = Some(ButtonContent::Icon {
-            name: name.into(),
+            sprite: sprite.into(),
             scale,
             color,
             tileset,

@@ -3,6 +3,7 @@ use std::collections::HashSet;
 use serde::{Deserialize, Serialize};
 use tetra::graphics::Color;
 
+use crate::assets::Sprite;
 use crate::game::game_data::{AmmoType, NeedAmmoValue};
 use crate::game::traits::{LooksLike, Name};
 use crate::game::{AttackType, DamageValue, GameData, ItemPrototype, ItemQuality, ItemSize};
@@ -25,7 +26,7 @@ pub struct Item {
     #[serde(default, rename = "r")]
     readable: Option<String>,
     #[serde(default, rename = "l")]
-    looks_like: Option<String>,
+    looks_like: Option<Sprite>,
     #[serde(default, rename = "t")]
     container: Option<Container>,
 }
@@ -99,7 +100,7 @@ impl Item {
         self
     }
 
-    pub fn with_looks_like(mut self, looks_like: impl Into<String>) -> Self {
+    pub fn with_looks_like(mut self, looks_like: impl Into<Sprite>) -> Self {
         self.looks_like = Some(looks_like.into());
         self
     }
@@ -258,12 +259,12 @@ impl Name for Item {
 }
 
 impl LooksLike for Item {
-    fn looks_like(&self) -> &str {
-        if let Some(looks_like) = &self.looks_like {
+    fn looks_like(&self) -> Sprite {
+        if let Some(looks_like) = self.looks_like {
             return looks_like;
         }
 
-        &self.proto().looks_like
+        self.proto().looks_like
     }
 }
 

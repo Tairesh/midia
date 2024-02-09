@@ -1,6 +1,7 @@
 use geometry::Point;
 use tetra::graphics::Color;
 
+use crate::assets::Sprite;
 use crate::game::traits::LooksLike;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -10,10 +11,10 @@ pub enum CursorType {
 }
 
 impl LooksLike for CursorType {
-    fn looks_like(&self) -> &'static str {
+    fn looks_like(&self) -> Sprite {
         match self {
-            Self::Select => "cursor",
-            Self::Fill => "fill",
+            Self::Select => Sprite::Cursor,
+            Self::Fill => Sprite::Fill,
         }
     }
 }

@@ -2,6 +2,7 @@ use enum_dispatch::enum_dispatch;
 use serde::{Deserialize, Serialize};
 use tetra::graphics::Color;
 
+use crate::assets::Sprite;
 use crate::game::traits::{LooksLike, Name};
 
 use super::{
@@ -27,7 +28,7 @@ pub enum Terrain {
 pub trait TerrainView {
     // TODO: implement Name and LooksLike after JSON-izing all terrains
     fn name(&self) -> &str;
-    fn looks_like(&self) -> &'static str;
+    fn looks_like(&self) -> Sprite;
     fn color(&self) -> Option<Color> {
         None
     }

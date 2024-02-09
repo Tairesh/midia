@@ -5,6 +5,7 @@ use tetra::graphics::mesh::{BorderRadii, Mesh, ShapeStyle};
 use tetra::graphics::Rectangle;
 use tetra::{Context, Event};
 
+use crate::game::traits::LooksLike;
 use crate::{
     app::App,
     colors::Colors,
@@ -259,7 +260,7 @@ impl CreateCharacter {
                     ButtonEvent::ColorRight as u8,
                 ),
                 Box::new(TilesetSprite::new(
-                    Race::Gazan.name(),
+                    Race::Gazan.looks_like(),
                     app.assets.tileset.clone(),
                     Position {
                         x: Horizontal::AtWindowCenterByCenter { offset: 50.0 },
@@ -335,7 +336,7 @@ impl CreateCharacter {
         self.body_color = character.appearance.body_color;
         let race = Race::from(self.race);
         self.hide_color_selectors(!race.has_custom_colors());
-        self.race_sprite().set_name(race.name());
+        self.race_sprite().set_sprite(race.looks_like());
         if let Some(body_color) = self.body_color {
             self.color_bg().set_color(body_color);
             self.color_name()
@@ -412,7 +413,7 @@ impl SceneImpl for CreateCharacter {
                 let window_size = self.window_size;
                 self.race_name().update(name, ctx, window_size);
                 let race = Race::from(self.race);
-                self.race_sprite().set_name(race.name());
+                self.race_sprite().set_sprite(race.looks_like());
                 self.hide_color_selectors(!race.has_custom_colors());
                 if race.has_custom_colors() {
                     let color = *race.custom_colors().first().unwrap();

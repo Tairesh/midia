@@ -2,6 +2,7 @@
 
 use std::collections::HashSet;
 
+use crate::assets::Sprite;
 use crate::colors::Colors;
 use crate::game::units::Appearance;
 use crate::game::{Avatar, ItemPrototype, ItemSize, Material};
@@ -152,7 +153,7 @@ pub fn dead_body(appearance: &Appearance) -> Item {
     let body = Item::custom(ItemPrototype {
         id: CORPSE.to_string(),
         name: format!("dead {}", appearance.body_name()),
-        looks_like: CORPSE.to_string(),
+        looks_like: Sprite::Corpse,
         size: ItemSize::Huge,
         materials: HashSet::from([Material::Flesh]),
         qualities: Vec::default(),
@@ -187,7 +188,7 @@ mod tests {
         let unit = Player::new(tester_girl(), Point::default());
         let body = dead_body(unit.appearance());
         assert_eq!(body.name(), "dead gazan girl");
-        assert_eq!(body.looks_like(), "corpse");
+        assert_eq!(body.looks_like(), Sprite::Corpse);
         assert_eq!(body.size(), ItemSize::Huge);
         assert_eq!(body.proto().color_from_material, Some(Material::Flesh));
         assert_eq!(body.color(), unit.view().fg().unwrap())

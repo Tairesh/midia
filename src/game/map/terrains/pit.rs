@@ -1,3 +1,4 @@
+use crate::assets::Sprite;
 use crate::game::traits::{LooksLike, Name};
 
 use super::super::{Passage, TerrainInteract, TerrainView};
@@ -22,8 +23,8 @@ impl TerrainView for Pit {
         "pit"
     }
 
-    fn looks_like(&self) -> &'static str {
-        "pit"
+    fn looks_like(&self) -> Sprite {
+        Sprite::Pit
     }
 
     fn is_transparent(&self) -> bool {

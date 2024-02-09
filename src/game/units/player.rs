@@ -26,7 +26,7 @@ impl Player {
         Self {
             id: 0,
             view: AvatarView::new(
-                personality.appearance.race.looks_like().to_string(),
+                personality.appearance.race.looks_like(),
                 personality.appearance.body_color.map(Color::from),
             ),
             inventory: Inventory::humanoid(),

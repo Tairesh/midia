@@ -23,7 +23,7 @@ mod tests {
     use std::path::PathBuf;
 
     use crate::game::world::tests::prepare_world;
-    use crate::game::{Dice, SkillLevel};
+    use crate::game::{AttrLevel, SkillLevel};
 
     use super::{delete, load, load_world, SAVEFILES_FOLDER};
 
@@ -43,7 +43,7 @@ mod tests {
             .personality
             .char_sheet
             .attributes
-            .agility = Dice::D12;
+            .agility = AttrLevel::D12;
         world
             .units_mut()
             .player_mut()
@@ -64,7 +64,7 @@ mod tests {
         assert_eq!(world.units().player().pos, world2.units().player().pos);
         assert_eq!("test", world2.units().player().personality.mind.name);
         assert_eq!(
-            Dice::D12,
+            AttrLevel::D12,
             world2
                 .units()
                 .player()

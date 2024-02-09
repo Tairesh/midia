@@ -121,7 +121,7 @@ impl PlayerPersonality {
 
 #[cfg(test)]
 pub mod tests {
-    use crate::game::savage::{Attributes, Skills};
+    use crate::game::savage::{AttrLevel, Attributes, Skills};
     use crate::game::{Dice, SkillLevel};
 
     use super::{Appearance, BodyColor, CharSheet, Gender, Mind, PlayerPersonality, Race, Sex};
@@ -159,11 +159,11 @@ pub mod tests {
                 Race::Nyarnik,
                 22,
                 Attributes {
-                    agility: Dice::D8,
-                    smarts: Dice::D6,
-                    spirit: Dice::D6,
-                    strength: Dice::D10,
-                    vigor: Dice::D6,
+                    agility: AttrLevel::D8,
+                    smarts: AttrLevel::D6,
+                    spirit: AttrLevel::D6,
+                    strength: AttrLevel::D10,
+                    vigor: AttrLevel::D6,
                 },
                 Skills {
                     athletics: SkillLevel::None,

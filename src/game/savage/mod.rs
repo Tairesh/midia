@@ -5,7 +5,7 @@ pub use combat::{
     RangedDistance, TerrainMeleeAttackResult, UnitMeleeAttackResult, UnitRangedAttackResult,
 };
 pub use damage::{Damage, DamageDice, DamageRollResult, DamageType};
-pub use dice::{Dice, DiceWithModifier, RollResult, SkillLevel};
+pub use dices::{AttrLevel, Dice, DiceWithModifier, RollResult, SkillLevel};
 pub use skills::{Skill, Skills};
 pub use wound::Wound;
 
@@ -13,7 +13,7 @@ mod attributes;
 mod charsheet;
 mod combat;
 mod damage;
-mod dice;
+mod dices;
 mod skills;
 mod wound;
 

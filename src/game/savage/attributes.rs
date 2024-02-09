@@ -6,20 +6,20 @@ use tetra::graphics::Color;
 
 use crate::colors::Colors;
 
-use super::Dice;
+use super::{AttrLevel, Dice};
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct Attributes {
     /// Physical precision and speed
-    pub agility: Dice,
+    pub agility: AttrLevel,
     /// Mental power
-    pub smarts: Dice,
+    pub smarts: AttrLevel,
     /// Willpower
-    pub spirit: Dice,
+    pub spirit: AttrLevel,
     /// Physical power
-    pub strength: Dice,
+    pub strength: AttrLevel,
     /// Physical health
-    pub vigor: Dice,
+    pub vigor: AttrLevel,
 }
 
 impl Attributes {
@@ -35,7 +35,7 @@ impl Attributes {
         attributes
     }
 
-    pub fn get_attribute(&self, attribute: Attribute) -> Dice {
+    pub fn get_attribute(&self, attribute: Attribute) -> AttrLevel {
         match attribute {
             Attribute::Agility => self.agility,
             Attribute::Smarts => self.smarts,
@@ -45,32 +45,20 @@ impl Attributes {
         }
     }
 
-    pub fn set_attribute(&mut self, attribute: Attribute, value: Dice) {
+    pub fn set_attribute(&mut self, attribute: Attribute, value: impl Into<AttrLevel>) {
         match attribute {
-            Attribute::Agility => self.agility = value,
-            Attribute::Smarts => self.smarts = value,
-            Attribute::Spirit => self.spirit = value,
-            Attribute::Strength => self.strength = value,
-            Attribute::Vigor => self.vigor = value,
+            Attribute::Agility => self.agility = value.into(),
+            Attribute::Smarts => self.smarts = value.into(),
+            Attribute::Spirit => self.spirit = value.into(),
+            Attribute::Strength => self.strength = value.into(),
+            Attribute::Vigor => self.vigor = value.into(),
         }
     }
 
-    pub fn get_attributes(&self) -> Vec<(Attribute, Dice)> {
+    pub fn get_attributes(&self) -> Vec<(Attribute, AttrLevel)> {
         Attribute::iterator()
             .map(move |attr| (attr, self.get_attribute(attr)))
             .collect()
-    }
-}
-
-impl Default for Attributes {
-    fn default() -> Self {
-        Attributes {
-            agility: Dice::D4,
-            smarts: Dice::D4,
-            spirit: Dice::D4,
-            strength: Dice::D4,
-            vigor: Dice::D4,
-        }
     }
 }
 

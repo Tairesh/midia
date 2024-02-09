@@ -2,7 +2,7 @@ use rand::distributions::{Distribution, Standard};
 use rand::Rng;
 
 use crate::game::races::Race;
-use crate::game::savage::Attributes;
+use crate::game::savage::{AttrLevel, Attributes};
 use crate::game::Dice;
 
 use super::{Attribute, SkillLevel};
@@ -128,7 +128,7 @@ impl Skills {
                 if value == free_skill_level {
                     continue;
                 }
-                attr_value = Dice::max(free_skill_level.into(), attr_value);
+                attr_value = Dice::max(free_skill_level.into(), attr_value.into()).into();
                 base_value = free_skill_level;
             }
             skill_points -=

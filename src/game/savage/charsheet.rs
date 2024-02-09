@@ -100,31 +100,33 @@ impl CharSheet {
     }
 
     pub fn get_attribute_with_modifiers(&self, attribute: Attribute) -> DiceWithModifier {
-        let mut dice = self.attributes.get_attribute(attribute);
+        let mut attr_level = self.attributes.get_attribute(attribute);
         match attribute {
             Attribute::Vigor => {
                 if self.wounds.contains(&Wound::BatteredGuts) {
-                    dice -= 1;
+                    attr_level -= 1;
                 }
             }
             Attribute::Agility => {
                 if self.wounds.contains(&Wound::BrokenGuts) {
-                    dice -= 1;
+                    attr_level -= 1;
                 }
             }
             Attribute::Strength => {
                 if self.wounds.contains(&Wound::BustedGuts) {
-                    dice -= 1;
+                    attr_level -= 1;
                 }
             }
             Attribute::Smarts => {
                 if self.wounds.contains(&Wound::BrainDamage) {
-                    dice -= 1;
+                    attr_level -= 1;
                 }
             }
             Attribute::Spirit => {}
         }
-        DiceWithModifier::new(dice, -(self.wounds.len() as i8))
+        let mut dice = DiceWithModifier::from(attr_level);
+        dice.1 -= self.wounds.len() as i8;
+        dice
     }
 
     pub fn get_skill_with_modifiers(&self, skill: Skill) -> DiceWithModifier {

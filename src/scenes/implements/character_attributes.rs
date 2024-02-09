@@ -11,7 +11,7 @@ use crate::{
     game::{
         traits::Name,
         units::{Player, PlayerPersonality},
-        Attribute, CharSheet, Dice, Skill, SkillLevel, World,
+        AttrLevel, Attribute, CharSheet, Skill, SkillLevel, World,
     },
     savefile::{self, Meta},
     scenes::{
@@ -199,7 +199,7 @@ pub struct CharacterAttributes {
 fn attribute_sprites(
     assets: &Assets,
     attr: Attribute,
-    dice: Dice,
+    dice: AttrLevel,
     i: usize,
 ) -> [Box<dyn UiSprite>; 5] {
     let y = 130.0;
@@ -629,14 +629,14 @@ impl CharacterAttributes {
         self.update_points(ctx);
     }
 
-    fn get_attribute(&self, attribute: Attribute) -> Dice {
+    fn get_attribute(&self, attribute: Attribute) -> AttrLevel {
         self.personality
             .char_sheet
             .attributes
             .get_attribute(attribute)
     }
 
-    fn set_attribute(&mut self, attribute: Attribute, dice: Dice) {
+    fn set_attribute(&mut self, attribute: Attribute, dice: AttrLevel) {
         self.personality
             .char_sheet
             .attributes
@@ -682,14 +682,14 @@ impl SceneImpl for CharacterAttributes {
         if let Ok(attribute) = Attribute::try_from(event) {
             if event.is_minus() {
                 let value = self.get_attribute(attribute);
-                if value > Dice::D4 {
+                if value > AttrLevel::D4 {
                     self.attributes_points += 1;
                     self.set_attribute(attribute, value - 1);
                     self.update_attribute_label(attribute, ctx);
                 }
             } else {
                 let value = self.get_attribute(attribute);
-                if self.attributes_points > 0 && value < Dice::D12 {
+                if self.attributes_points > 0 && value < AttrLevel::D12 {
                     self.attributes_points -= 1;
                     self.set_attribute(attribute, value + 1);
                     self.update_attribute_label(attribute, ctx);

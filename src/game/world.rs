@@ -10,6 +10,7 @@ use super::{
         lang,
         savefile::{self, GameView, Meta, SaveError},
     },
+    ai::{AIImpl, AIManager, AI},
     map::{field_of_view_set, Fov, TerrainView},
     races::{BodyColor, Gender, Pronouns, Race, Sex},
     savage::HitResult,
@@ -65,6 +66,7 @@ impl World {
 
         // TODO: don't forget to remove
         world.add_unit(Box::new(Monster::new(
+            AI::BasicMonster,
             Point::new(0, 5),
             "green bug".to_string(),
             Appearance {
@@ -77,6 +79,7 @@ impl World {
             CharSheet::default(false, Race::Bug, 1),
         )));
         world.add_unit(Box::new(Monster::new(
+            AI::BasicMonster,
             Point::new(0, 7),
             "mutant bug queen".to_string(),
             Appearance {
@@ -249,9 +252,26 @@ impl World {
         new_id
     }
 
-    #[allow(clippy::unused_self)]
     fn plan(&mut self) {
-        // TODO
+        let mut units_to_act = HashMap::new();
+        for unit in self.units().loaded_units() {
+            if unit.action().is_some() {
+                continue;
+            }
+            if let Some(ai) = unit.ai() {
+                units_to_act.insert(unit.id(), ai);
+            }
+        }
+
+        for (unit_id, ai) in units_to_act {
+            let action = AIManager::instance().plan(ai, unit_id, self);
+            self.units_mut().get_unit_mut(unit_id).set_action(action);
+        }
+    }
+
+    #[cfg(test)]
+    pub fn plan_test(&mut self) {
+        self.plan();
     }
 
     /// Doing actions that should be done
@@ -343,15 +363,13 @@ pub mod tests {
 
     use geometry::Point;
 
-    use crate::game::races::Sex;
-    use crate::game::units::Appearance;
-
     use super::{
         super::{
             actions::implements::{Skip, Walk},
+            ai::AI,
             map::terrains::{Boulder, BoulderSize, Dirt},
-            races::Pronouns,
-            units::{tests::helpers::tester_girl, Avatar, Monster},
+            races::{Pronouns, Sex},
+            units::{tests::helpers::tester_girl, Appearance, Avatar, Monster},
             CharSheet, Race,
         },
         savefile::{GameView, Meta},
@@ -371,8 +389,25 @@ pub mod tests {
         )
     }
 
+    pub fn add_dummy(world: &mut World, pos: Point) -> usize {
+        world.add_unit(Box::new(Monster::new(
+            AI::Dummy,
+            pos,
+            "Dummy".to_string(),
+            Appearance {
+                race: Race::Gazan,
+                age: 20,
+                body_color: None,
+                sex: Sex::Undefined,
+            },
+            Pronouns::ItIts,
+            CharSheet::default(false, Race::Gazan, 20),
+        )))
+    }
+
     pub fn add_monster(world: &mut World, pos: Point) -> usize {
         world.add_unit(Box::new(Monster::new(
+            AI::BasicMonster,
             pos,
             "Old Bugger".to_string(),
             Appearance {
@@ -389,7 +424,7 @@ pub mod tests {
     #[test]
     pub fn test_moving_other_unit() {
         let mut world = prepare_world();
-        let monster_id = add_monster(&mut world, Point::new(1, 0));
+        let monster_id = add_dummy(&mut world, Point::new(1, 0));
 
         world.map().get_tile_mut(Point::new(2, 0)).terrain = Dirt::default().into();
         let action = Action::new(

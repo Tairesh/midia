@@ -244,7 +244,7 @@ mod tests {
 
     use crate::game::map::items::helpers::{DEMONIC_SAP, GOD_AXE, STONE_KNIFE, STONE_SPEAR};
     use crate::game::map::terrains::Boulder;
-    use crate::game::world::tests::{add_monster, prepare_world};
+    use crate::game::world::tests::{add_dummy, prepare_world};
     use crate::game::{Action, Avatar, Item, Race};
 
     use super::{Melee, ATTACK_MOVES};
@@ -254,7 +254,7 @@ mod tests {
         let mut world = prepare_world();
         assert_eq!(world.meta.current_tick, 0);
 
-        add_monster(&mut world, Point::new(1, 0));
+        add_dummy(&mut world, Point::new(1, 0));
         world
             .units_mut()
             .player_mut()
@@ -281,7 +281,7 @@ mod tests {
         let mut world = prepare_world();
         assert_eq!(world.meta.current_tick, 0);
 
-        add_monster(&mut world, Point::new(1, 0));
+        add_dummy(&mut world, Point::new(1, 0));
         world
             .units_mut()
             .player_mut()
@@ -424,7 +424,7 @@ mod tests {
             .wield(Item::new(STONE_SPEAR));
 
         let target = Point::new(2, 0);
-        add_monster(&mut world, target);
+        add_dummy(&mut world, target);
         let action = Action::new(0, Melee::new(target).into(), &world).unwrap();
         world.units_mut().player_mut().set_action(Some(action));
         world.tick();
@@ -432,10 +432,8 @@ mod tests {
         let mut log = world.log();
         let event = &log.new_events()[0];
         assert!(
-            event
-                .msg
-                .contains("You attack Old Bugger with your stone spear"),
-            "msg \"{}\" doesn't contains \"You attack Old Bugger with your stone spear\"",
+            event.msg.contains("You attack Dummy with your stone spear"),
+            "msg \"{}\" doesn't contains \"You attack Dummy with your stone spear\"",
             event.msg
         );
     }

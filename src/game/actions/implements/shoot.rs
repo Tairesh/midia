@@ -265,7 +265,7 @@ mod tests {
     use crate::game::map::items::helpers::{
         QUIVER, WOODEN_ARROW, WOODEN_BOLT, WOODEN_CROSSBOW, WOODEN_SHORTBOW,
     };
-    use crate::game::world::tests::{add_monster, prepare_world};
+    use crate::game::world::tests::{add_dummy, prepare_world};
     use crate::game::{Action, Avatar, Item, ItemPrototype, ItemSize};
 
     use super::{Shoot, ATTACK_MOVES};
@@ -276,7 +276,7 @@ mod tests {
         assert_eq!(world.meta.current_tick, 0);
 
         let target = Point::new(3, 0);
-        add_monster(&mut world, target);
+        add_dummy(&mut world, target);
         world
             .units_mut()
             .player_mut()
@@ -331,7 +331,7 @@ mod tests {
         assert_eq!(world.meta.current_tick, 0);
 
         let target = Point::new(3, 0);
-        add_monster(&mut world, target);
+        add_dummy(&mut world, target);
         world
             .units_mut()
             .player_mut()
@@ -366,11 +366,11 @@ mod tests {
 
         // Distance of wooden shortbow is 12 so we can shoot to 12*4=48 tiles.
         let target_far = Point::new(48, 0);
-        add_monster(&mut world, target_far);
+        add_dummy(&mut world, target_far);
         assert!(Action::new(0, Shoot::new(target_far).into(), &world).is_ok());
 
         let target_too_far = Point::new(49, 0);
-        add_monster(&mut world, target_too_far);
+        add_dummy(&mut world, target_too_far);
         assert!(Action::new(0, Shoot::new(target_too_far).into(), &world).is_err());
     }
 
@@ -379,7 +379,7 @@ mod tests {
         let mut world = prepare_world();
 
         let target = Point::new(3, 0);
-        add_monster(&mut world, target);
+        add_dummy(&mut world, target);
         world
             .units_mut()
             .player_mut()
@@ -407,7 +407,7 @@ mod tests {
     fn test_cant_shoot_crossbow_without_reloading() {
         let mut world = prepare_world();
         let target = Point::new(3, 0);
-        add_monster(&mut world, target);
+        add_dummy(&mut world, target);
         world
             .units_mut()
             .player_mut()

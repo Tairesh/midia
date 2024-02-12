@@ -69,7 +69,7 @@ mod tests {
 
     use crate::game::actions::implements::Skip;
     use crate::game::map::terrains::{Boulder, BoulderSize, Dirt};
-    use crate::game::world::tests::{add_monster, prepare_world};
+    use crate::game::world::tests::{add_dummy, prepare_world};
     use crate::game::{Action, Avatar};
 
     use super::Walk;
@@ -109,7 +109,7 @@ mod tests {
     fn test_walking_fail_to_unit() {
         let mut world = prepare_world();
         world.map().get_tile_mut(Point::new(1, 0)).terrain = Dirt::default().into();
-        add_monster(&mut world, Point::new(1, 0));
+        add_dummy(&mut world, Point::new(1, 0));
 
         assert!(Action::new(
             0,
@@ -126,7 +126,7 @@ mod tests {
     fn test_fail_walking_two_units_to_same_place() {
         let mut world = prepare_world();
         world.map().get_tile_mut(Point::new(1, 1)).terrain = Dirt::default().into();
-        let npc = add_monster(&mut world, Point::new(1, 0));
+        let npc = add_dummy(&mut world, Point::new(1, 0));
 
         let action = Action::new(
             0,

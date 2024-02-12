@@ -4,8 +4,8 @@ use tetra::graphics::Color;
 
 use super::{
     super::{
-        super::assets::Sprite, map::items::helpers::dead_body, races::Pronouns, savage::HitResult,
-        traits::LooksLike, Action, AttackType, BodySlot, CharSheet, Item,
+        super::assets::Sprite, ai::AI, map::items::helpers::dead_body, races::Pronouns,
+        savage::HitResult, traits::LooksLike, Action, AttackType, BodySlot, CharSheet, Item,
     },
     Appearance, Fighter, Inventory, Monster, Player, Weapon,
 };
@@ -14,6 +14,9 @@ use super::{
 pub trait Avatar {
     fn id(&self) -> usize;
     fn set_id(&mut self, id: usize);
+    fn ai(&self) -> Option<AI> {
+        None
+    }
     fn pos(&self) -> Point;
     fn set_pos(&mut self, pos: Point);
     fn name(&self) -> &str;

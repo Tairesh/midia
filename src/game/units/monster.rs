@@ -4,6 +4,7 @@ use tetra::graphics::Color;
 
 use super::{
     super::{
+        ai::AI,
         races::{Pronouns, Race},
         traits::LooksLike,
         Action, AttackType, BodySlot, CharSheet,
@@ -14,6 +15,7 @@ use super::{
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Monster {
     id: usize,
+    ai: AI,
     pos: Point,
     name: String,
     appearance: Appearance,
@@ -25,6 +27,7 @@ pub struct Monster {
 
 impl Monster {
     pub fn new(
+        ai: AI,
         pos: Point,
         name: String,
         appearance: Appearance,
@@ -37,6 +40,7 @@ impl Monster {
                 appearance.race.looks_like(),
                 appearance.body_color.map(Color::from),
             ),
+            ai,
             pos,
             name,
             appearance,
@@ -55,6 +59,10 @@ impl Avatar for Monster {
 
     fn set_id(&mut self, id: usize) {
         self.id = id;
+    }
+
+    fn ai(&self) -> Option<AI> {
+        Some(self.ai)
     }
 
     fn pos(&self) -> Point {

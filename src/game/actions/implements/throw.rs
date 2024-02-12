@@ -280,7 +280,7 @@ mod tests {
     use crate::assets::Sprite;
     use crate::game::map::items::helpers::ROCK;
     use crate::game::traits::Name;
-    use crate::game::world::tests::{add_monster, prepare_world};
+    use crate::game::world::tests::{add_dummy, prepare_world};
     use crate::game::{Action, Avatar, Item, ItemPrototype, ItemSize};
 
     use super::{Throw, ATTACK_MOVES};
@@ -291,7 +291,7 @@ mod tests {
         assert_eq!(world.meta.current_tick, 0);
 
         let target = Point::new(3, 0);
-        add_monster(&mut world, target);
+        add_dummy(&mut world, target);
         world
             .units_mut()
             .player_mut()
@@ -320,7 +320,7 @@ mod tests {
         assert_eq!(world.meta.current_tick, 0);
 
         let target = Point::new(3, 0);
-        add_monster(&mut world, target);
+        add_dummy(&mut world, target);
         world
             .units_mut()
             .player_mut()
@@ -337,7 +337,7 @@ mod tests {
         assert_eq!(world.meta.current_tick, 0);
 
         let target = Point::new(15, 0);
-        add_monster(&mut world, target);
+        add_dummy(&mut world, target);
         world
             .units_mut()
             .player_mut()
@@ -354,7 +354,7 @@ mod tests {
         assert_eq!(world.meta.current_tick, 0);
 
         let target = Point::new(3, 0);
-        add_monster(&mut world, target);
+        add_dummy(&mut world, target);
         world
             .units_mut()
             .player_mut()

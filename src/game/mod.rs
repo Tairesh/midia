@@ -16,6 +16,7 @@ pub use units::{Avatar, Fighter};
 pub use world::World;
 
 pub mod actions;
+mod ai;
 mod game_data;
 pub mod log;
 pub mod map;

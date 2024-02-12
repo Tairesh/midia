@@ -18,12 +18,19 @@ use super::super::{
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Copy, Clone)]
 pub struct Melee {
+    // TODO: remember unit in target position, they can move away before attack is finished
+    // Same for ranged attacks
     target: Point,
 }
 
 impl Melee {
     pub fn new(target: Point) -> Self {
         Self { target }
+    }
+
+    #[cfg(test)]
+    pub fn target(&self) -> Point {
+        self.target
     }
 
     fn smash(self, action: &Action, world: &mut World) -> bool {
@@ -217,9 +224,14 @@ impl ActionImpl for Melee {
         }
 
         let distance = (actor.pos().distance(self.target).floor() - 1.0) as u8;
-        let weapon = actor.inventory().unwrap().main_hand();
+
+        let weapon = actor.as_fighter().weapon(AttackType::Melee);
+        if weapon.is_none() {
+            return No("You have no weapon".to_string());
+        }
+
         if distance > 0 {
-            let weapon_distance = weapon.map_or(0, |w| w.melee_damage().distance);
+            let weapon_distance = weapon.unwrap().damage.distance;
             if distance > weapon_distance {
                 No("You can't reach the target from this distance".to_string())
             } else {

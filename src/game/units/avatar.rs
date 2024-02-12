@@ -148,5 +148,6 @@ mod tests {
         assert!(items.iter().any(|i| i.proto().id == CLOAK));
         assert!(items.iter().any(|i| i.proto().id == GOD_AXE));
         assert_eq!(items[2].name(), "dead gazan girl");
+        assert!(avatar.char_sheet().is_dead());
     }
 }

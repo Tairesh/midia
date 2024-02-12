@@ -427,15 +427,7 @@ pub mod tests {
         let monster_id = add_dummy(&mut world, Point::new(1, 0));
 
         world.map().get_tile_mut(Point::new(2, 0)).terrain = Dirt::default().into();
-        let action = Action::new(
-            1,
-            Walk {
-                dir: Direction::East,
-            }
-            .into(),
-            &world,
-        )
-        .unwrap();
+        let action = Action::new(1, Walk::new(Direction::East).into(), &world).unwrap();
         let length = action.length;
         let mut units = world.units_mut();
         let monster = units.get_unit_mut(monster_id);

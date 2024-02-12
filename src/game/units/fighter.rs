@@ -15,9 +15,6 @@ pub trait Fighter {
     fn pos(&self) -> Point {
         self.as_avatar().pos()
     }
-    fn char_sheet(&self) -> &CharSheet {
-        self.as_avatar().char_sheet()
-    }
     fn armor(&self, slot: BodySlot) -> i8;
     fn weapon(&self, _attack_type: AttackType) -> Option<Weapon>;
     fn toughness(&self) -> u8 {

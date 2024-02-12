@@ -175,7 +175,7 @@ impl GameModeImpl for Walking {
                     game.try_start_action(Skip {}.into());
                 } else {
                     game.try_rotate_player(dir);
-                    game.try_start_action(Walk { dir }.into());
+                    game.try_start_action(Walk::new(dir).into());
                 }
             }
         }

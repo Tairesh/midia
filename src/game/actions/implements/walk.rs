@@ -15,7 +15,18 @@ use super::super::{
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Copy, Clone)]
 pub struct Walk {
-    pub dir: Direction,
+    dir: Direction,
+}
+
+impl Walk {
+    pub fn new(dir: Direction) -> Self {
+        Self { dir }
+    }
+
+    #[cfg(test)]
+    pub fn dir(&self) -> Direction {
+        self.dir
+    }
 }
 
 impl ActionImpl for Walk {

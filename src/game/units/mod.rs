@@ -123,6 +123,7 @@ impl Units {
     }
 
     pub fn unload_unit(&mut self, unit_id: usize) {
+        self.get_unit_mut(unit_id).set_action(None);
         self.loaded_units.remove(&unit_id);
     }
 }

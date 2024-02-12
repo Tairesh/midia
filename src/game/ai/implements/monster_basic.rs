@@ -13,13 +13,13 @@ impl AIImpl for BasicMonsterAI {
         let units = world.units();
         let unit = units.get_unit(unit_id).as_monster()?;
         let pos = unit.pos();
-        let player = units.player().pos();
-        let attack = Action::new(unit_id, Melee::new(player).into(), world);
+        let player_pos = units.player().pos();
+        let attack = Action::new(unit_id, Melee::new(player_pos, world).into(), world);
         if let Ok(action) = attack {
             return Some(action);
         }
 
-        Action::new(unit_id, Walk::new(pos.dir_to(player)).into(), world).ok()
+        Action::new(unit_id, Walk::new(pos.dir_to(player_pos)).into(), world).ok()
     }
 }
 
@@ -28,6 +28,7 @@ mod tests {
     use geometry::{Direction, Point};
 
     use crate::game::actions::implements::Walk;
+    use crate::game::actions::AttackTarget;
     use crate::game::world::tests::{add_monster, prepare_world};
     use crate::game::Avatar;
 
@@ -61,7 +62,10 @@ mod tests {
         assert!(npc.action().is_some());
         let action = npc.action().unwrap();
         if let ActionType::Melee(melee) = action.typ {
-            assert_eq!(Point::new(0, 0), melee.target());
+            match melee.target() {
+                AttackTarget::Avatar(id) => assert_eq!(0, id),
+                _ => panic!("Unexpected target: {:?}", melee.target()),
+            }
         } else {
             panic!("Unexpected monster action: {:?}", action.typ);
         }

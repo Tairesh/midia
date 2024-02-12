@@ -16,18 +16,21 @@ use super::super::{
     },
     ActionImpl,
     ActionPossibility::{self, No, Yes},
+    AttackTarget,
 };
 
 // TODO: Shooting should send missiles through entire map when there is no obstacles.
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Copy, Clone)]
 pub struct Shoot {
-    target: Point,
+    target: AttackTarget,
 }
 
 impl Shoot {
-    pub fn new(target: Point) -> Self {
-        Self { target }
+    pub fn new(pos: Point, world: &World) -> Self {
+        Self {
+            target: AttackTarget::auto(pos, world),
+        }
     }
 }
 
@@ -57,14 +60,10 @@ impl ActionImpl for Shoot {
                 return No(format!("You can't shoot from {}.", a(weapon.name())));
             }
 
-            let mut map = world.map();
-            let units = &map.get_tile(self.target).units;
-            if units.is_empty() {
+            let AttackTarget::Avatar(unit_id) = self.target else {
                 // TODO: shoot obstacles
                 return No("There is no one to shoot.".to_string());
-            }
-            let unit_id = units.iter().copied().next().unwrap();
-            drop(map);
+            };
 
             let units = world.units();
             let target = units.get_unit(unit_id);
@@ -91,13 +90,10 @@ impl ActionImpl for Shoot {
     // TODO: refactor this, code almost the same as in throw.rs
     #[allow(clippy::too_many_lines)]
     fn on_finish(&self, action: &Action, world: &mut World) {
-        let mut map = world.map();
-        let units = &map.get_tile(self.target).units;
-        if units.is_empty() {
+        let AttackTarget::Avatar(unit_id) = self.target else {
+            // TODO: shoot obstacles
             return;
-        }
-        let unit_id = units.iter().copied().next().unwrap();
-        drop(map);
+        };
 
         let units = world.units();
         let unit = units.get_unit(unit_id);
@@ -260,12 +256,14 @@ impl ActionImpl for Shoot {
 mod tests {
     use std::collections::HashSet;
 
-    use geometry::Point;
+    use geometry::{Direction, Point};
 
+    use crate::game::actions::implements::Skip;
+    use crate::game::actions::AttackTarget;
     use crate::game::map::items::helpers::{
         QUIVER, WOODEN_ARROW, WOODEN_BOLT, WOODEN_CROSSBOW, WOODEN_SHORTBOW,
     };
-    use crate::game::world::tests::{add_dummy, prepare_world};
+    use crate::game::world::tests::{add_dummy, add_monster, prepare_world};
     use crate::game::{Action, Avatar, Item, ItemPrototype, ItemSize};
 
     use super::{Shoot, ATTACK_MOVES};
@@ -294,7 +292,7 @@ mod tests {
             );
 
         // Can't shoot before loading arrow to bow.
-        assert!(Action::new(0, Shoot::new(target).into(), &world).is_err());
+        assert!(Action::new(0, Shoot::new(target, &world).into(), &world).is_err());
         world
             .units_mut()
             .player_mut()
@@ -303,7 +301,7 @@ mod tests {
             .reload()
             .ok();
 
-        let action = Action::new(0, Shoot::new(target).into(), &world).unwrap();
+        let action = Action::new(0, Shoot::new(target, &world).into(), &world).unwrap();
         world.units_mut().player_mut().set_action(Some(action));
         world.tick();
 
@@ -320,7 +318,7 @@ mod tests {
         );
 
         assert!(
-            Action::new(0, Shoot::new(target).into(), &world).is_err(),
+            Action::new(0, Shoot::new(target, &world).into(), &world).is_err(),
             "Assert we can't shoot second time cause there is no more arrows"
         );
     }
@@ -339,7 +337,7 @@ mod tests {
             .unwrap()
             .clear();
 
-        assert!(Action::new(0, Shoot::new(target).into(), &world).is_err());
+        assert!(Action::new(0, Shoot::new(target, &world).into(), &world).is_err());
     }
 
     #[test]
@@ -367,11 +365,11 @@ mod tests {
         // Distance of wooden shortbow is 12 so we can shoot to 12*4=48 tiles.
         let target_far = Point::new(48, 0);
         add_dummy(&mut world, target_far);
-        assert!(Action::new(0, Shoot::new(target_far).into(), &world).is_ok());
+        assert!(Action::new(0, Shoot::new(target_far, &world).into(), &world).is_ok());
 
         let target_too_far = Point::new(49, 0);
         add_dummy(&mut world, target_too_far);
-        assert!(Action::new(0, Shoot::new(target_too_far).into(), &world).is_err());
+        assert!(Action::new(0, Shoot::new(target_too_far, &world).into(), &world).is_err());
     }
 
     #[test]
@@ -400,7 +398,7 @@ mod tests {
             .reload()
             .ok();
 
-        assert!(Action::new(0, Shoot::new(target).into(), &world).is_err());
+        assert!(Action::new(0, Shoot::new(target, &world).into(), &world).is_err());
     }
 
     #[test]
@@ -431,7 +429,7 @@ mod tests {
             .reload()
             .is_ok());
 
-        let action = Action::new(0, Shoot::new(target).into(), &world).unwrap();
+        let action = Action::new(0, Shoot::new(target, &world).into(), &world).unwrap();
         world.units_mut().player_mut().set_action(Some(action));
         world.tick();
 
@@ -446,8 +444,56 @@ mod tests {
         );
 
         assert!(
-            Action::new(0, Shoot::new(target).into(), &world).is_err(),
+            Action::new(0, Shoot::new(target, &world).into(), &world).is_err(),
             "Assert we can't shoot second time cause there is no more bolts in a crossbow"
+        );
+    }
+
+    #[test]
+    fn test_shooting_at_moving_target() {
+        let mut world = prepare_world();
+        let target = Point::new(5, 0);
+        let mut units = world.units_mut();
+        let player = units.player_mut();
+        let inventory = player.inventory_mut().unwrap();
+        inventory.wield(Item::new(WOODEN_CROSSBOW));
+        inventory.wear(
+            Item::new(QUIVER).with_items_inside(vec![Item::new(WOODEN_BOLT); 10]),
+            0,
+        );
+        assert!(inventory.reload().is_ok());
+
+        drop(units);
+        let monster = add_monster(&mut world, target);
+
+        // Wait 5 ticks to make sure monster will move.
+        for _ in 0..5 {
+            let action = Action::new(0, Skip {}.into(), &world).unwrap();
+            world.units_mut().player_mut().set_action(Some(action));
+            world.tick();
+        }
+
+        let action = Shoot::new(target, &world);
+        if let AttackTarget::Avatar(unit_id) = action.target {
+            assert_eq!(monster, unit_id);
+        } else {
+            panic!("Unexpected target: {:?}", action.target);
+        }
+        let action = Action::new(0, action.into(), &world).unwrap();
+        world.units_mut().player_mut().set_action(Some(action));
+        world.tick();
+
+        let mut log = world.log();
+        let event = &log.new_events()[0];
+        assert!(
+            event.msg.contains("shoot a wooden crossbow (wooden bolt)"),
+            "msg \"{}\" doesn't contains \"shoot a wooden crossbow (wooden bolt)\"",
+            event.msg
+        );
+        drop(log);
+        assert_eq!(
+            world.units().get_unit(monster).pos(),
+            target + Direction::West
         );
     }
 }

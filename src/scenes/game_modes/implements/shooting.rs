@@ -129,7 +129,8 @@ impl GameModeImpl for Shooting {
             let pos = game.world.borrow().units().player().pos
                 + game.shift_of_view()
                 + self.mouse_moved_pos;
-            game.try_start_action(Shoot::new(pos).into());
+            let action = Shoot::new(pos, &game.world.borrow());
+            game.try_start_action(action.into());
             game.set_shift_of_view(Point::default());
             game.modes.pop();
             return None;

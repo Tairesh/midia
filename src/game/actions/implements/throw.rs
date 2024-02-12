@@ -11,16 +11,19 @@ use super::super::{
     },
     ActionImpl,
     ActionPossibility::{self, No, Yes},
+    AttackTarget,
 };
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Copy, Clone)]
 pub struct Throw {
-    target: Point,
+    target: AttackTarget,
 }
 
 impl Throw {
-    pub fn new(target: Point) -> Self {
-        Self { target }
+    pub fn new(target: Point, world: &World) -> Self {
+        Self {
+            target: AttackTarget::auto(target, world),
+        }
     }
 }
 
@@ -46,20 +49,15 @@ impl ActionImpl for Throw {
             return No(format!("You can't throw {}.", a(item.name())));
         }
 
-        let distance =
-            RangedDistance::define(actor.pos().distance(self.target), throw_value.distance);
+        let pos = self.target.pos(world);
+        let distance = RangedDistance::define(actor.pos().distance(pos), throw_value.distance);
         if distance == RangedDistance::Unreachable {
             return No(format!("You can't throw {} that far.", a(item.name())));
         }
 
-        let mut map = world.map();
-        let units = &map.get_tile(self.target).units;
-        if units.is_empty() {
+        let AttackTarget::Avatar(unit_id) = self.target else {
             return Yes(ATTACK_MOVES);
-        }
-
-        let unit_id = units.iter().copied().next().unwrap();
-        drop(map);
+        };
 
         if distance == RangedDistance::Melee {
             return No(format!(
@@ -82,10 +80,10 @@ impl ActionImpl for Throw {
     // TODO: refactor this, code almost the same as in shoot.rs
     #[allow(clippy::too_many_lines)]
     fn on_finish(&self, action: &Action, world: &mut World) {
-        let mut map = world.map();
-        let units = &map.get_tile(self.target).units;
-        if units.is_empty() {
-            drop(map);
+        let AttackTarget::Avatar(unit_id) = self.target else {
+            let AttackTarget::Terrain(pos) = self.target else {
+                unreachable!("Impossible throw target")
+            };
             let item = action
                 .owner_mut(&mut world.units_mut())
                 .inventory_mut()
@@ -103,13 +101,11 @@ impl ActionImpl for Throw {
                     },
                     a(item.name()),
                 ),
-                self.target,
+                pos,
             ));
-            world.map().get_tile_mut(self.target).items.push(item);
+            world.map().get_tile_mut(pos).items.push(item);
             return;
-        }
-        let unit_id = units.iter().copied().next().unwrap();
-        drop(map);
+        };
 
         let units = world.units();
         let unit = units.get_unit(unit_id);
@@ -275,12 +271,14 @@ impl ActionImpl for Throw {
 mod tests {
     use std::collections::HashSet;
 
-    use geometry::Point;
+    use geometry::{Direction, Point};
 
     use crate::assets::Sprite;
+    use crate::game::actions::implements::Skip;
+    use crate::game::actions::AttackTarget;
     use crate::game::map::items::helpers::ROCK;
     use crate::game::traits::Name;
-    use crate::game::world::tests::{add_dummy, prepare_world};
+    use crate::game::world::tests::{add_dummy, add_monster, prepare_world};
     use crate::game::{Action, Avatar, Item, ItemPrototype, ItemSize};
 
     use super::{Throw, ATTACK_MOVES};
@@ -299,7 +297,7 @@ mod tests {
             .unwrap()
             .wield(Item::new(ROCK));
 
-        let action = Action::new(0, Throw::new(target).into(), &world).unwrap();
+        let action = Action::new(0, Throw::new(target, &world).into(), &world).unwrap();
         world.units_mut().player_mut().set_action(Some(action));
         world.tick();
 
@@ -328,7 +326,7 @@ mod tests {
             .unwrap()
             .clear();
 
-        assert!(Action::new(0, Throw::new(target).into(), &world).is_err());
+        assert!(Action::new(0, Throw::new(target, &world).into(), &world).is_err());
     }
 
     #[test]
@@ -345,7 +343,7 @@ mod tests {
             .unwrap()
             .wield(Item::new(ROCK));
 
-        assert!(Action::new(0, Throw::new(target).into(), &world).is_err());
+        assert!(Action::new(0, Throw::new(target, &world).into(), &world).is_err());
     }
 
     #[test]
@@ -377,7 +375,50 @@ mod tests {
                 is_ammo: None,
             }));
 
-        assert!(Action::new(0, Throw::new(target).into(), &world).is_err());
+        assert!(Action::new(0, Throw::new(target, &world).into(), &world).is_err());
+    }
+
+    #[test]
+    fn test_throwing_at_moving_target() {
+        let mut world = prepare_world();
+        let target = Point::new(3, 0);
+        let mut units = world.units_mut();
+        let player = units.player_mut();
+        let inventory = player.inventory_mut().unwrap();
+        inventory.wield(Item::new(ROCK));
+        drop(units);
+
+        let monster = add_monster(&mut world, target);
+
+        // Wait 5 ticks to make sure monster will move.
+        for _ in 0..5 {
+            let action = Action::new(0, Skip {}.into(), &world).unwrap();
+            world.units_mut().player_mut().set_action(Some(action));
+            world.tick();
+        }
+
+        let action = Throw::new(target, &world);
+        if let AttackTarget::Avatar(unit_id) = action.target {
+            assert_eq!(monster, unit_id);
+        } else {
+            panic!("Unexpected target: {:?}", action.target);
+        }
+        let action = Action::new(0, action.into(), &world).unwrap();
+        world.units_mut().player_mut().set_action(Some(action));
+        world.tick();
+
+        let mut log = world.log();
+        let event = &log.new_events()[0];
+        assert!(
+            event.msg.contains("throw a rock at Old Bugger"),
+            "msg \"{}\" doesn't contains \"throw a rock at Old Bugger\"",
+            event.msg
+        );
+        drop(log);
+        assert_eq!(
+            world.units().get_unit(monster).pos(),
+            target + Direction::West
+        );
     }
 
     // TODO: add test for throwing to terrain

@@ -14,38 +14,41 @@ use super::super::{
     },
     ActionImpl,
     ActionPossibility::{self, No, Yes},
+    AttackTarget,
 };
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Copy, Clone)]
 pub struct Melee {
     // TODO: remember unit in target position, they can move away before attack is finished
     // Same for ranged attacks
-    target: Point,
+    target: AttackTarget,
 }
 
 impl Melee {
-    pub fn new(target: Point) -> Self {
-        Self { target }
+    pub fn new(pos: Point, world: &World) -> Self {
+        Self {
+            target: AttackTarget::auto(pos, world),
+        }
     }
 
     #[cfg(test)]
-    pub fn target(&self) -> Point {
+    pub fn target(&self) -> AttackTarget {
         self.target
     }
 
     fn smash(self, action: &Action, world: &mut World) -> bool {
+        let AttackTarget::Terrain(target) = self.target else {
+            return false;
+        };
         let units = world.units();
         let owner = action.owner(&units);
         let weapon = owner.as_fighter().weapon(AttackType::Melee).unwrap();
         let can_smash = weapon.damage.damage_types.contains(&DamageType::Blunt)
-            && world.map().get_tile(self.target).terrain.is_smashable();
+            && world.map().get_tile(target).terrain.is_smashable();
         if !can_smash {
             return false;
         }
-        let attack = melee_smash_terrain(
-            owner.as_fighter(),
-            &world.map().get_tile(self.target).terrain,
-        );
+        let attack = melee_smash_terrain(owner.as_fighter(), &world.map().get_tile(target).terrain);
         match attack {
             TerrainMeleeAttackResult::Miss => {
                 world.log().push(LogEvent::info(
@@ -57,7 +60,7 @@ impl Melee {
                         } else {
                             "y"
                         },
-                        world.map().get_tile(self.target).terrain.name(),
+                        world.map().get_tile(target).terrain.name(),
                         owner.pronouns().possessive_adjective(),
                         weapon.name,
                         if owner.pronouns().verb_ends_with_s() {
@@ -66,7 +69,7 @@ impl Melee {
                             ""
                         },
                     ),
-                    self.target,
+                    target,
                 ));
             }
             TerrainMeleeAttackResult::Hit(damage) => {
@@ -79,11 +82,11 @@ impl Melee {
                         } else {
                             ""
                         },
-                        world.map().get_tile(self.target).terrain.name(),
+                        world.map().get_tile(target).terrain.name(),
                         owner.pronouns().possessive_adjective(),
                         weapon.name,
                     ),
-                    self.target,
+                    target,
                 ));
             }
             TerrainMeleeAttackResult::Success(damage) => {
@@ -96,20 +99,15 @@ impl Melee {
                         } else {
                             ""
                         },
-                        world.map().get_tile(self.target).terrain.name(),
+                        world.map().get_tile(target).terrain.name(),
                         owner.pronouns().possessive_adjective(),
                         weapon.name,
                     ),
-                    self.target,
+                    target,
                 ));
-                let (new_terrain, mut items) =
-                    world.map().get_tile(self.target).terrain.smash_result();
-                world.map().get_tile_mut(self.target).terrain = new_terrain;
-                world
-                    .map()
-                    .get_tile_mut(self.target)
-                    .items
-                    .append(&mut items);
+                let (new_terrain, mut items) = world.map().get_tile(target).terrain.smash_result();
+                world.map().get_tile_mut(target).terrain = new_terrain;
+                world.map().get_tile_mut(target).items.append(&mut items);
             }
         }
 
@@ -117,84 +115,76 @@ impl Melee {
     }
 
     fn attack_unit(self, action: &Action, world: &mut World) -> bool {
+        let AttackTarget::Avatar(unit_id) = self.target else {
+            return false;
+        };
         let units = world.units();
         let owner = action.owner(&units);
         let weapon_name = owner.as_fighter().weapon(AttackType::Melee).unwrap().name;
-        let unit_id = world
-            .map()
-            .get_tile(self.target)
-            .units
-            .iter()
-            .copied()
-            .next();
-        if let Some(unit_id) = unit_id {
-            let unit = units.get_unit(unit_id);
-            let attack = melee_attack_unit(owner.as_fighter(), unit.as_fighter());
-            match attack {
-                UnitMeleeAttackResult::Hit(hit) => {
-                    let damage = hit.params.damage.to_string();
-                    for event in unit_attack_success(
-                        owner,
-                        unit,
-                        &hit,
-                        format!(
-                            "{} attack{} {} with {} {weapon_name} dealing {} damage{}.",
-                            owner.name_for_actions(),
-                            if owner.pronouns().verb_ends_with_s() {
-                                "s"
-                            } else {
-                                ""
-                            },
-                            unit.name_for_actions(),
-                            owner.pronouns().possessive_adjective(),
-                            if hit.params.damage == 0 {
-                                "no"
-                            } else {
-                                &damage
-                            },
-                            if hit.params.penetration > 0 {
-                                format!(" and {} armor penetration", hit.params.penetration)
-                            } else {
-                                String::new()
-                            }
-                        ),
-                    ) {
-                        world.log().push(event);
-                    }
+        let unit = units.get_unit(unit_id);
+        let attack = melee_attack_unit(owner.as_fighter(), unit.as_fighter());
+        match attack {
+            UnitMeleeAttackResult::Hit(hit) => {
+                let damage = hit.params.damage.to_string();
+                for event in unit_attack_success(
+                    owner,
+                    unit,
+                    &hit,
+                    format!(
+                        "{} attack{} {} with {} {weapon_name} dealing {} damage{}.",
+                        owner.name_for_actions(),
+                        if owner.pronouns().verb_ends_with_s() {
+                            "s"
+                        } else {
+                            ""
+                        },
+                        unit.name_for_actions(),
+                        owner.pronouns().possessive_adjective(),
+                        if hit.params.damage == 0 {
+                            "no"
+                        } else {
+                            &damage
+                        },
+                        if hit.params.penetration > 0 {
+                            format!(" and {} armor penetration", hit.params.penetration)
+                        } else {
+                            String::new()
+                        }
+                    ),
+                ) {
+                    world.log().push(event);
+                }
 
-                    drop(units);
-                    world.apply_damage(unit_id, hit);
-                }
-                UnitMeleeAttackResult::Miss => {
-                    world.log().push(LogEvent::warning(
-                        format!(
-                            "{} attack{} {} with {} {weapon_name} but miss{}.",
-                            owner.name_for_actions(),
-                            if owner.pronouns().verb_ends_with_s() {
-                                "s"
-                            } else {
-                                ""
-                            },
-                            unit.name_for_actions(),
-                            owner.pronouns().possessive_adjective(),
-                            if owner.pronouns().verb_ends_with_s() {
-                                "es"
-                            } else {
-                                ""
-                            },
-                        ),
-                        self.target,
-                    ));
-                }
+                drop(units);
+                world.apply_damage(unit_id, hit);
             }
-
-            true
-        } else {
-            false
+            UnitMeleeAttackResult::Miss => {
+                world.log().push(LogEvent::warning(
+                    format!(
+                        "{} attack{} {} with {} {weapon_name} but miss{}.",
+                        owner.name_for_actions(),
+                        if owner.pronouns().verb_ends_with_s() {
+                            "s"
+                        } else {
+                            ""
+                        },
+                        unit.name_for_actions(),
+                        owner.pronouns().possessive_adjective(),
+                        if owner.pronouns().verb_ends_with_s() {
+                            "es"
+                        } else {
+                            ""
+                        },
+                    ),
+                    unit.pos(),
+                ));
+            }
         }
+
+        true
     }
 
-    fn swing(self, action: &Action, world: &mut World) {
+    fn swing(action: &Action, world: &mut World) {
         let units = world.units();
         let owner = action.owner(&units);
         let weapon = owner.as_fighter().weapon(AttackType::Melee).unwrap().name;
@@ -210,7 +200,7 @@ impl Melee {
                 },
                 owner.pronouns().possessive_adjective(),
             ),
-            self.target,
+            owner.pos(),
         ));
     }
 }
@@ -223,7 +213,11 @@ impl ActionImpl for Melee {
             return No("You are in shock".to_string());
         }
 
-        let distance = (actor.pos().distance(self.target).floor() - 1.0) as u8;
+        let target = match self.target {
+            AttackTarget::Avatar(id) => units.get_unit(id).pos(),
+            AttackTarget::Terrain(pos) => pos,
+        };
+        let distance = (actor.pos().distance(target).floor() - 1.0) as u8;
 
         let weapon = actor.as_fighter().weapon(AttackType::Melee);
         if weapon.is_none() {
@@ -245,7 +239,7 @@ impl ActionImpl for Melee {
     fn on_finish(&self, action: &Action, world: &mut World) {
         // TODO: attack with cutting weapon
         if !self.attack_unit(action, world) && !self.smash(action, world) {
-            self.swing(action, world);
+            Self::swing(action, world);
         }
     }
 }
@@ -274,7 +268,7 @@ mod tests {
             .unwrap()
             .clear();
 
-        let action = Action::new(0, Melee::new(Point::new(1, 0)).into(), &world).unwrap();
+        let action = Action::new(0, Melee::new(Point::new(1, 0), &world).into(), &world).unwrap();
         world.units_mut().player_mut().set_action(Some(action));
         world.tick();
 
@@ -301,7 +295,7 @@ mod tests {
             .unwrap()
             .wield(Item::new(GOD_AXE));
 
-        let action = Action::new(0, Melee::new(Point::new(1, 0)).into(), &world).unwrap();
+        let action = Action::new(0, Melee::new(Point::new(1, 0), &world).into(), &world).unwrap();
         world.units_mut().player_mut().set_action(Some(action));
         world.tick();
 
@@ -327,7 +321,7 @@ mod tests {
             .inventory_mut()
             .unwrap()
             .wield(Item::new(DEMONIC_SAP));
-        let action = Action::new(0, Melee::new(Point::new(1, 0)).into(), &world).unwrap();
+        let action = Action::new(0, Melee::new(Point::new(1, 0), &world).into(), &world).unwrap();
         world.units_mut().player_mut().set_action(Some(action));
         world.tick();
 
@@ -355,7 +349,7 @@ mod tests {
             .inventory_mut()
             .unwrap()
             .wield(Item::new(STONE_KNIFE));
-        let action = Action::new(0, Melee::new(Point::new(1, 0)).into(), &world).unwrap();
+        let action = Action::new(0, Melee::new(Point::new(1, 0), &world).into(), &world).unwrap();
         world.units_mut().player_mut().set_action(Some(action));
         world.tick();
 
@@ -385,7 +379,7 @@ mod tests {
             .inventory_mut()
             .unwrap()
             .clear();
-        let action = Action::new(0, Melee::new(Point::new(1, 0)).into(), &world).unwrap();
+        let action = Action::new(0, Melee::new(Point::new(1, 0), &world).into(), &world).unwrap();
         world.units_mut().player_mut().set_action(Some(action));
         world.tick();
 
@@ -411,7 +405,7 @@ mod tests {
             .clear();
 
         world.map().get_tile_mut(Point::new(1, 0)).terrain = Boulder::default().into();
-        let action = Action::new(0, Melee::new(Point::new(1, 0)).into(), &world).unwrap();
+        let action = Action::new(0, Melee::new(Point::new(1, 0), &world).into(), &world).unwrap();
         world.units_mut().player_mut().set_action(Some(action));
         world.tick();
 
@@ -437,7 +431,7 @@ mod tests {
 
         let target = Point::new(2, 0);
         add_dummy(&mut world, target);
-        let action = Action::new(0, Melee::new(target).into(), &world).unwrap();
+        let action = Action::new(0, Melee::new(target, &world).into(), &world).unwrap();
         world.units_mut().player_mut().set_action(Some(action));
         world.tick();
 
@@ -461,6 +455,6 @@ mod tests {
             .wield(Item::new(STONE_SPEAR));
 
         let target = Point::new(3, 0);
-        assert!(Action::new(0, Melee::new(target).into(), &world).is_err());
+        assert!(Action::new(0, Melee::new(target, &world).into(), &world).is_err());
     }
 }

@@ -377,7 +377,7 @@ pub mod tests {
     };
 
     pub fn prepare_world() -> World {
-        World::new(
+        let world = World::new(
             Meta::new("test", "test"),
             GameView::default(),
             Log::new(),
@@ -386,7 +386,11 @@ pub mod tests {
                 Box::new(Player::new(tester_girl(), Point::new(0, 0))) as Box<dyn Avatar>,
             )]),
             HashMap::new(),
-        )
+        );
+        world.map().get_tile_mut(Point::new(0, 0)).terrain = Dirt::default().into();
+        world.map().get_tile_mut(Point::new(0, 0)).units.insert(0);
+
+        world
     }
 
     pub fn add_dummy(world: &mut World, pos: Point) -> usize {

@@ -554,7 +554,6 @@ impl CharacterAttributes {
             &mut rand::thread_rng(),
             true,
             self.personality.appearance.race,
-            self.personality.appearance.age,
         );
         self.attributes_points = 0;
         self.update_attributes_and_skills(ctx);

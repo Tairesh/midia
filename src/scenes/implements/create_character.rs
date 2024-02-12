@@ -366,7 +366,7 @@ impl CreateCharacter {
                     age,
                 },
                 Mind { name, gender },
-                CharSheet::default(true, race, age),
+                CharSheet::default(true, race),
             );
             Some(vec![Transition::Push(Scene::CharacterAttributes(
                 self.meta.path.clone(),

@@ -114,7 +114,7 @@ impl PlayerPersonality {
                 race,
             },
             Mind { name, gender },
-            CharSheet::default(true, race, age),
+            CharSheet::default(true, race),
         )
     }
 }
@@ -138,7 +138,7 @@ pub mod tests {
                 name: "Dooka".to_string(),
                 gender: Gender::Female,
             },
-            CharSheet::default(true, Race::Gazan, 25),
+            CharSheet::default(true, Race::Gazan),
         )
     }
 
@@ -157,7 +157,6 @@ pub mod tests {
             CharSheet::new(
                 true,
                 Race::Nyarnik,
-                22,
                 Attributes {
                     agility: AttrLevel::D8,
                     smarts: AttrLevel::D6,

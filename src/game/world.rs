@@ -76,7 +76,7 @@ impl World {
                 sex: Sex::Undefined,
             },
             Pronouns::ItIts,
-            CharSheet::default(false, Race::Bug, 1),
+            CharSheet::default(false, Race::Bug),
         )));
         world.add_unit(Box::new(Monster::new(
             AI::BasicMonster,
@@ -89,7 +89,7 @@ impl World {
                 sex: Sex::Female,
             },
             Pronouns::SheHer,
-            CharSheet::default(false, Race::Bug, 2),
+            CharSheet::default(false, Race::Bug),
         )));
 
         world.units().iter().for_each(|(&i, unit)| {
@@ -401,7 +401,7 @@ pub mod tests {
                 sex: Sex::Undefined,
             },
             Pronouns::ItIts,
-            CharSheet::default(false, Race::Gazan, 20),
+            CharSheet::default(false, Race::Gazan),
         )))
     }
 
@@ -417,7 +417,7 @@ pub mod tests {
                 sex: Sex::Undefined,
             },
             Pronouns::ItIts,
-            CharSheet::default(false, Race::Bug, 99),
+            CharSheet::default(false, Race::Bug),
         )))
     }
 

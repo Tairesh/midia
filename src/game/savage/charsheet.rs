@@ -12,7 +12,6 @@ pub struct CharSheet {
     #[serde(default)]
     pub wild_card: bool,
     pub race: Race,
-    pub age: u8,
     pub attributes: Attributes,
     pub skills: Skills,
     pub wounds: Vec<Wound>,
@@ -24,17 +23,10 @@ pub struct CharSheet {
 }
 
 impl CharSheet {
-    pub fn new(
-        wild_card: bool,
-        race: Race,
-        age: u8,
-        attributes: Attributes,
-        skills: Skills,
-    ) -> Self {
+    pub fn new(wild_card: bool, race: Race, attributes: Attributes, skills: Skills) -> Self {
         Self {
             wild_card,
             race,
-            age,
             attributes,
             skills,
             wounds: vec![],
@@ -43,10 +35,10 @@ impl CharSheet {
         }
     }
 
-    pub fn default(wild_card: bool, race: Race, age: u8) -> Self {
+    pub fn default(wild_card: bool, race: Race) -> Self {
         let attributes = Attributes::default();
         let skills = Skills::default(race);
-        Self::new(wild_card, race, age, attributes, skills)
+        Self::new(wild_card, race, attributes, skills)
     }
 
     pub fn reset(&mut self) {
@@ -57,10 +49,10 @@ impl CharSheet {
         self.skills = Skills::default(self.race);
     }
 
-    pub fn random<R: Rng + ?Sized>(rng: &mut R, wild_card: bool, race: Race, age: u8) -> Self {
+    pub fn random<R: Rng + ?Sized>(rng: &mut R, wild_card: bool, race: Race) -> Self {
         let attributes = Attributes::random(rng);
         let skills = Skills::random(rng, &attributes, race);
-        Self::new(wild_card, race, age, attributes, skills)
+        Self::new(wild_card, race, attributes, skills)
     }
 
     pub fn calc_skill_points(&self) -> i8 {
@@ -81,13 +73,7 @@ impl CharSheet {
     }
 
     pub fn walk_koeff(&self) -> f32 {
-        // TODO: write tests for moving for different races and ages
-        let k_age = match self.age {
-            0 => 100.0,
-            1..=3 => 10.0,
-            4..=10 => 3.0,
-            11.. => 1.0,
-        };
+        // TODO: write tests for moving for different races and wounds
         let mut k_wounds = 1.0;
         for &wound in &self.wounds {
             if wound == Wound::LeftLeg || wound == Wound::RightLeg {
@@ -96,7 +82,7 @@ impl CharSheet {
         }
         let k_shock = if self.shock { 0.5 } else { 1.0 };
 
-        k_age * k_wounds * k_shock * self.race.walk_koeff()
+        k_wounds * k_shock * self.race.walk_koeff()
     }
 
     pub fn get_attribute_with_modifiers(&self, attribute: Attribute) -> DiceWithModifier {

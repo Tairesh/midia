@@ -10,7 +10,7 @@ pub struct DummyAI;
 
 impl AIImpl for DummyAI {
     fn plan(&mut self, unit_id: usize, world: &World) -> Option<Action> {
-        Action::new(unit_id, Skip {}.into(), world).ok()
+        Action::new(unit_id, Skip::new(100).into(), world).ok()
     }
 }
 

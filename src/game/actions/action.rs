@@ -56,6 +56,7 @@ impl Action {
     pub fn act(&self, world: &mut World) {
         if let ActionPossibility::No(reason) = self.typ.is_possible(self.owner, world) {
             self.cancel_action(world, reason);
+            return;
         }
         // TODO: draw stamina
 

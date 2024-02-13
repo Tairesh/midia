@@ -467,11 +467,9 @@ mod tests {
         let monster = add_monster(&mut world, target);
 
         // Wait 5 ticks to make sure monster will move.
-        for _ in 0..5 {
-            let action = Action::new(0, Skip {}.into(), &world).unwrap();
-            world.units_mut().player_mut().set_action(Some(action));
-            world.tick();
-        }
+        let action = Action::new(0, Skip::new(5).into(), &world).unwrap();
+        world.units_mut().player_mut().set_action(Some(action));
+        world.tick();
 
         let action = Shoot::new(target, &world);
         if let AttackTarget::Avatar(unit_id) = action.target {

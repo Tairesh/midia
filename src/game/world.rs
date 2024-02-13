@@ -280,12 +280,14 @@ impl World {
         self.plan();
 
         let actions: Vec<Action> = self
-            .units
-            .borrow()
-            .iter()
-            .filter_map(|(_, u)| u.action().cloned())
+            .units()
+            .loaded_units()
+            .filter_map(|u| u.action().cloned())
             .collect();
         for action in actions {
+            if self.units().get_unit(action.owner).char_sheet().is_dead() {
+                continue;
+            }
             action.act(self);
             if self.meta.current_tick >= action.finish {
                 self.units_mut().get_unit_mut(action.owner).set_action(None);
@@ -299,20 +301,14 @@ impl World {
     /// Shocked units trying to get out of the shock
     fn shock_out(&mut self) {
         let current_tick = self.meta.current_tick;
-        let mut units_to_shock_out = Vec::new();
-        for unit in self.units().loaded_units() {
+        for unit in self.units_mut().loaded_units_mut() {
             if unit.char_sheet().can_try_to_shock_out(current_tick) {
-                units_to_shock_out.push(unit.id());
-            }
-        }
-        let mut units = self.units_mut();
-        for unit_id in units_to_shock_out {
-            let unit = units.get_unit_mut(unit_id);
-            if unit.char_sheet_mut().try_to_shock_out(current_tick) {
-                self.log().push(LogEvent::info(
-                    format!("{} is out of the shock!", unit.name_for_actions()),
-                    unit.pos(),
-                ));
+                if unit.char_sheet_mut().try_to_shock_out(current_tick) {
+                    self.log().push(LogEvent::info(
+                        format!("{} is out of the shock!", unit.name_for_actions()),
+                        unit.pos(),
+                    ));
+                }
             }
         }
     }
@@ -439,13 +435,10 @@ pub mod tests {
         assert_eq!(Point::new(0, 0), units.player().pos());
         assert_eq!(Point::new(1, 0), units.get_unit(monster_id).pos());
         drop(units);
-        for _ in 0..length {
-            world
-                .units_mut()
-                .player_mut()
-                .set_action(Some(Action::new(0, Skip {}.into(), &world).unwrap()));
-            world.tick();
-        }
+        world.units_mut().player_mut().set_action(Some(
+            Action::new(0, Skip::new(length).into(), &world).unwrap(),
+        ));
+        world.tick();
         let units = world.units();
         assert_eq!(Point::new(0, 0), units.player().pos());
         assert_eq!(Point::new(2, 0), units.get_unit(monster_id).pos())

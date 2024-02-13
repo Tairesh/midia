@@ -9,6 +9,7 @@ mod action_type;
 mod attack_target;
 pub mod implements;
 
+#[derive(Debug)]
 pub enum ActionPossibility {
     Yes(u32),
     // length in ticks

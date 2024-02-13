@@ -81,7 +81,7 @@ mod tests {
     use crate::game::actions::implements::Skip;
     use crate::game::map::terrains::{Boulder, BoulderSize, Dirt};
     use crate::game::world::tests::{add_dummy, prepare_world};
-    use crate::game::{Action, Avatar};
+    use crate::game::{Action, ActionType, Avatar};
 
     use super::Walk;
 
@@ -136,7 +136,7 @@ mod tests {
     #[test]
     fn test_fail_walking_two_units_to_same_place() {
         let mut world = prepare_world();
-        world.map().get_tile_mut(Point::new(1, 1)).terrain = Dirt::default().into();
+        world.map().get_tile_mut(Point::new(0, 1)).terrain = Dirt::default().into();
         let npc = add_dummy(&mut world, Point::new(1, 0));
 
         let action = Action::new(
@@ -164,13 +164,50 @@ mod tests {
         assert_eq!(Point::new(1, 0), world.units().get_unit(npc).pos());
         assert!(world.units().player().action().is_none());
 
-        let action = Action::new(0, Skip {}.into(), &world).unwrap();
+        let action = Action::new(0, Skip::one().into(), &world).unwrap();
         world.units_mut().player_mut().set_action(Some(action));
         world.tick();
-        // do not check npc.action because it can be already new one, selected by AI
+        assert!(matches!(
+            world.units().get_unit(npc).action().unwrap().typ,
+            ActionType::Skip(..)
+        ));
         assert_eq!(Point::new(1, 0), world.units().get_unit(npc).pos());
         assert_eq!(1, world.map().get_tile(Point::new(0, 1)).units.len());
         assert_eq!(1, world.map().get_tile(Point::new(1, 0)).units.len());
         assert_eq!(0, world.map().get_tile(Point::new(0, 0)).units.len());
     }
+
+    #[test]
+    fn test_two_monsters_cant_walk_to_same_tile() {
+        let mut world = prepare_world();
+        world.map().get_tile_mut(Point::new(1, 1)).terrain = Dirt::default().into();
+        let npc1 = add_dummy(&mut world, Point::new(1, 0));
+        let npc2 = add_dummy(&mut world, Point::new(0, 1));
+
+        let action = Action::new(npc1, Walk::new(Direction::South).into(), &world).unwrap();
+        world
+            .units_mut()
+            .get_unit_mut(npc1)
+            .set_action(Some(action));
+        let action = Action::new(npc2, Walk::new(Direction::East).into(), &world).unwrap();
+        world
+            .units_mut()
+            .get_unit_mut(npc2)
+            .set_action(Some(action));
+        let skip = Action::new(0, Skip::new(20).into(), &world).unwrap();
+        world.units_mut().player_mut().set_action(Some(skip));
+        world.tick();
+        assert_eq!(Point::new(1, 1), world.units().get_unit(npc1).pos());
+        assert_eq!(Point::new(0, 1), world.units().get_unit(npc2).pos());
+        assert!(matches!(
+            world.units().get_unit(npc1).action().unwrap().typ,
+            ActionType::Skip(..)
+        ));
+        assert!(matches!(
+            world.units().get_unit(npc2).action().unwrap().typ,
+            ActionType::Skip(..)
+        ));
+    }
+
+    // TODO: bug with walking when monster already dead
 }

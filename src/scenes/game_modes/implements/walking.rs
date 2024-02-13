@@ -158,7 +158,7 @@ impl GameModeImpl for Walking {
                         );
                     }
                     KeyBindingAction::Skip => {
-                        game.try_start_action(Skip {}.into());
+                        game.try_start_action(Skip::one().into());
                     }
                 }
             }
@@ -172,7 +172,7 @@ impl GameModeImpl for Walking {
             {
                 self.last_walk = now;
                 if dir.is_here() {
-                    game.try_start_action(Skip {}.into());
+                    game.try_start_action(Skip::one().into());
                 } else {
                     game.try_rotate_player(dir);
                     game.try_start_action(Walk::new(dir).into());

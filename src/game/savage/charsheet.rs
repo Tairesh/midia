@@ -150,11 +150,14 @@ impl CharSheet {
         self.wounds.len() > wounds_limit
     }
 
-    pub fn can_try_to_shock_out(&self, current_tick: u128) -> bool {
+    fn can_try_to_shock_out(&self, current_tick: u128) -> bool {
         self.shock && (current_tick - self.last_shock_out_roll) >= 10
     }
 
     pub fn try_to_shock_out(&mut self, current_tick: u128) -> bool {
+        if !self.can_try_to_shock_out(current_tick) {
+            return false;
+        }
         self.last_shock_out_roll = current_tick;
         let mut roll = self
             .get_attribute_with_modifiers(Attribute::Spirit)
@@ -166,7 +169,7 @@ impl CharSheet {
                 roll = wild_roll;
             }
         }
-        if roll.total >= 4 {
+        if roll.success() {
             self.shock = false;
             true
         } else {

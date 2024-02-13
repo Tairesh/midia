@@ -11,6 +11,10 @@ impl RollResult {
         RollResult { natural, total }
     }
 
+    pub fn success(self) -> bool {
+        self.total >= 4
+    }
+
     pub fn successes(self) -> u8 {
         self.total.max(0) as u8 / 4
     }

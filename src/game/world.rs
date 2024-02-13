@@ -302,13 +302,11 @@ impl World {
     fn shock_out(&mut self) {
         let current_tick = self.meta.current_tick;
         for unit in self.units_mut().loaded_units_mut() {
-            if unit.char_sheet().can_try_to_shock_out(current_tick) {
-                if unit.char_sheet_mut().try_to_shock_out(current_tick) {
-                    self.log().push(LogEvent::info(
-                        format!("{} is out of the shock!", unit.name_for_actions()),
-                        unit.pos(),
-                    ));
-                }
+            if unit.char_sheet_mut().try_to_shock_out(current_tick) {
+                self.log().push(LogEvent::info(
+                    format!("{} is out of the shock!", unit.name_for_actions()),
+                    unit.pos(),
+                ));
             }
         }
     }

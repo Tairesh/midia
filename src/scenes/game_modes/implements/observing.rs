@@ -1,6 +1,7 @@
 use std::time::Instant;
 
 use geometry::{Direction, Point, Rect, Vec2};
+use rand::{thread_rng, Rng};
 use tetra::{
     graphics::{
         mesh::{Mesh, ShapeStyle},
@@ -12,7 +13,11 @@ use tetra::{
 
 use crate::{
     colors::Colors,
-    game::World,
+    game::{
+        races::{BugColorDistribution, Pronouns, Sex},
+        units::{Appearance, Monster},
+        CharSheet, Race, World, AI,
+    },
     input,
     settings::Settings,
     ui::{Draw, JustMesh, Label, Position, Positionate, Stringify},
@@ -171,6 +176,28 @@ impl GameModeImpl for Observing {
             }
         }
         if self.mouse_moved || shifted {
+            self.update_sprite(ctx, game);
+        }
+        if input::is_mouse_button_pressed(ctx, input::MouseButton::Left)
+            && Settings::instance().debug.god_mode
+        {
+            let pos = game.world.borrow().units().player().pos
+                + game.shift_of_view()
+                + self.mouse_moved_pos;
+            let color = thread_rng().sample(BugColorDistribution {});
+            game.world.borrow_mut().add_unit(Box::new(Monster::new(
+                AI::BasicMonster,
+                pos,
+                format!("giant {color} bug").to_lowercase(),
+                Appearance {
+                    race: Race::Bug,
+                    age: 99,
+                    body_color: Some(color),
+                    sex: Sex::Undefined,
+                },
+                Pronouns::ItIts,
+                CharSheet::default(false, Race::Bug),
+            )));
             self.update_sprite(ctx, game);
         }
 

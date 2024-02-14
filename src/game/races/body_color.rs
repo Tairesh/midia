@@ -1,5 +1,7 @@
-// use rand::distributions::{Distribution, Standard};
-// use rand::Rng;
+use std::fmt::{Display, Formatter};
+
+use rand::distributions::{Distribution, Standard};
+use rand::Rng;
 use serde::{Deserialize, Serialize};
 use tetra::graphics::Color;
 
@@ -27,6 +29,7 @@ pub enum BodyColor {
     // For monsters
     Lime,
     Red,
+    Violet,
 }
 
 impl BodyColor {
@@ -43,19 +46,18 @@ impl BodyColor {
     }
 }
 
-// impl Distribution<BodyColor> for Standard {
-//     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> BodyColor {
-//         match rng.gen_range(0..6) {
-//             0 => BodyColor::Albino,
-//             1 => BodyColor::Ginger,
-//             2 => BodyColor::LightBrown,
-//             3 => BodyColor::DarkBrown,
-//             4 => BodyColor::White,
-//             5 => BodyColor::Gray,
-//             _ => unreachable!(),
-//         }
-//     }
-// }
+pub struct BugColorDistribution {}
+
+impl Distribution<BodyColor> for BugColorDistribution {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> BodyColor {
+        match rng.gen_range(0..3) {
+            0 => BodyColor::Lime,
+            1 => BodyColor::Red,
+            2 => BodyColor::Violet,
+            _ => unreachable!(),
+        }
+    }
+}
 
 impl From<BodyColor> for Color {
     fn from(s: BodyColor) -> Self {
@@ -77,6 +79,7 @@ impl From<BodyColor> for Color {
             BodyColor::OrangeRed => Colors::ORANGE_RED,
             BodyColor::Lime => Colors::LIME_GREEN,
             BodyColor::Red => Colors::RED,
+            BodyColor::Violet => Colors::VIOLET,
         }
     }
 }
@@ -101,6 +104,7 @@ impl From<BodyColor> for &str {
             BodyColor::OrangeRed => "Orange Red",
             BodyColor::Lime => "Lime",
             BodyColor::Red => "Red",
+            BodyColor::Violet => "Violet",
         }
     }
 }
@@ -108,6 +112,12 @@ impl From<BodyColor> for &str {
 impl Name for BodyColor {
     fn name(&self) -> &'static str {
         (*self).into()
+    }
+}
+
+impl Display for BodyColor {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.name())
     }
 }
 

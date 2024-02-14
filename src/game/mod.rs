@@ -1,6 +1,7 @@
 #![allow(unused_imports)]
 
 pub use actions::{Action, ActionType};
+pub use ai::AI;
 pub use game_data::{
     AmmoType, DamageValue, GameData, IsAmmoValue, ItemPrototype, ItemQuality, ItemSize, Material,
     WearLayer,

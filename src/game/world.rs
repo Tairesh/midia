@@ -335,7 +335,7 @@ impl World {
                 pos,
             ));
             self.map().get_tile_mut(pos).units.remove(&unit_id);
-            self.units_mut().remove_unit(unit_id);
+            self.units_mut().unload_unit(unit_id);
         }
     }
 

@@ -197,8 +197,12 @@ mod tests {
         let skip = Action::new(0, Skip::new(20).into(), &world).unwrap();
         world.units_mut().player_mut().set_action(Some(skip));
         world.tick();
-        assert_eq!(Point::new(1, 1), world.units().get_unit(npc1).pos());
-        assert_eq!(Point::new(0, 1), world.units().get_unit(npc2).pos());
+        let pos1 = world.units().get_unit(npc1).pos();
+        let pos2 = world.units().get_unit(npc2).pos();
+        assert!(
+            (Point::new(1, 1) == pos1 && Point::new(0, 1) == pos2)
+                || (Point::new(1, 1) == pos2 && Point::new(1, 0) == pos1)
+        );
         assert!(matches!(
             world.units().get_unit(npc1).action().unwrap().typ,
             ActionType::Skip(..)

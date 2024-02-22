@@ -105,4 +105,19 @@ mod tests {
             .terrain
             .can_be_opened());
     }
+
+    #[test]
+    fn test_cant_close_closed_chest() {
+        let world = prepare_world();
+        world.map().get_tile_mut(Point::new(1, 0)).terrain = Chest::new(Vec::new(), false).into();
+        let action = Action::new(
+            0,
+            Close {
+                dir: Direction::East,
+            }
+            .into(),
+            &world,
+        );
+        assert!(action.is_err());
+    }
 }

@@ -124,7 +124,7 @@ impl GameModeImpl for Throwing {
                 + game.shift_of_view()
                 + self.mouse_moved_pos;
             let action = Throw::new(pos, &game.world.borrow());
-            game.try_start_action(action.into());
+            game.try_start_action(action);
             game.set_shift_of_view(Point::default());
             game.modes.pop();
             return None;

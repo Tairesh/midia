@@ -1,15 +1,13 @@
-use std::collections::{hash_map::DefaultHasher, HashSet};
+use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 
 use arrayvec::ArrayVec;
 use rand::{distributions::Standard, rngs::StdRng, Rng, SeedableRng};
 
 use crate::game::map::items::helpers::{
-    random_book, BACKPACK, DEMONIC_PIKE, GOD_AXE, LEATHER_ARM_GUARD, OBSIDIAN_BOLT, OBSIDIAN_SHARD,
-    QUIVER, RAGS, STONE_KNIFE, STONE_SHOVEL, STONE_SPEAR, WOODEN_ARROW, WOODEN_CROSSBOW,
-    WOODEN_SHORTBOW,
+    DEMONIC_PIKE, GOD_AXE, OBSIDIAN_BOLT, OBSIDIAN_SHARD, QUIVER, STONE_KNIFE, WOODEN_ARROW,
+    WOODEN_CROSSBOW, WOODEN_SHORTBOW,
 };
-use crate::game::AmmoType;
 
 use super::{
     terrains::{Boulder, Chest, Dirt, Grass, Tree},
@@ -48,7 +46,6 @@ impl Chunk {
             } else if rng.gen_bool(0.003) {
                 Chest::new(
                     vec![
-                        random_book(),
                         Item::new(STONE_KNIFE),
                         Item::new(OBSIDIAN_SHARD),
                         Item::new(GOD_AXE),

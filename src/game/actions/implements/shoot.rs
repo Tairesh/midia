@@ -1,22 +1,18 @@
-use std::iter::Cloned;
-
-use geometry::{Point, DIR8};
+use geometry::Point;
 use rand::seq::SliceRandom;
-
-use crate::game::game_data::NeedAmmoValue;
-use crate::game::savage::HitResult;
-use crate::game::traits::Name;
 
 use super::super::{
     super::{
         super::lang::a,
+        game_data::NeedAmmoValue,
         log::helpers::unit_attack_success,
         savage::{ranged_attack_unit, RangedDistance, UnitRangedAttackResult, ATTACK_MOVES},
-        Action, AttackType, Avatar, Item, LogEvent, World,
+        traits::Name,
+        Action, AttackType, Avatar, LogEvent, World,
     },
     ActionImpl,
     ActionPossibility::{self, No, Yes},
-    AttackTarget,
+    ActionType, AttackTarget,
 };
 
 // TODO: Shooting should send missiles through entire map when there is no obstacles.
@@ -27,10 +23,12 @@ pub struct Shoot {
 }
 
 impl Shoot {
-    pub fn new(pos: Point, world: &World) -> Self {
+    #[allow(clippy::new_ret_no_self)]
+    pub fn new(pos: Point, world: &World) -> ActionType {
         Self {
             target: AttackTarget::auto(pos, world),
         }
+        .into()
     }
 }
 
@@ -254,8 +252,6 @@ impl ActionImpl for Shoot {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashSet;
-
     use geometry::{Direction, Point};
 
     use crate::game::actions::implements::Skip;
@@ -264,9 +260,9 @@ mod tests {
         QUIVER, WOODEN_ARROW, WOODEN_BOLT, WOODEN_CROSSBOW, WOODEN_SHORTBOW,
     };
     use crate::game::world::tests::{add_dummy, add_monster, prepare_world};
-    use crate::game::{Action, Avatar, Item, ItemPrototype, ItemSize};
+    use crate::game::{Action, Avatar, Item};
 
-    use super::{Shoot, ATTACK_MOVES};
+    use super::*;
 
     #[test]
     fn test_shoot_from_bow() {
@@ -472,10 +468,14 @@ mod tests {
         world.tick();
 
         let action = Shoot::new(target, &world);
-        if let AttackTarget::Avatar(unit_id) = action.target {
-            assert_eq!(monster, unit_id);
+        if let ActionType::Shoot(shoot) = action {
+            if let AttackTarget::Avatar(unit_id) = shoot.target {
+                assert_eq!(monster, unit_id);
+            } else {
+                panic!("Unexpected target: {:?}", shoot.target);
+            }
         } else {
-            panic!("Unexpected target: {:?}", action.target);
+            panic!("Unexpected action: {:?}", action);
         }
         let action = Action::new(0, action.into(), &world).unwrap();
         world.units_mut().player_mut().set_action(Some(action));

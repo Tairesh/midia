@@ -52,7 +52,7 @@ impl GameModeImpl for MeleeAttack {
             game.try_rotate_player(dir);
         } else if let Some(target) = self.target {
             let action = Melee::new(target, &game.world.borrow());
-            game.try_start_action(action.into());
+            game.try_start_action(action);
             game.modes.pop();
         }
         None

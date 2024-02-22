@@ -35,16 +35,13 @@ impl ActionImpl for Drop {
             ));
         }
 
-        if let Some(item) = inventory.unwrap().main_hand() {
-            let k = if matches!(self.dir, Direction::Here) {
-                1.0
-            } else {
-                1.5
-            };
-            Yes((item.drop_time() * k).round() as u32)
+        let item = inventory.unwrap().main_hand().unwrap();
+        let k = if matches!(self.dir, Direction::Here) {
+            1.0
         } else {
-            No("[DEBUG] Item doesn't exists".to_string())
-        }
+            1.5
+        };
+        Yes((item.drop_time() * k).round() as u32)
     }
 
     fn on_finish(&self, action: &Action, world: &mut World) {

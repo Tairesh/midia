@@ -3,14 +3,14 @@ use serde::{Deserialize, Serialize};
 use crate::game::actions::implements::Skip;
 use crate::game::{Action, ActionType, World};
 
-use super::super::{AIImpl, AI};
+use super::super::AIImpl;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct DummyAI;
 
 impl AIImpl for DummyAI {
     fn plan(&mut self, unit_id: usize, world: &World) -> Option<Action> {
-        Action::new(unit_id, Skip::new(100).into(), world).ok()
+        Action::new(unit_id, Skip::new(100), world).ok()
     }
 }
 

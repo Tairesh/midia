@@ -70,7 +70,7 @@ impl ActionImpl for WieldFromGround {
 mod tests {
     use geometry::{Direction, Point};
 
-    use crate::game::map::items::helpers::{random_book, GOD_AXE, ROCK, STONE_SHOVEL};
+    use crate::game::map::items::helpers::{book_debug, GOD_AXE, ROCK, STONE_SHOVEL};
     use crate::game::world::tests::prepare_world;
     use crate::game::{Action, Avatar, Item};
 
@@ -179,7 +179,7 @@ mod tests {
             .map()
             .get_tile_mut(Point::new(1, 0))
             .items
-            .push(random_book());
+            .push(book_debug());
 
         let action = Action::new(
             0,
@@ -195,7 +195,7 @@ mod tests {
 
         let units = world.units();
         let item = units.player().inventory.main_hand().unwrap();
-        assert_eq!(item.proto().id, random_book().proto().id);
+        assert_eq!(item.proto().id, book_debug().proto().id);
         assert_eq!(0, world.map().get_tile(Point::new(1, 0)).items.len());
         assert!(world
             .units()

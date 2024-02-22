@@ -8,7 +8,7 @@ use crate::game::{
     Action, ActionType, Avatar, Map, World,
 };
 
-use super::super::{pathfinding::astar, AIImpl, AI};
+use super::super::{pathfinding::astar, AIImpl};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 struct SelectedPath {
@@ -65,7 +65,7 @@ impl AIImpl for BasicMonsterAI {
         let unit = units.get_unit(unit_id).as_monster()?;
         let pos = unit.pos();
         let player_pos = units.player().pos();
-        let attack = Action::new(unit_id, Melee::new(player_pos, world).into(), world);
+        let attack = Action::new(unit_id, Melee::new(player_pos, world), world);
         if let Ok(action) = attack {
             return Some(action);
         }
@@ -87,11 +87,11 @@ impl AIImpl for BasicMonsterAI {
             let pos_index = path.path.iter().position(|&p| p == pos)?;
             if pos_index + 1 < path.path.len() {
                 let next_pos = path.path[pos_index + 1];
-                return Action::new(unit_id, Walk::new(pos.dir_to(next_pos)).into(), world).ok();
+                return Action::new(unit_id, Walk::new(pos.dir_to(next_pos)), world).ok();
             }
         }
 
-        Action::new(unit_id, Walk::new(pos.dir_to(player_pos)).into(), world).ok()
+        Action::new(unit_id, Walk::new(pos.dir_to(player_pos)), world).ok()
     }
 }
 
@@ -99,7 +99,6 @@ impl AIImpl for BasicMonsterAI {
 mod tests {
     use geometry::{Direction, Point};
 
-    use crate::game::actions::implements::Walk;
     use crate::game::actions::AttackTarget;
     use crate::game::map::terrains::{Boulder, BoulderSize};
     use crate::game::world::tests::{add_monster, prepare_world};

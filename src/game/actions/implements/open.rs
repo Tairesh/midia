@@ -3,7 +3,7 @@ use geometry::Direction;
 use crate::game::log::{LogCategory, LogEvent};
 use crate::game::map::{TerrainInteract, TerrainView};
 use crate::game::traits::Name;
-use crate::game::{Action, Avatar, World};
+use crate::game::{Action, ActionType, Avatar, World};
 
 use super::super::{
     ActionImpl,
@@ -13,6 +13,13 @@ use super::super::{
 #[derive(serde::Serialize, serde::Deserialize, Debug, Copy, Clone)]
 pub struct Open {
     pub dir: Direction,
+}
+
+impl Open {
+    #[allow(clippy::new_ret_no_self)]
+    pub fn new(dir: Direction) -> ActionType {
+        Self { dir }.into()
+    }
 }
 
 impl ActionImpl for Open {
@@ -76,16 +83,10 @@ mod tests {
         let mut world = prepare_world();
         world.map().get_tile_mut(Point::new(1, 0)).terrain = Chest::new(Vec::new(), false).into();
 
-        let typ = Open {
-            dir: Direction::East,
-        };
-        if let Ok(action) = Action::new(0, typ.into(), &world) {
-            world.units_mut().player_mut().set_action(Some(action));
-            while world.units().player().action().is_some() {
-                world.tick();
-            }
-        } else {
-            panic!("Cannot open");
+        let action = Action::new(0, Open::new(Direction::East), &world).unwrap();
+        world.units_mut().player_mut().set_action(Some(action));
+        while world.units().player().action().is_some() {
+            world.tick();
         }
 
         let mut log = world.log();
@@ -100,5 +101,14 @@ mod tests {
             .get_tile(Point::new(1, 0))
             .terrain
             .can_be_closed());
+    }
+
+    #[test]
+    fn test_cant_open_already_opened() {
+        let world = prepare_world();
+        world.map().get_tile_mut(Point::new(1, 0)).terrain = Chest::new(Vec::new(), true).into();
+
+        let action = Action::new(0, Open::new(Direction::East), &world);
+        assert!(action.is_err());
     }
 }

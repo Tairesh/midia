@@ -2,6 +2,8 @@ use std::f32::consts::SQRT_2;
 
 use geometry::Direction;
 
+use crate::game::ActionType;
+
 use super::super::{
     super::{
         log::{LogCategory, LogEvent},
@@ -19,8 +21,9 @@ pub struct Walk {
 }
 
 impl Walk {
-    pub fn new(dir: Direction) -> Self {
-        Self { dir }
+    #[allow(clippy::new_ret_no_self)]
+    pub fn new(dir: Direction) -> ActionType {
+        Self { dir }.into()
     }
 
     #[cfg(test)]

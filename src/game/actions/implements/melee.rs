@@ -3,32 +3,31 @@ use geometry::Point;
 use super::super::{
     super::map::{TerrainInteract, TerrainView},
     super::{
-        super::lang::a,
         log::helpers::unit_attack_success,
         savage::{
             melee_attack_unit, melee_smash_terrain, DamageType, TerrainMeleeAttackResult,
             UnitMeleeAttackResult, ATTACK_MOVES,
         },
         traits::Name,
-        Action, AttackType, Avatar, Item, LogEvent, World,
+        Action, AttackType, Avatar, LogEvent, World,
     },
     ActionImpl,
     ActionPossibility::{self, No, Yes},
-    AttackTarget,
+    ActionType, AttackTarget,
 };
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Copy, Clone)]
 pub struct Melee {
-    // TODO: remember unit in target position, they can move away before attack is finished
-    // Same for ranged attacks
     target: AttackTarget,
 }
 
 impl Melee {
-    pub fn new(pos: Point, world: &World) -> Self {
+    #[allow(clippy::new_ret_no_self)]
+    pub fn new(pos: Point, world: &World) -> ActionType {
         Self {
             target: AttackTarget::auto(pos, world),
         }
+        .into()
     }
 
     #[cfg(test)]

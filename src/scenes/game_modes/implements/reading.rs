@@ -58,7 +58,7 @@ impl GameModeImpl for Reading {
             self.selected = Some(dir);
             game.try_rotate_player(dir);
         } else if let Some(dir) = self.selected {
-            let action = Read::new(dir, game.world.borrow().units().player()).into();
+            let action = Read::new(dir, game.world.borrow().units().player());
             game.try_start_action(action);
             game.modes.pop();
         }

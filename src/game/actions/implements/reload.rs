@@ -1,5 +1,3 @@
-use std::fmt::format;
-
 use crate::game::game_data::NeedAmmoValue;
 use crate::game::{Action, LogEvent};
 
@@ -7,10 +5,18 @@ use super::super::{
     super::{super::lang::a, traits::Name, Avatar, World},
     ActionImpl,
     ActionPossibility::{self, No, Yes},
+    ActionType,
 };
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Copy, Clone)]
 pub struct Reload {}
+
+impl Reload {
+    #[allow(clippy::new_ret_no_self)]
+    pub fn new() -> ActionType {
+        Self {}.into()
+    }
+}
 
 impl ActionImpl for Reload {
     fn is_possible(&self, actor_id: usize, world: &World) -> ActionPossibility {

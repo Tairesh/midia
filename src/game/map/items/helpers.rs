@@ -142,7 +142,8 @@ pub const STONE_SHOVEL: &str = "shovel_stone";
 // pub const STEEL_SHOVEL: &str = "shovel_steel";
 // pub const DEMONIC_SHOVEL: &str = "shovel_demonic";
 
-pub fn random_book() -> Item {
+#[cfg(test)]
+pub fn book_debug() -> Item {
     Item::new(BOOK)
         .with_colored(Colors::BLUE_VIOLET)
         .with_named("strange book")

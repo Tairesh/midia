@@ -7,11 +7,11 @@ use super::super::{
         log::helpers::unit_attack_success,
         savage::{ranged_attack_unit, RangedDistance, UnitRangedAttackResult, ATTACK_MOVES},
         traits::Name,
-        Action, AttackType, Avatar, Item, LogEvent, World,
+        Action, AttackType, Avatar, LogEvent, World,
     },
     ActionImpl,
     ActionPossibility::{self, No, Yes},
-    AttackTarget,
+    ActionType, AttackTarget,
 };
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Copy, Clone)]
@@ -20,10 +20,12 @@ pub struct Throw {
 }
 
 impl Throw {
-    pub fn new(target: Point, world: &World) -> Self {
+    #[allow(clippy::new_ret_no_self)]
+    pub fn new(target: Point, world: &World) -> ActionType {
         Self {
             target: AttackTarget::auto(target, world),
         }
+        .into()
     }
 }
 
@@ -277,11 +279,10 @@ mod tests {
     use crate::game::actions::implements::Skip;
     use crate::game::actions::AttackTarget;
     use crate::game::map::items::helpers::ROCK;
-    use crate::game::traits::Name;
     use crate::game::world::tests::{add_dummy, add_monster, prepare_world};
     use crate::game::{Action, Avatar, Item, ItemPrototype, ItemSize};
 
-    use super::{Throw, ATTACK_MOVES};
+    use super::*;
 
     #[test]
     fn test_throw_rock() {
@@ -297,7 +298,7 @@ mod tests {
             .unwrap()
             .wield(Item::new(ROCK));
 
-        let action = Action::new(0, Throw::new(target, &world).into(), &world).unwrap();
+        let action = Action::new(0, Throw::new(target, &world), &world).unwrap();
         world.units_mut().player_mut().set_action(Some(action));
         world.tick();
 
@@ -326,7 +327,7 @@ mod tests {
             .unwrap()
             .clear();
 
-        assert!(Action::new(0, Throw::new(target, &world).into(), &world).is_err());
+        assert!(Action::new(0, Throw::new(target, &world), &world).is_err());
     }
 
     #[test]
@@ -343,7 +344,7 @@ mod tests {
             .unwrap()
             .wield(Item::new(ROCK));
 
-        assert!(Action::new(0, Throw::new(target, &world).into(), &world).is_err());
+        assert!(Action::new(0, Throw::new(target, &world), &world).is_err());
     }
 
     #[test]
@@ -375,7 +376,7 @@ mod tests {
                 is_ammo: None,
             }));
 
-        assert!(Action::new(0, Throw::new(target, &world).into(), &world).is_err());
+        assert!(Action::new(0, Throw::new(target, &world), &world).is_err());
     }
 
     #[test]
@@ -391,17 +392,21 @@ mod tests {
         let monster = add_monster(&mut world, target);
 
         // Wait 5 ticks to make sure monster will move.
-        let action = Action::new(0, Skip::new(5).into(), &world).unwrap();
+        let action = Action::new(0, Skip::new(5), &world).unwrap();
         world.units_mut().player_mut().set_action(Some(action));
         world.tick();
 
         let action = Throw::new(target, &world);
-        if let AttackTarget::Avatar(unit_id) = action.target {
-            assert_eq!(monster, unit_id);
+        if let ActionType::Throw(action) = action {
+            if let AttackTarget::Avatar(unit_id) = action.target {
+                assert_eq!(monster, unit_id);
+            } else {
+                panic!("Unexpected target: {:?}", action.target);
+            }
         } else {
-            panic!("Unexpected target: {:?}", action.target);
+            panic!("Unexpected action: {:?}", action);
         }
-        let action = Action::new(0, action.into(), &world).unwrap();
+        let action = Action::new(0, action, &world).unwrap();
         world.units_mut().player_mut().set_action(Some(action));
         world.tick();
 

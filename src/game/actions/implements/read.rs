@@ -7,6 +7,7 @@ use super::super::{
     },
     Action, ActionImpl,
     ActionPossibility::{self, No, Yes},
+    ActionType,
 };
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Copy, Clone)]
@@ -16,17 +17,18 @@ pub struct Read {
 }
 
 impl Read {
-    pub fn new(dir: Direction, avatar: &dyn Avatar) -> Self {
+    #[allow(clippy::new_ret_no_self)]
+    pub fn new(dir: Direction, avatar: &dyn Avatar) -> ActionType {
         let reading_roll = avatar
             .char_sheet()
             .get_skill_with_modifiers(Skill::Reading)
             .roll_explosive();
-        Self { dir, reading_roll }
+        Self { dir, reading_roll }.into()
     }
 
     #[cfg(test)]
-    pub fn new_test(dir: Direction, reading_roll: RollResult) -> Self {
-        Self { dir, reading_roll }
+    pub fn new_test(dir: Direction, reading_roll: RollResult) -> ActionType {
+        Self { dir, reading_roll }.into()
     }
 }
 
@@ -74,7 +76,7 @@ impl ActionImpl for Read {
 mod tests {
     use geometry::{Direction, Point};
 
-    use crate::game::map::items::helpers::random_book;
+    use crate::game::map::items::helpers::book_debug;
     use crate::game::world::tests::prepare_world;
     use crate::game::{Action, Avatar, RollResult};
 
@@ -88,10 +90,11 @@ mod tests {
             .map()
             .get_tile_mut(Point::new(1, 0))
             .items
-            .push(random_book());
+            .push(book_debug());
 
         let typ = Read::new_test(Direction::East, RollResult::new(4, 4));
-        if let Ok(action) = Action::new(0, typ.into(), &world) {
+        if let Ok(action) = Action::new(0, typ, &world) {
+            assert_eq!(action.length, 52);
             world.units_mut().player_mut().set_action(Some(action));
             while world.units().player().action().is_some() {
                 world.tick();
@@ -119,9 +122,39 @@ mod tests {
             .map()
             .get_tile_mut(Point::new(1, 0))
             .items
-            .push(random_book());
+            .push(book_debug());
 
         let typ = Read::new_test(Direction::East, RollResult::new(1, 1));
-        assert!(Action::new(0, typ.into(), &world).is_err());
+        assert!(Action::new(0, typ, &world).is_err());
+    }
+
+    #[test]
+    fn test_slow_read() {
+        let world = prepare_world();
+        world.map().get_tile_mut(Point::new(1, 0)).items.clear();
+        world
+            .map()
+            .get_tile_mut(Point::new(1, 0))
+            .items
+            .push(book_debug());
+
+        let typ = Read::new_test(Direction::East, RollResult::new(2, 2));
+        let action = Action::new(0, typ, &world).unwrap();
+        assert_eq!(action.length, 104);
+    }
+
+    #[test]
+    fn test_fast_read() {
+        let world = prepare_world();
+        world.map().get_tile_mut(Point::new(1, 0)).items.clear();
+        world
+            .map()
+            .get_tile_mut(Point::new(1, 0))
+            .items
+            .push(book_debug());
+
+        let typ = Read::new_test(Direction::East, RollResult::new(8, 8));
+        let action = Action::new(0, typ, &world).unwrap();
+        assert_eq!(action.length, 26);
     }
 }

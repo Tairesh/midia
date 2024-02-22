@@ -56,7 +56,7 @@ impl TerrainInteract for Boulder {
     fn passage(&self) -> Passage {
         match self.size {
             BoulderSize::Huge | BoulderSize::Middle => Passage::Impassable,
-            BoulderSize::Small => Passage::Passable(50.0),
+            BoulderSize::Small => Passage::Passable(50),
         }
     }
 

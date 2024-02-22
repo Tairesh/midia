@@ -47,7 +47,7 @@ impl TerrainView for Chest {
 
 impl TerrainInteract for Chest {
     fn passage(&self) -> Passage {
-        Passage::Passable(50.0)
+        Passage::Passable(50)
     }
 
     fn can_stock_items(&self) -> bool {

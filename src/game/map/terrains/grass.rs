@@ -80,7 +80,7 @@ impl TerrainView for Grass {
 
 impl TerrainInteract for Grass {
     fn passage(&self) -> Passage {
-        Passage::Passable(11.0)
+        Passage::Passable(11)
     }
 
     fn is_diggable(&self) -> bool {

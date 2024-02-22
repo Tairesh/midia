@@ -51,7 +51,7 @@ impl ActionImpl for Walk {
             let k_character = actor.char_sheet().walk_koeff();
             let k = k_diagonal * k_character;
             if let Passable(pass_time) = tile.terrain.passage() {
-                f32::round(pass_time * k) as u32
+                (pass_time as f32 * k).round() as u32
             } else {
                 0
             }

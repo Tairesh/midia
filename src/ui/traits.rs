@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use geometry::{Rect, Vec2};
 use tetra::graphics::Color;
 use tetra::Context;

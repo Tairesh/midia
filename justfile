@@ -1,7 +1,7 @@
 set dotenv-load := true
 
 check: fmt-check cargo-check test clippy
-before-commit: fix check
+before-commit: update fix check
 
 fix:
     cargo fix --allow-dirty --allow-staged
@@ -18,3 +18,6 @@ test:
 
 clippy:
 	cargo +nightly clippy -- -D warnings -D clippy::pedantic -A clippy::cast_precision_loss -A clippy::cast_possible_truncation -A clippy::cast_possible_wrap -A clippy::cast_sign_loss -A clippy::cast_lossless -A clippy::module_name_repetitions -A clippy::unnecessary_box_returns --verbose --no-deps
+
+update:
+    cargo update

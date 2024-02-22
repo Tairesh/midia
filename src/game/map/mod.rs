@@ -41,6 +41,11 @@ impl Map {
             .or_insert_with_key(|pos| Chunk::generate(seed, *pos))
     }
 
+    pub fn get_tile_opt(&self, pos: Point) -> Option<&Tile> {
+        let (chunk, pos) = pos.to_chunk();
+        self.chunks.get(&chunk).map(|c| &c.tiles[pos])
+    }
+
     pub fn get_tile(&mut self, pos: Point) -> &Tile {
         let (chunk, pos) = pos.to_chunk();
         let chunk = self.get_chunk(chunk);

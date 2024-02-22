@@ -2,11 +2,11 @@
 
 use std::collections::HashSet;
 
-use crate::game::traits::Name;
-
 use super::{
+    super::traits::Name,
     items::Item,
     terrain::{Terrain, TerrainInteract, TerrainView},
+    Passage,
 };
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
@@ -80,5 +80,17 @@ impl Tile {
             })
             .next()
             .unwrap_or_else(|| "You can't find anything to read here.".to_string())
+    }
+
+    pub fn passage(&self) -> Passage {
+        if self.units.is_empty() {
+            self.terrain.passage()
+        } else {
+            Passage::TemporaryImpassable(*self.units.iter().next().unwrap())
+        }
+    }
+
+    pub fn is_passable(&self) -> bool {
+        self.passage().is_passable()
     }
 }

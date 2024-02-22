@@ -33,7 +33,7 @@ impl AIManager {
             .get_or_init(|| {
                 Mutex::new(AIManager {
                     dummy: DummyAI {},
-                    basic_monster: BasicMonsterAI {},
+                    basic_monster: BasicMonsterAI::new(),
                 })
             })
             .lock()

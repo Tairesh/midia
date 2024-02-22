@@ -59,7 +59,7 @@ impl TerrainView for Dirt {
 
 impl TerrainInteract for Dirt {
     fn passage(&self) -> Passage {
-        Passage::Passable(10.0)
+        Passage::Passable(10)
     }
 
     fn is_diggable(&self) -> bool {

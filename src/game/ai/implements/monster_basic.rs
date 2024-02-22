@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
-use geometry::Point;
+use geometry::{Direction, Point};
+use rand::Rng;
 use serde::{Deserialize, Serialize};
 
 use crate::game::{
@@ -65,6 +66,19 @@ impl AIImpl for BasicMonsterAI {
         let unit = units.get_unit(unit_id).as_monster()?;
         let pos = unit.pos();
         let player_pos = units.player().pos();
+        let distance = pos.distance(player_pos);
+        // TODO: use World's rng instead of thread_rng
+        // TODO: check if the player is visible
+        // TODO: add aggro state and periodic Notice roll
+        if distance.floor() as u32 > unit.char_sheet().sight_range() {
+            return Action::new(
+                unit_id,
+                Walk::new(Direction::random(&mut rand::thread_rng(), false)),
+                world,
+            )
+            .ok();
+        }
+
         let attack = Action::new(unit_id, Melee::new(player_pos, world), world);
         if let Ok(action) = attack {
             return Some(action);
@@ -109,7 +123,7 @@ mod tests {
     #[test]
     fn test_monster_walk_to_player() {
         let mut world = prepare_world();
-        let npc = add_monster(&mut world, Point::new(7, 0));
+        let npc = add_monster(&mut world, Point::new(3, 0));
         world.plan_test();
 
         let units = world.units();

@@ -176,4 +176,30 @@ impl CharSheet {
             false
         }
     }
+
+    pub fn sight_range(&self) -> u32 {
+        // TODO: traits
+        (self.get_skill_with_modifiers(Skill::Notice).value() / 2) as u32
+            * if self.wild_card { 10 } else { 5 }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use test_case::test_case;
+
+    use super::*;
+
+    #[test_case(false, SkillLevel::None, 5)]
+    #[test_case(false, SkillLevel::D4, 10)]
+    #[test_case(false, SkillLevel::D12, 30)]
+    #[test_case(true, SkillLevel::None, 10)]
+    #[test_case(true, SkillLevel::D4, 20)]
+    #[test_case(true, SkillLevel::D12, 60)]
+    fn test_sight_range(wild_card: bool, notice: SkillLevel, expected: u32) {
+        let mut char_sheet = CharSheet::default(wild_card, Race::Gazan);
+        char_sheet.skills.set_skill(Skill::Notice, notice);
+
+        assert_eq!(char_sheet.sight_range(), expected);
+    }
 }

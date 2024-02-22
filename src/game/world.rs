@@ -1,9 +1,9 @@
 use std::cell::{Ref, RefCell, RefMut};
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::convert::TryFrom;
 use std::rc::Rc;
 
-use geometry::{Direction, Point, TwoDimDirection};
+use geometry::{Direction, Point};
 
 use super::{
     super::{
@@ -12,15 +12,12 @@ use super::{
     },
     ai::{AIImpl, AIManager, AI},
     map::{field_of_view_set, Fov, TerrainView},
-    races::{BodyColor, Gender, Pronouns, Race, Sex},
+    races::{BodyColor, Pronouns, Race, Sex},
     savage::HitResult,
     traits::Name,
-    units::{Appearance, Avatar, Mind, Monster, Player, PlayerPersonality, Units},
+    units::{Appearance, Avatar, Monster, Player, Units},
     Action, CharSheet, Chunk, ChunkPos, Log, LogEvent, Map, TilePos,
 };
-
-// TODO: weather and outside lighting system
-const VISION_RANGE: i32 = 64;
 
 pub struct World {
     pub meta: Meta,
@@ -101,8 +98,16 @@ impl World {
 
     pub fn calc_fov(&mut self) {
         let center = self.units().player().pos();
-        self.fov
-            .set_visible(field_of_view_set(center, VISION_RANGE, &self.map.borrow()));
+        // TODO: weather and outside lighting system
+        // TODO: add light sources
+        // TODO: add periodic Notice roll
+        // TODO: add memory
+        let vision_range = self.units().player().char_sheet().sight_range();
+        self.fov.set_visible(field_of_view_set(
+            center,
+            vision_range as i32,
+            &self.map.borrow(),
+        ));
     }
 
     // TODO: move this to savefile::save

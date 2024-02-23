@@ -2,6 +2,8 @@ use std::fs::File;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
+use crate::game::World;
+
 use super::{Meta, SAVEFILES_FOLDER};
 
 #[derive(Debug)]
@@ -31,15 +33,51 @@ pub fn create(name: &str, seed: &str) -> Result<PathBuf, Error> {
         return Err(Error::FileExists);
     }
     let mut file = File::create(&path).map_err(Error::from)?;
-    file.write_all(make_data(name.as_str(), seed)?.as_bytes())
-        .map_err(Into::into)
-        .map(|()| path)
+    let meta = Meta::new(name, seed.to_string()).with_path(&path);
+    file.write_all(
+        serde_json::to_string(&meta)
+            .map_err(Error::from)?
+            .as_bytes(),
+    )
+    .map_err(Into::into)
+    .map(|()| path)
 }
 
-pub fn save(path: &Path, data: &str) -> Result<(), Error> {
+fn serialize_world(world: &World) -> Result<String, Error> {
+    let mut data = serde_json::to_string(&world.meta).map_err(Error::from)?;
+    data.push('\n');
+    data.push_str(
+        serde_json::to_string(&world.game_view)
+            .map_err(Error::from)?
+            .as_str(),
+    );
+    data.push('\n');
+    data.push_str(
+        serde_json::to_string(&world.log)
+            .map_err(Error::from)?
+            .as_str(),
+    );
+    for (_, unit) in world.units().iter() {
+        data.push('\n');
+        data.push_str(serde_json::to_string(unit).map_err(Error::from)?.as_str());
+    }
+    data.push_str("\n/units");
+    let mut map = world.map();
+    for coords in map.changed.clone() {
+        let chunk = map.get_chunk(coords);
+        data.push('\n');
+        data.push_str(serde_json::to_string(chunk).map_err(Error::from)?.as_str());
+    }
+    data.push_str("\n/chunks");
+
+    Ok(data)
+}
+
+pub fn save(world: &World) -> Result<(), Error> {
     make_dir()?;
-    let mut file = File::create(path).map_err(Error::from)?;
-    file.write_all(data.as_bytes()).map_err(Into::into)
+    let mut file = File::create(&world.meta.path).map_err(Error::from)?;
+    file.write_all(serialize_world(world)?.as_bytes())
+        .map_err(Into::into)
 }
 
 fn make_dir() -> Result<(), Error> {
@@ -55,9 +93,4 @@ fn name_to_path(name: &str) -> PathBuf {
     [SAVEFILES_FOLDER, (file_name + ".save").as_str()]
         .iter()
         .collect()
-}
-
-fn make_data(name: &str, seed: &str) -> Result<String, Error> {
-    let metadata = Meta::new(name, seed);
-    serde_json::to_string(&metadata).map_err(Error::from)
 }

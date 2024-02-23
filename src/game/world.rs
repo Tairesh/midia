@@ -8,7 +8,7 @@ use geometry::{Direction, Point};
 use super::{
     super::{
         lang,
-        savefile::{self, GameView, Meta, SaveError},
+        savefile::{self, GameView, Meta},
     },
     ai::{AIImpl, AIManager, AI},
     map::{field_of_view_set, Fov, TerrainView},
@@ -25,7 +25,7 @@ pub struct World {
     units: Rc<RefCell<Units>>,
     map: RefCell<Map>,
     fov: Fov,
-    log: RefCell<Log>,
+    pub log: RefCell<Log>,
     // TODO: add Rng created with seed
     // TODO: add WorldLog
 }
@@ -110,55 +110,11 @@ impl World {
         ));
     }
 
-    // TODO: move this to savefile::save
-    fn make_data(&self) -> Result<String, SaveError> {
-        let mut data = serde_json::to_string(&self.meta).map_err(SaveError::from)?;
-        data.push('\n');
-        data.push_str(
-            serde_json::to_string(&self.game_view)
-                .map_err(SaveError::from)?
-                .as_str(),
-        );
-        data.push('\n');
-        data.push_str(
-            serde_json::to_string(&self.log)
-                .map_err(SaveError::from)?
-                .as_str(),
-        );
-        for (_, unit) in self.units().iter() {
-            data.push('\n');
-            data.push_str(
-                serde_json::to_string(unit)
-                    .map_err(SaveError::from)?
-                    .as_str(),
-            );
-        }
-        data.push_str("\n/units");
-        let mut map = self.map();
-        for coords in map.changed.clone() {
-            let chunk = map.get_chunk(coords);
-            data.push('\n');
-            data.push_str(
-                serde_json::to_string(chunk)
-                    .map_err(SaveError::from)?
-                    .as_str(),
-            );
-        }
-        data.push_str("\n/chunks");
-
-        Ok(data)
-    }
-
     pub fn save(&mut self) {
         self.meta.update_before_save();
-        savefile::save(
-            &self.meta.path,
-            self.make_data()
-                .expect("Error on preparing world data!")
-                .as_str(),
-        )
-        .map_err(|e| panic!("Error on saving world to {:?}: {e:?}", self.meta.path))
-        .ok();
+        savefile::save(self)
+            .map_err(|e| panic!("Error on saving world to {:?}: {e:?}", self.meta.path))
+            .ok();
     }
 
     pub fn map(&self) -> RefMut<Map> {

@@ -2,21 +2,24 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use geometry::{Direction, Point, Vec2};
-use tetra::graphics::Canvas;
-use tetra::input::{Key, KeyModifier};
-use tetra::Context;
+use tetra::{
+    graphics::Canvas,
+    input::{Key, KeyModifier},
+    Context,
+};
 
-use crate::game::Avatar;
 use crate::{
     app::App,
     assets::Assets,
     colors::Colors,
     game::{
+        log::LogCategory,
         traits::{LooksLike, Name},
-        Action, ActionType, Item, World,
+        Action, ActionType, Avatar, Item, World,
     },
     input,
     scenes::map_view,
+    settings::Settings,
     ui::{
         Colorize, GameLog, Horizontal, Label, Position, SomeUISprites, SomeUISpritesMut,
         TilesetSprite, UiSprite, Vertical,
@@ -210,6 +213,9 @@ impl GameScene {
         self.need_redraw = true;
 
         for event in self.world.borrow().log().new_events() {
+            if event.category == LogCategory::Debug && !Settings::instance().debug.show_debug_log {
+                continue;
+            }
             self.log.log(event.msg.as_str(), event.category.into());
         }
 

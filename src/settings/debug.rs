@@ -5,7 +5,7 @@ use super::Validate;
 pub struct DebugSettings {
     pub show_fps: bool,
     pub god_mode: bool,
-    // TODO: debug log, backtrace, god-mode, etc.
+    pub show_debug_log: bool,
 }
 
 impl Validate for DebugSettings {

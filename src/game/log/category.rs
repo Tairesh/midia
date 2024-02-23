@@ -2,7 +2,7 @@ use tetra::graphics::Color;
 
 use crate::colors::Colors;
 
-#[derive(serde::Serialize, serde::Deserialize, Debug, Copy, Clone)]
+#[derive(serde::Serialize, serde::Deserialize, Debug, Copy, Clone, Eq, PartialEq)]
 pub enum LogCategory {
     #[serde(rename = "0")]
     Debug,

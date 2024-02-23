@@ -9,6 +9,7 @@ use super::{
     super::{
         lang,
         savefile::{self, GameView, Meta},
+        settings::Settings,
     },
     ai::{AIImpl, AIManager, AI},
     map::{field_of_view_set, Fov, TerrainView},
@@ -273,6 +274,9 @@ impl World {
     }
 
     pub fn apply_damage(&mut self, unit_id: usize, hit: HitResult) {
+        if unit_id == 0 && Settings::instance().debug.god_mode {
+            return;
+        }
         let current_tick = self.meta.current_tick;
         let pos = self.units().get_unit(unit_id).pos();
         let items_dropped = self

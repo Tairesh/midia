@@ -114,7 +114,7 @@ mod tests {
     use geometry::{Direction, Point};
 
     use crate::game::actions::AttackTarget;
-    use crate::game::map::terrains::{Boulder, BoulderSize};
+    use crate::game::map::terrains::{Boulder, BoulderSize, Dirt, DirtVariant};
     use crate::game::world::tests::{add_monster, prepare_world};
     use crate::game::Avatar;
 
@@ -124,6 +124,10 @@ mod tests {
     fn test_monster_walk_to_player() {
         let mut world = prepare_world();
         let npc = add_monster(&mut world, Point::new(3, 0));
+        for i in 0..3 {
+            world.map().get_tile_mut(Point::new(i, 0)).terrain =
+                Dirt::new(DirtVariant::Dirt1).into();
+        }
         world.plan_test();
 
         let units = world.units();

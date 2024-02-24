@@ -1,7 +1,7 @@
 set dotenv-load := true
 
 check: fmt-check cargo-check test clippy
-before-commit: update fix check
+before-commit: fix check
 
 fix:
     cargo +nightly fix --allow-dirty --allow-staged

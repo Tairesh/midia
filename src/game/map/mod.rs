@@ -1,5 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
+use bracket_noise::prelude::{FastNoise, FractalType, NoiseType};
 use geometry::Point;
 
 pub use chunk::Chunk;
@@ -20,25 +21,41 @@ pub mod terrains;
 mod tile;
 
 pub struct Map {
-    pub seed: String,
+    pub seed: u64,
     pub chunks: HashMap<ChunkPos, Chunk>,
     pub changed: HashSet<ChunkPos>,
+    noise: FastNoise,
 }
 
 impl Map {
+    pub fn new(seed: u64, chunks: HashMap<ChunkPos, Chunk>, changed: HashSet<ChunkPos>) -> Self {
+        let mut noise = FastNoise::seeded(seed);
+        noise.set_noise_type(NoiseType::PerlinFractal);
+        noise.set_fractal_type(FractalType::FBM);
+        noise.set_fractal_octaves(5);
+        noise.set_fractal_gain(0.6);
+        noise.set_fractal_lacunarity(2.0);
+        noise.set_frequency(2.0);
+
+        Self {
+            seed,
+            chunks,
+            changed,
+            noise,
+        }
+    }
+
     pub fn get_chunk(&mut self, pos: ChunkPos) -> &Chunk {
-        let seed = self.seed.clone();
         self.chunks
             .entry(pos)
-            .or_insert_with_key(|pos| Chunk::generate(seed, *pos))
+            .or_insert_with_key(|pos| Chunk::generate(self.seed, &self.noise, *pos))
     }
 
     pub fn get_chunk_mut(&mut self, pos: ChunkPos) -> &mut Chunk {
-        let seed = self.seed.clone();
         self.changed.insert(pos);
         self.chunks
             .entry(pos)
-            .or_insert_with_key(|pos| Chunk::generate(seed, *pos))
+            .or_insert_with_key(|pos| Chunk::generate(self.seed, &self.noise, *pos))
     }
 
     pub fn get_tile_opt(&self, pos: Point) -> Option<&Tile> {

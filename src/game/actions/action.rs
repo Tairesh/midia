@@ -60,14 +60,15 @@ impl Action {
         }
         // TODO: draw stamina
 
-        let steps = (self.finish - world.meta.current_tick) as u32;
-        if steps == self.length {
-            self.typ.on_start(self, world);
-        }
-        if steps == 0 {
+        if self.finish <= world.meta.current_tick {
             self.typ.on_finish(self, world);
         } else {
-            self.typ.on_step(self, world);
+            let steps = (self.finish - world.meta.current_tick) as u32;
+            if steps == self.length {
+                self.typ.on_start(self, world);
+            } else {
+                self.typ.on_step(self, world);
+            }
         }
     }
 }

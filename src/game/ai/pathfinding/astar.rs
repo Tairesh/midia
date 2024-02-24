@@ -95,23 +95,24 @@ mod test {
         for point in blocked {
             world.map().get_tile_mut(point).terrain = Boulder::new(BoulderSize::Huge).into();
         }
+        let free = vec![
+            Point::new(2, 0),
+            Point::new(3, 0),
+            Point::new(4, 1),
+            Point::new(3, 2),
+            Point::new(2, 2),
+            Point::new(1, 2),
+            Point::new(0, 1),
+            Point::new(0, 0),
+        ];
+        for point in &free {
+            world.map().get_tile_mut(*point).terrain = Dirt::new(DirtVariant::Dirt1).into();
+        }
 
         let result = astar(&world.map(), Point::new(2, 0), Point::new(0, 0));
         assert!(result.is_some());
         let (result, _cost) = result.unwrap();
-        assert_eq!(
-            result,
-            vec![
-                Point { x: 2, y: 0 },
-                Point { x: 3, y: 0 },
-                Point { x: 4, y: -1 },
-                Point { x: 3, y: -2 },
-                Point { x: 2, y: -2 },
-                Point { x: 1, y: -2 },
-                Point { x: 0, y: -1 },
-                Point { x: 0, y: 0 },
-            ]
-        );
+        assert_eq!(result, free);
     }
 
     // TODO: add more tests

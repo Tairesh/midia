@@ -1,4 +1,5 @@
 use std::fs::File;
+use std::hash::{DefaultHasher, Hash, Hasher};
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
@@ -25,6 +26,12 @@ impl From<std::io::Error> for Error {
     }
 }
 
+fn world_seed(seed: &str) -> u64 {
+    let mut hasher = DefaultHasher::new();
+    seed.hash(&mut hasher);
+    hasher.finish()
+}
+
 pub fn create(name: &str, seed: &str) -> Result<PathBuf, Error> {
     make_dir()?;
     let name = name.trim().replace('\n', "");
@@ -33,7 +40,7 @@ pub fn create(name: &str, seed: &str) -> Result<PathBuf, Error> {
         return Err(Error::FileExists);
     }
     let mut file = File::create(&path).map_err(Error::from)?;
-    let meta = Meta::new(name, seed.to_string()).with_path(&path);
+    let meta = Meta::new(name, world_seed(seed)).with_path(&path);
     file.write_all(
         serde_json::to_string(&meta)
             .map_err(Error::from)?

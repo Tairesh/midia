@@ -123,11 +123,11 @@ mod tests {
     #[test]
     fn test_monster_walk_to_player() {
         let mut world = prepare_world();
-        let npc = add_monster(&mut world, Point::new(3, 0));
-        for i in 0..3 {
+        for i in 0..2 {
             world.map().get_tile_mut(Point::new(i, 0)).terrain =
                 Dirt::new(DirtVariant::Dirt1).into();
         }
+        let npc = add_monster(&mut world, Point::new(2, 0));
         world.plan_test();
 
         let units = world.units();

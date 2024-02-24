@@ -44,12 +44,13 @@ pub fn draw(
     let mut map = world.map();
     map.load_tiles_between(left_top, right_bottom);
 
-    // TODO: is_visible takes like 12% of the time
+    // TODO: is_visible takes like 12% of processing time
     let tiles = map
         .tiles_between(left_top, right_bottom)
         .into_iter()
         .filter(|(pos, _)| world.is_visible(*pos))
         .collect::<Vec<(Point, &Tile)>>();
+    // TODO: looks like x and y are swapped
     for &(pos, tile) in &tiles {
         let delta = Vec2::from(pos - center_tile);
         let position = center + delta * tile_size;

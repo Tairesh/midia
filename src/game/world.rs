@@ -41,11 +41,7 @@ impl World {
     ) -> Self {
         let changed = chunks.keys().copied().collect();
         let mut world = Self {
-            map: RefCell::new(Map {
-                seed: meta.seed.clone(),
-                chunks,
-                changed,
-            }),
+            map: RefCell::new(Map::new(meta.seed, chunks, changed)),
             meta,
             game_view,
             units: Rc::new(RefCell::new(Units::new(units))),
@@ -337,7 +333,7 @@ pub mod tests {
 
     pub fn prepare_world() -> World {
         let world = World::new(
-            Meta::new("test", "test"),
+            Meta::new("test", 1),
             GameView::default(),
             Log::new(),
             HashMap::from([(

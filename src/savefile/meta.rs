@@ -9,24 +9,21 @@ pub struct Meta {
     #[serde(skip)]
     pub path: PathBuf,
     pub name: String,
-    pub seed: String,
+    pub seed: u64,
     pub version: String,
     pub time: SystemTime,
     pub current_tick: u128,
 }
 
 impl Meta {
-    pub fn new<S>(name: S, seed: S) -> Self
-    where
-        S: Into<String>,
-    {
+    pub fn new(name: impl Into<String>, seed: u64) -> Self {
         Self {
             path: PathBuf::default(),
             name: name.into(),
-            seed: seed.into(),
             version: VERSION.to_string(),
             time: SystemTime::now(),
             current_tick: 0,
+            seed,
         }
     }
 

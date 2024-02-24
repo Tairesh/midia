@@ -2,25 +2,23 @@ use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 
 use arrayvec::ArrayVec;
+use bracket_noise::prelude::FastNoise;
+use geometry::Point;
 use rand::{distributions::Standard, rngs::StdRng, Rng, SeedableRng};
 
-use crate::game::map::items::helpers::{
-    DEMONIC_PIKE, GOD_AXE, OBSIDIAN_BOLT, OBSIDIAN_SHARD, QUIVER, STONE_KNIFE, WOODEN_ARROW,
-    WOODEN_CROSSBOW, WOODEN_SHORTBOW,
-};
-
 use super::{
-    terrains::{Boulder, Chest, Dirt, Grass, Tree},
+    items::helpers::ROCK,
+    terrains::{Dirt, Grass},
     ChunkPos, Item, Tile,
 };
 
 #[derive(Hash)]
 struct ChunkUnique {
     pos: ChunkPos,
-    world_seed: String,
+    world_seed: u64,
 }
 
-fn chunk_seed(world_seed: String, pos: ChunkPos) -> u64 {
+fn chunk_seed(world_seed: u64, pos: ChunkPos) -> u64 {
     let mut hasher = DefaultHasher::new();
     let seed = ChunkUnique { pos, world_seed };
     seed.hash(&mut hasher);
@@ -36,36 +34,27 @@ pub struct Chunk {
 impl Chunk {
     pub const SIZE: i32 = 32;
     pub const USIZE: usize = (Chunk::SIZE * Chunk::SIZE) as usize;
+    pub const NOISE_SIZE: f32 = 64.0; // SIZE * frequency
 
-    pub fn generate(world_seed: String, pos: ChunkPos) -> Self {
+    pub fn generate(world_seed: u64, noise: &FastNoise, pos: ChunkPos) -> Self {
         let mut rng = StdRng::seed_from_u64(chunk_seed(world_seed, pos));
         let mut tiles = ArrayVec::new();
-        for _ in 0..Chunk::USIZE {
-            tiles.push(Tile::new(if rng.gen_bool(0.005) {
-                Tree::new(rng.sample(Standard)).into()
-            } else if rng.gen_bool(0.003) {
-                Chest::new(
-                    vec![
-                        Item::new(STONE_KNIFE),
-                        Item::new(OBSIDIAN_SHARD),
-                        Item::new(GOD_AXE),
-                        Item::new(DEMONIC_PIKE),
-                        Item::new(QUIVER)
-                            .with_items_inside(vec![Item::new(OBSIDIAN_BOLT); 3])
-                            .with_items_inside(vec![Item::new(WOODEN_ARROW); 3]),
-                        Item::new(WOODEN_CROSSBOW),
-                        Item::new(WOODEN_SHORTBOW),
-                    ],
-                    false,
-                )
-                .into()
-            } else if rng.gen_bool(0.01) {
-                Boulder::new(rng.sample(Standard)).into()
-            } else if rng.gen_bool(0.5) {
-                Grass::new(rng.sample(Standard), rng.gen_bool(0.1)).into()
+        for i in 0..Chunk::USIZE {
+            let point = Point::from_index(i, Chunk::SIZE) + pos.left_top();
+            let n = noise.get_noise(
+                point.x as f32 / Self::NOISE_SIZE,
+                point.y as f32 / Self::NOISE_SIZE,
+            );
+            let terrain = if n > 0.0 {
+                Grass::new(rng.sample(Standard), n < 0.1).into()
             } else {
                 Dirt::new(rng.sample(Standard)).into()
-            }));
+            };
+            let mut tile = Tile::new(terrain);
+            tile.items
+                .push(Item::new(ROCK).with_named(format!("{point:?}")));
+
+            tiles.push(tile);
         }
         Chunk { pos, tiles }
     }

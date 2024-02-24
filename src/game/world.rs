@@ -150,6 +150,10 @@ impl World {
         drop(units);
         if self.units().get_unit(unit_id).is_player() {
             self.calc_fov();
+            self.log().push(LogEvent::debug(
+                format!("You moved to {pos:?}"),
+                self.units().player().pos(),
+            ));
         }
     }
 

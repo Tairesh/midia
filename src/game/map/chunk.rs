@@ -7,9 +7,8 @@ use geometry::Point;
 use rand::{distributions::Standard, rngs::StdRng, Rng, SeedableRng};
 
 use super::{
-    items::helpers::ROCK,
     terrains::{Dirt, Grass},
-    ChunkPos, Item, Tile,
+    ChunkPos, Tile, TilePos,
 };
 
 #[derive(Hash)]
@@ -40,7 +39,7 @@ impl Chunk {
         let mut rng = StdRng::seed_from_u64(chunk_seed(world_seed, pos));
         let mut tiles = ArrayVec::new();
         for i in 0..Chunk::USIZE {
-            let point = Point::from_index(i, Chunk::SIZE) + pos.left_top();
+            let point = Point::from_chunk(pos, i);
             let n = noise.get_noise(
                 point.x as f32 / Self::NOISE_SIZE,
                 point.y as f32 / Self::NOISE_SIZE,
@@ -50,10 +49,7 @@ impl Chunk {
             } else {
                 Dirt::new(rng.sample(Standard)).into()
             };
-            let mut tile = Tile::new(terrain);
-            tile.items
-                .push(Item::new(ROCK).with_named(format!("{point:?}")));
-
+            let tile = Tile::new(terrain);
             tiles.push(tile);
         }
         Chunk { pos, tiles }

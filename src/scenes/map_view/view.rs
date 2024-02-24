@@ -1,15 +1,17 @@
 use std::cell::RefCell;
 
 use geometry::{Point, Vec2};
-use tetra::graphics::{Canvas, DrawParams};
-use tetra::Context;
+use tetra::{
+    graphics::{Canvas, DrawParams},
+    Context,
+};
 
-use crate::assets::{Assets, Sprite, Tileset};
-use crate::colors::Colors;
-use crate::game::map::TerrainView;
-use crate::game::traits::LooksLike;
-use crate::game::{Avatar, Tile, World};
-use crate::scenes::game_modes::Cursor;
+use crate::{
+    assets::{Assets, Sprite, Tileset},
+    colors::Colors,
+    game::{map::TerrainView, traits::LooksLike, Avatar, Tile, World},
+    scenes::game_modes::Cursor,
+};
 
 // TODO: refactor this shit
 
@@ -50,7 +52,6 @@ pub fn draw(
         .into_iter()
         .filter(|(pos, _)| world.is_visible(*pos))
         .collect::<Vec<(Point, &Tile)>>();
-    // TODO: looks like x and y are swapped
     for &(pos, tile) in &tiles {
         let delta = Vec2::from(pos - center_tile);
         let position = center + delta * tile_size;

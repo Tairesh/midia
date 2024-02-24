@@ -74,7 +74,7 @@ impl GameModeImpl for Shooting {
             .weapon(AttackType::Shoot)
             .unwrap()
             .damage;
-        let distance = RangedDistance::define(pos.distance(Point::default()), damage.distance);
+        let distance = RangedDistance::define(pos.distance_to(Point::default()), damage.distance);
         let color = match distance {
             RangedDistance::Close => Colors::LIME,
             RangedDistance::Medium => Colors::YELLOW,
@@ -144,7 +144,8 @@ impl GameModeImpl for Shooting {
                 .unwrap()
                 .damage;
             let pos = self.shift_of_view + self.mouse_moved_pos + dir;
-            let distance = RangedDistance::define(pos.distance(Point::default()), damage.distance);
+            let distance =
+                RangedDistance::define(pos.distance_to(Point::default()), damage.distance);
             if distance != RangedDistance::Unreachable {
                 let now = Instant::now();
                 if now.duration_since(self.last_shift).subsec_millis()

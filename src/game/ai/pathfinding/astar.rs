@@ -28,7 +28,7 @@ pub fn astar(map: &Map, start: Point, end: Point) -> Option<(Vec<Point>, u32)> {
                 })
                 .collect::<SmallVec<[_; 8]>>()
         },
-        |p| p.square_distance(end),
+        |p| p.square_distance_to(end),
         |p| *p == end,
     )
 }
@@ -38,7 +38,7 @@ mod test {
     use crate::game::map::terrains::{Boulder, BoulderSize, Dirt, DirtVariant};
     use crate::game::world::tests::prepare_world;
 
-    use super::{astar, Point, TerrainInteract};
+    use super::{astar, Point};
 
     #[test]
     fn test_line() {

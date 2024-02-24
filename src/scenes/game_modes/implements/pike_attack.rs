@@ -74,7 +74,7 @@ impl GameModeImpl for PikeAttack {
             .weapon(AttackType::Melee)
             .unwrap()
             .damage;
-        let distance = (pos.distance(Point::default()).floor() - 1.0) as u8;
+        let distance = (pos.distance_to(Point::default()).floor() - 1.0) as u8;
         let color = if distance <= damage.distance {
             Colors::LIGHT_CORAL
         } else {
@@ -99,7 +99,7 @@ impl GameModeImpl for PikeAttack {
         for i in -r..=r {
             for j in -r..=r {
                 let point = Point::new(i, j);
-                let distance = (point.distance(Point::default()).floor() - 1.0) as u8;
+                let distance = (point.distance_to(Point::default()).floor() - 1.0) as u8;
                 if distance > damage.distance {
                     continue;
                 }
@@ -162,7 +162,7 @@ impl GameModeImpl for PikeAttack {
                 .unwrap()
                 .damage;
             let pos = self.shift_of_view + self.mouse_moved_pos + dir;
-            let distance = (pos.distance(Point::default()).floor() - 1.0) as u8;
+            let distance = (pos.distance_to(Point::default()).floor() - 1.0) as u8;
             if distance <= damage.distance {
                 let now = Instant::now();
                 if now.duration_since(self.last_shift).subsec_millis()

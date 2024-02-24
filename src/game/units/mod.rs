@@ -90,7 +90,7 @@ impl Units {
             }
 
             let pos = unit.pos();
-            let dist = pos.square_distance(center);
+            let dist = pos.square_distance_to(center);
             if dist <= Self::BUBBLE_SQUARE_RADIUS {
                 self.loaded_units.insert(i);
             }

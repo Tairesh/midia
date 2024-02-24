@@ -70,8 +70,10 @@ impl ActionImpl for Shoot {
                 return No("You can't shoot to a dead body.".to_string());
             }
 
-            let distance =
-                RangedDistance::define(actor.pos().distance(target.pos()), ranged_value.distance);
+            let distance = RangedDistance::define(
+                actor.pos().distance_to(target.pos()),
+                ranged_value.distance,
+            );
 
             match distance {
                 RangedDistance::Unreachable => {

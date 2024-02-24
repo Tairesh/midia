@@ -117,12 +117,14 @@ struct ScanFovData<'a> {
 
 #[allow(non_snake_case)]
 impl ScanFovData<'_> {
+    #[inline]
     fn is_transparent(&self, point: Point) -> bool {
         self.fov_check.is_transparent(point)
     }
 
+    #[inline]
     fn distance_to_center(&self, point: Point) -> i32 {
-        point.square_distance(self.center) as i32
+        point.square_distance_to(self.center) as i32
     }
 
     fn insert_visible_for_vertical(&mut self, point: Point) -> bool {

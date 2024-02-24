@@ -52,7 +52,7 @@ impl ActionImpl for Throw {
         }
 
         let pos = self.target.pos(world);
-        let distance = RangedDistance::define(actor.pos().distance(pos), throw_value.distance);
+        let distance = RangedDistance::define(actor.pos().distance_to(pos), throw_value.distance);
         if distance == RangedDistance::Unreachable {
             return No(format!("You can't throw {} that far.", a(item.name())));
         }

@@ -216,7 +216,7 @@ impl ActionImpl for Melee {
             AttackTarget::Avatar(id) => units.get_unit(id).pos(),
             AttackTarget::Terrain(pos) => pos,
         };
-        let distance = (actor.pos().distance(target).floor() - 1.0) as u8;
+        let distance = (actor.pos().distance_to(target).floor() - 1.0) as u8;
 
         let weapon = actor.as_fighter().weapon(AttackType::Melee);
         if weapon.is_none() {

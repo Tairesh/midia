@@ -8,7 +8,7 @@ pub enum RangedDistance {
 }
 
 impl RangedDistance {
-    pub fn define(distance: f64, weapon_distance: u8) -> Self {
+    pub fn define(distance: f32, weapon_distance: u8) -> Self {
         let distance = distance.round() as u8;
         if distance <= 1 {
             Self::Melee
@@ -54,7 +54,7 @@ mod tests {
     #[test_case(Point::new(0, 0), Point::new(61, 0), 15, RangedDistance::Unreachable)]
     fn test_define(start: Point, target: Point, weapon_distance: u8, expected: RangedDistance) {
         assert_eq!(
-            RangedDistance::define(start.distance(target), weapon_distance),
+            RangedDistance::define(start.distance_to(target), weapon_distance),
             expected
         );
     }

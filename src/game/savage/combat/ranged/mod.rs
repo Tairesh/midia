@@ -68,7 +68,7 @@ fn attack_roll(
     attacker: &dyn Fighter,
     defender: &dyn Fighter,
 ) -> Option<RollResult> {
-    let distance = attacker.pos().distance(defender.pos());
+    let distance = attacker.pos().distance_to(defender.pos());
     let damage_value = attacker.weapon(attack_type).unwrap().damage;
     let distance = RangedDistance::define(distance, damage_value.distance);
 

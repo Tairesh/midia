@@ -66,7 +66,7 @@ impl AIImpl for BasicMonsterAI {
         let unit = units.get_unit(unit_id).as_monster()?;
         let pos = unit.pos();
         let player_pos = units.player().pos();
-        let distance = pos.distance(player_pos);
+        let distance = pos.distance_to(player_pos);
         // TODO: use World's rng instead of thread_rng
         // TODO: check if the player is visible
         // TODO: add aggro state and periodic Notice roll
@@ -101,11 +101,11 @@ impl AIImpl for BasicMonsterAI {
             let pos_index = path.path.iter().position(|&p| p == pos)?;
             if pos_index + 1 < path.path.len() {
                 let next_pos = path.path[pos_index + 1];
-                return Action::new(unit_id, Walk::new(pos.dir_to(next_pos)), world).ok();
+                return Action::new(unit_id, Walk::new(pos.direction_to(next_pos)), world).ok();
             }
         }
 
-        Action::new(unit_id, Walk::new(pos.dir_to(player_pos)), world).ok()
+        Action::new(unit_id, Walk::new(pos.direction_to(player_pos)), world).ok()
     }
 }
 

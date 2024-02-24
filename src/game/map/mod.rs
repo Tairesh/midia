@@ -60,19 +60,19 @@ impl Map {
 
     pub fn get_tile_opt(&self, pos: Point) -> Option<&Tile> {
         let (chunk, pos) = pos.to_chunk();
-        self.chunks.get(&chunk).map(|c| &c.tiles[pos])
+        self.chunks.get(&chunk).map(|c| &c.surface[pos])
     }
 
     pub fn get_tile(&mut self, pos: Point) -> &Tile {
         let (chunk, pos) = pos.to_chunk();
         let chunk = self.get_chunk(chunk);
-        &chunk.tiles[pos]
+        &chunk.surface[pos]
     }
 
     pub fn get_tile_mut(&mut self, pos: Point) -> &mut Tile {
         let (chunk, pos) = pos.to_chunk();
         let chunk = self.get_chunk_mut(chunk);
-        &mut chunk.tiles[pos]
+        &mut chunk.surface[pos]
     }
 
     pub fn load_tiles_between(&mut self, left_top: Point, right_bottom: Point) {
@@ -97,7 +97,7 @@ impl Map {
             for y in lt_y..=rb_y {
                 let chunk_pos = ChunkPos::new(x, y);
                 let chunk = self.chunks.get(&chunk_pos).unwrap();
-                for (i, tile) in chunk.tiles.iter().enumerate() {
+                for (i, tile) in chunk.surface.iter().enumerate() {
                     tiles.push((TilePos::from_chunk(chunk_pos, i), tile));
                 }
             }
@@ -111,6 +111,6 @@ impl FovMap for Map {
         let (chunk, pos) = pos.to_chunk();
         self.chunks
             .get(&chunk)
-            .map_or(true, |c| c.tiles[pos].terrain.is_transparent())
+            .map_or(true, |c| c.surface[pos].terrain.is_transparent())
     }
 }

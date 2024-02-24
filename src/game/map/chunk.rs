@@ -27,7 +27,7 @@ fn chunk_seed(world_seed: u64, pos: ChunkPos) -> u64 {
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct Chunk {
     pub pos: ChunkPos,
-    pub tiles: ArrayVec<Tile, { Chunk::USIZE }>,
+    pub surface: ArrayVec<Tile, { Chunk::USIZE }>,
 }
 
 impl Chunk {
@@ -37,7 +37,7 @@ impl Chunk {
 
     pub fn generate(world_seed: u64, noise: &FastNoise, pos: ChunkPos) -> Self {
         let mut rng = StdRng::seed_from_u64(chunk_seed(world_seed, pos));
-        let mut tiles = ArrayVec::new();
+        let mut surface = ArrayVec::new();
         for i in 0..Chunk::USIZE {
             let point = Point::from_chunk(pos, i);
             let n = noise.get_noise(
@@ -50,8 +50,8 @@ impl Chunk {
                 Dirt::new(rng.sample(Standard)).into()
             };
             let tile = Tile::new(terrain);
-            tiles.push(tile);
+            surface.push(tile);
         }
-        Chunk { pos, tiles }
+        Chunk { pos, surface }
     }
 }

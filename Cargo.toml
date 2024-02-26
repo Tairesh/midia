@@ -22,7 +22,7 @@ chrono = "0.4"
 enum_dispatch = "0.3"
 arrayvec = { version = "0.7", features = ["serde"] }
 once_cell = "1.10"
-enum-iterator = "1.1"
+enum-iterator = "2.0"
 typetag = "0.2"
 pathfinding = "4.9"
 smallvec = "1.13"

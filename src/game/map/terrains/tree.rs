@@ -4,7 +4,6 @@ use rand::{
 };
 
 use crate::assets::Sprite;
-use crate::game::traits::{LooksLike, Name};
 
 use super::super::{Passage, TerrainInteract, TerrainView};
 
@@ -90,6 +89,36 @@ pub enum TreeVariant {
     Willow,
     #[serde(rename = "10")]
     Birch,
+}
+
+pub struct DeadTrees;
+
+pub struct LiveTrees;
+
+impl Distribution<TreeVariant> for DeadTrees {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> TreeVariant {
+        match rng.gen_range(0..5) {
+            0 => TreeVariant::DeadTree,
+            1 => TreeVariant::DeadPine,
+            2 => TreeVariant::DeadHickory,
+            3 => TreeVariant::DeadWillow,
+            4 => TreeVariant::DeadBirch,
+            _ => unreachable!(),
+        }
+    }
+}
+
+impl Distribution<TreeVariant> for LiveTrees {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> TreeVariant {
+        match rng.gen_range(0..5) {
+            0 => TreeVariant::Tree,
+            1 => TreeVariant::Pine,
+            2 => TreeVariant::Hickory,
+            3 => TreeVariant::Willow,
+            4 => TreeVariant::Birch,
+            _ => unreachable!(),
+        }
+    }
 }
 
 impl Distribution<TreeVariant> for Standard {

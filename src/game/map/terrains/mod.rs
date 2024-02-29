@@ -3,9 +3,9 @@
 pub use boulder::{Boulder, BoulderSize};
 pub use chest::Chest;
 pub use dirt::{Dirt, DirtVariant};
-pub use grass::{Grass, GrassVariant};
+pub use grass::Grass;
 pub use pit::Pit;
-pub use tree::{Tree, TreeVariant};
+pub use tree::{DeadTrees, LiveTrees, Tree};
 
 mod boulder;
 mod chest;

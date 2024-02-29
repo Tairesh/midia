@@ -10,6 +10,7 @@ pub use passage::Passage;
 pub use pos::{ChunkPos, TilePos};
 pub use terrain::{Terrain, TerrainInteract, TerrainView};
 pub use tile::Tile;
+use worldgen::{wasteland::Wasteland, WorldGen};
 
 mod chunk;
 mod fov;
@@ -19,6 +20,7 @@ mod pos;
 mod terrain;
 pub mod terrains;
 mod tile;
+mod worldgen;
 
 pub struct Map {
     pub seed: u64,
@@ -48,14 +50,14 @@ impl Map {
     pub fn get_chunk(&mut self, pos: ChunkPos) -> &Chunk {
         self.chunks
             .entry(pos)
-            .or_insert_with_key(|pos| Chunk::generate(self.seed, &self.noise, *pos))
+            .or_insert_with_key(|pos| Wasteland::generate(self.seed, &self.noise, *pos))
     }
 
     pub fn get_chunk_mut(&mut self, pos: ChunkPos) -> &mut Chunk {
         self.changed.insert(pos);
         self.chunks
             .entry(pos)
-            .or_insert_with_key(|pos| Chunk::generate(self.seed, &self.noise, *pos))
+            .or_insert_with_key(|pos| Wasteland::generate(self.seed, &self.noise, *pos))
     }
 
     pub fn get_tile_opt(&self, pos: Point) -> Option<&Tile> {

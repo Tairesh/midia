@@ -41,8 +41,8 @@ impl GameData {
 
     fn load() -> Self {
         let mut data = Self {
-            names: Race::iterator()
-                .map(|r| (r, Sex::iterator().map(|s| (s, Vec::new())).collect()))
+            names: Race::iter()
+                .map(|r| (r, Sex::iter().map(|s| (s, Vec::new())).collect()))
                 .collect(),
             items: HashMap::with_capacity(100),
         };

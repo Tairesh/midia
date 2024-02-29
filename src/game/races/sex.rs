@@ -1,10 +1,11 @@
+use enum_iterator::Sequence;
 use rand::distributions::{Distribution, Standard};
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 
 use crate::game::races::Gender;
 
-#[derive(Serialize, Deserialize, Debug, Copy, Clone, Eq, PartialEq, Hash)]
+#[derive(Serialize, Deserialize, Sequence, Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub enum Sex {
     #[serde(rename = "m")]
     Male,
@@ -15,8 +16,8 @@ pub enum Sex {
 }
 
 impl Sex {
-    pub fn iterator() -> impl Iterator<Item = Sex> {
-        [Self::Male, Self::Female, Self::Undefined].iter().copied()
+    pub fn iter() -> impl Iterator<Item = Sex> {
+        enum_iterator::all()
     }
 }
 

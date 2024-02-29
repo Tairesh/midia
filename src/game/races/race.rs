@@ -7,15 +7,15 @@ use serde::{Deserialize, Serialize};
 
 use crate::assets::Sprite;
 use crate::game::{
-    DamageValue,
     savage::{DamageDice, DamageType, Skill},
-    SkillLevel
-    , traits::{LooksLike, Name}, units::{Inventory, Weapon},
+    traits::{LooksLike, Name},
+    units::{Inventory, Weapon},
+    DamageValue, SkillLevel,
 };
 
 use super::BodyColor;
 
-#[derive(Serialize, Deserialize, Debug, Copy, Clone, Eq, PartialEq, Hash)]
+#[derive(Serialize, Deserialize, Sequence, Debug, Copy, Clone, Eq, PartialEq, Hash)]
 #[serde(rename_all = "snake_case")]
 pub enum Race {
     Gazan,
@@ -104,17 +104,8 @@ impl Race {
         }
     }
 
-    // TODO: use enum_iterator
-    pub fn iterator() -> impl Iterator<Item = Race> {
-        [
-            Self::Gazan,
-            Self::Lagnam,
-            Self::Nyarnik,
-            Self::Totik,
-            Self::Bug,
-        ]
-        .iter()
-        .copied()
+    pub fn iter() -> impl Iterator<Item = Race> {
+        enum_iterator::all()
     }
 
     pub fn natural_weapon(self) -> Weapon {

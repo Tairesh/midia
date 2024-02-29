@@ -16,13 +16,13 @@ features = ["serde_support", "texture_png", "texture_jpeg", "font_ttf"]
 geometry = { git = "https://github.com/Tairesh/geometry.git", features = ["serde", "rand"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-serde_with = "3.0"
+serde_with = "3.6"
 rand = "^0.8"
 chrono = "0.4"
 enum_dispatch = "0.3"
 arrayvec = { version = "0.7", features = ["serde"] }
-once_cell = "1.10"
-enum-iterator = "1.1"
+once_cell = "1.19"
+enum-iterator = "2.0"
 typetag = "0.2"
 pathfinding = "4.9"
 smallvec = "1.13"

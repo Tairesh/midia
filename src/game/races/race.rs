@@ -1,18 +1,16 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 use enum_iterator::{next_cycle, previous_cycle, Sequence};
 use rand::distributions::{Distribution, Standard};
 use rand::Rng;
 use serde::{Deserialize, Serialize};
-use tetra::graphics::Color;
 
 use crate::assets::Sprite;
-use crate::colors::Colors;
 use crate::game::{
+    DamageValue,
     savage::{DamageDice, DamageType, Skill},
-    traits::{LooksLike, Name},
-    units::{Inventory, Weapon},
-    AttackType, Attribute, Damage, DamageValue, SkillLevel,
+    SkillLevel
+    , traits::{LooksLike, Name}, units::{Inventory, Weapon},
 };
 
 use super::BodyColor;
@@ -186,11 +184,11 @@ pub enum PlayableRace {
 
 impl PlayableRace {
     pub fn next(self) -> Self {
-        next_cycle(&self).unwrap()
+        next_cycle(&self)
     }
 
     pub fn prev(self) -> Self {
-        previous_cycle(&self).unwrap()
+        previous_cycle(&self)
     }
 }
 

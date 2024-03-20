@@ -1,11 +1,10 @@
 use geometry::Direction;
 
-use crate::game::traits::Name;
-
 use super::super::{
+    super::traits::Name,
     super::{
         log::{LogCategory, LogEvent},
-        map::{TerrainInteract, TerrainView},
+        map::{TerrainInteract, TerrainInteractAction, TerrainView},
         Avatar, World,
     },
     Action, ActionImpl,
@@ -28,7 +27,7 @@ impl ActionImpl for DropMainHand {
         let pos = actor.pos() + self.dir;
         let mut map = world.map();
         let tile = map.get_tile(pos);
-        if !tile.terrain.can_stock_items() {
+        if !tile.terrain.supports_action(TerrainInteractAction::Drop) {
             return No(format!(
                 "You can't put items on the {}",
                 tile.terrain.name()

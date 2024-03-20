@@ -1,5 +1,4 @@
 pub use close::Close;
-pub use dig::Dig;
 pub use drop::DropMainHand;
 pub use melee::Melee;
 pub use open::Open;
@@ -13,7 +12,6 @@ pub use wear::Wear;
 pub use wield::WieldFromGround;
 
 mod close;
-mod dig;
 mod drop;
 mod melee;
 mod open;

@@ -5,8 +5,8 @@ use tetra::graphics::Color;
 use crate::assets::Sprite;
 
 use super::{
-    Item,
-    Passage, terrains::{Boulder, Chest, Dirt, Grass, Pit, Tree},
+    terrains::{Boulder, Chest, Dirt, Grass, Tree},
+    Item, Passage,
 };
 
 // TODO: JSON-ize all terrains
@@ -18,7 +18,6 @@ pub enum Terrain {
     Dirt,
     Grass,
     Boulder,
-    Pit,
     Tree,
     Chest,
 }
@@ -40,26 +39,8 @@ pub trait TerrainInteract {
     fn is_passable(&self) -> bool {
         matches!(self.passage(), Passage::Passable(..))
     }
-    fn is_diggable(&self) -> bool {
-        false
-    }
-    /// return new Terrain and digged items
-    fn dig_result(&self) -> (Terrain, Vec<Item>) {
-        unimplemented!()
-    }
-    fn is_readable(&self) -> bool {
-        false
-    }
     fn read(&self) -> String {
-        unreachable!()
-    }
-    /// Can put items on this tile
-    fn can_stock_items(&self) -> bool;
-    fn can_be_opened(&self) -> bool {
-        false
-    }
-    fn can_be_closed(&self) -> bool {
-        false
+        unimplemented!()
     }
     fn can_suck_items_on_close(&self) -> bool {
         false
@@ -85,18 +66,12 @@ pub trait TerrainInteract {
     fn smash_result(&self) -> (Terrain, Vec<Item>) {
         unimplemented!()
     }
-    // TODO: remove this methods
-    fn supports_action(&self, action: TerrainInteractAction) -> bool {
-        match action {
-            TerrainInteractAction::Open => self.can_be_opened(),
-            TerrainInteractAction::Close => self.can_be_closed(),
-            TerrainInteractAction::Read => self.is_readable(),
-            TerrainInteractAction::Drop => self.can_stock_items(),
-            _ => true,
-        }
+    fn supports_action(&self, _action: TerrainInteractAction) -> bool {
+        false
     }
 }
 
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum TerrainInteractAction {
     Open,
     Close,

@@ -2,6 +2,8 @@
 
 use std::collections::HashSet;
 
+use crate::game::TerrainInteractAction;
+
 use super::{
     super::traits::Name,
     items::Item,
@@ -54,12 +56,13 @@ impl Tile {
     }
 
     pub fn is_readable(&self) -> bool {
-        self.terrain.is_readable() || self.items.iter().any(Item::is_readable)
+        self.terrain.supports_action(TerrainInteractAction::Read)
+            || self.items.iter().any(Item::is_readable)
     }
 
     pub fn read(&self) -> String {
         // TODO: probably we shouldn't read only first occurrence
-        if self.terrain.is_readable() {
+        if self.terrain.supports_action(TerrainInteractAction::Read) {
             return format!(
                 "Text on this {} says «{}»",
                 self.terrain.name(),

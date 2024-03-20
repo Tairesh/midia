@@ -6,7 +6,6 @@ use rand::{
 use crate::assets::Sprite;
 use crate::game::map::items::helpers::ROCK;
 use crate::game::map::terrains::{Dirt, DirtVariant};
-use crate::game::traits::{LooksLike, Name};
 use crate::game::{Item, Terrain};
 
 use super::super::{Passage, TerrainInteract, TerrainView};
@@ -58,10 +57,6 @@ impl TerrainInteract for Boulder {
             BoulderSize::Huge | BoulderSize::Middle => Passage::Impassable,
             BoulderSize::Small => Passage::Passable(50),
         }
-    }
-
-    fn can_stock_items(&self) -> bool {
-        false
     }
 
     fn is_smashable(&self) -> bool {

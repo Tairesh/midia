@@ -7,10 +7,11 @@ use tetra::graphics::Color;
 use crate::assets::Sprite;
 use crate::colors::Colors;
 use crate::game::traits::{LooksLike, Name};
+use crate::game::TerrainInteractAction;
 
 use super::super::{
-    terrains::{Dirt, DirtVariant, Pit},
-    Item, Passage, Terrain, TerrainInteract, TerrainView,
+    terrains::{Dirt, DirtVariant},
+    Passage, Terrain, TerrainInteract, TerrainView,
 };
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
@@ -83,24 +84,16 @@ impl TerrainInteract for Grass {
         Passage::Passable(11)
     }
 
-    fn is_diggable(&self) -> bool {
-        true
-    }
-
-    fn dig_result(&self) -> (Terrain, Vec<Item>) {
-        (Pit::new().into(), vec![])
-    }
-
-    fn can_stock_items(&self) -> bool {
-        true
-    }
-
     fn on_step(&self) -> Option<Terrain> {
         if rand::thread_rng().gen_bool(0.1) {
             Some(Dirt::new(rand::random::<DirtVariant>()).into())
         } else {
             None
         }
+    }
+
+    fn supports_action(&self, action: TerrainInteractAction) -> bool {
+        action == TerrainInteractAction::Drop
     }
 }
 
@@ -178,18 +171,17 @@ impl Distribution<GrassVariant> for Standard {
 
 #[cfg(test)]
 mod tests {
-    use super::{Grass, GrassVariant, Terrain, TerrainInteract, TerrainView};
+    use super::{Grass, GrassVariant, Terrain, TerrainView};
 
     #[test]
     fn test_dead_grass() {
         let mut terrain: Terrain = Grass::new(GrassVariant::Grass1, false).into();
         assert_eq!("grass", terrain.name());
         assert!(terrain.is_transparent());
-        assert!(terrain.is_diggable());
         if let Terrain::Grass(grass) = &mut terrain {
             grass.die();
         } else {
-            unreachable!()
+            panic!("expected grass");
         }
         assert_eq!("dead grass", terrain.name());
     }

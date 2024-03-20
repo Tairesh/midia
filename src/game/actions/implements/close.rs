@@ -1,7 +1,7 @@
 use geometry::Direction;
 
 use crate::game::log::{LogCategory, LogEvent};
-use crate::game::map::{TerrainInteract, TerrainView};
+use crate::game::map::{TerrainInteract, TerrainInteractAction, TerrainView};
 use crate::game::traits::Name;
 use crate::game::{Action, Avatar, World};
 
@@ -23,7 +23,7 @@ impl ActionImpl for Close {
         let mut map = world.map();
         let tile = map.get_tile(pos);
 
-        if !tile.terrain.can_be_closed() {
+        if !tile.terrain.supports_action(TerrainInteractAction::Close) {
             return No(format!("You can't close the {}", tile.terrain.name()));
         }
 
@@ -69,9 +69,10 @@ impl ActionImpl for Close {
 mod tests {
     use geometry::{Direction, Point};
 
-    use crate::game::map::{terrains::Chest, TerrainInteract};
+    use crate::game::map::items::helpers::WOODEN_SPLINTER;
+    use crate::game::map::terrains::Chest;
     use crate::game::world::tests::prepare_world;
-    use crate::game::{Action, Avatar};
+    use crate::game::{Action, Avatar, Item, Terrain, TerrainInteract, TerrainInteractAction};
 
     use super::Close;
 
@@ -79,6 +80,11 @@ mod tests {
     fn test_closing() {
         let mut world = prepare_world();
         world.map().get_tile_mut(Point::new(1, 0)).terrain = Chest::new(Vec::new(), true).into();
+        world
+            .map()
+            .get_tile_mut(Point::new(1, 0))
+            .items
+            .push(Item::new(WOODEN_SPLINTER));
 
         let typ = Close {
             dir: Direction::East,
@@ -103,7 +109,17 @@ mod tests {
             .map()
             .get_tile(Point::new(1, 0))
             .terrain
-            .can_be_opened());
+            .supports_action(TerrainInteractAction::Open));
+        assert!(world.map().get_tile(Point::new(1, 0)).items.is_empty());
+        if let Terrain::Chest(Chest { items_inside, open }) =
+            &world.map().get_tile(Point::new(1, 0)).terrain
+        {
+            assert!(!open);
+            assert_eq!(items_inside.len(), 1);
+            assert_eq!(items_inside[0].proto().id, WOODEN_SPLINTER);
+        } else {
+            panic!("Not a chest");
+        };
     }
 
     #[test]

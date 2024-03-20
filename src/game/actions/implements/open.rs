@@ -1,7 +1,7 @@
 use geometry::Direction;
 
 use crate::game::log::{LogCategory, LogEvent};
-use crate::game::map::{TerrainInteract, TerrainView};
+use crate::game::map::{TerrainInteract, TerrainInteractAction, TerrainView};
 use crate::game::traits::Name;
 use crate::game::{Action, ActionType, Avatar, World};
 
@@ -30,7 +30,7 @@ impl ActionImpl for Open {
         let mut map = world.map();
         let tile = map.get_tile(pos);
 
-        if !tile.terrain.can_be_opened() {
+        if !tile.terrain.supports_action(TerrainInteractAction::Open) {
             return No(format!("You can't open the {}", tile.terrain.name()));
         }
 
@@ -72,16 +72,18 @@ impl ActionImpl for Open {
 mod tests {
     use geometry::{Direction, Point};
 
-    use crate::game::map::{terrains::Chest, TerrainInteract};
+    use crate::game::map::items::helpers::WOODEN_SPLINTER;
+    use crate::game::map::terrains::Chest;
     use crate::game::world::tests::prepare_world;
-    use crate::game::{Action, Avatar};
+    use crate::game::{Action, Avatar, Item, TerrainInteract, TerrainInteractAction};
 
     use super::Open;
 
     #[test]
     fn test_opening() {
         let mut world = prepare_world();
-        world.map().get_tile_mut(Point::new(1, 0)).terrain = Chest::new(Vec::new(), false).into();
+        world.map().get_tile_mut(Point::new(1, 0)).terrain =
+            Chest::new(vec![Item::new(WOODEN_SPLINTER)], false).into();
 
         let action = Action::new(0, Open::new(Direction::East), &world).unwrap();
         world.units_mut().player_mut().set_action(Some(action));
@@ -100,7 +102,12 @@ mod tests {
             .map()
             .get_tile(Point::new(1, 0))
             .terrain
-            .can_be_closed());
+            .supports_action(TerrainInteractAction::Close));
+        assert_eq!(world.map().get_tile(Point::new(1, 0)).items.len(), 1);
+        assert_eq!(
+            world.map().get_tile(Point::new(1, 0)).items[0].proto().id,
+            WOODEN_SPLINTER
+        );
     }
 
     #[test]

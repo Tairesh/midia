@@ -1,10 +1,8 @@
 pub use action::Action;
-pub use action_impl::ActionImpl;
-pub use action_type::ActionType;
+pub use action_type::{ActionImpl, ActionType};
 pub use attack_target::AttackTarget;
 
 mod action;
-mod action_impl;
 mod action_type;
 mod attack_target;
 pub mod implements;

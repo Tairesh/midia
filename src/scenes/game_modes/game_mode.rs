@@ -2,8 +2,8 @@ use enum_dispatch::enum_dispatch;
 use tetra::Context;
 
 use crate::game::World;
-use crate::scenes::{implements::GameScene, Transition};
 use crate::scenes::game_modes::Cursor;
+use crate::scenes::{implements::GameScene, Transition};
 
 use super::implements::{
     Interacting, MeleeAttack, Observing, PikeAttack, Shooting, Throwing, Walking,

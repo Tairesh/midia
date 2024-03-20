@@ -6,9 +6,9 @@ use tetra::graphics::Color;
 
 use crate::assets::Sprite;
 use crate::colors::Colors;
-use crate::game::traits::{LooksLike, Name};
+use crate::game::TerrainInteractAction;
 
-use super::super::{terrains::Pit, Item, Passage, Terrain, TerrainInteract, TerrainView};
+use super::super::{Passage, Terrain, TerrainInteract, TerrainView};
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
 pub struct Dirt {
@@ -62,18 +62,6 @@ impl TerrainInteract for Dirt {
         Passage::Passable(10)
     }
 
-    fn is_diggable(&self) -> bool {
-        true
-    }
-
-    fn dig_result(&self) -> (Terrain, Vec<Item>) {
-        (Pit::new().into(), vec![])
-    }
-
-    fn can_stock_items(&self) -> bool {
-        true
-    }
-
     fn on_step(&self) -> Option<Terrain> {
         if self.variant == DirtVariant::Dirt2 {
             None
@@ -82,6 +70,10 @@ impl TerrainInteract for Dirt {
         } else {
             None
         }
+    }
+
+    fn supports_action(&self, action: TerrainInteractAction) -> bool {
+        action == TerrainInteractAction::Drop
     }
 }
 
@@ -124,17 +116,5 @@ impl Distribution<DirtVariant> for Standard {
             9 => DirtVariant::Dirt10,
             _ => unreachable!(),
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::{Dirt, DirtVariant, Terrain, TerrainInteract, TerrainView};
-
-    #[test]
-    fn test_dirt() {
-        let terrain: Terrain = Dirt::new(DirtVariant::Dirt1).into();
-        assert_eq!("dirt", terrain.name());
-        assert!(terrain.is_diggable());
     }
 }

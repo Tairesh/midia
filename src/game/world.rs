@@ -5,6 +5,8 @@ use std::rc::Rc;
 
 use geometry::{Direction, Point};
 
+use crate::game::map::items::helpers::BONE_KNIFE;
+
 use super::{
     super::{
         lang,
@@ -17,7 +19,7 @@ use super::{
     savage::HitResult,
     traits::Name,
     units::{Appearance, Avatar, Monster, Player, Units},
-    Action, CharSheet, Chunk, ChunkPos, Log, LogEvent, Map, TilePos,
+    Action, CharSheet, Chunk, ChunkPos, Item, Log, LogEvent, Map, TilePos,
 };
 
 pub struct World {
@@ -59,6 +61,11 @@ impl World {
         let mut world = Self::new(meta, GameView::default(), Log::new(), units, HashMap::new());
 
         // TODO: don't forget to remove
+        world
+            .map()
+            .get_tile_mut(Point::new(0, 0))
+            .items
+            .push(Item::new(BONE_KNIFE));
         world.add_unit(Box::new(Monster::new(
             AI::BasicMonster,
             Point::new(0, 5),

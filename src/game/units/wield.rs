@@ -1,7 +1,5 @@
 use std::collections::VecDeque;
 
-use crate::game::traits::Name;
-
 use super::super::{Item, ItemQuality};
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Default)]
@@ -32,6 +30,10 @@ impl Wield {
 
     pub fn off_hands(&self) -> Vec<&Item> {
         self.items.iter().skip(1).collect()
+    }
+
+    pub fn second_hand(&self) -> Option<&Item> {
+        self.items.iter().nth(1)
     }
 
     pub fn has_quality(&self, quality: &ItemQuality) -> bool {

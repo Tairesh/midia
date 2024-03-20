@@ -4,6 +4,8 @@ use std::path::Path;
 use geometry::Point;
 use tetra::{Context, Event};
 
+use crate::game::map::items::helpers::STONE_SPEAR;
+use crate::game::Item;
 use crate::{
     app::App,
     assets::Assets,
@@ -563,7 +565,8 @@ impl CharacterAttributes {
     fn next(&self) -> Transition {
         // TODO: traits, skills, etc.
         // TODO: find available starting pos in the world
-        let avatar = Player::new(self.personality.clone(), Point::new(0, 0));
+        let mut avatar = Player::new(self.personality.clone(), Point::new(0, 0));
+        avatar.inventory.wield.wield(Item::new(STONE_SPEAR));
         let mut world = World::create(self.meta.clone(), avatar);
         world.save();
 

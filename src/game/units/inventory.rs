@@ -1,5 +1,3 @@
-use std::collections::VecDeque;
-
 use crate::game::{AmmoType, BodySlot, Item};
 
 use super::{Wear, Wield};
@@ -63,6 +61,10 @@ impl Inventory {
 
     pub fn main_hand_take(&mut self) -> Option<Item> {
         self.wield.main_hand_take()
+    }
+
+    pub fn second_hand(&self) -> Option<&Item> {
+        self.wield.second_hand()
     }
 
     pub fn has_ammo(&self, ammo_type: AmmoType) -> bool {

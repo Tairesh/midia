@@ -2,14 +2,14 @@ use std::cell::RefCell;
 
 use geometry::{Point, Vec2};
 use tetra::{
-    graphics::{Canvas, DrawParams},
     Context,
+    graphics::{Canvas, DrawParams},
 };
 
 use crate::{
     assets::{Assets, Sprite, Tileset},
     colors::Colors,
-    game::{map::TerrainView, traits::LooksLike, Avatar, Tile, World},
+    game::{Avatar, map::TerrainView, Tile, traits::LooksLike, World},
     scenes::game_modes::Cursor,
 };
 
@@ -187,7 +187,7 @@ pub fn draw_unit(
     let scale = if !rotate || avatar.view().direction().is_default() {
         Vec2::new(zoom, zoom)
     } else {
-        position.x += 10.0 * zoom;
+        position.x += tileset.tile_size as f32 * zoom;
         Vec2::new(-zoom, zoom)
     };
     let mut draw_params = DrawParams::new().position(position).scale(scale);
@@ -196,9 +196,26 @@ pub fn draw_unit(
     }
     tileset.draw_sprite(ctx, avatar.view().looks_like(), draw_params);
 
-    // TODO: draw both items
     if avatar.inventory().is_none() || avatar.inventory().unwrap().main_hand().is_none() {
         return;
+    }
+    if let Some(item) = avatar.inventory().unwrap().second_hand() {
+        let (offset_x, offset_y) = (
+            if !rotate || avatar.view().direction().is_default() {
+                tileset.tile_size as f32 - 5.0
+            } else {
+                5.0 - tileset.tile_size as f32
+            } * zoom,
+            3.0 * zoom,
+        );
+        tileset.draw_sprite(
+            ctx,
+            item.looks_like(),
+            DrawParams::new()
+                .position(position + Vec2::new(offset_x, offset_y))
+                .color(item.color())
+                .scale(scale * Vec2::new(-0.7, 0.7)),
+        );
     }
     let item = avatar.inventory().unwrap().main_hand().unwrap();
     let (offset_x, offset_y) = (

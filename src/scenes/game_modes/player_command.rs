@@ -6,10 +6,15 @@ pub enum PlayerCommand {
     Close,
     Read,
     Drop,
+    Examine,
 }
 
 impl PlayerCommand {
     pub fn highlight_tile(self, tile: &Tile) -> bool {
+        if self == Self::Examine {
+            return false;
+        }
+
         tile.terrain.supports_action(self.into())
     }
 
@@ -29,6 +34,7 @@ impl From<PlayerCommand> for TerrainInteractAction {
             PlayerCommand::Close => TerrainInteractAction::Close,
             PlayerCommand::Read => TerrainInteractAction::Read,
             PlayerCommand::Drop => TerrainInteractAction::Drop,
+            PlayerCommand::Examine => TerrainInteractAction::Examine,
         }
     }
 }

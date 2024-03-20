@@ -16,9 +16,7 @@ use crate::{
 
 use super::super::{
     super::{implements::GameScene, Scene, Transition},
-    implements::{
-        Examining, Interacting, MeleeAttack, Observing, PickingUp, PikeAttack, Shooting, Throwing,
-    },
+    implements::{Interacting, MeleeAttack, Observing, PickingUp, PikeAttack, Shooting, Throwing},
     GameModeImpl, PlayerCommand,
 };
 
@@ -51,7 +49,7 @@ impl GameModeImpl for Walking {
                         return Some(Transition::Push(Scene::GameMenu));
                     }
                     KeyBindingAction::Examine => {
-                        game.push_mode(Examining::new().into());
+                        game.push_mode(Interacting::new(PlayerCommand::Examine).into());
                     }
                     KeyBindingAction::DropHere => {
                         game.try_start_action(

@@ -6,8 +6,7 @@ use crate::scenes::game_modes::Cursor;
 use crate::scenes::{implements::GameScene, Transition};
 
 use super::implements::{
-    Examining, Interacting, MeleeAttack, Observing, PickingUp, PikeAttack, Shooting, Throwing,
-    Walking,
+    Interacting, MeleeAttack, Observing, PickingUp, PikeAttack, Shooting, Throwing, Walking,
 };
 
 #[enum_dispatch]
@@ -25,7 +24,6 @@ pub trait GameModeImpl {
 #[enum_dispatch(GameModeImpl)]
 pub enum GameMode {
     Walking,
-    Examining,
     PickingUp,
     Observing,
     MeleeAttack,

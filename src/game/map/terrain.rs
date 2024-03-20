@@ -92,6 +92,7 @@ pub trait TerrainInteract {
             TerrainInteractAction::Close => self.can_be_closed(),
             TerrainInteractAction::Read => self.is_readable(),
             TerrainInteractAction::Drop => self.can_stock_items(),
+            TerrainInteractAction::Examine => true,
         }
     }
 }
@@ -101,4 +102,5 @@ pub enum TerrainInteractAction {
     Close,
     Read,
     Drop,
+    Examine,
 }

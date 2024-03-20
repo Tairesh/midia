@@ -56,13 +56,18 @@ impl GameModeImpl for Interacting {
             self.selected = Some(dir);
             game.try_rotate_player(dir);
         } else if let Some(dir) = self.selected {
-            let action = match self.command {
-                PlayerCommand::Open => Open { dir }.into(),
-                PlayerCommand::Close => Close { dir }.into(),
-                PlayerCommand::Read => Read::new(dir, game.world.borrow().units().player()),
-                PlayerCommand::Drop => DropMainHand { dir }.into(),
-            };
-            game.try_start_action(action);
+            if self.command == PlayerCommand::Examine {
+                game.examine(dir);
+            } else {
+                let action = match self.command {
+                    PlayerCommand::Open => Open { dir }.into(),
+                    PlayerCommand::Close => Close { dir }.into(),
+                    PlayerCommand::Read => Read::new(dir, game.world.borrow().units().player()),
+                    PlayerCommand::Drop => DropMainHand { dir }.into(),
+                    PlayerCommand::Examine => unreachable!(),
+                };
+                game.try_start_action(action);
+            }
             game.modes.pop();
         }
         None

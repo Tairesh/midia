@@ -33,7 +33,7 @@ impl Wield {
     }
 
     pub fn second_hand(&self) -> Option<&Item> {
-        self.items.iter().nth(1)
+        self.items.get(1)
     }
 
     pub fn has_quality(&self, quality: &ItemQuality) -> bool {

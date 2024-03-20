@@ -2,14 +2,14 @@ use std::cell::RefCell;
 
 use geometry::{Point, Vec2};
 use tetra::{
-    Context,
     graphics::{Canvas, DrawParams},
+    Context,
 };
 
 use crate::{
     assets::{Assets, Sprite, Tileset},
     colors::Colors,
-    game::{Avatar, map::TerrainView, Tile, traits::LooksLike, World},
+    game::{map::TerrainView, traits::LooksLike, Avatar, Tile, World},
     scenes::game_modes::Cursor,
 };
 

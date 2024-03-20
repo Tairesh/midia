@@ -256,7 +256,7 @@ impl ActionImpl for Shoot {
 mod tests {
     use geometry::{Direction, Point};
 
-    use crate::game::actions::implements::Skip;
+    use crate::game::actions::implements::{Skip, Walk};
     use crate::game::actions::AttackTarget;
     use crate::game::map::items::helpers::{
         QUIVER, WOODEN_ARROW, WOODEN_BOLT, WOODEN_CROSSBOW, WOODEN_SHORTBOW,
@@ -463,6 +463,11 @@ mod tests {
 
         drop(units);
         let monster = add_monster(&mut world, target);
+        let action = Action::new(monster, Walk::new(Direction::West), &world).unwrap();
+        world
+            .units_mut()
+            .get_unit_mut(monster)
+            .set_action(Some(action));
 
         // Wait 5 ticks to make sure monster will move.
         let action = Action::new(0, Skip::new(5).into(), &world).unwrap();

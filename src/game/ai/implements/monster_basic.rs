@@ -62,15 +62,18 @@ impl BasicMonsterAI {
 
 impl AIImpl for BasicMonsterAI {
     fn plan(&mut self, unit_id: usize, world: &World) -> Option<Action> {
-        let units = world.units();
-        let unit = units.get_unit(unit_id).as_monster()?;
-        let pos = unit.pos();
+        let mut units = world.units_mut();
         let player_pos = units.player().pos();
-        let distance = pos.distance_to(player_pos);
+        let unit = units.get_unit_mut(unit_id).as_monster_mut()?;
+        let pos = unit.pos();
+        let distance = pos.distance_to(player_pos).floor() as u32;
+        let current_tick = world.meta.current_tick;
+        let sight_range = unit.char_sheet_mut().sight_range(current_tick);
+        drop(units);
         // TODO: use World's rng instead of thread_rng
         // TODO: check if the player is visible
         // TODO: add aggro state and periodic Notice roll
-        if distance.floor() as u32 > unit.char_sheet().sight_range() {
+        if distance > sight_range {
             return Action::new(
                 unit_id,
                 Walk::new(Direction::random(&mut rand::thread_rng(), false)),

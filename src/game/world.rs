@@ -106,7 +106,12 @@ impl World {
         // TODO: add light sources
         // TODO: add periodic Notice roll
         // TODO: add memory
-        let vision_range = self.units().player().char_sheet().sight_range();
+        let current_tick = self.meta.current_tick;
+        let vision_range = self
+            .units_mut()
+            .player_mut()
+            .char_sheet_mut()
+            .sight_range(current_tick);
         self.fov.set_visible(field_of_view_set(
             center,
             vision_range as i32,
@@ -327,6 +332,7 @@ impl World {
 pub mod tests {
     use std::collections::HashMap;
 
+    use crate::game::{AttrLevel, SkillLevel};
     use geometry::Point;
 
     use super::{
@@ -376,6 +382,13 @@ pub mod tests {
     }
 
     pub fn add_monster(world: &mut World, pos: Point) -> usize {
+        let mut charsheet = CharSheet::default(false, Race::Bug);
+        charsheet.attributes.agility = AttrLevel::D6;
+        charsheet.attributes.strength = AttrLevel::D6;
+        charsheet.attributes.vigor = AttrLevel::D8;
+        charsheet.skills.fighting = SkillLevel::D6;
+        charsheet.skills.shooting = SkillLevel::D8;
+        charsheet.skills.notice = SkillLevel::D6;
         world.add_unit(Box::new(Monster::new(
             AI::BasicMonster,
             pos,
@@ -387,7 +400,7 @@ pub mod tests {
                 sex: Sex::Undefined,
             },
             Pronouns::ItIts,
-            CharSheet::default(false, Race::Bug),
+            charsheet,
         )))
     }
 

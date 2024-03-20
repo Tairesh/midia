@@ -12,11 +12,11 @@ use crate::{
     ui::{Button, Image, Label, Position, Positionate, TextInput, Vertical},
 };
 
-use super::{SomeTransitions, Transition};
+use super::Transition;
 
 pub const UI_ICONS_SCALE: Vec2 = Vec2::new(3.0, 3.0);
 
-pub(crate) fn easy_back(event: &Event, focused: bool) -> SomeTransitions {
+pub(crate) fn easy_back(event: &Event, focused: bool) -> Option<Transition> {
     if focused {
         return None;
     }
@@ -26,7 +26,7 @@ pub(crate) fn easy_back(event: &Event, focused: bool) -> SomeTransitions {
         }
         | Event::KeyPressed {
             key: Key::Backspace,
-        } => Some(vec![Transition::Pop]),
+        } => Some(Transition::Pop),
         _ => None,
     }
 }

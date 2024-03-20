@@ -14,7 +14,7 @@ use crate::{
 
 use super::super::{
     helpers::{back_btn, bg, easy_back, icon_minus, icon_plus, label, title},
-    SceneImpl, SomeTransitions, Transition,
+    SceneImpl, Transition,
 };
 
 #[derive(Debug, Copy, Clone)]
@@ -150,7 +150,7 @@ impl SettingsScene {
 }
 
 impl SceneImpl for SettingsScene {
-    fn event(&mut self, _ctx: &mut Context, event: Event) -> SomeTransitions {
+    fn event(&mut self, _ctx: &mut Context, event: Event) -> Option<Transition> {
         easy_back(&event, self.is_there_focused_sprite())
     }
 
@@ -162,7 +162,7 @@ impl SceneImpl for SettingsScene {
         Some(&mut self.sprites)
     }
 
-    fn custom_event(&mut self, ctx: &mut Context, event: u8) -> SomeTransitions {
+    fn custom_event(&mut self, ctx: &mut Context, event: u8) -> Option<Transition> {
         let event = ButtonEvent::from(event);
         match event {
             ButtonEvent::FullscreenMode => {

@@ -1,4 +1,4 @@
-pub use transition::{SomeTransitions, Transition};
+pub use transition::Transition;
 pub use {scene::Scene, scene_impl::SceneImpl};
 
 mod game_modes;

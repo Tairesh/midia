@@ -8,7 +8,7 @@ use crate::{
 };
 
 use super::super::{
-    super::{implements::GameScene, SomeTransitions},
+    super::{implements::GameScene, Transition},
     Cursor, CursorType, GameModeImpl,
 };
 
@@ -29,8 +29,8 @@ impl Default for PickingUp {
 }
 
 impl GameModeImpl for PickingUp {
-    fn cursors(&self, world: &World) -> Vec<Cursor> {
-        if let Some(selected) = self.selected {
+    fn cursors(&self, world: &World) -> Option<Vec<Cursor>> {
+        Some(if let Some(selected) = self.selected {
             vec![
                 (
                     selected.into(),
@@ -48,14 +48,14 @@ impl GameModeImpl for PickingUp {
                 })
                 .map(|d| (d.into(), Colors::WHITE_SMOKE, CursorType::Select))
                 .collect()
-        }
+        })
     }
 
     fn can_push(&self, world: &World) -> Result<(), String> {
         world.units().player().inventory.can_wield_any()
     }
 
-    fn update(&mut self, ctx: &mut Context, game: &mut GameScene) -> SomeTransitions {
+    fn update(&mut self, ctx: &mut Context, game: &mut GameScene) -> Option<Transition> {
         if input::is_key_pressed(ctx, Key::Escape) {
             game.modes.pop();
         } else if let Some(dir) = input::get_direction_keys_down(ctx) {

@@ -152,7 +152,7 @@ pub fn draw_cursors(
     world: &RefCell<World>,
     assets: &Assets,
     window_size: (i32, i32),
-    cursors: Vec<Cursor>,
+    cursors: Option<Vec<Cursor>>,
 ) {
     let world = world.borrow();
 
@@ -162,15 +162,17 @@ pub fn draw_cursors(
     let center = Vec2::new(window_size.0 as f32, window_size.1 as f32) / 2.0
         - Vec2::new(tile_size, tile_size) / 2.0;
 
-    for (delta, color, typ) in cursors {
-        let delta = delta * tile_size;
-        let position = center + delta;
+    if let Some(cursors) = cursors {
+        for (delta, color, typ) in cursors {
+            let delta = delta * tile_size;
+            let position = center + delta;
 
-        let params = DrawParams::new()
-            .position(position)
-            .scale(scale)
-            .color(color);
-        assets.tileset.draw_sprite(ctx, typ.looks_like(), params);
+            let params = DrawParams::new()
+                .position(position)
+                .scale(scale)
+                .color(color);
+            assets.tileset.draw_sprite(ctx, typ.looks_like(), params);
+        }
     }
 }
 

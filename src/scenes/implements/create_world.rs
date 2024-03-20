@@ -12,7 +12,7 @@ use crate::{
 
 use super::super::{
     helpers::{back_randomize_next, bg, easy_back, error_label, label, text_input, title},
-    Scene, SceneImpl, SomeTransitions, Transition,
+    Scene, SceneImpl, Transition,
 };
 
 const RANDOMIZE_EVENT: u8 = 1;
@@ -126,7 +126,7 @@ impl CreateWorld {
 }
 
 impl SceneImpl for CreateWorld {
-    fn on_update(&mut self, _ctx: &mut Context) -> SomeTransitions {
+    fn on_update(&mut self, _ctx: &mut Context) -> Option<Transition> {
         if !self.name_input().danger() && self.name_empty().visible() {
             self.name_empty().set_visible(false);
         }
@@ -139,7 +139,7 @@ impl SceneImpl for CreateWorld {
         None
     }
 
-    fn event(&mut self, _ctx: &mut Context, event: Event) -> SomeTransitions {
+    fn event(&mut self, _ctx: &mut Context, event: Event) -> Option<Transition> {
         let focused = self.is_there_focused_sprite();
         easy_back(&event, focused)
     }
@@ -152,7 +152,7 @@ impl SceneImpl for CreateWorld {
         Some(&mut self.sprites)
     }
 
-    fn custom_event(&mut self, _ctx: &mut Context, event: u8) -> SomeTransitions {
+    fn custom_event(&mut self, _ctx: &mut Context, event: u8) -> Option<Transition> {
         match event {
             RANDOMIZE_EVENT => {
                 let mut rng = thread_rng();
@@ -173,7 +173,7 @@ impl SceneImpl for CreateWorld {
                     None
                 } else {
                     match savefile::create(name.as_str(), seed.as_str()) {
-                        Ok(path) => Some(vec![Transition::Replace(Scene::CreateCharacter(path))]),
+                        Ok(path) => Some(Transition::Replace(Scene::CreateCharacter(path))),
                         Err(err) => match err {
                             savefile::SaveError::System(err) => {
                                 panic!("Can't write savefile: {err}")

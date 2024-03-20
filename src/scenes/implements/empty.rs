@@ -1,12 +1,14 @@
 use tetra::{Context, Event};
 
+use crate::scenes::Transition;
+
 use super::super::{
     super::{
         app::App,
         ui::{SomeUISprites, SomeUISpritesMut, UiSprite},
     },
     helpers::{bg, easy_back},
-    SceneImpl, SomeTransitions,
+    SceneImpl,
 };
 
 pub struct Empty {
@@ -22,7 +24,7 @@ impl Empty {
 }
 
 impl SceneImpl for Empty {
-    fn event(&mut self, _ctx: &mut Context, event: Event) -> SomeTransitions {
+    fn event(&mut self, _ctx: &mut Context, event: Event) -> Option<Transition> {
         easy_back(&event, false)
     }
 

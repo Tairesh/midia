@@ -6,11 +6,13 @@ use super::Scene;
 pub enum Transition {
     Push(Scene),
     Pop,
-    GoMainMenu,     // unload world and pop to first scene
-    Replace(Scene), // pop and push
+    /// pop and push
+    Replace(Scene),
+    /// unload world pop all scenes except first
+    GoMainMenu,
+    /// load savefile and push GameScene
     LoadWorld(PathBuf),
+    /// custom scene-related event
     CustomEvent(u8),
     Quit,
 }
-
-pub type SomeTransitions = Option<Vec<Transition>>;

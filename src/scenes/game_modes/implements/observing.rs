@@ -24,7 +24,7 @@ use crate::{
 };
 
 use super::super::{
-    super::{implements::GameScene, SomeTransitions},
+    super::{implements::GameScene, Transition},
     Cursor, CursorType, GameModeImpl,
 };
 
@@ -147,11 +147,15 @@ impl Default for Observing {
 }
 
 impl GameModeImpl for Observing {
-    fn cursors(&self, _world: &World) -> Vec<Cursor> {
-        vec![(self.mouse_moved_pos, Colors::LIME, CursorType::Select)]
+    fn cursors(&self, _world: &World) -> Option<Vec<Cursor>> {
+        Some(vec![(
+            self.mouse_moved_pos,
+            Colors::LIME,
+            CursorType::Select,
+        )])
     }
 
-    fn update(&mut self, ctx: &mut Context, game: &mut GameScene) -> SomeTransitions {
+    fn update(&mut self, ctx: &mut Context, game: &mut GameScene) -> Option<Transition> {
         self.update_mouse(ctx, game);
         let mut shifted = false;
         if input::is_key_pressed(ctx, Key::Escape) {

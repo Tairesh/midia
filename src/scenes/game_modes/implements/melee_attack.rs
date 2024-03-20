@@ -7,7 +7,7 @@ use crate::game::actions::implements::Melee;
 use crate::game::World;
 use crate::input;
 use crate::scenes::implements::GameScene;
-use crate::scenes::SomeTransitions;
+use crate::scenes::Transition;
 
 use super::super::{Cursor, CursorType, GameModeImpl};
 
@@ -22,8 +22,8 @@ impl MeleeAttack {
 }
 
 impl GameModeImpl for MeleeAttack {
-    fn cursors(&self, world: &World) -> Vec<Cursor> {
-        if let Some(target) = self.target {
+    fn cursors(&self, world: &World) -> Option<Vec<Cursor>> {
+        Some(if let Some(target) = self.target {
             let pos = target - world.units().player().pos;
             vec![
                 (pos, Colors::WHITE.with_alpha(0.1), CursorType::Fill),
@@ -41,10 +41,10 @@ impl GameModeImpl for MeleeAttack {
                 })
                 .map(|dir| (dir.into(), Colors::RED, CursorType::Select))
                 .collect()
-        }
+        })
     }
 
-    fn update(&mut self, ctx: &mut Context, game: &mut GameScene) -> SomeTransitions {
+    fn update(&mut self, ctx: &mut Context, game: &mut GameScene) -> Option<Transition> {
         if input::is_key_pressed(ctx, Key::Escape) {
             game.modes.pop();
         } else if let Some(dir) = input::get_direction_keys_down(ctx) {

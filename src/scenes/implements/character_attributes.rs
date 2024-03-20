@@ -19,7 +19,7 @@ use crate::{
             back_randomize_reset_next, bg, colored_label, decorative_label, easy_back, icon_minus,
             icon_plus, title,
         },
-        Scene, SceneImpl, SomeTransitions, Transition,
+        SceneImpl, Transition,
     },
     ui::{
         Alert, Disable, Horizontal, Label, Position, SomeUISprites, SomeUISpritesMut, UiSprite,
@@ -560,17 +560,14 @@ impl CharacterAttributes {
         self.update_points(ctx);
     }
 
-    fn next(&self) -> Vec<Transition> {
+    fn next(&self) -> Transition {
         // TODO: traits, skills, etc.
         // TODO: find available starting pos in the world
         let avatar = Player::new(self.personality.clone(), Point::new(0, 0));
         let mut world = World::create(self.meta.clone(), avatar);
         world.save();
 
-        vec![
-            Transition::LoadWorld(self.meta.path.clone()),
-            Transition::Replace(Scene::Game),
-        ]
+        Transition::LoadWorld(self.meta.path.clone())
     }
 
     fn attribute_labels() -> HashMap<Attribute, usize> {
@@ -655,7 +652,7 @@ impl CharacterAttributes {
 }
 
 impl SceneImpl for CharacterAttributes {
-    fn event(&mut self, _ctx: &mut Context, event: Event) -> SomeTransitions {
+    fn event(&mut self, _ctx: &mut Context, event: Event) -> Option<Transition> {
         easy_back(&event, false)
     }
 
@@ -676,7 +673,7 @@ impl SceneImpl for CharacterAttributes {
     }
 
     // TODO: refactor and delete this allow
-    fn custom_event(&mut self, ctx: &mut Context, event: u8) -> SomeTransitions {
+    fn custom_event(&mut self, ctx: &mut Context, event: u8) -> Option<Transition> {
         let event = ButtonEvent::from(event);
         if let Ok(attribute) = Attribute::try_from(event) {
             if event.is_minus() {

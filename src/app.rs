@@ -9,7 +9,7 @@ use crate::{
     colors::Colors,
     game::world::World,
     savefile,
-    scenes::{Scene, SceneImpl, SomeTransitions, Transition},
+    scenes::{Scene, SceneImpl, Transition},
     settings::Settings,
     ui::{Draw, Label, Position, Positionate, Stringify},
 };
@@ -77,14 +77,6 @@ impl App {
         self.on_open(ctx);
     }
 
-    fn exec_transitions(&mut self, ctx: &mut Context, transitions: SomeTransitions) {
-        if let Some(transitions) = transitions {
-            for transition in transitions {
-                self.transit(ctx, transition);
-            }
-        }
-    }
-
     fn transit(&mut self, ctx: &mut Context, transition: Transition) {
         match transition {
             Transition::Push(s) => self.push_scene(ctx, s),
@@ -92,8 +84,9 @@ impl App {
             Transition::Replace(s) => self.replace_scene(ctx, s),
             Transition::CustomEvent(event) => {
                 if let Some(scene) = self.current_scene() {
-                    let transitions = scene.custom_event(ctx, event);
-                    self.exec_transitions(ctx, transitions);
+                    if let Some(transition) = scene.custom_event(ctx, event) {
+                        self.transit(ctx, transition);
+                    }
                 }
             }
             Transition::Quit => window::quit(ctx),
@@ -102,14 +95,15 @@ impl App {
                 self.scenes.drain(1..);
                 self.on_open(ctx);
             }
-            Transition::LoadWorld(path) => self.load_world(&path),
+            Transition::LoadWorld(path) => self.load_world(ctx, &path),
         }
     }
 
-    fn load_world(&mut self, path: &Path) {
+    fn load_world(&mut self, ctx: &mut Context, path: &Path) {
         self.world = savefile::load_world(path)
             .ok() // TODO: catch errors
             .map(|w| Rc::new(RefCell::new(w)));
+        self.push_scene(ctx, Scene::Game);
     }
 
     fn unload_world(&mut self) {
@@ -128,8 +122,9 @@ impl App {
 impl State for App {
     fn update(&mut self, ctx: &mut Context) -> tetra::Result {
         if let Some(scene) = self.current_scene() {
-            let transitions = scene.update(ctx);
-            self.exec_transitions(ctx, Some(transitions));
+            if let Some(transition) = scene.update(ctx) {
+                self.transit(ctx, transition);
+            }
         } else {
             self.transit(ctx, Transition::Quit);
         }
@@ -176,8 +171,9 @@ impl State for App {
         }
 
         if let Some(scene) = self.current_scene() {
-            let transitions = scene.event(ctx, event);
-            self.exec_transitions(ctx, transitions);
+            if let Some(transition) = scene.event(ctx, event) {
+                self.transit(ctx, transition);
+            }
         }
 
         Ok(())

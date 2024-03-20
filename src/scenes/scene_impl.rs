@@ -2,13 +2,13 @@ use tetra::{Context, Event};
 
 use crate::ui::{SomeUISprites, SomeUISpritesMut};
 
-use super::{SomeTransitions, Transition};
+use super::Transition;
 
 pub trait SceneImpl {
-    fn on_update(&mut self, _ctx: &mut Context) -> SomeTransitions {
+    fn on_update(&mut self, _ctx: &mut Context) -> Option<Transition> {
         None
     }
-    fn event(&mut self, _ctx: &mut Context, _event: Event) -> SomeTransitions {
+    fn event(&mut self, _ctx: &mut Context, _event: Event) -> Option<Transition> {
         None
     }
     fn before_draw(&mut self, _ctx: &mut Context) {}
@@ -21,7 +21,7 @@ pub trait SceneImpl {
     fn sprites_mut(&mut self) -> SomeUISpritesMut {
         None
     }
-    fn custom_event(&mut self, _ctx: &mut Context, _event: u8) -> SomeTransitions {
+    fn custom_event(&mut self, _ctx: &mut Context, _event: u8) -> Option<Transition> {
         None
     }
 
@@ -38,23 +38,26 @@ pub trait SceneImpl {
         }
     }
 
-    fn update(&mut self, ctx: &mut Context) -> Vec<Transition> {
+    fn update(&mut self, ctx: &mut Context) -> Option<Transition> {
+        if let Some(transition) = self.on_update(ctx) {
+            return Some(transition);
+        }
+
         // TODO: find a way to optimize this shit
-        let mut transitions = self.on_update(ctx).unwrap_or_default();
         let focused = self.is_there_focused_sprite();
         if let Some(sprites) = self.sprites_mut() {
             // creating same big useless vec of Rects EVERY frame
             let mut blocked = Vec::with_capacity(sprites.len());
-            sprites.iter_mut().rev().for_each(|sprite| {
+            for sprite in sprites.iter_mut().rev() {
                 if let Some(transition) = sprite.update(ctx, focused, &blocked) {
-                    transitions.push(transition);
+                    return Some(transition);
                 }
                 if sprite.visible() && sprite.block_mouse() {
                     blocked.push(sprite.rect());
                 }
-            });
+            }
         }
 
-        transitions
+        None
     }
 }

@@ -18,7 +18,6 @@ use crate::{
         Action, ActionType, Avatar, Item, World,
     },
     input,
-    scenes::map_view,
     settings::Settings,
     ui::{
         Colorize, GameLog, Horizontal, Label, Position, SomeUISprites, SomeUISpritesMut,
@@ -28,7 +27,7 @@ use crate::{
 
 use super::super::{
     game_modes::{implements::Walking, Cursor, GameMode, GameModeImpl},
-    SceneImpl, SomeTransitions,
+    map_view, SceneImpl, Transition,
 };
 
 pub struct GameScene {
@@ -178,7 +177,7 @@ impl GameScene {
         self.shift_of_view
     }
 
-    pub fn mode_update(&mut self, ctx: &mut Context) -> SomeTransitions {
+    pub fn mode_update(&mut self, ctx: &mut Context) -> Option<Transition> {
         self.current_mode().borrow_mut().update(ctx, self)
     }
 
@@ -204,7 +203,7 @@ impl GameScene {
         self.sprites[4].as_label().unwrap()
     }
 
-    fn cursors(&self) -> Vec<Cursor> {
+    fn cursors(&self) -> Option<Vec<Cursor>> {
         self.current_mode().borrow().cursors(&self.world.borrow())
     }
 
@@ -244,7 +243,7 @@ impl GameScene {
 }
 
 impl SceneImpl for GameScene {
-    fn on_update(&mut self, ctx: &mut Context) -> SomeTransitions {
+    fn on_update(&mut self, ctx: &mut Context) -> Option<Transition> {
         if input::is_mouse_scrolled_down(ctx)
             || input::is_key_with_mod_pressed(ctx, (Key::Z, KeyModifier::Shift))
         {

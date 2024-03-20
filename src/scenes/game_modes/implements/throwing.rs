@@ -15,7 +15,7 @@ use crate::{
 };
 
 use super::super::{
-    super::{implements::GameScene, SomeTransitions},
+    super::{implements::GameScene, Transition},
     Cursor, CursorType, GameModeImpl,
 };
 
@@ -65,7 +65,7 @@ impl Default for Throwing {
 }
 
 impl GameModeImpl for Throwing {
-    fn cursors(&self, world: &World) -> Vec<Cursor> {
+    fn cursors(&self, world: &World) -> Option<Vec<Cursor>> {
         let pos = self.shift_of_view + self.mouse_moved_pos;
         let damage = world
             .units()
@@ -96,7 +96,7 @@ impl GameModeImpl for Throwing {
             CursorType::Select,
         ));
 
-        cursors
+        Some(cursors)
     }
 
     fn can_push(&self, world: &World) -> Result<(), String> {
@@ -111,7 +111,7 @@ impl GameModeImpl for Throwing {
         )
     }
 
-    fn update(&mut self, ctx: &mut Context, game: &mut GameScene) -> SomeTransitions {
+    fn update(&mut self, ctx: &mut Context, game: &mut GameScene) -> Option<Transition> {
         self.update_mouse(ctx, game);
         if input::is_key_pressed(ctx, Key::Escape) {
             game.set_shift_of_view(Point::default());

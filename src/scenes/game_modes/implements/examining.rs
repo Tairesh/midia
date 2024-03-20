@@ -1,11 +1,11 @@
 use geometry::Direction;
-use tetra::{input::Key, Context};
+use tetra::{Context, input::Key};
 
 use crate::{colors::Colors, game::World, input};
 
 use super::super::{
-    super::{implements::GameScene, SomeTransitions},
-    Cursor, CursorType, GameModeImpl,
+    Cursor,
+    CursorType, GameModeImpl, super::{implements::GameScene, Transition},
 };
 
 pub struct Examining {
@@ -25,22 +25,16 @@ impl Default for Examining {
 }
 
 impl GameModeImpl for Examining {
-    fn cursors(&self, _world: &World) -> Vec<Cursor> {
-        if let Some(selected) = self.selected {
+    fn cursors(&self, _world: &World) -> Option<Vec<Cursor>> {
+        self.selected.map(|selected| {
             vec![
-                (
-                    selected.into(),
-                    Colors::WHITE.with_alpha(0.1),
-                    CursorType::Fill,
-                ),
-                (selected.into(), Colors::LIME, CursorType::Select),
+                (selected.into(), Colors::CURSOR_BG, CursorType::Fill),
+                (selected.into(), Colors::CURSOR_FG, CursorType::Select),
             ]
-        } else {
-            vec![]
-        }
+        })
     }
 
-    fn update(&mut self, ctx: &mut Context, game: &mut GameScene) -> SomeTransitions {
+    fn update(&mut self, ctx: &mut Context, game: &mut GameScene) -> Option<Transition> {
         if input::is_key_pressed(ctx, Key::Escape) {
             game.modes.pop();
         } else if let Some(dir) = input::get_direction_keys_down(ctx) {

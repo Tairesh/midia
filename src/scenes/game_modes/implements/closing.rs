@@ -6,10 +6,12 @@ use crate::{
     colors::Colors,
     game::{actions::implements::Close, map::TerrainInteract, World},
     input,
-    scenes::{implements::GameScene, SomeTransitions},
 };
 
-use super::super::{Cursor, CursorType, GameModeImpl};
+use super::super::{
+    super::{implements::GameScene, Transition},
+    Cursor, CursorType, GameModeImpl,
+};
 
 pub struct Closing {
     selected: Option<Direction>,
@@ -28,8 +30,8 @@ impl Default for Closing {
 }
 
 impl GameModeImpl for Closing {
-    fn cursors(&self, world: &World) -> Vec<Cursor> {
-        if let Some(selected) = self.selected {
+    fn cursors(&self, world: &World) -> Option<Vec<Cursor>> {
+        Some(if let Some(selected) = self.selected {
             vec![
                 (
                     selected.into(),
@@ -46,10 +48,10 @@ impl GameModeImpl for Closing {
                 })
                 .map(|d| (d.into(), Colors::WHITE_SMOKE, CursorType::Select))
                 .collect()
-        }
+        })
     }
 
-    fn update(&mut self, ctx: &mut Context, game: &mut GameScene) -> SomeTransitions {
+    fn update(&mut self, ctx: &mut Context, game: &mut GameScene) -> Option<Transition> {
         if input::is_key_pressed(ctx, Key::Escape) {
             game.modes.pop();
         } else if let Some(dir) = input::get_direction_keys_down(ctx) {

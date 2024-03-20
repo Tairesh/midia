@@ -27,7 +27,7 @@ use super::super::{
         back_randomize_next, bg, easy_back, error_label, icon_left, icon_minus, icon_plus,
         icon_right, label, subtitle, text_input, title,
     },
-    Scene, SceneImpl, SomeTransitions, Transition,
+    Scene, SceneImpl, Transition,
 };
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
@@ -348,7 +348,7 @@ impl CreateCharacter {
         }
     }
 
-    fn create(&mut self) -> SomeTransitions {
+    fn create(&mut self) -> Option<Transition> {
         let name = self.name_input().value();
         if name.is_empty() {
             self.name_input().set_danger(true);
@@ -368,23 +368,23 @@ impl CreateCharacter {
                 Mind { name, gender },
                 CharSheet::default(true, race),
             );
-            Some(vec![Transition::Push(Scene::CharacterAttributes(
+            Some(Transition::Push(Scene::CharacterAttributes(
                 self.meta.path.clone(),
                 character,
-            ))])
+            )))
         }
     }
 }
 
 impl SceneImpl for CreateCharacter {
-    fn on_update(&mut self, _ctx: &mut Context) -> SomeTransitions {
+    fn on_update(&mut self, _ctx: &mut Context) -> Option<Transition> {
         if !self.name_input().danger() && self.name_empty().visible() {
             self.name_empty().set_visible(false);
         }
         None
     }
 
-    fn event(&mut self, _ctx: &mut Context, event: Event) -> SomeTransitions {
+    fn event(&mut self, _ctx: &mut Context, event: Event) -> Option<Transition> {
         easy_back(&event, self.is_there_focused_sprite())
     }
 
@@ -400,7 +400,7 @@ impl SceneImpl for CreateCharacter {
         Some(&mut self.sprites)
     }
 
-    fn custom_event(&mut self, ctx: &mut Context, event: u8) -> SomeTransitions {
+    fn custom_event(&mut self, ctx: &mut Context, event: u8) -> Option<Transition> {
         let event = ButtonEvent::from(event);
         match event {
             ButtonEvent::RaceLeft | ButtonEvent::RaceRight => {

@@ -16,7 +16,7 @@ use crate::{
 };
 
 use super::super::{
-    super::{implements::GameScene, Scene, SomeTransitions, Transition},
+    super::{implements::GameScene, Scene, Transition},
     implements::{
         Closing, Digging, Dropping, Examining, MeleeAttack, Observing, Opening, PickingUp,
         PikeAttack, Reading, Shooting, Throwing,
@@ -45,12 +45,12 @@ impl Default for Walking {
 impl GameModeImpl for Walking {
     // TODO: refactor this method
     #[allow(clippy::too_many_lines)]
-    fn update(&mut self, ctx: &mut Context, game: &mut GameScene) -> SomeTransitions {
+    fn update(&mut self, ctx: &mut Context, game: &mut GameScene) -> Option<Transition> {
         for key in input::get_key_with_mod_pressed(ctx) {
             if let Some(&action) = Settings::instance().input.keybindings.get(&key) {
                 match action {
                     KeyBindingAction::MainMenu => {
-                        return Some(vec![Transition::Push(Scene::GameMenu)]);
+                        return Some(Transition::Push(Scene::GameMenu));
                     }
                     KeyBindingAction::Examine => {
                         game.push_mode(Examining::new().into());

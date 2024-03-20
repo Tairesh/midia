@@ -23,7 +23,7 @@ use crate::{
     VERSION,
 };
 
-use super::super::{helpers::easy_back, Scene, SceneImpl, SomeTransitions, Transition};
+use super::super::{helpers::easy_back, Scene, SceneImpl, Transition};
 
 const KEYS: [Key; 10] = [
     Key::Num1,
@@ -175,7 +175,7 @@ impl LoadWorld {
 }
 
 impl SceneImpl for LoadWorld {
-    fn event(&mut self, _ctx: &mut Context, event: Event) -> SomeTransitions {
+    fn event(&mut self, _ctx: &mut Context, event: Event) -> Option<Transition> {
         easy_back(&event, false)
     }
 
@@ -187,19 +187,16 @@ impl SceneImpl for LoadWorld {
         Some(&mut self.sprites)
     }
 
-    fn custom_event(&mut self, _ctx: &mut Context, event: u8) -> SomeTransitions {
+    fn custom_event(&mut self, _ctx: &mut Context, event: u8) -> Option<Transition> {
         let i = (event / 2) as usize;
         let path = self.paths.get(i)?;
         if event % 2 == 0 {
             // load
             if let Some(meta) = savefile::load(path) {
                 if savefile::has_avatar(path) {
-                    Some(vec![
-                        Transition::LoadWorld(path.clone()),
-                        Transition::Replace(Scene::Game),
-                    ])
+                    Some(Transition::LoadWorld(path.clone()))
                 } else {
-                    Some(vec![Transition::Replace(Scene::CreateCharacter(meta.path))])
+                    Some(Transition::Replace(Scene::CreateCharacter(meta.path)))
                 }
             } else {
                 panic!("Can't load savefile: {path:?}")
@@ -208,9 +205,9 @@ impl SceneImpl for LoadWorld {
             // delete
             savefile::delete(path);
             if savefiles_exists() {
-                Some(vec![Transition::Replace(Scene::LoadWorld)])
+                Some(Transition::Replace(Scene::LoadWorld))
             } else {
-                Some(vec![Transition::Pop])
+                Some(Transition::Pop)
             }
         }
     }

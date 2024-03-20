@@ -439,4 +439,6 @@ impl Colors {
 
     // Special
     pub const TRANSPARENT: Color = Color::rgba(0.0, 0.0, 0.0, 0.0);
+    pub const CURSOR_BG: Color = Color::rgba(1.0, 1.0, 1.0, 0.1);
+    pub const CURSOR_FG: Color = Colors::LIME;
 }

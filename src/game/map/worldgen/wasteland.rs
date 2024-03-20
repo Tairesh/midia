@@ -24,7 +24,7 @@ impl WorldGen for Wasteland {
                 point.y as f32 / Chunk::NOISE_SIZE,
             );
             let terrain: Terrain = if rng.gen_bool(0.05) {
-                Tree::new(if humidity > 0.0 {
+                Tree::new(if humidity > 0.0 + rng.gen_range(-0.2..=0.2) {
                     rng.sample(LiveTrees)
                 } else {
                     rng.sample(DeadTrees)

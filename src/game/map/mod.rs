@@ -8,7 +8,7 @@ pub use fov::{field_of_view_set, Fov, FovMap};
 pub use items::Item;
 pub use passage::Passage;
 pub use pos::{ChunkPos, TilePos};
-pub use terrain::{Terrain, TerrainInteract, TerrainView};
+pub use terrain::{Terrain, TerrainInteract, TerrainInteractAction, TerrainView};
 pub use tile::Tile;
 use worldgen::{wasteland::Wasteland, WorldGen};
 

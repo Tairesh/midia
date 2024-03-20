@@ -13,11 +13,11 @@ use super::super::{
 };
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Copy, Clone)]
-pub struct Drop {
+pub struct DropMainHand {
     pub dir: Direction,
 }
 
-impl ActionImpl for Drop {
+impl ActionImpl for DropMainHand {
     fn is_possible(&self, actor_id: usize, world: &World) -> ActionPossibility {
         let units = world.units();
         let actor = units.get_unit(actor_id);
@@ -73,7 +73,7 @@ mod tests {
     use crate::game::world::tests::prepare_world;
     use crate::game::{Action, Avatar, Item};
 
-    use super::Drop;
+    use super::DropMainHand;
 
     #[test]
     fn test_dropping() {
@@ -88,7 +88,7 @@ mod tests {
 
         let action = Action::new(
             0,
-            Drop {
+            DropMainHand {
                 dir: Direction::Here,
             }
             .into(),

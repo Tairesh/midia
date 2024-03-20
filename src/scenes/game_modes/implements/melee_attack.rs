@@ -26,7 +26,7 @@ impl GameModeImpl for MeleeAttack {
         Some(if let Some(target) = self.target {
             let pos = target - world.units().player().pos;
             vec![
-                (pos, Colors::WHITE.with_alpha(0.1), CursorType::Fill),
+                (pos, Colors::CURSOR_BG, CursorType::Fill),
                 (pos, Colors::LIGHT_CORAL, CursorType::Select),
             ]
         } else {

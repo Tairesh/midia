@@ -1,6 +1,6 @@
 pub use close::Close;
 pub use dig::Dig;
-pub use drop::Drop;
+pub use drop::DropMainHand;
 pub use melee::Melee;
 pub use open::Open;
 pub use read::Read;

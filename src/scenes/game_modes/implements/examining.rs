@@ -1,11 +1,11 @@
 use geometry::Direction;
-use tetra::{Context, input::Key};
+use tetra::{input::Key, Context};
 
 use crate::{colors::Colors, game::World, input};
 
 use super::super::{
-    Cursor,
-    CursorType, GameModeImpl, super::{implements::GameScene, Transition},
+    super::{implements::GameScene, Transition},
+    Cursor, CursorType, GameModeImpl,
 };
 
 pub struct Examining {

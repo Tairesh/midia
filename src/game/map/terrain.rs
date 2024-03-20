@@ -3,7 +3,6 @@ use serde::{Deserialize, Serialize};
 use tetra::graphics::Color;
 
 use crate::assets::Sprite;
-use crate::game::traits::{LooksLike, Name};
 
 use super::{
     terrains::{Boulder, Chest, Dirt, Grass, Pit, Tree},
@@ -37,7 +36,6 @@ pub trait TerrainView {
 
 #[enum_dispatch(Terrain)]
 pub trait TerrainInteract {
-    // TODO: implement Interact enum for adding more interaction types easily
     fn passage(&self) -> Passage;
     fn is_passable(&self) -> bool {
         matches!(self.passage(), Passage::Passable(..))
@@ -87,4 +85,20 @@ pub trait TerrainInteract {
     fn smash_result(&self) -> (Terrain, Vec<Item>) {
         unimplemented!()
     }
+    // TODO: remove this methods
+    fn supports_action(&self, action: TerrainInteractAction) -> bool {
+        match action {
+            TerrainInteractAction::Open => self.can_be_opened(),
+            TerrainInteractAction::Close => self.can_be_closed(),
+            TerrainInteractAction::Read => self.is_readable(),
+            TerrainInteractAction::Drop => self.can_stock_items(),
+        }
+    }
+}
+
+pub enum TerrainInteractAction {
+    Open,
+    Close,
+    Read,
+    Drop,
 }

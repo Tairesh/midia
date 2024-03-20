@@ -6,8 +6,8 @@ use crate::scenes::game_modes::Cursor;
 use crate::scenes::{implements::GameScene, Transition};
 
 use super::implements::{
-    Closing, Digging, Dropping, Examining, MeleeAttack, Observing, Opening, PickingUp, PikeAttack,
-    Reading, Shooting, Throwing, Walking,
+    Examining, Interacting, MeleeAttack, Observing, PickingUp, PikeAttack, Shooting, Throwing,
+    Walking,
 };
 
 #[enum_dispatch]
@@ -27,14 +27,10 @@ pub enum GameMode {
     Walking,
     Examining,
     PickingUp,
-    Dropping,
-    Digging,
     Observing,
-    Reading,
-    Opening,
-    Closing,
     MeleeAttack,
     PikeAttack,
     Throwing,
     Shooting,
+    Interacting,
 }

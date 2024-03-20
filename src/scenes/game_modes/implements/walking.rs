@@ -3,13 +3,12 @@ use std::time::Instant;
 use geometry::Direction;
 use tetra::{input::KeyModifier, Context};
 
-use crate::game::Fighter;
 use crate::{
     colors::Colors,
     game::{
-        actions::implements::{Drop, Reload, Skip, Walk, Wear},
+        actions::implements::{DropMainHand, Reload, Skip, Walk, Wear},
         traits::Name,
-        BodySlot, LogEvent,
+        BodySlot, Fighter, LogEvent,
     },
     input,
     settings::{KeyBindingAction, Settings},
@@ -18,10 +17,9 @@ use crate::{
 use super::super::{
     super::{implements::GameScene, Scene, Transition},
     implements::{
-        Closing, Digging, Dropping, Examining, MeleeAttack, Observing, Opening, PickingUp,
-        PikeAttack, Reading, Shooting, Throwing,
+        Examining, Interacting, MeleeAttack, Observing, PickingUp, PikeAttack, Shooting, Throwing,
     },
-    GameModeImpl,
+    GameModeImpl, PlayerCommand,
 };
 
 pub struct Walking {
@@ -57,14 +55,14 @@ impl GameModeImpl for Walking {
                     }
                     KeyBindingAction::DropHere => {
                         game.try_start_action(
-                            Drop {
+                            DropMainHand {
                                 dir: Direction::Here,
                             }
                             .into(),
                         );
                     }
                     KeyBindingAction::Drop => {
-                        game.push_mode(Dropping::new().into());
+                        game.push_mode(Interacting::new(PlayerCommand::Drop).into());
                     }
                     KeyBindingAction::PickUp => {
                         game.push_mode(PickingUp::new().into());
@@ -72,20 +70,17 @@ impl GameModeImpl for Walking {
                     KeyBindingAction::ClearLog => {
                         game.log.clear();
                     }
-                    KeyBindingAction::Dig => {
-                        game.push_mode(Digging::new().into());
-                    }
                     KeyBindingAction::Observe => {
                         game.push_mode(Observing::new().into());
                     }
                     KeyBindingAction::Open => {
-                        game.push_mode(Opening::new().into());
+                        game.push_mode(Interacting::new(PlayerCommand::Open).into());
                     }
                     KeyBindingAction::Read => {
-                        game.push_mode(Reading::new().into());
+                        game.push_mode(Interacting::new(PlayerCommand::Read).into());
                     }
                     KeyBindingAction::Close => {
-                        game.push_mode(Closing::new().into());
+                        game.push_mode(Interacting::new(PlayerCommand::Close).into());
                     }
                     KeyBindingAction::Wear => {
                         game.try_start_action(Wear {}.into());

@@ -3,15 +3,17 @@
 pub use actions::{Action, ActionType};
 pub use ai::AI;
 pub use game_data::{
-    AmmoType, DamageValue, GameData, IsAmmoValue, ItemPrototype, ItemQuality, ItemSize, Material,
-    WearLayer,
+    AmmoType, DamageValue, GameData, ItemPrototype, ItemQuality, ItemSize, Material,
 };
 pub use log::{Log, LogEvent};
-pub use map::{Chunk, ChunkPos, Item, Map, Terrain, TerrainInteract, TerrainView, Tile, TilePos};
+pub use map::{
+    Chunk, ChunkPos, Item, Map, Terrain, TerrainInteract, TerrainInteractAction, TerrainView, Tile,
+    TilePos,
+};
 pub use races::{BodySlot, Race};
 pub use savage::{
     AttackType, AttrLevel, Attribute, CharSheet, Damage, DamageDice, DamageRollResult, DamageType,
-    Dice, DiceWithModifier, RangedDistance, RollResult, Skill, SkillLevel, Wound,
+    Dice, RangedDistance, RollResult, Skill, SkillLevel, Wound,
 };
 pub use units::{Avatar, Fighter};
 pub use world::World;

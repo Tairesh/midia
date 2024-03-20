@@ -2,11 +2,11 @@ use enum_dispatch::enum_dispatch;
 use tetra::Context;
 
 use crate::game::World;
-use crate::scenes::game_modes::Cursor;
 use crate::scenes::{implements::GameScene, Transition};
+use crate::scenes::game_modes::Cursor;
 
 use super::implements::{
-    Interacting, MeleeAttack, Observing, PickingUp, PikeAttack, Shooting, Throwing, Walking,
+    Interacting, MeleeAttack, Observing, PikeAttack, Shooting, Throwing, Walking,
 };
 
 #[enum_dispatch]
@@ -24,7 +24,6 @@ pub trait GameModeImpl {
 #[enum_dispatch(GameModeImpl)]
 pub enum GameMode {
     Walking,
-    PickingUp,
     Observing,
     MeleeAttack,
     PikeAttack,

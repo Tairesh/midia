@@ -5,8 +5,8 @@ use tetra::graphics::Color;
 use crate::assets::Sprite;
 
 use super::{
-    terrains::{Boulder, Chest, Dirt, Grass, Pit, Tree},
-    Item, Passage,
+    Item,
+    Passage, terrains::{Boulder, Chest, Dirt, Grass, Pit, Tree},
 };
 
 // TODO: JSON-ize all terrains
@@ -92,7 +92,7 @@ pub trait TerrainInteract {
             TerrainInteractAction::Close => self.can_be_closed(),
             TerrainInteractAction::Read => self.is_readable(),
             TerrainInteractAction::Drop => self.can_stock_items(),
-            TerrainInteractAction::Examine => true,
+            _ => true,
         }
     }
 }
@@ -103,4 +103,5 @@ pub enum TerrainInteractAction {
     Read,
     Drop,
     Examine,
+    WieldFromGround,
 }

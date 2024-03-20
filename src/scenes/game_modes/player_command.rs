@@ -6,21 +6,30 @@ pub enum PlayerCommand {
     Close,
     Read,
     Drop,
+    WieldFromGround,
     Examine,
 }
 
 impl PlayerCommand {
     pub fn highlight_tile(self, tile: &Tile) -> bool {
-        if self == Self::Examine {
-            return false;
+        match self {
+            Self::Examine => false,
+            Self::WieldFromGround => !tile.items.is_empty(),
+            _ => tile.terrain.supports_action(self.into()),
         }
-
-        tile.terrain.supports_action(self.into())
     }
 
     pub fn can_start(self, world: &World) -> Result<(), String> {
-        if self == Self::Drop && world.units().player().inventory.main_hand().is_none() {
-            return Err("You have nothing to drop!".to_string());
+        match self {
+            Self::Drop => {
+                if world.units().player().inventory.main_hand().is_none() {
+                    return Err("You have nothing to drop!".to_string());
+                }
+            }
+            Self::WieldFromGround => {
+                return world.units().player().inventory.can_wield_any();
+            }
+            _ => {}
         }
 
         Ok(())
@@ -35,6 +44,7 @@ impl From<PlayerCommand> for TerrainInteractAction {
             PlayerCommand::Read => TerrainInteractAction::Read,
             PlayerCommand::Drop => TerrainInteractAction::Drop,
             PlayerCommand::Examine => TerrainInteractAction::Examine,
+            PlayerCommand::WieldFromGround => TerrainInteractAction::WieldFromGround,
         }
     }
 }

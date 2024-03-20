@@ -3,7 +3,7 @@ use tetra::input::Key;
 use tetra::Context;
 
 use crate::colors::Colors;
-use crate::game::actions::implements::{Close, DropMainHand, Open, Read};
+use crate::game::actions::implements::{Close, DropMainHand, Open, Read, WieldFromGround};
 use crate::game::World;
 use crate::input;
 use crate::scenes::game_modes::{Cursor, CursorType};
@@ -64,6 +64,7 @@ impl GameModeImpl for Interacting {
                     PlayerCommand::Close => Close { dir }.into(),
                     PlayerCommand::Read => Read::new(dir, game.world.borrow().units().player()),
                     PlayerCommand::Drop => DropMainHand { dir }.into(),
+                    PlayerCommand::WieldFromGround => WieldFromGround { dir }.into(),
                     PlayerCommand::Examine => unreachable!(),
                 };
                 game.try_start_action(action);

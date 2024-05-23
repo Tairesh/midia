@@ -1,9 +1,6 @@
 use std::collections::HashMap;
 
-use tetra::input::{
-    Key,
-    KeyModifier::{Ctrl, Shift},
-};
+use tetra::input::Key;
 
 use crate::input::KeyWithMod;
 
@@ -43,25 +40,25 @@ impl Default for InputSettings {
         Self {
             repeat_interval: 125,
             keybindings: [
-                (KeyWithMod::key(Key::Escape), KeyBindingAction::MainMenu),
-                (KeyWithMod::key(Key::E), KeyBindingAction::Examine),
-                (KeyWithMod::key(Key::D), KeyBindingAction::DropHere),
-                (KeyWithMod::new(Key::D, Shift), KeyBindingAction::Drop),
-                (KeyWithMod::key(Key::G), KeyBindingAction::PickUp),
-                (KeyWithMod::key(Key::R), KeyBindingAction::Reload),
-                (KeyWithMod::new(Key::C, Ctrl), KeyBindingAction::ClearLog),
-                (KeyWithMod::key(Key::X), KeyBindingAction::Observe),
-                (KeyWithMod::new(Key::R, Shift), KeyBindingAction::Read),
-                (KeyWithMod::key(Key::O), KeyBindingAction::Open),
-                (KeyWithMod::key(Key::C), KeyBindingAction::Close),
-                (KeyWithMod::new(Key::A, Ctrl), KeyBindingAction::MeleeAttack),
-                (KeyWithMod::new(Key::W, Shift), KeyBindingAction::Wear),
-                (KeyWithMod::new(Key::X, Shift), KeyBindingAction::SwapHands),
-                (KeyWithMod::key(Key::I), KeyBindingAction::Inventory),
-                (KeyWithMod::key(Key::T), KeyBindingAction::Throw),
-                (KeyWithMod::key(Key::F), KeyBindingAction::RangeAttack),
-                (KeyWithMod::key(Key::R), KeyBindingAction::Reload),
-                (KeyWithMod::key(Key::Period), KeyBindingAction::Skip),
+                (Key::Escape.into(), KeyBindingAction::MainMenu),
+                (Key::E.into(), KeyBindingAction::Examine),
+                (Key::D.into(), KeyBindingAction::DropHere),
+                (KeyWithMod::shift(Key::D), KeyBindingAction::Drop),
+                (Key::G.into(), KeyBindingAction::PickUp),
+                (Key::R.into(), KeyBindingAction::Reload),
+                (KeyWithMod::ctrl(Key::C), KeyBindingAction::ClearLog),
+                (Key::X.into(), KeyBindingAction::Observe),
+                (KeyWithMod::shift(Key::R), KeyBindingAction::Read),
+                (Key::O.into(), KeyBindingAction::Open),
+                (Key::C.into(), KeyBindingAction::Close),
+                (KeyWithMod::ctrl(Key::A), KeyBindingAction::MeleeAttack),
+                (KeyWithMod::shift(Key::W), KeyBindingAction::Wear),
+                (KeyWithMod::shift(Key::X), KeyBindingAction::SwapHands),
+                (Key::I.into(), KeyBindingAction::Inventory),
+                (Key::T.into(), KeyBindingAction::Throw),
+                (Key::F.into(), KeyBindingAction::RangeAttack),
+                (Key::R.into(), KeyBindingAction::Reload),
+                (Key::Period.into(), KeyBindingAction::Skip),
             ]
             .into(),
         }

@@ -7,7 +7,9 @@ pub use tetra::{input::*, math::num_traits::Zero, Context};
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub struct KeyWithMod {
     pub key: Key,
-    pub key_mod: Option<KeyModifier>,
+    pub shift: bool,
+    pub ctrl: bool,
+    pub alt: bool,
 }
 
 impl serde::Serialize for KeyWithMod {
@@ -15,10 +17,17 @@ impl serde::Serialize for KeyWithMod {
     where
         S: Serializer,
     {
-        match self.key_mod {
-            Some(key_mod) => serializer.serialize_str(&format!("{}+{:?}", key_mod, self.key)),
-            None => serializer.serialize_str(&format!("{:?}", self.key)),
+        let mut s = format!("{:?}", self.key);
+        if self.alt {
+            s = format!("Alt+{s}");
         }
+        if self.ctrl {
+            s = format!("Ctrl+{s}");
+        }
+        if self.shift {
+            s = format!("Shift+{s}");
+        }
+        serializer.serialize_str(&s)
     }
 }
 
@@ -28,50 +37,102 @@ impl<'de> serde::Deserialize<'de> for KeyWithMod {
         D: Deserializer<'de>,
     {
         let str = String::deserialize(deserializer)?;
-        let parts: Vec<String> = str
-            .split('+')
-            .map(|s| format!("\"{}\"", s.trim()))
-            .collect();
-        match parts.len() {
-            1 => Ok(Self::key(
-                serde_json::from_str(&parts[0]).map_err(serde::de::Error::custom)?,
-            )),
-            2 => Ok(Self::new(
-                serde_json::from_str(&parts[1]).map_err(serde::de::Error::custom)?,
-                serde_json::from_str(&parts[0]).map_err(serde::de::Error::custom)?,
-            )),
-            _ => Err(serde::de::Error::custom("Invalid key")),
-        }
+        let shift = str.contains("Shift+");
+        let ctrl = str.contains("Ctrl+");
+        let alt = str.contains("Alt+");
+        let key = format!(
+            "\"{}\"",
+            str.replace("Shift+", "")
+                .replace("Ctrl+", "")
+                .replace("Alt+", "")
+        );
+        let key = serde_json::from_str(&key).map_err(serde::de::Error::custom)?;
+
+        Ok(Self {
+            key,
+            shift,
+            ctrl,
+            alt,
+        })
     }
 }
 
 impl KeyWithMod {
-    pub fn new(key: Key, key_mod: KeyModifier) -> Self {
+    pub fn new(key: Key, shift: bool, ctrl: bool, alt: bool) -> Self {
         Self {
             key,
-            key_mod: Some(key_mod),
+            shift,
+            ctrl,
+            alt,
         }
     }
 
-    pub fn key(key: Key) -> Self {
-        Self { key, key_mod: None }
+    pub fn from_key(key: Key) -> Self {
+        Self {
+            key,
+            shift: false,
+            ctrl: false,
+            alt: false,
+        }
     }
 
-    pub fn with(mut self, key_mod: KeyModifier) -> Self {
-        self.key_mod = Some(key_mod);
-        self
+    pub fn shift(key: Key) -> Self {
+        Self {
+            key,
+            shift: true,
+            ctrl: false,
+            alt: false,
+        }
+    }
+
+    pub fn ctrl(key: Key) -> Self {
+        Self {
+            key,
+            shift: false,
+            ctrl: true,
+            alt: false,
+        }
+    }
+
+    pub fn alt(key: Key) -> Self {
+        Self {
+            key,
+            shift: false,
+            ctrl: false,
+            alt: true,
+        }
     }
 }
 
 impl From<Key> for KeyWithMod {
     fn from(key: Key) -> Self {
-        Self::key(key)
+        Self::from_key(key)
     }
 }
 
 impl From<(Key, KeyModifier)> for KeyWithMod {
     fn from((key, key_mod): (Key, KeyModifier)) -> Self {
-        Self::key(key).with(key_mod)
+        match key_mod {
+            KeyModifier::Shift => Self {
+                key,
+                shift: true,
+                ctrl: false,
+                alt: false,
+            },
+            KeyModifier::Ctrl => Self {
+                key,
+                shift: false,
+                ctrl: true,
+                alt: false,
+            },
+            KeyModifier::Alt => Self {
+                key,
+                shift: false,
+                ctrl: false,
+                alt: true,
+            },
+            _ => unreachable!("Only Shift, Ctrl and Alt are supported"),
+        }
     }
 }
 
@@ -81,11 +142,17 @@ pub fn is_key_with_mod_pressed<K: Into<KeyWithMod>>(ctx: &mut Context, kwm: K) -
     if !is_key_pressed(ctx, kwm.key) {
         return false;
     }
-    if let Some(key_mod) = kwm.key_mod {
-        is_key_modifier_down(ctx, key_mod)
-    } else {
-        is_no_key_modifiers(ctx)
+    if kwm.shift && !is_key_modifier_down(ctx, KeyModifier::Shift) {
+        return false;
     }
+    if kwm.ctrl && !is_key_modifier_down(ctx, KeyModifier::Ctrl) {
+        return false;
+    }
+    if kwm.alt && !is_key_modifier_down(ctx, KeyModifier::Alt) {
+        return false;
+    }
+
+    true
 }
 
 /// Nor Shift, nor Alt, nor Ctrl is pressed
@@ -159,19 +226,12 @@ pub fn is_some_of_keys_pressed(ctx: &mut Context, keys: &[Key]) -> bool {
 pub fn get_key_with_mod_pressed(ctx: &mut Context) -> Vec<KeyWithMod> {
     let mut keys = Vec::new();
     for &key in get_keys_pressed(ctx) {
-        if is_no_key_modifiers(ctx) {
-            keys.push(KeyWithMod::key(key));
-        } else {
-            if is_key_modifier_down(ctx, KeyModifier::Shift) {
-                keys.push(KeyWithMod::new(key, KeyModifier::Shift));
-            }
-            if is_key_modifier_down(ctx, KeyModifier::Alt) {
-                keys.push(KeyWithMod::new(key, KeyModifier::Alt));
-            }
-            if is_key_modifier_down(ctx, KeyModifier::Ctrl) {
-                keys.push(KeyWithMod::new(key, KeyModifier::Ctrl));
-            }
-        }
+        keys.push(KeyWithMod::new(
+            key,
+            is_key_modifier_down(ctx, KeyModifier::Shift),
+            is_key_modifier_down(ctx, KeyModifier::Ctrl),
+            is_key_modifier_down(ctx, KeyModifier::Alt),
+        ));
     }
 
     keys
@@ -183,11 +243,11 @@ mod tests {
 
     #[test]
     fn test_serializing_key_with_mod() {
-        let kwm = KeyWithMod::new(Key::A, KeyModifier::Ctrl);
+        let kwm = KeyWithMod::new(Key::A, false, true, false);
         let serialized = serde_json::to_string(&kwm).unwrap();
         assert_eq!(serialized, "\"Ctrl+A\"");
 
-        let kwm = KeyWithMod::key(Key::A);
+        let kwm = KeyWithMod::from_key(Key::A);
         let serialized = serde_json::to_string(&kwm).unwrap();
         assert_eq!(serialized, "\"A\"");
     }
@@ -195,9 +255,9 @@ mod tests {
     #[test]
     fn test_deserializing_key_with_mod() {
         let kwm: KeyWithMod = serde_json::from_str("\"Ctrl+A\"").unwrap();
-        assert_eq!(kwm, KeyWithMod::new(Key::A, KeyModifier::Ctrl));
+        assert_eq!(kwm, KeyWithMod::new(Key::A, false, true, false));
 
         let kwm: KeyWithMod = serde_json::from_str("\"A\"").unwrap();
-        assert_eq!(kwm, KeyWithMod::key(Key::A));
+        assert_eq!(kwm, KeyWithMod::from_key(Key::A));
     }
 }

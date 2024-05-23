@@ -10,7 +10,7 @@ pub enum Transition {
     Replace(Scene),
     /// unload world pop all scenes except first
     GoMainMenu,
-    /// load savefile and push GameScene
+    /// load savefile and push `GameScene`
     LoadWorld(PathBuf),
     /// custom scene-related event
     CustomEvent(u8),

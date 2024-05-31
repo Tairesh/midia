@@ -49,6 +49,7 @@ mod tests {
         assert_eq!(a(word), result);
     }
 
+    #[test_case("", "")]
     #[test_case("you pet the cat", "You pet the cat")]
     #[test_case("this book is called 'The Cat'", "This book is called 'The Cat'")]
     fn test_capitalize(sentence: &str, result: &str) {

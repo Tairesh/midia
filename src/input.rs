@@ -240,24 +240,23 @@ pub fn get_key_with_mod_pressed(ctx: &mut Context) -> Vec<KeyWithMod> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use test_case::test_case;
 
-    #[test]
-    fn test_serializing_key_with_mod() {
-        let kwm = KeyWithMod::new(Key::A, false, true, false);
+    #[test_case(KeyWithMod::new(Key::A, false, true, false), "\"Ctrl+A\"")]
+    #[test_case(KeyWithMod::from_key(Key::A), "\"A\"")]
+    #[test_case(KeyWithMod::shift(Key::A), "\"Shift+A\"")]
+    #[test_case(KeyWithMod::new(Key::Delete, false, true, true), "\"Ctrl+Alt+Delete\"")]
+    fn test_serializing_key_with_mod(kwm: KeyWithMod, expected: &str) {
         let serialized = serde_json::to_string(&kwm).unwrap();
-        assert_eq!(serialized, "\"Ctrl+A\"");
-
-        let kwm = KeyWithMod::from_key(Key::A);
-        let serialized = serde_json::to_string(&kwm).unwrap();
-        assert_eq!(serialized, "\"A\"");
+        assert_eq!(serialized, expected);
     }
 
-    #[test]
-    fn test_deserializing_key_with_mod() {
-        let kwm: KeyWithMod = serde_json::from_str("\"Ctrl+A\"").unwrap();
-        assert_eq!(kwm, KeyWithMod::new(Key::A, false, true, false));
-
-        let kwm: KeyWithMod = serde_json::from_str("\"A\"").unwrap();
-        assert_eq!(kwm, KeyWithMod::from_key(Key::A));
+    #[test_case("\"Ctrl+A\"", KeyWithMod::new(Key::A, false, true, false))]
+    #[test_case("\"A\"", KeyWithMod::from_key(Key::A))]
+    #[test_case("\"Shift+A\"", KeyWithMod::shift(Key::A))]
+    #[test_case("\"Ctrl+Alt+Delete\"", KeyWithMod::new(Key::Delete, false, true, true))]
+    fn test_deserializing_key_with_mod(serialized: &str, expected: KeyWithMod) {
+        let kwm: KeyWithMod = serde_json::from_str(serialized).unwrap();
+        assert_eq!(kwm, expected);
     }
 }

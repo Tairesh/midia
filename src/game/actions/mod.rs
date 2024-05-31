@@ -9,7 +9,6 @@ pub mod implements;
 
 #[derive(Debug)]
 pub enum ActionPossibility {
-    Yes(u32),
-    // length in ticks
+    Yes(u32),   // length in ticks
     No(String), // reason why not
 }

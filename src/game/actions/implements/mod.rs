@@ -15,6 +15,7 @@ mod close;
 mod drop;
 mod melee;
 mod open;
+mod ranged_attack;
 mod read;
 mod reload;
 mod shoot;

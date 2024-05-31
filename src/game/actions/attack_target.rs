@@ -34,6 +34,10 @@ impl AttackTarget {
             Self::Avatar(id) => world.units().get_unit(id).pos(),
         }
     }
+
+    pub fn is_avatar(self) -> bool {
+        matches!(self, Self::Avatar(_))
+    }
 }
 
 #[cfg(test)]

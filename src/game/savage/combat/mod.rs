@@ -14,3 +14,22 @@ pub enum AttackType {
     Throw,
     Shoot,
 }
+
+impl AttackType {
+    /// E.g. "shoot from[ a bow]", "throw[ a spear]", "attack with[ a sword]"
+    pub fn verb_a(self, with_s: bool) -> &'static str {
+        if with_s {
+            match self {
+                AttackType::Melee => "attacks with",
+                AttackType::Throw => "throws",
+                AttackType::Shoot => "shoots from",
+            }
+        } else {
+            match self {
+                AttackType::Melee => "attack with",
+                AttackType::Throw => "throw",
+                AttackType::Shoot => "shoot from",
+            }
+        }
+    }
+}

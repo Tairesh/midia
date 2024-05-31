@@ -378,7 +378,7 @@ impl CreateCharacter {
 
 impl SceneImpl for CreateCharacter {
     fn on_update(&mut self, _ctx: &mut Context) -> Option<Transition> {
-        if !self.name_input().danger() && self.name_empty().visible() {
+        if !self.name_input().is_danger() && self.name_empty().visible() {
             self.name_empty().set_visible(false);
         }
         None

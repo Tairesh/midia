@@ -127,13 +127,13 @@ impl CreateWorld {
 
 impl SceneImpl for CreateWorld {
     fn on_update(&mut self, _ctx: &mut Context) -> Option<Transition> {
-        if !self.name_input().danger() && self.name_empty().visible() {
+        if !self.name_input().is_danger() && self.name_empty().visible() {
             self.name_empty().set_visible(false);
         }
-        if !self.name_input().danger() && self.name_error().visible() {
+        if !self.name_input().is_danger() && self.name_error().visible() {
             self.name_error().set_visible(false);
         }
-        if !self.seed_input().danger() && self.seed_error().visible() {
+        if !self.seed_input().is_danger() && self.seed_error().visible() {
             self.seed_error().set_visible(false);
         }
         None

@@ -59,7 +59,7 @@ impl Avatar for Player {
         &self.personality.mind.name
     }
 
-    fn name_for_actions(&self) -> &str {
+    fn name_for_actions(&self) -> &'static str {
         "you"
     }
 

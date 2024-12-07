@@ -113,6 +113,6 @@ impl FovMap for Map {
         let (chunk, pos) = pos.to_chunk();
         self.chunks
             .get(&chunk)
-            .map_or(true, |c| c.surface[pos].terrain.is_transparent())
+            .is_none_or(|c| c.surface[pos].terrain.is_transparent())
     }
 }

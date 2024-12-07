@@ -71,6 +71,6 @@ impl GameLog {
     pub fn same_message(&self, new_msg: &String) -> bool {
         self.texts
             .front()
-            .map_or(false, |t| new_msg == t.text.content())
+            .is_some_and(|t| new_msg == t.text.content())
     }
 }

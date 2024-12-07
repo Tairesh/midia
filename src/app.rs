@@ -100,10 +100,15 @@ impl App {
     }
 
     fn load_world(&mut self, ctx: &mut Context, path: &Path) {
-        self.world = savefile::load_world(path)
-            .ok() // TODO: catch errors
-            .map(|w| Rc::new(RefCell::new(w)));
-        self.push_scene(ctx, Scene::Game);
+        match savefile::load_world(path) {
+            Ok(world) => {
+                self.world = Some(Rc::new(RefCell::new(world)));
+                self.push_scene(ctx, Scene::Game);
+            }
+            Err(e) => {
+                println!("Failed to load world: {e:?}");
+            }
+        }
     }
 
     fn unload_world(&mut self) {

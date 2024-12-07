@@ -324,10 +324,10 @@ fn handle_ammo_use(world: &mut World, action: &Action, attack_type: AttackType, 
         .inventory()
         .unwrap()
         .main_hand()
-        .map_or(false, |weapon| {
+        .is_some_and(|weapon| {
             weapon
                 .need_ammo()
-                .map_or(false, |need_ammo| need_ammo.reload == 0)
+                .is_some_and(|need_ammo| need_ammo.reload == 0)
         });
     if auto_reload {
         owner.inventory_mut().unwrap().reload().ok();

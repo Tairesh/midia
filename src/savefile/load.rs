@@ -15,7 +15,7 @@ pub fn savefiles_exists() -> bool {
                 entry
                     .map(|entry| {
                         entry.file_type().map(|t| t.is_file()).unwrap_or(false)
-                            && entry.path().extension().map_or(false, |ext| ext == "save")
+                            && entry.path().extension().is_some_and(|ext| ext == "save")
                     })
                     .unwrap_or(false)
             })
@@ -40,21 +40,22 @@ pub fn savefiles() -> Vec<Meta> {
     files
 }
 
+#[allow(dead_code)]
 #[derive(Debug)]
-pub enum Error {
+pub enum WorldLoadError {
     SystemError(String),
     DeserializeError(String),
 }
 
-impl From<serde_json::Error> for Error {
+impl From<serde_json::Error> for WorldLoadError {
     fn from(e: serde_json::Error) -> Self {
-        Error::DeserializeError(e.to_string())
+        WorldLoadError::DeserializeError(e.to_string())
     }
 }
 
-impl From<std::io::Error> for Error {
+impl From<std::io::Error> for WorldLoadError {
     fn from(e: std::io::Error) -> Self {
-        Error::SystemError(e.to_string())
+        WorldLoadError::SystemError(e.to_string())
     }
 }
 
@@ -75,7 +76,7 @@ pub fn has_avatar(path: &Path) -> bool {
     }
 }
 
-pub fn load_world(path: &Path) -> Result<World, Error> {
+pub fn load_world(path: &Path) -> Result<World, WorldLoadError> {
     let file = File::open(path)?;
     let mut lines = BufReader::new(&file).lines();
     let meta = lines.next().unwrap()?;

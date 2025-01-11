@@ -1,4 +1,5 @@
 use crate::game::{savage::HitResult, Avatar};
+use geometry::Point;
 
 use super::{LogCategory, LogEvent};
 
@@ -10,47 +11,33 @@ pub fn unit_attack_success(
 ) -> Vec<LogEvent> {
     let mut events = Vec::new();
 
-    events.push(LogEvent::new(
-        first_message,
-        unit.pos(),
-        if owner.is_player() {
-            LogCategory::Success
-        } else {
-            LogCategory::Danger
-        },
-    ));
+    push_event(&mut events, first_message, owner, unit);
     if hit.params.critical {
-        events.push(LogEvent::new(
-            "Critical hit!".to_string(),
-            unit.pos(),
-            if owner.is_player() {
-                LogCategory::Success
-            } else {
-                LogCategory::Danger
-            },
-        ));
+        push_event(&mut events, "Critical hit!".to_string(), owner, unit);
     }
     if hit.consequences.shock {
         if hit.consequences.wounds.is_empty() {
-            events.push(LogEvent::new(
-                format!("{} is stunned.", unit.name_for_actions()),
-                unit.pos(),
-                if owner.is_player() {
-                    LogCategory::Success
-                } else {
-                    LogCategory::Danger
-                },
-            ));
+            push_event(
+                &mut events,
+                format!(
+                    "{} {} stunned.",
+                    unit.name_for_actions(),
+                    unit.pronouns().is_are()
+                ),
+                owner,
+                unit,
+            );
         } else {
-            events.push(LogEvent::new(
-                format!("{} is stunned and wounded.", unit.name_for_actions()),
-                unit.pos(),
-                if owner.is_player() {
-                    LogCategory::Success
-                } else {
-                    LogCategory::Danger
-                },
-            ));
+            push_event(
+                &mut events,
+                format!(
+                    "{} {} stunned and wounded.",
+                    unit.name_for_actions(),
+                    unit.pronouns().is_are()
+                ),
+                owner,
+                unit,
+            );
         }
     }
 
@@ -67,4 +54,16 @@ pub fn unit_attack_success(
     ));
 
     events
+}
+
+fn push_event(events: &mut Vec<LogEvent>, message: String, owner: &dyn Avatar, unit: &dyn Avatar) {
+    events.push(LogEvent::new(
+        message,
+        unit.pos(),
+        if owner.is_player() {
+            LogCategory::Success
+        } else {
+            LogCategory::Danger
+        },
+    ));
 }

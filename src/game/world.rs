@@ -278,7 +278,11 @@ impl World {
         for unit in self.units_mut().loaded_units_mut() {
             if unit.char_sheet_mut().try_to_shock_out(current_tick) {
                 self.log().push(LogEvent::info(
-                    format!("{} is out of the shock!", unit.name_for_actions()),
+                    format!(
+                        "{} {} out of the shock!",
+                        unit.name_for_actions(),
+                        unit.pronouns().is_are()
+                    ),
                     unit.pos(),
                 ));
             }

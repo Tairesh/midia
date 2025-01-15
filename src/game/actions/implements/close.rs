@@ -36,9 +36,9 @@ impl ActionImpl for Close {
                 item.name(),
                 if count > 1 { "and other items" } else { "" },
                 if count > 1 {
-                    format!(" (x{})", count)
+                    format!(" (x{count})")
                 } else {
-                    "".to_string()
+                    String::new()
                 }
             ));
         }

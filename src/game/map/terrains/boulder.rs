@@ -2,13 +2,14 @@ use rand::{
     distributions::{Distribution, Standard},
     Rng,
 };
-
-use crate::assets::Sprite;
-use crate::game::map::items::helpers::ROCK;
-use crate::game::map::terrains::{Dirt, DirtVariant};
-use crate::game::{Item, Terrain};
+use std::result;
 
 use super::super::{Passage, TerrainInteract, TerrainView};
+use crate::assets::Sprite;
+use crate::game::map::items::helpers::ROCK;
+use crate::game::map::terrain::TerrainSmash;
+use crate::game::map::terrains::{Dirt, DirtVariant};
+use crate::game::{Item, Terrain};
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
 pub struct Boulder {
@@ -59,19 +60,13 @@ impl TerrainInteract for Boulder {
         }
     }
 
-    fn is_smashable(&self) -> bool {
-        true
-    }
-
-    fn smash_toughness(&self) -> u8 {
-        match self.size {
+    fn smash(&self) -> Option<TerrainSmash> {
+        let toughness = match self.size {
             BoulderSize::Huge => 12,
             BoulderSize::Middle => 10,
             BoulderSize::Small => 8,
-        }
-    }
+        };
 
-    fn smash_result(&self) -> (Terrain, Vec<Item>) {
         let mut rng = rand::thread_rng();
         let dirt_variant = rng.gen::<DirtVariant>();
         let shards_count = match self.size {
@@ -81,8 +76,9 @@ impl TerrainInteract for Boulder {
         };
         // TODO: add sharp rocks and rubble
         let items = (0..shards_count).map(|_| Item::new(ROCK)).collect();
+        let result = (Dirt::new(dirt_variant).into(), items);
 
-        (Dirt::new(dirt_variant).into(), items)
+        Some(TerrainSmash::new(toughness, result))
     }
 }
 

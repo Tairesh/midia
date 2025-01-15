@@ -12,7 +12,7 @@ pub fn melee_smash_terrain(attacker: &dyn Fighter, defender: &Terrain) -> Terrai
 
         if damage.damage_type.is_some()
             && damage.damage_type.unwrap() == DamageType::Blunt
-            && damage.damage >= defender.smash_toughness()
+            && damage.damage >= defender.smash().unwrap().toughness
         {
             TerrainMeleeAttackResult::Success(damage.damage)
         } else {

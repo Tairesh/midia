@@ -54,14 +54,8 @@ pub trait TerrainInteract {
     fn on_step(&self) -> Option<Terrain> {
         None
     }
-    fn is_smashable(&self) -> bool {
-        false
-    }
-    fn smash_toughness(&self) -> u8 {
-        unimplemented!()
-    }
-    fn smash_result(&self) -> (Terrain, Vec<Item>) {
-        unimplemented!()
+    fn smash(&self) -> Option<TerrainSmash> {
+        None
     }
     fn supports_action(&self, _action: TerrainInteractAction) -> bool {
         false
@@ -76,4 +70,15 @@ pub enum TerrainInteractAction {
     Drop,
     Examine,
     WieldFromGround,
+}
+
+pub struct TerrainSmash {
+    pub toughness: u8,
+    pub result: (Terrain, Vec<Item>),
+}
+
+impl TerrainSmash {
+    pub fn new(toughness: u8, result: (Terrain, Vec<Item>)) -> Self {
+        Self { toughness, result }
+    }
 }

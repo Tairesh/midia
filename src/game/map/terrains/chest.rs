@@ -1,12 +1,12 @@
 use rand::Rng;
 
+use super::super::{TerrainInteract, TerrainView};
 use crate::assets::Sprite;
 use crate::game::map::items::helpers::WOODEN_SPLINTER;
+use crate::game::map::terrain::TerrainSmash;
 use crate::game::map::terrains::{Dirt, DirtVariant};
 use crate::game::map::Passage;
 use crate::game::{Item, Terrain, TerrainInteractAction};
-
-use super::super::{TerrainInteract, TerrainView};
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
 pub struct Chest {
@@ -64,15 +64,7 @@ impl TerrainInteract for Chest {
         Chest::new(items, false).into()
     }
 
-    fn is_smashable(&self) -> bool {
-        true
-    }
-
-    fn smash_toughness(&self) -> u8 {
-        8
-    }
-
-    fn smash_result(&self) -> (Terrain, Vec<Item>) {
+    fn smash(&self) -> Option<TerrainSmash> {
         let mut rng = rand::thread_rng();
         let dirt_variant = rng.gen::<DirtVariant>();
         let splinters_count = rng.gen_range(1..=3);
@@ -80,7 +72,9 @@ impl TerrainInteract for Chest {
         for _ in 0..splinters_count {
             items.push(Item::new(WOODEN_SPLINTER));
         }
-        (Dirt::new(dirt_variant).into(), items)
+        let result = (Dirt::new(dirt_variant).into(), items);
+
+        Some(TerrainSmash::new(8, result))
     }
 
     fn supports_action(&self, action: TerrainInteractAction) -> bool {

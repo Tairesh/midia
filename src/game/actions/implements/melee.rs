@@ -43,7 +43,7 @@ impl Melee {
         let owner = action.owner(&units);
         let weapon = owner.as_fighter().weapon(AttackType::Melee).unwrap();
         let can_smash = weapon.damage.damage_types.contains(&DamageType::Blunt)
-            && world.map().get_tile(target).terrain.is_smashable();
+            && world.map().get_tile(target).terrain.smash().is_some();
         if !can_smash {
             return false;
         }
@@ -104,7 +104,8 @@ impl Melee {
                     ),
                     target,
                 ));
-                let (new_terrain, mut items) = world.map().get_tile(target).terrain.smash_result();
+                let (new_terrain, mut items) =
+                    world.map().get_tile(target).terrain.smash().unwrap().result;
                 world.map().get_tile_mut(target).terrain = new_terrain;
                 world.map().get_tile_mut(target).items.append(&mut items);
             }

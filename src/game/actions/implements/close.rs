@@ -27,6 +27,22 @@ impl ActionImpl for Close {
             return No(format!("You can't close the {}", tile.terrain.name()));
         }
 
+        if !tile.items.is_empty() && !tile.terrain.can_contain_items() {
+            let item = &tile.items[0];
+            let count = tile.items.len();
+            return No(format!(
+                "You can't close the {} with {} {}{} on it",
+                tile.terrain.name(),
+                item.name(),
+                if count > 1 { "and other items" } else { "" },
+                if count > 1 {
+                    format!(" (x{})", count)
+                } else {
+                    "".to_string()
+                }
+            ));
+        }
+
         Yes(50)
     }
 
@@ -51,12 +67,7 @@ impl ActionImpl for Close {
             pos,
             LogCategory::Info,
         ));
-        let new_terrain = if tile.terrain.can_suck_items_on_close() {
-            tile.terrain
-                .close_and_suck_items(tile.items.drain(..).collect())
-        } else {
-            tile.terrain.close()
-        };
+        let new_terrain = tile.terrain.close(tile.items.drain(..).collect());
         tile.terrain = new_terrain;
 
         drop(map);
@@ -136,4 +147,6 @@ mod tests {
         );
         assert!(action.is_err());
     }
+
+    // TODO: Add tests for doors (open/close/can't close wuth items)
 }

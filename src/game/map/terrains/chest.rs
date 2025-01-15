@@ -49,7 +49,7 @@ impl TerrainInteract for Chest {
         Passage::Passable(50)
     }
 
-    fn can_suck_items_on_close(&self) -> bool {
+    fn can_contain_items(&self) -> bool {
         true
     }
 
@@ -60,7 +60,7 @@ impl TerrainInteract for Chest {
         )
     }
 
-    fn close_and_suck_items(&self, items: Vec<Item>) -> Terrain {
+    fn close(&self, items: Vec<Item>) -> Terrain {
         Chest::new(items, false).into()
     }
 

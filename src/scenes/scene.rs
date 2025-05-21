@@ -7,8 +7,8 @@ use crate::game::units::PlayerPersonality;
 
 use super::{
     implements::{
-        CharacterAttributes, CreateCharacter, CreateWorld, Empty, GameMenu, GameScene, LoadWorld,
-        MainMenu, SettingsScene,
+        CharacterAttributes, CreateCharacter, CreateWorld, Empty, GameMenu, GameScene, InventoryScene,
+        LoadWorld, MainMenu, SettingsScene,
     },
     SceneImpl,
 };
@@ -24,6 +24,7 @@ pub enum Scene {
     CreateCharacter(PathBuf),
     CharacterAttributes(PathBuf, PlayerPersonality),
     Game,
+    Inventory,
     GameMenu,
 }
 
@@ -41,6 +42,7 @@ impl Scene {
                 Box::new(CharacterAttributes::new(&path, personality, app, ctx))
             }
             Scene::Game => Box::new(GameScene::new(app)),
+            Scene::Inventory => Box::new(InventoryScene::new(app, ctx)),
             Scene::GameMenu => Box::new(GameMenu::new(app)),
         }
     }

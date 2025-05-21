@@ -27,7 +27,7 @@ use crate::{
 
 use super::super::{
     game_modes::{implements::Walking, Cursor, GameMode, GameModeImpl},
-    map_view, SceneImpl, Transition,
+    map_view, Scene, SceneImpl, Transition,
 };
 
 pub struct GameScene {
@@ -244,6 +244,10 @@ impl GameScene {
 
 impl SceneImpl for GameScene {
     fn on_update(&mut self, ctx: &mut Context) -> Option<Transition> {
+        if input::is_key_pressed(ctx, Key::I) {
+            return Some(Transition::Push(Scene::Inventory));
+        }
+
         if input::is_mouse_scrolled_down(ctx)
             || input::is_key_with_mod_pressed(ctx, (Key::Z, KeyModifier::Shift))
         {

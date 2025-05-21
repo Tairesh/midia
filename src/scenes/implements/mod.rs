@@ -7,6 +7,7 @@ pub use game_scene::GameScene;
 pub use load_world::LoadWorld;
 pub use main_menu::MainMenu;
 pub use settings_scene::SettingsScene;
+pub use inventory_scene::InventoryScene;
 
 mod character_attributes;
 mod create_character;
@@ -17,3 +18,4 @@ mod game_scene;
 mod load_world;
 mod main_menu;
 mod settings_scene;
+mod inventory_scene;

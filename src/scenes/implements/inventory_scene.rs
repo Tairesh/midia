@@ -40,7 +40,9 @@ impl InventoryScene {
         // Wielded Title
         let wielded_title_pos = Position {
             x: Horizontal::AtWindowCenterByLeft { offset: -230.0 },
-            y: Vertical::ByTop { y: current_y_offset },
+            y: Vertical::ByTop {
+                y: current_y_offset,
+            },
         };
         let wielded_title = Box::new(Label::new(
             "Wielded:",
@@ -57,7 +59,9 @@ impl InventoryScene {
         for item in player.inventory.wield.items.iter() {
             let icon_pos = Position {
                 x: item_x_icon,
-                y: Vertical::ByTop { y: current_y_offset },
+                y: Vertical::ByTop {
+                    y: current_y_offset,
+                },
             };
             let icon = Box::new(TilesetSprite::new(
                 item.looks_like(),
@@ -70,7 +74,9 @@ impl InventoryScene {
 
             let label_pos = Position {
                 x: item_x_label,
-                y: Vertical::ByTop { y: current_y_offset },
+                y: Vertical::ByTop {
+                    y: current_y_offset,
+                },
             };
             let name_label = Box::new(Label::new(
                 item.name(),
@@ -87,7 +93,9 @@ impl InventoryScene {
         // Worn Title
         let worn_title_pos = Position {
             x: Horizontal::AtWindowCenterByLeft { offset: -230.0 },
-            y: Vertical::ByTop { y: current_y_offset },
+            y: Vertical::ByTop {
+                y: current_y_offset,
+            },
         };
         let worn_title = Box::new(Label::new(
             "Worn:",
@@ -109,7 +117,9 @@ impl InventoryScene {
                 // Item in wear slot
                 let icon_pos = Position {
                     x: worn_item_x_icon,
-                    y: Vertical::ByTop { y: current_y_offset },
+                    y: Vertical::ByTop {
+                        y: current_y_offset,
+                    },
                 };
                 let icon = Box::new(TilesetSprite::new(
                     item.looks_like(),
@@ -122,7 +132,9 @@ impl InventoryScene {
 
                 let label_pos = Position {
                     x: worn_item_x_label,
-                    y: Vertical::ByTop { y: current_y_offset },
+                    y: Vertical::ByTop {
+                        y: current_y_offset,
+                    },
                 };
                 let name_label = Box::new(Label::new(
                     item.name(),
@@ -137,7 +149,9 @@ impl InventoryScene {
                     for inner_item in container.items.iter() {
                         let inner_icon_pos = Position {
                             x: inner_item_x_icon,
-                            y: Vertical::ByTop { y: current_y_offset },
+                            y: Vertical::ByTop {
+                                y: current_y_offset,
+                            },
                         };
                         let inner_icon = Box::new(TilesetSprite::new(
                             inner_item.looks_like(),
@@ -150,7 +164,9 @@ impl InventoryScene {
 
                         let inner_label_pos = Position {
                             x: inner_item_x_label,
-                            y: Vertical::ByTop { y: current_y_offset },
+                            y: Vertical::ByTop {
+                                y: current_y_offset,
+                            },
                         };
                         let inner_name_label = Box::new(Label::new(
                             format!("- {}", inner_item.name()),
@@ -188,12 +204,7 @@ impl SceneImpl for InventoryScene {
         None
     }
 
-    fn event(
-        &mut self,
-        _ctx: &mut Context,
-        event: input::Event,
-        _app: &App,
-    ) -> Option<Transition> {
+    fn event(&mut self, _ctx: &mut Context, event: input::Event, _app: &App) -> Option<Transition> {
         if let input::Event::KeyboardKeyReleased(key) = event {
             if key == Key::Escape || key == Key::I {
                 return Some(Transition::Pop);

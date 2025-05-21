@@ -7,8 +7,8 @@ use crate::game::units::PlayerPersonality;
 
 use super::{
     implements::{
-        CharacterAttributes, CreateCharacter, CreateWorld, Empty, GameMenu, GameScene, InventoryScene,
-        LoadWorld, MainMenu, SettingsScene,
+        CharacterAttributes, CreateCharacter, CreateWorld, Empty, GameMenu, GameScene,
+        InventoryScene, LoadWorld, MainMenu, SettingsScene,
     },
     SceneImpl,
 };

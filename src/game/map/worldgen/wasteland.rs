@@ -1,7 +1,7 @@
 use arrayvec::ArrayVec;
 use bracket_noise::prelude::FastNoise;
-use geometry::Point;
-use rand::{distributions::Standard, prelude::StdRng, Rng, SeedableRng};
+use rand::{distr::StandardUniform, prelude::StdRng, Rng, SeedableRng};
+use roguemetry::Point;
 
 use super::{
     super::{
@@ -23,17 +23,17 @@ impl WorldGen for Wasteland {
                 point.x as f32 / Chunk::NOISE_SIZE,
                 point.y as f32 / Chunk::NOISE_SIZE,
             );
-            let terrain: Terrain = if rng.gen_bool(0.05) {
-                Tree::new(if humidity > 0.0 + rng.gen_range(-0.2..=0.2) {
+            let terrain: Terrain = if rng.random_bool(0.05) {
+                Tree::new(if humidity > 0.0 + rng.random_range(-0.2..=0.2) {
                     rng.sample(LiveTrees)
                 } else {
                     rng.sample(DeadTrees)
                 })
                 .into()
             } else if humidity > 0.0 {
-                Grass::new(rng.sample(Standard), humidity < 0.1).into()
+                Grass::new(rng.sample(StandardUniform), humidity < 0.1).into()
             } else {
-                Dirt::new(rng.sample(Standard)).into()
+                Dirt::new(rng.sample(StandardUniform)).into()
             };
 
             let tile = Tile::new(terrain);

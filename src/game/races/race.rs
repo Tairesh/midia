@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use enum_iterator::{next_cycle, previous_cycle, Sequence};
-use rand::distributions::{Distribution, Standard};
+use rand::distr::{Distribution, StandardUniform};
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 
@@ -217,9 +217,9 @@ impl From<Race> for PlayableRace {
     }
 }
 
-impl Distribution<PlayableRace> for Standard {
+impl Distribution<PlayableRace> for StandardUniform {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> PlayableRace {
-        match rng.gen_range(0..4) {
+        match rng.random_range(0..4) {
             0 => PlayableRace::Gazan,
             1 => PlayableRace::Nyarnik,
             2 => PlayableRace::Totik,

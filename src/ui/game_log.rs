@@ -1,6 +1,6 @@
 use std::collections::VecDeque;
 
-use geometry::Vec2;
+use roguemetry::Vec2;
 use tetra::graphics::text::{Font, Text};
 use tetra::graphics::{Color, DrawParams, Rectangle};
 use tetra::Context;

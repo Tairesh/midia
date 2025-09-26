@@ -1,5 +1,4 @@
-use rand::distributions::Standard;
-use rand::prelude::Distribution;
+use rand::distr::{Distribution, StandardUniform};
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 use tetra::graphics::Color;
@@ -27,7 +26,7 @@ impl Attributes {
         let mut attributes = Self::default();
         let mut points = 5;
         while points > 0 {
-            let random_attr = rng.gen::<Attribute>();
+            let random_attr = rng.random::<Attribute>();
             attributes.set_attribute(random_attr, attributes.get_attribute(random_attr) + 1);
             points -= 1;
         }
@@ -111,8 +110,8 @@ impl Attribute {
     }
 }
 
-impl Distribution<Attribute> for Standard {
+impl Distribution<Attribute> for StandardUniform {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Attribute {
-        unsafe { std::mem::transmute(rng.gen::<u8>() % Attribute::iterator().count() as u8) }
+        unsafe { std::mem::transmute(rng.random::<u8>() % Attribute::iterator().count() as u8) }
     }
 }

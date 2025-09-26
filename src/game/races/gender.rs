@@ -1,4 +1,4 @@
-use rand::distributions::{Distribution, Standard};
+use rand::distr::{Distribution, StandardUniform};
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 
@@ -44,9 +44,9 @@ impl From<Gender> for String {
     }
 }
 
-impl Distribution<Gender> for Standard {
+impl Distribution<Gender> for StandardUniform {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Gender {
-        if rng.gen_bool(0.51) {
+        if rng.random_bool(0.51) {
             Gender::Female
         } else {
             Gender::Male

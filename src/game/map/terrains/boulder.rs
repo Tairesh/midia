@@ -1,5 +1,5 @@
 use rand::{
-    distributions::{Distribution, Standard},
+    distr::{Distribution, StandardUniform},
     Rng,
 };
 use std::result;
@@ -67,11 +67,11 @@ impl TerrainInteract for Boulder {
             BoulderSize::Small => 8,
         };
 
-        let mut rng = rand::thread_rng();
-        let dirt_variant = rng.gen::<DirtVariant>();
+        let mut rng = rand::rng();
+        let dirt_variant = rng.random::<DirtVariant>();
         let shards_count = match self.size {
-            BoulderSize::Huge => rng.gen_range(3..6),
-            BoulderSize::Middle => rng.gen_range(1..3),
+            BoulderSize::Huge => rng.random_range(3..6),
+            BoulderSize::Middle => rng.random_range(1..3),
             BoulderSize::Small => 1,
         };
         // TODO: add sharp rocks and rubble
@@ -92,9 +92,9 @@ pub enum BoulderSize {
     Small,
 }
 
-impl Distribution<BoulderSize> for Standard {
+impl Distribution<BoulderSize> for StandardUniform {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> BoulderSize {
-        match rng.gen_range(0..3) {
+        match rng.random_range(0..3) {
             0 => BoulderSize::Huge,
             1 => BoulderSize::Middle,
             2 => BoulderSize::Small,

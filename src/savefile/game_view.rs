@@ -1,4 +1,4 @@
-use geometry::Vec2;
+use roguemetry::Vec2;
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct GameView {

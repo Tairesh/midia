@@ -1,7 +1,7 @@
 use std::time::Instant;
 
-use geometry::{Direction, Point, Rect, Vec2};
-use rand::{thread_rng, Rng};
+use rand::Rng;
+use roguemetry::{Direction, Point, Rect, Vec2};
 use tetra::{
     graphics::{
         mesh::{Mesh, ShapeStyle},
@@ -188,7 +188,7 @@ impl GameModeImpl for Observing {
             let pos = game.world.borrow().units().player().pos
                 + game.shift_of_view()
                 + self.mouse_moved_pos;
-            let color = thread_rng().sample(BugColorDistribution {});
+            let color = rand::rng().sample(BugColorDistribution {});
             game.world.borrow_mut().add_unit(Box::new(Monster::new(
                 AI::BasicMonster,
                 pos,
@@ -197,7 +197,7 @@ impl GameModeImpl for Observing {
                     race: Race::Bug,
                     age: 99,
                     body_color: Some(color),
-                    sex: Sex::Undefined,
+                    sex: Sex::Other,
                 },
                 Pronouns::ItIts,
                 CharSheet::default(false, Race::Bug),

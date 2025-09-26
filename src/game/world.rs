@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use std::convert::TryFrom;
 use std::rc::Rc;
 
-use geometry::{Direction, Point};
+use roguemetry::{Direction, Point};
 
 use crate::game::map::items::helpers::BONE_KNIFE;
 
@@ -74,7 +74,7 @@ impl World {
                 race: Race::Bug,
                 age: 1,
                 body_color: Some(BodyColor::Lime),
-                sex: Sex::Undefined,
+                sex: Sex::Other,
             },
             Pronouns::ItIts,
             CharSheet::default(false, Race::Bug),
@@ -122,11 +122,16 @@ impl World {
     pub fn save(&mut self) {
         self.meta.update_before_save();
         savefile::save(self)
-            .map_err(|e| panic!("Error on saving world to {:?}: {e:?}", self.meta.path))
+            .map_err(|e| {
+                panic!(
+                    "Error on saving world to {}: {e:?}",
+                    self.meta.path.display()
+                )
+            })
             .ok();
     }
 
-    pub fn map(&self) -> RefMut<Map> {
+    pub fn map(&self) -> RefMut<'_, Map> {
         self.map.borrow_mut()
     }
 
@@ -138,11 +143,11 @@ impl World {
         self.units.clone()
     }
 
-    pub fn units_mut(&self) -> RefMut<Units> {
+    pub fn units_mut(&self) -> RefMut<'_, Units> {
         self.units.borrow_mut()
     }
 
-    pub fn units(&self) -> Ref<Units> {
+    pub fn units(&self) -> Ref<'_, Units> {
         self.units.borrow()
     }
 
@@ -169,7 +174,7 @@ impl World {
         }
     }
 
-    pub fn log(&self) -> RefMut<Log> {
+    pub fn log(&self) -> RefMut<'_, Log> {
         self.log.borrow_mut()
     }
 
@@ -337,7 +342,7 @@ pub mod tests {
     use std::collections::HashMap;
 
     use crate::game::{AttrLevel, SkillLevel};
-    use geometry::Point;
+    use roguemetry::Point;
 
     use super::{
         super::{
@@ -378,7 +383,7 @@ pub mod tests {
                 race: Race::Gazan,
                 age: 20,
                 body_color: None,
-                sex: Sex::Undefined,
+                sex: Sex::Other,
             },
             Pronouns::ItIts,
             CharSheet::default(false, Race::Gazan),
@@ -401,7 +406,7 @@ pub mod tests {
                 race: Race::Bug,
                 age: 99,
                 body_color: None,
-                sex: Sex::Undefined,
+                sex: Sex::Other,
             },
             Pronouns::ItIts,
             charsheet,

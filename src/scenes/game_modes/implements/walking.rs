@@ -1,6 +1,6 @@
 use std::time::Instant;
 
-use geometry::Direction;
+use roguemetry::Direction;
 use tetra::{input::KeyModifier, Context};
 
 use crate::{

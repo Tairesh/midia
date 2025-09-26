@@ -1,4 +1,4 @@
-use geometry::Direction;
+use roguemetry::Direction;
 
 use super::super::{
     super::{
@@ -68,7 +68,7 @@ impl ActionImpl for WieldFromGround {
 
 #[cfg(test)]
 mod tests {
-    use geometry::{Direction, Point};
+    use roguemetry::{Direction, Point};
 
     use crate::game::map::items::helpers::{book_debug, GOD_AXE, ROCK, STONE_SHOVEL};
     use crate::game::world::tests::prepare_world;

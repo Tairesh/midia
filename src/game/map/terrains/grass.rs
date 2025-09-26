@@ -1,5 +1,5 @@
 use rand::{
-    distributions::{Distribution, Standard},
+    distr::{Distribution, StandardUniform},
     Rng,
 };
 use tetra::graphics::Color;
@@ -85,7 +85,8 @@ impl TerrainInteract for Grass {
     }
 
     fn on_step(&self) -> Option<Terrain> {
-        if rand::thread_rng().gen_bool(0.1) {
+        // TODO: Should be seeded via World RNG
+        if rand::rng().random_bool(0.1) {
             Some(Dirt::new(rand::random::<DirtVariant>()).into())
         } else {
             None
@@ -141,9 +142,9 @@ pub enum GrassVariant {
     Grass20,
 }
 
-impl Distribution<GrassVariant> for Standard {
+impl Distribution<GrassVariant> for StandardUniform {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> GrassVariant {
-        match rng.gen_range(0..20) {
+        match rng.random_range(0..20) {
             0 => GrassVariant::Grass1,
             1 => GrassVariant::Grass2,
             2 => GrassVariant::Grass3,

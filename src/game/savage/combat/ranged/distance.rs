@@ -37,7 +37,7 @@ impl RangedDistance {
 
 #[cfg(test)]
 mod tests {
-    use geometry::Point;
+    use roguemetry::Point;
     use test_case::test_case;
 
     use super::*;

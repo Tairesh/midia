@@ -1,4 +1,4 @@
-use geometry::Vec2;
+use roguemetry::Vec2;
 use tetra::{
     graphics::Color,
     input::{Key, KeyModifier, MouseButton},

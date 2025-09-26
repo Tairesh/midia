@@ -154,11 +154,11 @@ impl SceneImpl for SettingsScene {
         easy_back(&event, self.is_there_focused_sprite())
     }
 
-    fn sprites(&self) -> SomeUISprites {
+    fn sprites(&self) -> SomeUISprites<'_> {
         Some(&self.sprites)
     }
 
-    fn sprites_mut(&mut self) -> SomeUISpritesMut {
+    fn sprites_mut(&mut self) -> SomeUISpritesMut<'_> {
         Some(&mut self.sprites)
     }
 
@@ -185,7 +185,8 @@ impl SceneImpl for SettingsScene {
                     let window_settings = &Settings::instance().window;
                     tetra::window::set_size(ctx, window_settings.width, window_settings.height)
                         .ok();
-                    let current_monitor = tetra::window::get_current_monitor(ctx).unwrap_or(0);
+                    let current_monitor =
+                        tetra::window::get_current_monitor(ctx).unwrap_or(0) as i32;
                     tetra::window::set_position(
                         ctx,
                         WindowPosition::Centered(current_monitor),

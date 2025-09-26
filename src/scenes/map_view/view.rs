@@ -1,6 +1,6 @@
 use std::cell::RefCell;
 
-use geometry::{Point, Vec2};
+use roguemetry::{Point, Vec2};
 use tetra::{
     graphics::{Canvas, DrawParams},
     Context,

@@ -1,5 +1,5 @@
-use geometry::{Point, DIR8};
 use rand::seq::SliceRandom;
+use roguemetry::{Point, DIR8};
 
 use super::super::{
     super::{
@@ -44,7 +44,7 @@ impl ActionImpl for Throw {
 mod tests {
     use std::collections::HashSet;
 
-    use geometry::{Direction, Point};
+    use roguemetry::{Direction, Point};
 
     use crate::assets::Sprite;
     use crate::game::actions::implements::Skip;

@@ -1,4 +1,4 @@
-use geometry::Point;
+use roguemetry::Point;
 
 use super::super::{
     super::map::{TerrainInteract, TerrainView},
@@ -246,7 +246,7 @@ impl ActionImpl for Melee {
 
 #[cfg(test)]
 mod tests {
-    use geometry::Point;
+    use roguemetry::Point;
 
     use crate::game::map::items::helpers::{DEMONIC_SAP, GOD_AXE, STONE_KNIFE, STONE_SPEAR};
     use crate::game::map::terrains::Boulder;

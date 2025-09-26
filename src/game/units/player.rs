@@ -1,4 +1,4 @@
-use geometry::Point;
+use roguemetry::Point;
 use serde::{Deserialize, Serialize};
 use tetra::graphics::Color;
 

@@ -74,7 +74,7 @@ impl GameData {
                 }
             } else {
                 // TODO: implement logging
-                println!("Failed to load file: {path:?}, {result:?}");
+                println!("Failed to load file: {}, {result:?}", path.display());
             }
         }
     }

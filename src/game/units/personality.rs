@@ -1,4 +1,4 @@
-use rand::{distributions::Standard, seq::SliceRandom, Rng};
+use rand::{distr::StandardUniform, seq::IndexedRandom, Rng};
 use serde::{Deserialize, Serialize};
 
 use super::super::{
@@ -33,7 +33,7 @@ impl Appearance {
                         + match self.sex {
                             Sex::Male => "boy",
                             Sex::Female => "girl",
-                            Sex::Undefined => "child",
+                            Sex::Other => "child",
                         }
                 }
                 16.. => {
@@ -41,7 +41,7 @@ impl Appearance {
                         + match self.sex {
                             Sex::Male => " man",
                             Sex::Female => " woman",
-                            Sex::Undefined => "",
+                            Sex::Other => "",
                         }
                 }
             }
@@ -87,12 +87,12 @@ impl PlayerPersonality {
     }
 
     pub fn random_playable<R: Rng + ?Sized>(rng: &mut R) -> PlayerPersonality {
-        let gender = rng.sample(Standard);
+        let gender = rng.sample(StandardUniform);
         let sex = Sex::from(&gender);
         let game_data = GameData::instance();
-        let race: PlayableRace = rng.sample(Standard);
+        let race: PlayableRace = rng.sample(StandardUniform);
         let race = Race::from(race);
-        let age = rng.gen_range(0..=99);
+        let age = rng.random_range(0..=99);
         let name = game_data
             .names
             .get(&race)

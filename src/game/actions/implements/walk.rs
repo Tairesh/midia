@@ -1,6 +1,6 @@
 use std::f32::consts::SQRT_2;
 
-use geometry::Direction;
+use roguemetry::Direction;
 
 use crate::game::ActionType;
 
@@ -79,7 +79,7 @@ impl ActionImpl for Walk {
 
 #[cfg(test)]
 mod tests {
-    use geometry::{Direction, Point};
+    use roguemetry::{Direction, Point};
 
     use crate::game::actions::implements::Skip;
     use crate::game::map::terrains::{Boulder, BoulderSize, Dirt};

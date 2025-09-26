@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use geometry::Vec2;
+use roguemetry::Vec2;
 use tetra::graphics::mesh::{BorderRadii, Mesh, ShapeStyle};
 use tetra::graphics::Rectangle;
 use tetra::{Context, Event};
@@ -157,7 +157,7 @@ impl CreateCharacter {
                     ButtonEvent::GenderLeft as u8,
                 ),
                 text_input(
-                    if meta.time.elapsed().unwrap().as_secs() % 2 == 0 {
+                    if meta.time.elapsed().unwrap().as_secs().is_multiple_of(2) {
                         "Female"
                     } else {
                         "Male"
@@ -323,7 +323,7 @@ impl CreateCharacter {
     }
 
     fn randomize(&mut self, ctx: &mut Context) {
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         let character = PlayerPersonality::random_playable(&mut rng);
         self.gender_input().set_value(character.mind.gender);
         self.name_input().set_value(character.mind.name);
@@ -392,11 +392,11 @@ impl SceneImpl for CreateCharacter {
         self.window_size = window_size;
     }
 
-    fn sprites(&self) -> SomeUISprites {
+    fn sprites(&self) -> SomeUISprites<'_> {
         Some(&self.sprites)
     }
 
-    fn sprites_mut(&mut self) -> SomeUISpritesMut {
+    fn sprites_mut(&mut self) -> SomeUISpritesMut<'_> {
         Some(&mut self.sprites)
     }
 

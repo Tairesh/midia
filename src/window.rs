@@ -25,7 +25,7 @@ pub fn create_window(title: impl Into<String>) -> Result<Context> {
     if window_settings.fullscreen {
         window::set_fullscreen(&mut ctx, true).ok();
     } else {
-        let monitor = window::get_current_monitor(&ctx).unwrap_or(0);
+        let monitor = window::get_current_monitor(&ctx).unwrap_or(0) as i32;
         window::set_position(&mut ctx, Centered(monitor), Centered(monitor));
     }
 

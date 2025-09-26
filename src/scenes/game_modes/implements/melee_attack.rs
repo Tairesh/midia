@@ -1,4 +1,4 @@
-use geometry::{Point, DIR8};
+use roguemetry::{Point, DIR8};
 use tetra::input::Key;
 use tetra::Context;
 

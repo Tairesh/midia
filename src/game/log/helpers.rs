@@ -1,5 +1,5 @@
 use crate::game::{savage::HitResult, Avatar};
-use geometry::Point;
+use roguemetry::Point;
 
 use super::{LogCategory, LogEvent};
 

@@ -176,7 +176,7 @@ pub fn dead_body(appearance: &Appearance) -> Item {
 
 #[cfg(test)]
 mod tests {
-    use geometry::Point;
+    use roguemetry::Point;
 
     use crate::game::traits::{LooksLike, Name};
     use crate::game::units::tests::helpers::tester_girl;

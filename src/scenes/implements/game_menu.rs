@@ -58,11 +58,11 @@ impl GameMenu {
 }
 
 impl SceneImpl for GameMenu {
-    fn sprites(&self) -> SomeUISprites {
+    fn sprites(&self) -> SomeUISprites<'_> {
         Some(&self.sprites)
     }
 
-    fn sprites_mut(&mut self) -> SomeUISpritesMut {
+    fn sprites_mut(&mut self) -> SomeUISpritesMut<'_> {
         Some(&mut self.sprites)
     }
 }

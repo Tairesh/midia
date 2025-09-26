@@ -16,7 +16,7 @@ impl AIImpl for DummyAI {
 
 #[cfg(test)]
 mod tests {
-    use geometry::Point;
+    use roguemetry::Point;
 
     use crate::game::world::tests::{add_dummy, prepare_world};
     use crate::game::Avatar;

@@ -1,6 +1,6 @@
 use std::time::Instant;
 
-use geometry::{Direction, Point, Vec2};
+use roguemetry::{Direction, Point, Vec2};
 use tetra::{
     input::{Key, KeyModifier, MouseButton},
     Context,

@@ -50,7 +50,7 @@ impl Dice {
 
     pub fn roll(self) -> u8 {
         // TODO: Use world's rng instead of thread_rng
-        rand::thread_rng().gen::<u8>() % self.value() + 1
+        rand::rng().random::<u8>() % self.value() + 1
     }
 
     /// Roll a dice that explodes on the maximum value.

@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use geometry::Point;
+use roguemetry::Point;
 
 use crate::lang::Capitalize;
 

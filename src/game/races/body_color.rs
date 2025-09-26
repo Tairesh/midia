@@ -1,6 +1,6 @@
 use std::fmt::{Display, Formatter};
 
-use rand::distributions::{Distribution, Standard};
+use rand::distr::{Distribution, StandardUniform};
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 use tetra::graphics::Color;
@@ -50,7 +50,7 @@ pub struct BugColorDistribution {}
 
 impl Distribution<BodyColor> for BugColorDistribution {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> BodyColor {
-        match rng.gen_range(0..3) {
+        match rng.random_range(0..3) {
             0 => BodyColor::Lime,
             1 => BodyColor::Red,
             2 => BodyColor::Violet,

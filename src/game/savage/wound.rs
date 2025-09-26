@@ -1,4 +1,4 @@
-use rand::{thread_rng, Rng};
+use rand::Rng;
 
 use crate::game::Dice;
 
@@ -37,6 +37,7 @@ impl Wound {
     }
 
     pub fn random() -> Self {
+        // TODO: use world's rng instead of thread_rng
         let roll = [Dice::D6, Dice::D6].into_iter().map(Dice::roll).sum();
         match roll {
             2 => Wound::Groin,
@@ -49,7 +50,7 @@ impl Wound {
                 _ => unreachable!(),
             },
             10 => {
-                if thread_rng().gen_bool(0.5) {
+                if rand::rng().random_bool(0.5) {
                     Wound::LeftLeg
                 } else {
                     Wound::RightLeg

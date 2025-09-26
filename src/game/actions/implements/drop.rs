@@ -1,4 +1,4 @@
-use geometry::Direction;
+use roguemetry::Direction;
 
 use super::super::{
     super::traits::Name,
@@ -65,7 +65,7 @@ impl ActionImpl for DropMainHand {
 
 #[cfg(test)]
 mod tests {
-    use geometry::{Direction, Point};
+    use roguemetry::{Direction, Point};
 
     use crate::game::map::items::helpers::GOD_AXE;
     use crate::game::map::terrains::Dirt;

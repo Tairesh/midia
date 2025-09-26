@@ -1,7 +1,7 @@
 use std::collections::{HashMap, HashSet};
 
 use bracket_noise::prelude::{FastNoise, FractalType, NoiseType};
-use geometry::Point;
+use roguemetry::Point;
 
 pub use chunk::Chunk;
 pub use fov::{field_of_view_set, Fov, FovMap};

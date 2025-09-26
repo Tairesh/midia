@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use geometry::{Direction, Point, Vec2};
+use roguemetry::{Direction, Point, Vec2};
 use tetra::{
     graphics::Canvas,
     input::{Key, KeyModifier},
@@ -306,11 +306,11 @@ impl SceneImpl for GameScene {
         self.need_redraw = true;
     }
 
-    fn sprites(&self) -> SomeUISprites {
+    fn sprites(&self) -> SomeUISprites<'_> {
         Some(&self.sprites)
     }
 
-    fn sprites_mut(&mut self) -> SomeUISpritesMut {
+    fn sprites_mut(&mut self) -> SomeUISpritesMut<'_> {
         Some(&mut self.sprites)
     }
 }

@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use geometry::{Rect, Vec2};
+use roguemetry::{Rect, Vec2};
 use tetra::{
     graphics::{mesh::Mesh, Color, DrawParams},
     input, Context,

@@ -1,5 +1,5 @@
 use rand::{
-    distributions::{Distribution, Standard},
+    distr::{Distribution, StandardUniform},
     Rng,
 };
 
@@ -93,7 +93,7 @@ pub struct LiveTrees;
 
 impl Distribution<TreeVariant> for DeadTrees {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> TreeVariant {
-        match rng.gen_range(0..5) {
+        match rng.random_range(0..5) {
             0 => TreeVariant::DeadTree,
             1 => TreeVariant::DeadPine,
             2 => TreeVariant::DeadHickory,
@@ -106,7 +106,7 @@ impl Distribution<TreeVariant> for DeadTrees {
 
 impl Distribution<TreeVariant> for LiveTrees {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> TreeVariant {
-        match rng.gen_range(0..5) {
+        match rng.random_range(0..5) {
             0 => TreeVariant::Tree,
             1 => TreeVariant::Pine,
             2 => TreeVariant::Hickory,
@@ -117,9 +117,9 @@ impl Distribution<TreeVariant> for LiveTrees {
     }
 }
 
-impl Distribution<TreeVariant> for Standard {
+impl Distribution<TreeVariant> for StandardUniform {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> TreeVariant {
-        match rng.gen_range(0..10) {
+        match rng.random_range(0..10) {
             0 => TreeVariant::DeadTree,
             1 => TreeVariant::DeadPine,
             2 => TreeVariant::DeadHickory,

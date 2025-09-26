@@ -1,6 +1,6 @@
 use std::time::{Duration, Instant};
 
-use geometry::{Rect, Vec2};
+use roguemetry::{Rect, Vec2};
 use tetra::{
     graphics::{
         mesh::{BorderRadii, Mesh, ShapeStyle},
@@ -270,7 +270,7 @@ impl Draw for TextInput {
                 DrawParams::new()
                     .position(Vec2::new(
                         rect.x + text_width + 10.0,
-                        rect.y + rect.h / 2.0 - (self.geometry.line_height + 8.0) / 2.0,
+                        rect.y + rect.h / 2.0 - self.geometry.line_height.midpoint(8.0),
                     ))
                     .color(color),
             );

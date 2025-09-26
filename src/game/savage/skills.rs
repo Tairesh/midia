@@ -1,4 +1,4 @@
-use rand::distributions::{Distribution, Standard};
+use rand::distr::{Distribution, StandardUniform};
 use rand::Rng;
 
 use crate::game::races::Race;
@@ -60,7 +60,7 @@ impl Skills {
 
         let mut points = skills.calc_skill_points(attributes, race);
         while points > 0 {
-            let random_skill = rng.gen::<Skill>();
+            let random_skill = rng.random::<Skill>();
             skills.set_skill(random_skill, skills.get_skill(random_skill) + 1);
 
             points = skills.calc_skill_points(attributes, race);
@@ -221,8 +221,8 @@ impl Skill {
     }
 }
 
-impl Distribution<Skill> for Standard {
+impl Distribution<Skill> for StandardUniform {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Skill {
-        unsafe { std::mem::transmute(rng.gen::<u8>() % Skill::iterator().count() as u8) }
+        unsafe { std::mem::transmute(rng.random::<u8>() % Skill::iterator().count() as u8) }
     }
 }

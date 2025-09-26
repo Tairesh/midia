@@ -1,4 +1,4 @@
-use geometry::Direction;
+use roguemetry::Direction;
 
 use super::super::{
     super::{
@@ -74,7 +74,7 @@ impl ActionImpl for Read {
 
 #[cfg(test)]
 mod tests {
-    use geometry::{Direction, Point};
+    use roguemetry::{Direction, Point};
 
     use crate::game::map::items::helpers::book_debug;
     use crate::game::world::tests::prepare_world;

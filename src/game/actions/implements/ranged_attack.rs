@@ -13,7 +13,7 @@ use crate::game::{
     AttackType, Avatar, LogEvent, RangedDistance, World,
 };
 use crate::lang::a;
-use geometry::Point;
+use roguemetry::Point;
 use std::fmt::format;
 
 /// Checks if a ranged attack is possible.

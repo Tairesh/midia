@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use geometry::Direction;
+use roguemetry::Direction;
 use serde::{Deserializer, Serializer};
 pub use tetra::{input::*, math::num_traits::Zero, Context};
 

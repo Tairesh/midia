@@ -1,4 +1,4 @@
-use geometry::Vec2;
+use roguemetry::Vec2;
 use serde::{Deserialize, Serialize};
 use tetra::{
     graphics::{DrawParams, Rectangle, Texture},

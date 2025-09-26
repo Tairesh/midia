@@ -1,5 +1,5 @@
-use geometry::Point;
 use rand::seq::SliceRandom;
+use roguemetry::Point;
 
 use super::super::{
     super::{
@@ -45,7 +45,7 @@ impl ActionImpl for Shoot {
 
 #[cfg(test)]
 mod tests {
-    use geometry::{Direction, Point};
+    use roguemetry::{Direction, Point};
 
     use crate::game::actions::implements::{Skip, Walk};
     use crate::game::actions::AttackTarget;

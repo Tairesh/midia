@@ -7,17 +7,17 @@ edition = "2021"
 build = "build.rs"
 
 [dependencies.tetra]
-version = "0.8"
+version = "0.9"
 default-features = false
-features = ["serde_support", "texture_png", "texture_jpeg", "font_ttf"]
+features = ["serde", "sdl_build_from_source", "texture_png", "texture_jpeg", "font_ttf"]
 
 [dependencies]
 # my small library for roguelikes' geometry
-geometry = { git = "https://github.com/Tairesh/geometry.git", features = ["serde", "rand"] }
+roguemetry = { git = "https://github.com/Tairesh/roguemetry.git", features = ["serde", "rand"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 serde_with = "3.11"
-rand = "^0.8"
+rand = "0.9"
 chrono = "0.4"
 enum_dispatch = "0.3"
 arrayvec = { version = "0.7", features = ["serde"] }

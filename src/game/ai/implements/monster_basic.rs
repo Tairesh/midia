@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
-use geometry::{Direction, Point};
 use rand::Rng;
+use roguemetry::{Direction, Point};
 use serde::{Deserialize, Serialize};
 
 use crate::game::{
@@ -76,7 +76,7 @@ impl AIImpl for BasicMonsterAI {
         if distance > sight_range {
             return Action::new(
                 unit_id,
-                Walk::new(Direction::random(&mut rand::thread_rng(), false)),
+                Walk::new(Direction::random(&mut rand::rng(), false)),
                 world,
             )
             .ok();
@@ -114,7 +114,7 @@ impl AIImpl for BasicMonsterAI {
 
 #[cfg(test)]
 mod tests {
-    use geometry::{Direction, Point};
+    use roguemetry::{Direction, Point};
 
     use crate::game::actions::AttackTarget;
     use crate::game::map::terrains::{Boulder, BoulderSize, Dirt, DirtVariant};
@@ -173,6 +173,11 @@ mod tests {
             Boulder::new(BoulderSize::Huge).into();
         world.map().get_tile_mut(Point::new(3, -1)).terrain =
             Boulder::new(BoulderSize::Huge).into();
+        world.map().get_tile_mut(Point::new(3, 1)).terrain = Dirt::new(DirtVariant::Dirt1).into();
+        world.map().get_tile_mut(Point::new(2, 2)).terrain = Dirt::new(DirtVariant::Dirt1).into();
+        world.map().get_tile_mut(Point::new(1, 2)).terrain = Dirt::new(DirtVariant::Dirt1).into();
+        world.map().get_tile_mut(Point::new(1, 1)).terrain = Dirt::new(DirtVariant::Dirt1).into();
+        world.map().get_tile_mut(Point::new(1, 0)).terrain = Dirt::new(DirtVariant::Dirt1).into();
         let npc = add_monster(&mut world, Point::new(3, 0));
         world.plan_test();
 

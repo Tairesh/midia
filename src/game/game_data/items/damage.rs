@@ -148,7 +148,8 @@ impl DamageValue {
             .damage_types
             .iter()
             .copied()
-            .choose(&mut rand::thread_rng());
+            // TODO: use World's rng instead of thread_rng
+            .choose(&mut rand::rng());
         if let Some(damage_type) = damage_type {
             DamageRollResult::new(
                 self.damage

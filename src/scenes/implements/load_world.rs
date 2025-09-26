@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use chrono::{DateTime, Local};
-use geometry::Vec2;
+use roguemetry::Vec2;
 use tetra::{
     graphics::{
         mesh::{Mesh, ShapeStyle},
@@ -179,18 +179,18 @@ impl SceneImpl for LoadWorld {
         easy_back(&event, false)
     }
 
-    fn sprites(&self) -> SomeUISprites {
+    fn sprites(&self) -> SomeUISprites<'_> {
         Some(&self.sprites)
     }
 
-    fn sprites_mut(&mut self) -> SomeUISpritesMut {
+    fn sprites_mut(&mut self) -> SomeUISpritesMut<'_> {
         Some(&mut self.sprites)
     }
 
     fn custom_event(&mut self, _ctx: &mut Context, event: u8) -> Option<Transition> {
         let i = (event / 2) as usize;
         let path = self.paths.get(i)?;
-        if event % 2 == 0 {
+        if event.is_multiple_of(2) {
             // load
             if let Some(meta) = savefile::load(path) {
                 if savefile::has_avatar(path) {
@@ -199,7 +199,7 @@ impl SceneImpl for LoadWorld {
                     Some(Transition::Replace(Scene::CreateCharacter(meta.path)))
                 }
             } else {
-                panic!("Can't load savefile: {path:?}")
+                panic!("Can't load savefile: {}", path.display());
             }
         } else {
             // delete

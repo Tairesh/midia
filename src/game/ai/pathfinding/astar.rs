@@ -1,5 +1,5 @@
-use geometry::{Point, DIR8};
 use pathfinding::directed::astar::astar as astar_lib;
+use roguemetry::{Point, DIR8};
 use smallvec::SmallVec;
 
 use crate::game::map::{Map, Passage, TerrainInteract};

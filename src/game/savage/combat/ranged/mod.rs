@@ -1,6 +1,6 @@
+use rand::seq::IndexedRandom;
+use roguemetry::{Point, DIR8};
 use std::collections::HashMap;
-
-use geometry::{Point, DIR8};
 
 pub use distance::RangedDistance;
 
@@ -40,7 +40,7 @@ pub fn ranged_attack_unit(
         if units_to_hit.is_empty() {
             return UnitRangedAttackResult::Miss;
         }
-        let random_target = units_to_hit[rand::random::<usize>() % units_to_hit.len()];
+        let random_target = *units_to_hit.choose(&mut rand::rng()).unwrap();
 
         UnitRangedAttackResult::InnocentBystander(
             random_target,

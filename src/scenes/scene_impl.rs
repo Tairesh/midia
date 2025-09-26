@@ -15,10 +15,10 @@ pub trait SceneImpl {
     fn after_draw(&mut self, _ctx: &mut Context) {}
     fn on_open(&mut self, _ctx: &mut Context) {}
     fn on_resize(&mut self, _ctx: &mut Context, _window_size: (i32, i32)) {}
-    fn sprites(&self) -> SomeUISprites {
+    fn sprites(&self) -> SomeUISprites<'_> {
         None
     }
-    fn sprites_mut(&mut self) -> SomeUISpritesMut {
+    fn sprites_mut(&mut self) -> SomeUISpritesMut<'_> {
         None
     }
     fn custom_event(&mut self, _ctx: &mut Context, _event: u8) -> Option<Transition> {
@@ -32,9 +32,9 @@ pub trait SceneImpl {
 
     fn reposition_all_sprites(&mut self, ctx: &mut Context, window_size: (i32, i32)) {
         if let Some(sprites) = self.sprites_mut() {
-            sprites
-                .iter_mut()
-                .for_each(|sprite| sprite.positionate(ctx, window_size));
+            for sprite in sprites.iter_mut() {
+                sprite.positionate(ctx, window_size);
+            }
         }
     }
 

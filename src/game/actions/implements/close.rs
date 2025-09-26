@@ -1,4 +1,4 @@
-use geometry::Direction;
+use roguemetry::Direction;
 
 use crate::game::log::{LogCategory, LogEvent};
 use crate::game::map::{TerrainInteract, TerrainInteractAction, TerrainView};
@@ -78,7 +78,7 @@ impl ActionImpl for Close {
 
 #[cfg(test)]
 mod tests {
-    use geometry::{Direction, Point};
+    use roguemetry::{Direction, Point};
 
     use crate::game::map::items::helpers::WOODEN_SPLINTER;
     use crate::game::map::terrains::Chest;

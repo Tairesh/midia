@@ -65,9 +65,10 @@ impl TerrainInteract for Chest {
     }
 
     fn smash(&self) -> Option<TerrainSmash> {
-        let mut rng = rand::thread_rng();
-        let dirt_variant = rng.gen::<DirtVariant>();
-        let splinters_count = rng.gen_range(1..=3);
+        // TODO: Should be seeded from world rng
+        let mut rng = rand::rng();
+        let dirt_variant = rng.random::<DirtVariant>();
+        let splinters_count = rng.random_range(1..=3);
         let mut items = self.items_inside.clone();
         for _ in 0..splinters_count {
             items.push(Item::new(WOODEN_SPLINTER));

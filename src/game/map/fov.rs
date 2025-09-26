@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use geometry::Point;
+use roguemetry::Point;
 
 use crate::game::Map;
 

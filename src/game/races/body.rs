@@ -1,4 +1,4 @@
-use rand::distributions::{Distribution, Standard};
+use rand::distr::{Distribution, StandardUniform};
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 
@@ -38,8 +38,8 @@ impl BodySlot {
     }
 }
 
-impl Distribution<BodySlot> for Standard {
+impl Distribution<BodySlot> for StandardUniform {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> BodySlot {
-        unsafe { std::mem::transmute(rng.gen::<u8>() % BodySlot::iterator().count() as u8) }
+        unsafe { std::mem::transmute(rng.random::<u8>() % BodySlot::iterator().count() as u8) }
     }
 }

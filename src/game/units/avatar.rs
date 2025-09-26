@@ -1,4 +1,4 @@
-use geometry::{Direction, Point, TwoDimDirection};
+use roguemetry::{Direction, Point, TwoDimDirection};
 use serde::{Deserialize, Serialize};
 use tetra::graphics::Color;
 
@@ -119,7 +119,7 @@ impl LooksLike for AvatarView {
 
 #[cfg(test)]
 mod tests {
-    use geometry::Point;
+    use roguemetry::Point;
 
     use crate::game::map::items::helpers::{CLOAK, GOD_AXE};
     use crate::game::traits::Name;

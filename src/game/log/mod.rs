@@ -40,7 +40,7 @@ impl Default for Log {
 
 #[cfg(test)]
 mod tests {
-    use geometry::Point;
+    use roguemetry::Point;
 
     use super::{Log, LogCategory, LogEvent};
 

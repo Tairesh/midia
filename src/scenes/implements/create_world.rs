@@ -1,4 +1,4 @@
-use rand::{thread_rng, Rng};
+use rand::Rng;
 use tetra::{Context, Event};
 
 use crate::{
@@ -28,7 +28,7 @@ pub struct CreateWorld {
 
 impl CreateWorld {
     pub fn new(app: &App, ctx: &mut Context) -> Self {
-        let mut rng = thread_rng();
+        let mut rng = rand::rng();
 
         let [back_btn, randomize_btn, create_btn] = back_randomize_next(
             &app.assets,
@@ -144,20 +144,20 @@ impl SceneImpl for CreateWorld {
         easy_back(&event, focused)
     }
 
-    fn sprites(&self) -> SomeUISprites {
+    fn sprites(&self) -> SomeUISprites<'_> {
         Some(&self.sprites)
     }
 
-    fn sprites_mut(&mut self) -> SomeUISpritesMut {
+    fn sprites_mut(&mut self) -> SomeUISpritesMut<'_> {
         Some(&mut self.sprites)
     }
 
     fn custom_event(&mut self, _ctx: &mut Context, event: u8) -> Option<Transition> {
         match event {
             RANDOMIZE_EVENT => {
-                let mut rng = thread_rng();
                 self.name_input().set_value("Test world");
-                self.seed_input().set_value(random_seed(&mut rng).as_str());
+                self.seed_input()
+                    .set_value(random_seed(&mut rand::rng()).as_str());
                 None
             }
             CREATE_EVENT => {

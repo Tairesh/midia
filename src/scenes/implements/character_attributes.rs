@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::path::Path;
 
-use geometry::Point;
+use roguemetry::Point;
 use tetra::{Context, Event};
 
 use crate::game::map::items::helpers::STONE_SPEAR;
@@ -552,11 +552,8 @@ impl CharacterAttributes {
     }
 
     fn randomize(&mut self, ctx: &mut Context) {
-        self.personality.char_sheet = CharSheet::random(
-            &mut rand::thread_rng(),
-            true,
-            self.personality.appearance.race,
-        );
+        self.personality.char_sheet =
+            CharSheet::random(&mut rand::rng(), true, self.personality.appearance.race);
         self.attributes_points = 0;
         self.update_attributes_and_skills(ctx);
         self.update_points(ctx);
@@ -667,11 +664,11 @@ impl SceneImpl for CharacterAttributes {
         self.window_size = window_size;
     }
 
-    fn sprites(&self) -> SomeUISprites {
+    fn sprites(&self) -> SomeUISprites<'_> {
         Some(&self.sprites)
     }
 
-    fn sprites_mut(&mut self) -> SomeUISpritesMut {
+    fn sprites_mut(&mut self) -> SomeUISpritesMut<'_> {
         Some(&mut self.sprites)
     }
 

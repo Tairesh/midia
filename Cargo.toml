@@ -9,11 +9,11 @@ build = "build.rs"
 [dependencies.tetra]
 version = "0.9"
 default-features = false
-features = ["serde", "sdl_build_from_source", "texture_png", "texture_jpeg", "font_ttf"]
+features = ["serde", "texture_png", "texture_jpeg", "font_ttf"]
 
 [dependencies]
 # my small library for roguelikes' geometry
-roguemetry = { git = "https://github.com/Tairesh/roguemetry.git", features = ["serde", "rand"] }
+roguemetry = { version = "0.1.1", features = ["serde", "rand"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 serde_with = "3.11"

@@ -1,4 +1,4 @@
-use roguemetry::{Direction, Point, TwoDimDirection};
+use roguemetry::{Direction, OneDimensionalDirection, Point};
 use serde::{Deserialize, Serialize};
 use tetra::graphics::Color;
 
@@ -75,7 +75,7 @@ pub trait Avatar {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct AvatarView {
-    direction: TwoDimDirection,
+    direction: OneDimensionalDirection,
     sprite: Sprite,
     fg: Option<Color>,
 }
@@ -83,17 +83,17 @@ pub struct AvatarView {
 impl AvatarView {
     pub fn new(sprite: Sprite, fg: Option<Color>) -> Self {
         Self {
-            direction: TwoDimDirection::default(),
+            direction: OneDimensionalDirection::default(),
             sprite,
             fg,
         }
     }
 
-    pub fn direction(&self) -> TwoDimDirection {
+    pub fn direction(&self) -> OneDimensionalDirection {
         self.direction
     }
 
-    pub fn set_direction(&mut self, direction: TwoDimDirection) {
+    pub fn set_direction(&mut self, direction: OneDimensionalDirection) {
         self.direction = direction;
     }
 

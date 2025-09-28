@@ -53,7 +53,11 @@ impl GameData {
     }
 
     fn load_dir(&mut self, path: &Path) {
-        for entry in path.read_dir().unwrap() {
+        let dir = path.read_dir();
+        if dir.is_err() {
+            return;
+        }
+        for entry in dir.unwrap() {
             let path = entry.unwrap().path();
             if path.is_dir() {
                 self.load_dir(&path);

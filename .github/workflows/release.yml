@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: "Create release"
         uses: taiki-e/create-gh-release-action@v1
@@ -31,7 +31,7 @@ jobs:
       matrix:
         include:
           - name: Windows
-            os: windows-2019
+            os: windows-latest
           - name: Linux
             os: ubuntu-latest
           - name: OSX
@@ -40,34 +40,18 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+
+      - name: "Set up SDL3"
+        uses: libsdl-org/setup-sdl@main
+        with:
+          version: 3-latest
+          install-linux-dependencies: true
 
       - name: "Install Rust toolchain"
-        uses: dtolnay/rust-toolchain@master
+        uses: dtolnay/rust-toolchain@v1
         with:
-          profile: minimal
           toolchain: nightly
-          override: true
-
-      - name: "Install SDL2 (linux)"
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt-get update -y -qq
-          sudo apt-get install libsdl2-dev
-
-      - name: "Install SDL2 (mac)"
-        if: runner.os == 'macOS'
-        run: |
-          HOMEBREW_NO_AUTO_UPDATE=yes HOMEBREW_NO_INSTALL_CLEANUP=yes brew install sdl2
-
-      - name: "Install SDL2 (windows)"
-        if: runner.os == 'Windows'
-        shell: powershell
-        run: |
-          Import-Module BitsTransfer
-          Start-BitsTransfer -Source "https://www.libsdl.org/release/SDL2-devel-2.0.22-VC.zip" -Destination SDL2.zip
-          Expand-Archive -Path SDL2.zip -Destination .
-          Get-ChildItem -Path SDL2-2.0.22/lib/x64/ -Recurse -File | Move-Item -Destination . -Force
 
       - name: "Build and upload binary"
         uses: taiki-e/upload-rust-binary-action@v1

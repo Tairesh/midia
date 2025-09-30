@@ -176,7 +176,7 @@ impl LoadWorld {
 
 impl SceneImpl for LoadWorld {
     fn event(&mut self, _ctx: &mut Context, event: Event) -> Option<Transition> {
-        easy_back(&event, false)
+        easy_back(&event, self.get_update_context_state())
     }
 
     fn sprites(&self) -> SomeUISprites<'_> {

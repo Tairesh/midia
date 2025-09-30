@@ -8,15 +8,15 @@ use tetra::{
     Context,
 };
 
+use super::super::{Disable, Draw, Focus, Hover, Position, Positionate, Press, UiSprite, Update};
 use crate::assets::Sprite;
+use crate::ui::UpdateContext;
 use crate::{
     assets::{Button as ButtonAsset, PreparedFont, Tileset},
     colors::Colors,
     input::{self, KeyWithMod, MouseButton},
     scenes::Transition,
 };
-
-use super::super::{Disable, Draw, Focus, Hover, Position, Positionate, Press, UiSprite, Update};
 
 enum ButtonContent {
     Text(Text, f32),
@@ -39,6 +39,7 @@ impl ButtonContent {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ButtonState {
     Default,
     Pressed,
@@ -164,14 +165,16 @@ impl Draw for Button {
 
         vec += Vec2::new(rect.w, rect.h) / 2.0 - content_size / 2.0;
         if !self.pressed() {
-            vec.y -= 2.0;
+            vec.y -= 1.0;
         }
         match &mut self.content {
             ButtonContent::Text(text, _) => {
-                text.draw(
-                    ctx,
-                    DrawParams::new().position(vec).color(Colors::LIGHT_YELLOW),
-                );
+                let color = if self.state == ButtonState::Disabled {
+                    Colors::LIGHT_GRAY
+                } else {
+                    Colors::LIGHT_YELLOW
+                };
+                text.draw(ctx, DrawParams::new().position(vec).color(color));
             }
             ButtonContent::Icon {
                 sprite,
@@ -183,6 +186,9 @@ impl Draw for Button {
                 let mut params = DrawParams::new().position(vec).scale(*scale);
                 if let Some(color) = color {
                     params = params.color(*color);
+                }
+                if self.state == ButtonState::Disabled {
+                    params = params.color(Colors::GRAY);
                 }
                 tileset.draw_sprite(ctx, *sprite, params);
             }
@@ -231,18 +237,18 @@ impl Positionate for Button {
 }
 
 impl Update for Button {
-    fn update(&mut self, ctx: &mut Context, focused: bool, blocked: &[Rect]) -> Option<Transition> {
+    fn update(&mut self, ctx: UpdateContext) -> Option<Transition> {
         if self.disabled() {
             return None;
         }
-        if !self.keys.is_empty() && !focused {
+        if !self.keys.is_empty() && !ctx.is_focused() {
             let mut on_pressed = false;
             let mut off_pressed = false;
             for kwm in self.keys.iter().copied() {
-                if input::is_key_with_mod_pressed(ctx, kwm) {
+                if input::is_key_with_mod_pressed(ctx.ctx, kwm) {
                     on_pressed = true;
                 }
-                if input::is_key_released(ctx, kwm.key) && self.pressed() {
+                if input::is_key_released(ctx.ctx, kwm.key) && self.pressed() {
                     off_pressed = true;
                 }
             }
@@ -253,22 +259,18 @@ impl Update for Button {
                 return Some(self.on_click.clone());
             }
         }
-        let mouse = input::get_mouse_position(ctx);
-        let rect = self.rect.unwrap();
-        let collides = rect.contains_point(mouse);
-        if collides && blocked.iter().any(|r| r.contains_point(mouse)) {
-            return None;
-        }
-        if !self.hovered() && collides {
+        let hovered = ctx.is_hovered(self.rect?);
+        if !self.hovered() && hovered {
             self.on_hovered();
-        } else if self.hovered() && !collides {
+        } else if self.hovered() && !hovered {
             self.off_hovered();
         }
-        if collides && !self.pressed() && input::is_mouse_button_pressed(ctx, MouseButton::Left) {
+        if hovered && !self.pressed() && input::is_mouse_button_pressed(ctx.ctx, MouseButton::Left)
+        {
             self.on_pressed();
-        } else if self.pressed() && input::is_mouse_button_released(ctx, MouseButton::Left) {
+        } else if self.pressed() && input::is_mouse_button_released(ctx.ctx, MouseButton::Left) {
             self.off_pressed();
-            if collides {
+            if hovered {
                 return Some(self.on_click.clone());
             }
         }

@@ -151,7 +151,7 @@ impl SettingsScene {
 
 impl SceneImpl for SettingsScene {
     fn event(&mut self, _ctx: &mut Context, event: Event) -> Option<Transition> {
-        easy_back(&event, self.is_there_focused_sprite())
+        easy_back(&event, self.get_update_context_state())
     }
 
     fn sprites(&self) -> SomeUISprites<'_> {

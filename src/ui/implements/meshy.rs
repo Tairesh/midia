@@ -6,9 +6,9 @@ use tetra::{
     input, Context,
 };
 
-use crate::scenes::Transition;
-
 use super::super::{Colorize, Draw, Focus, Hover, Position, Positionate, UiSprite, Update};
+use crate::scenes::Transition;
+use crate::ui::UpdateContext;
 
 pub struct JustMesh {
     mesh: Mesh,
@@ -176,13 +176,8 @@ impl Positionate for HoverableMesh {
 }
 
 impl Update for HoverableMesh {
-    fn update(
-        &mut self,
-        ctx: &mut Context,
-        _focused: bool,
-        _blocked: &[Rect],
-    ) -> Option<Transition> {
-        let mouse = input::get_mouse_position(ctx);
+    fn update(&mut self, ctx: UpdateContext) -> Option<Transition> {
+        let mouse = input::get_mouse_position(ctx.ctx);
         let rect = self.rect.unwrap();
         let collides = rect.contains_point(mouse);
         // no check for blocking cause it uses as background light

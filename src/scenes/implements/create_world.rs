@@ -140,8 +140,7 @@ impl SceneImpl for CreateWorld {
     }
 
     fn event(&mut self, _ctx: &mut Context, event: Event) -> Option<Transition> {
-        let focused = self.is_there_focused_sprite();
-        easy_back(&event, focused)
+        easy_back(&event, self.get_update_context_state())
     }
 
     fn sprites(&self) -> SomeUISprites<'_> {

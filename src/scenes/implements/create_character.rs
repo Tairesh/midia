@@ -385,7 +385,7 @@ impl SceneImpl for CreateCharacter {
     }
 
     fn event(&mut self, _ctx: &mut Context, event: Event) -> Option<Transition> {
-        easy_back(&event, self.is_there_focused_sprite())
+        easy_back(&event, self.get_update_context_state())
     }
 
     fn on_resize(&mut self, _ctx: &mut Context, window_size: (i32, i32)) {

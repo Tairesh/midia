@@ -12,6 +12,7 @@ pub use self::implements::{
 pub use self::position::{AnchorX, AnchorY, Horizontal, Position, Vertical};
 pub use self::traits::{
     Colorize, Disable, Draw, Focus, Hover, Positionate, Press, Stringify, UiSprite, Update,
+    UpdateContext, UpdateContextState,
 };
 
 mod game_log;

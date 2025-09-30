@@ -1,11 +1,11 @@
 #![allow(dead_code)]
 
-use roguemetry::{Rect, Vec2};
-use tetra::graphics::Color;
-use tetra::Context;
-
 use crate::scenes::Transition;
 use crate::ui::JustMesh;
+use roguemetry::{Rect, Vec2};
+use tetra::graphics::Color;
+use tetra::input::MouseButton;
+use tetra::{input, Context};
 
 use super::{Alert, Button, Label, Position, TextInput, TilesetSprite};
 
@@ -32,16 +32,65 @@ pub trait Positionate {
     }
 }
 
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
+pub enum UpdateContextState {
+    #[default]
+    Normal,
+    /// There is some focused sprite on the scene (e.g. text input intercepting all text input, so buttons shouldn't react to their hotkeys)
+    Focused,
+}
+
+pub struct UpdateContext<'a> {
+    pub ctx: &'a mut Context,
+    /// Rectangles of UI elements above current one, blocking mouse interaction
+    pub blocked: &'a [Rect],
+    pub state: UpdateContextState,
+}
+
+impl<'a> UpdateContext<'a> {
+    pub fn new(ctx: &'a mut Context, blocked: &'a [Rect], state: UpdateContextState) -> Self {
+        Self {
+            ctx,
+            blocked,
+            state,
+        }
+    }
+
+    pub fn is_focused(&self) -> bool {
+        self.state == UpdateContextState::Focused
+    }
+
+    pub fn is_clicked(&self, rect: Rect) -> bool {
+        if !input::is_mouse_button_pressed(self.ctx, MouseButton::Left) {
+            return false;
+        }
+        let mouse_pos = input::get_mouse_position(self.ctx);
+        if !rect.contains_point(mouse_pos) {
+            return false;
+        }
+        if self.blocked.iter().any(|r| r.contains_point(mouse_pos)) {
+            return false;
+        }
+
+        true
+    }
+
+    pub fn is_hovered(&self, rect: Rect) -> bool {
+        let mouse_pos = input::get_mouse_position(self.ctx);
+        if !rect.contains_point(mouse_pos) {
+            return false;
+        }
+        if self.blocked.iter().any(|r| r.contains_point(mouse_pos)) {
+            return false;
+        }
+
+        true
+    }
+}
+
 pub trait Update {
-    // focused means there is some focused sprite on the scene, that intercepts all input
-    // blocked is rects of ui elements above current one
     // TODO: implement a way to tell there is an yes-or-no-style alert, blocking even hovering
-    fn update(
-        &mut self,
-        _ctx: &mut Context,
-        _focused: bool,
-        _blocked: &[Rect],
-    ) -> Option<Transition> {
+    fn update(&mut self, _ctx: UpdateContext) -> Option<Transition> {
         None
     }
     fn block_mouse(&self) -> bool {

@@ -182,14 +182,20 @@ impl Position {
 
 #[cfg(test)]
 mod tests {
-    use test_case::test_case;
     use roguemetry::Vec2;
+    use test_case::test_case;
 
     use super::{AnchorX, AnchorY, Horizontal, Position, Vertical};
 
     #[test_case(Position::new(0.0, 0.0, AnchorX::Left, AnchorY::Top), Vec2::zero())]
-    #[test_case(Position::new(300.0, 400.0, AnchorX::Right, AnchorY::Bottom), Vec2::new(200.0, 200.0))]
-    #[test_case(Position::new(300.0, 300.0, AnchorX::Center, AnchorY::Center), Vec2::new(250.0, 200.0))]
+    #[test_case(
+        Position::new(300.0, 400.0, AnchorX::Right, AnchorY::Bottom),
+        Vec2::new(200.0, 200.0)
+    )]
+    #[test_case(
+        Position::new(300.0, 300.0, AnchorX::Center, AnchorY::Center),
+        Vec2::new(250.0, 200.0)
+    )]
     #[test_case(Position::center(), Vec2::new(350.0, 200.0))]
     #[test_case(Position::horizontal_center(10.0, Vertical::AtWindowCenterByCenter { offset: 10.0 }), Vec2::new(360.0, 210.0))]
     #[test_case(Position::vertical_center(10.0, Horizontal::AtWindowCenterByCenter { offset: 10.0 }), Vec2::new(360.0, 210.0))]

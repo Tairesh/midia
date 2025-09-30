@@ -11,15 +11,15 @@ use tetra::{
     Context,
 };
 
+use super::super::{
+    Disable, Draw, Focus, Hover, Position, Positionate, Press, Stringify, UiSprite, Update,
+};
+use crate::ui::UpdateContext;
 use crate::{
     assets::PreparedFont,
     colors::Colors,
     input::{self, KeyWithMod},
     scenes::Transition,
-};
-
-use super::super::{
-    Disable, Draw, Focus, Hover, Position, Positionate, Press, Stringify, UiSprite, Update,
 };
 
 enum ValueType {
@@ -336,54 +336,45 @@ impl Positionate for TextInput {
 }
 
 impl Update for TextInput {
-    fn update(
-        &mut self,
-        ctx: &mut Context,
-        _focused: bool,
-        blocked: &[Rect],
-    ) -> Option<Transition> {
-        let mouse = input::get_mouse_position(ctx);
-        let collides = self.rect().contains_point(mouse);
-        if collides && blocked.iter().any(|r| r.contains_point(mouse)) {
-            return None;
-        }
+    fn update(&mut self, ctx: UpdateContext) -> Option<Transition> {
+        let hovered = ctx.is_hovered(self.rect());
 
-        if self.state == InputState::Default && collides {
+        if self.state == InputState::Default && hovered {
             self.on_hovered();
-        } else if self.state == InputState::Hovered && !collides {
+        } else if self.state == InputState::Hovered && !hovered {
             self.off_hovered();
         } else if self.state == InputState::Focused {
-            if input::is_mouse_button_pressed(ctx, MouseButton::Left) && !collides {
+            if input::is_mouse_button_pressed(ctx.ctx, MouseButton::Left) && !hovered {
                 self.off_pressed();
             }
             if self.blink.its_time() {
                 self.blink.toggle();
             }
-            if input::is_key_pressed(ctx, Key::Backspace) && !self.value.text().content().is_empty()
+            if input::is_key_pressed(ctx.ctx, Key::Backspace)
+                && !self.value.text().content().is_empty()
             {
                 self.value.backspace();
             }
-            if input::is_key_pressed(ctx, Key::Enter) || input::is_key_pressed(ctx, Key::Escape) {
+            if input::is_key_pressed(ctx.ctx, Key::Enter)
+                || input::is_key_pressed(ctx.ctx, Key::Escape)
+            {
                 self.set_focused(false);
             }
-            if let Some(text_input) = input::get_text_input(ctx) {
+            if let Some(text_input) = input::get_text_input(ctx.ctx) {
                 self.value.try_push_str(text_input);
             }
-            if input::is_key_with_mod_pressed(ctx, KeyWithMod::new(Key::V, false, true, false))
-                || input::is_key_with_mod_pressed(
-                    ctx,
-                    KeyWithMod::new(Key::Insert, true, false, false),
-                )
+            if input::is_key_with_mod_pressed(ctx.ctx, KeyWithMod::ctrl(Key::V))
+                || input::is_key_with_mod_pressed(ctx.ctx, KeyWithMod::shift(Key::Insert))
             {
-                let clipboard: String = input::get_clipboard_text(ctx)
+                let clipboard: String = input::get_clipboard_text(ctx.ctx)
                     .unwrap()
                     .chars()
                     .map(|c| if c == '\n' { ' ' } else { c })
                     .collect();
                 self.value.try_push_str(clipboard.as_str());
             }
-        } else if input::is_mouse_button_pressed(ctx, MouseButton::Left)
-            && collides
+        } else if input::is_mouse_button_pressed(ctx.ctx, MouseButton::Left)
+            && hovered
             && self.state != InputState::Disabled
         {
             self.on_pressed();

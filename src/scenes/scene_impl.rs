@@ -1,6 +1,6 @@
 use tetra::{Context, Event};
 
-use crate::ui::{SomeUISprites, SomeUISpritesMut};
+use crate::ui::{SomeUISprites, SomeUISpritesMut, UpdateContext, UpdateContextState};
 
 use super::Transition;
 
@@ -25,9 +25,15 @@ pub trait SceneImpl {
         None
     }
 
-    fn is_there_focused_sprite(&self) -> bool {
-        self.sprites()
+    fn get_update_context_state(&self) -> UpdateContextState {
+        if self
+            .sprites()
             .is_some_and(|sprites| sprites.iter().any(|s| s.focused()))
+        {
+            UpdateContextState::Focused
+        } else {
+            UpdateContextState::Normal
+        }
     }
 
     fn reposition_all_sprites(&mut self, ctx: &mut Context, window_size: (i32, i32)) {
@@ -44,12 +50,13 @@ pub trait SceneImpl {
         }
 
         // TODO: find a way to optimize this shit
-        let focused = self.is_there_focused_sprite();
+        let state = self.get_update_context_state();
         if let Some(sprites) = self.sprites_mut() {
             // creating same big useless vec of Rects EVERY frame
             let mut blocked = Vec::with_capacity(sprites.len());
             for sprite in sprites.iter_mut().rev() {
-                if let Some(transition) = sprite.update(ctx, focused, &blocked) {
+                let context = UpdateContext::new(ctx, &blocked, state);
+                if let Some(transition) = sprite.update(context) {
                     return Some(transition);
                 }
                 if sprite.visible() && sprite.block_mouse() {

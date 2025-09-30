@@ -653,7 +653,7 @@ impl CharacterAttributes {
 
 impl SceneImpl for CharacterAttributes {
     fn event(&mut self, _ctx: &mut Context, event: Event) -> Option<Transition> {
-        easy_back(&event, false)
+        easy_back(&event, self.get_update_context_state())
     }
 
     fn on_open(&mut self, ctx: &mut Context) {

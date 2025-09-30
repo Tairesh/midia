@@ -9,9 +9,10 @@ use tetra::{
     Context,
 };
 
+use super::super::{
+    Draw, Focus, Position, Positionate, UiSprite, Update, UpdateContext, UpdateContextState,
+};
 use crate::{assets::Alert as AlertAsset, input, scenes::Transition};
-
-use super::super::{Draw, Focus, Position, Positionate, UiSprite, Update};
 
 pub struct Alert {
     asset: Rc<AlertAsset>,
@@ -103,25 +104,20 @@ impl Positionate for Alert {
 }
 
 impl Update for Alert {
-    fn update(&mut self, ctx: &mut Context, focused: bool, blocked: &[Rect]) -> Option<Transition> {
+    fn update(&mut self, ctx: UpdateContext) -> Option<Transition> {
         if !self.active {
             return None;
         }
-        if focused {
+        if ctx.state == UpdateContextState::Focused {
             return None;
         }
-        if input::is_key_pressed(ctx, Key::Escape) {
+        if input::is_key_pressed(ctx.ctx, Key::Escape) {
             return Some(Transition::Pop);
         }
-        if input::is_mouse_button_pressed(ctx, MouseButton::Left) {
-            let mouse = input::get_mouse_position(ctx);
-            if !self.rect.unwrap().contains_point(mouse) {
-                if blocked.iter().any(|r| r.contains_point(mouse)) {
-                    return None;
-                }
-                return Some(Transition::Pop);
-            }
+        if ctx.is_clicked(self.rect?) {
+            return Some(Transition::Pop);
         }
+
         None
     }
 }

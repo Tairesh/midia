@@ -182,32 +182,21 @@ impl Position {
 
 #[cfg(test)]
 mod tests {
+    use test_case::test_case;
     use roguemetry::Vec2;
 
     use super::{AnchorX, AnchorY, Horizontal, Position, Vertical};
 
-    #[test]
-    fn test_positions() {
+    #[test_case(Position::new(0.0, 0.0, AnchorX::Left, AnchorY::Top), Vec2::zero())]
+    #[test_case(Position::new(300.0, 400.0, AnchorX::Right, AnchorY::Bottom), Vec2::new(200.0, 200.0))]
+    #[test_case(Position::new(300.0, 300.0, AnchorX::Center, AnchorY::Center), Vec2::new(250.0, 200.0))]
+    #[test_case(Position::center(), Vec2::new(350.0, 200.0))]
+    #[test_case(Position::horizontal_center(10.0, Vertical::AtWindowCenterByCenter { offset: 10.0 }), Vec2::new(360.0, 210.0))]
+    #[test_case(Position::vertical_center(10.0, Horizontal::AtWindowCenterByCenter { offset: 10.0 }), Vec2::new(360.0, 210.0))]
+    #[test_case(Position { x: Horizontal::AtWindowRightByRight { offset: -10.0 }, y: Vertical::AtWindowBottomByBottom { offset: -10.0 } }, Vec2::new(690.0, 390.0))]
+    fn test_position_to_vec(pos: Position, expected: Vec2) {
         let owner_size = Vec2::new(100.0, 200.0);
         let window_size = (800, 600);
-        let pos = Position::new(0.0, 0.0, AnchorX::Left, AnchorY::Top);
-        assert_eq!(pos.as_vec(owner_size, window_size), Vec2::zero());
-        let pos = Position::new(300.0, 400.0, AnchorX::Right, AnchorY::Bottom);
-        assert_eq!(pos.as_vec(owner_size, window_size), Vec2::new(200.0, 200.0));
-        let pos = Position::new(300.0, 300.0, AnchorX::Center, AnchorY::Center);
-        assert_eq!(pos.as_vec(owner_size, window_size), Vec2::new(250.0, 200.0));
-        let pos = Position::center();
-        assert_eq!(pos.as_vec(owner_size, window_size), Vec2::new(350.0, 200.0));
-        let pos =
-            Position::horizontal_center(10.0, Vertical::AtWindowCenterByCenter { offset: 10.0 });
-        assert_eq!(pos.as_vec(owner_size, window_size), Vec2::new(360.0, 210.0));
-        let pos =
-            Position::vertical_center(10.0, Horizontal::AtWindowCenterByCenter { offset: 10.0 });
-        assert_eq!(pos.as_vec(owner_size, window_size), Vec2::new(360.0, 210.0));
-        let pos = Position {
-            x: Horizontal::AtWindowRightByRight { offset: -10.0 },
-            y: Vertical::AtWindowBottomByBottom { offset: -10.0 },
-        };
-        assert_eq!(pos.as_vec(owner_size, window_size), Vec2::new(690.0, 390.0));
+        assert_eq!(pos.as_vec(owner_size, window_size), expected);
     }
 }

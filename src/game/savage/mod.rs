@@ -5,7 +5,7 @@ pub use combat::{
     RangedDistance, TerrainMeleeAttackResult, UnitMeleeAttackResult, UnitRangedAttackResult,
 };
 pub use damage::{Damage, DamageDice, DamageRollResult, DamageType};
-pub use dices::{AttrLevel, Dice, DiceWithModifier, RollResult, SkillLevel};
+pub use dices::{AttrLevel, Dice, DiceStack, DiceWithModifier, RollResult, SkillLevel};
 pub use skills::{Skill, Skills};
 pub use wound::Wound;
 

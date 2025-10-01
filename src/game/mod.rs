@@ -13,7 +13,7 @@ pub use map::{
 pub use races::{BodySlot, Race};
 pub use savage::{
     AttackType, AttrLevel, Attribute, CharSheet, Damage, DamageDice, DamageRollResult, DamageType,
-    Dice, RangedDistance, RollResult, Skill, SkillLevel, Wound,
+    Dice, DiceStack, RangedDistance, RollResult, Skill, SkillLevel, Wound,
 };
 pub use units::{Avatar, Fighter};
 pub use world::World;

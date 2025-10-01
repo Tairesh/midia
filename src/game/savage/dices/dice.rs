@@ -53,7 +53,7 @@ impl Dice {
         rand::rng().random::<u8>() % self.value() + 1
     }
 
-    /// Roll a dice that explodes on the maximum value.
+    /// Roll a die that explodes on the maximum value.
     pub fn roll_explosive(self) -> u8 {
         let mut total = 0u8;
         let mut roll = self.roll();

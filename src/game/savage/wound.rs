@@ -1,5 +1,6 @@
 use rand::Rng;
 
+use crate::game::savage::dices::DiceStack;
 use crate::game::Dice;
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Copy, Clone, Eq, PartialEq, Hash)]
@@ -38,7 +39,7 @@ impl Wound {
 
     pub fn random() -> Self {
         // TODO: use world's rng instead of thread_rng
-        let roll = [Dice::D6, Dice::D6].into_iter().map(Dice::roll).sum();
+        let roll = DiceStack::from((Dice::D6, Dice::D6)).roll_total();
         match roll {
             2 => Wound::Groin,
             3 => Wound::LeftArm,

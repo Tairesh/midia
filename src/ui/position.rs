@@ -1,4 +1,3 @@
-use crate::ui::position;
 use roguemetry::Vec2;
 
 /// Specifies how to position a UI element horizontally relative to the window.

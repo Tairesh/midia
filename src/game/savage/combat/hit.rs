@@ -107,15 +107,20 @@ mod tests {
 
     use super::*;
 
-    #[test_case(4, 0, false, 0)]
-    #[test_case(5, 0, false, 0)]
-    #[test_case(7, 0, true, 0)]
-    #[test_case(5, 2, true, 0)]
-    #[test_case(5, 10, true, 0)]
-    #[test_case(8, 2, true, 0)]
-    #[test_case(9, 2, true, 1)]
-    #[test_case(10, 0, true, 0)]
-    #[test_case(11, 0, true, 1)]
+    #[test_case(5, 0, false, 0; "5+0 damage vs 5+2 toughness+armor, nothing")]
+    #[test_case(6, 0, false, 0; "6+0 damage vs 5+2 toughness+armor, nothing")]
+    #[test_case(7, 0, true, 0; "7+0 damage vs 5+2 toughness+armor, shock")]
+    #[test_case(5, 2, true, 0; "5+2 damage vs 5+2 toughness+armor, shock")]
+    #[test_case(5, 10, true, 0; "5+10 damage vs 5+2 toughness+armor, only shock")]
+    #[test_case(8, 2, true, 0; "8+2 damage vs 5+2 toughness+armor, shock")]
+    #[test_case(9, 2, true, 1; "9+2 damage vs 5+2 toughness+armor, 1 wound")]
+    #[test_case(10, 0, true, 0; "10+0 damage vs 5+2 toughness+armor, shock")]
+    #[test_case(11, 0, true, 1; "11+0 damage vs 5+2 toughness+armor, 1 wound")]
+    #[test_case(12, 2, true, 1; "12+2 damage vs 5+2 toughness+armor, 1 wound")]
+    #[test_case(13, 2, true, 2; "13+2 damage vs 5+2 toughness+armor, 2 wounds")]
+    #[test_case(13, 0, true, 1; "13+0 damage vs 5+2 toughness+armor, 1 wound")]
+    #[test_case(14, 0, true, 1; "14+0 damage vs 5+2 toughness+armor, 1 wound")]
+    #[test_case(15, 0, true, 2; "15+0 damage vs 5+2 toughness+armor, 2 wounds")]
     fn test_hit_result(damage: u8, penetration: u8, shock: bool, wounds: usize) {
         let avatar = Player::new(shasha(), Point::default());
         let parry = avatar.parry();

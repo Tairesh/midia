@@ -57,10 +57,11 @@ impl LoadWorld {
             600.0,
             height,
             app.assets.alert.clone(),
-            Position {
-                x: Horizontal::AtWindowCenterByCenter { offset: 0.0 },
-                y: Vertical::AtWindowCenterByTop { offset: y - 18.0 },
-            },
+            Position::new(
+                Horizontal::CenterByCenter,
+                Vertical::CenterByTop,
+                Vec2::new(0.0, y - 18.0),
+            ),
         )));
         for (i, savefile) in savefiles.iter().enumerate() {
             Self::push_sprites_for_savefile(&mut sprites, i, savefile, y, ctx, app);
@@ -90,19 +91,21 @@ impl LoadWorld {
             },
             Colors::KHAKI.with_alpha(0.6),
             Vec2::new(560.0, 50.0),
-            Position {
-                x: Horizontal::AtWindowCenterByLeft { offset: -282.0 },
-                y: Vertical::AtWindowCenterByTop { offset: y },
-            },
+            Position::new(
+                Horizontal::CenterByLeft,
+                Vertical::CenterByTop,
+                Vec2::new(-282.0, y),
+            ),
         )));
         sprites.push(Box::new(Label::new(
             savefile.name.as_str(),
             app.assets.fonts.header.clone(),
             Colors::LIGHT_YELLOW,
-            Position {
-                x: Horizontal::AtWindowCenterByLeft { offset: -280.0 },
-                y: Vertical::AtWindowCenterByTop { offset: y - 2.0 },
-            },
+            Position::new(
+                Horizontal::CenterByLeft,
+                Vertical::CenterByTop,
+                Vec2::new(-280.0, y - 2.0),
+            ),
         )));
         let mut version_label = Box::new(Label::new(
             savefile.version.as_str(),
@@ -112,10 +115,11 @@ impl LoadWorld {
             } else {
                 Colors::RED
             },
-            Position {
-                x: Horizontal::AtWindowCenterByLeft { offset: -275.0 },
-                y: Vertical::AtWindowCenterByTop { offset: y + 30.0 },
-            },
+            Position::new(
+                Horizontal::CenterByLeft,
+                Vertical::CenterByTop,
+                Vec2::new(-275.0, y + 30.0),
+            ),
         ));
         let version_label_size = version_label.calc_size(ctx);
         sprites.push(version_label);
@@ -124,12 +128,11 @@ impl LoadWorld {
             time.format("%Y.%m.%d %H:%M:%S").to_string(),
             app.assets.fonts.default.clone(),
             Colors::LIGHT_YELLOW,
-            Position {
-                x: Horizontal::AtWindowCenterByLeft {
-                    offset: -270.0 + version_label_size.x,
-                },
-                y: Vertical::AtWindowCenterByTop { offset: y + 30.0 },
-            },
+            Position::new(
+                Horizontal::CenterByLeft,
+                Vertical::CenterByTop,
+                Vec2::new(-270.0 + version_label_size.x, y + 30.0),
+            ),
         )));
         sprites.push(Box::new(
             ButtonBuilder::new(app.assets.button.clone())
@@ -141,10 +144,11 @@ impl LoadWorld {
                     },
                     app.assets.fonts.default.clone(),
                 )
-                .with_position(Position {
-                    x: Horizontal::AtWindowCenterByRight { offset: 120.0 },
-                    y: Vertical::AtWindowCenterByCenter { offset: y + 24.5 },
-                })
+                .with_position(Position::new(
+                    Horizontal::CenterByRight,
+                    Vertical::CenterByCenter,
+                    Vec2::new(120.0, y + 24.5),
+                ))
                 .with_keys(if i < 10 { vec![KEYS[i].into()] } else { vec![] })
                 .with_transition(Transition::CustomEvent((i * 2) as u8))
                 .build(),
@@ -164,10 +168,11 @@ impl LoadWorld {
                 } else {
                     vec![]
                 })
-                .with_position(Position {
-                    x: Horizontal::AtWindowCenterByRight { offset: 275.0 },
-                    y: Vertical::AtWindowCenterByCenter { offset: y + 24.5 },
-                })
+                .with_position(Position::new(
+                    Horizontal::CenterByRight,
+                    Vertical::CenterByCenter,
+                    Vec2::new(275.0, y + 24.5),
+                ))
                 .with_transition(Transition::CustomEvent((i * 2 + 1) as u8))
                 .build(),
         ));

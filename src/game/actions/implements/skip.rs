@@ -36,9 +36,10 @@ mod tests {
 
     use super::Skip;
 
-    #[test_case(1)]
-    #[test_case(2)]
-    #[test_case(10)]
+    #[test_case(1; "one tick")]
+    #[test_case(2; "two ticks")]
+    #[test_case(10; "ten ticks")]
+    #[test_case(100; "hundred ticks")]
     fn test_skipping_time(ticks: u32) {
         let mut world = prepare_world();
 

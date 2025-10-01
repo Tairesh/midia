@@ -145,16 +145,13 @@ pub mod tests {
 
     use super::{next_color, BodyColor};
 
-    #[test_case(BodyColor::Ginger, & vec ! [BodyColor::Ginger, BodyColor::LightBrown, BodyColor::Green], true, BodyColor::LightBrown)]
-    #[test_case(BodyColor::Green, & vec ! [BodyColor::Ginger, BodyColor::LightBrown, BodyColor::Green], true, BodyColor::Ginger)]
-    #[test_case(BodyColor::Ginger, & vec ! [BodyColor::Ginger, BodyColor::LightBrown, BodyColor::Green], false, BodyColor::Green)]
-    #[test_case(BodyColor::Green, & vec ! [BodyColor::Ginger, BodyColor::LightBrown, BodyColor::Green], false, BodyColor::LightBrown)]
-    fn test_next_color(
-        current: BodyColor,
-        colors: &Vec<BodyColor>,
-        forward: bool,
-        expect: BodyColor,
-    ) {
-        assert_eq!(next_color(current, colors, forward), expect);
+    const COLORS: [BodyColor; 3] = [BodyColor::Ginger, BodyColor::LightBrown, BodyColor::Green];
+
+    #[test_case(BodyColor::Ginger, true, BodyColor::LightBrown; "forward first -> second")]
+    #[test_case(BodyColor::Green, true, BodyColor::Ginger; "forward last -> first")]
+    #[test_case(BodyColor::Ginger, false, BodyColor::Green; "backward first -> last")]
+    #[test_case(BodyColor::Green, false, BodyColor::LightBrown; "backward last -> second")]
+    fn test_next_color(current: BodyColor, forward: bool, expect: BodyColor) {
+        assert_eq!(next_color(current, &COLORS, forward), expect);
     }
 }

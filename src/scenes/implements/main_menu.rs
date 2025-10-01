@@ -1,3 +1,4 @@
+use roguemetry::Vec2;
 use tetra::{input::Key, Context};
 
 use crate::ui::ButtonBuilder;
@@ -23,21 +24,21 @@ impl MainMenu {
         let bg = bg(&app.assets);
         let logo = Box::new(Image::new(
             app.assets.images.logo.clone(),
-            Position::horizontal_center(0.0, Vertical::AtWindowCenterByBottom { offset: -100.0 }),
+            Position::horizontal_center(Vertical::CenterByBottom, Vec2::new(0.0, -100.0)),
         ));
         let version = Box::new(Label::new(
             VERSION,
             app.assets.fonts.default.clone(),
             Colors::DARK_BROWN,
-            Position::horizontal_center(0.0, Vertical::AtWindowCenterByBottom { offset: -80.0 }),
+            Position::horizontal_center(Vertical::CenterByBottom, Vec2::new(0.0, -80.0)),
         ));
         let select_btn = Box::new(
             ButtonBuilder::new(app.assets.button.clone())
                 .with_text("[e] Select world", app.assets.fonts.default.clone())
                 .with_keys(vec![Key::E.into()])
                 .with_position(Position::horizontal_center(
-                    0.0,
-                    Vertical::AtWindowCenterByTop { offset: 0.0 },
+                    Vertical::CenterByTop,
+                    Vec2::zero(),
                 ))
                 .with_transition(Transition::Push(Scene::LoadWorld))
                 .build()
@@ -48,8 +49,8 @@ impl MainMenu {
                 .with_text("[c] Create new world", app.assets.fonts.default.clone())
                 .with_keys(vec![Key::C.into()])
                 .with_position(Position::horizontal_center(
-                    0.0,
-                    Vertical::AtWindowCenterByTop { offset: 50.0 },
+                    Vertical::CenterByTop,
+                    Vec2::new(0.0, 50.0),
                 ))
                 .with_transition(Transition::Push(Scene::CreateWorld))
                 .build(),
@@ -59,8 +60,8 @@ impl MainMenu {
                 .with_text("[s] Settings", app.assets.fonts.default.clone())
                 .with_keys(vec![Key::S.into()])
                 .with_position(Position::horizontal_center(
-                    0.0,
-                    Vertical::AtWindowCenterByTop { offset: 100.0 },
+                    Vertical::CenterByTop,
+                    Vec2::new(0.0, 100.0),
                 ))
                 .with_transition(Transition::Push(Scene::Settings))
                 .build(),
@@ -70,8 +71,8 @@ impl MainMenu {
                 .with_text("[x] Exit", app.assets.fonts.default.clone())
                 .with_keys(vec![Key::X.into()])
                 .with_position(Position::horizontal_center(
-                    0.0,
-                    Vertical::AtWindowCenterByTop { offset: 150.0 },
+                    Vertical::CenterByTop,
+                    Vec2::new(0.0, 150.0),
                 ))
                 .with_transition(Transition::Quit)
                 .build(),

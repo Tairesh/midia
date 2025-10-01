@@ -1,3 +1,4 @@
+use roguemetry::Vec2;
 use tetra::input::{Key, KeyModifier};
 use tetra::window::WindowPosition;
 use tetra::{Context, Event};
@@ -48,10 +49,11 @@ impl SettingsScene {
             ButtonBuilder::new(app.assets.button.clone())
                 .with_text("[Alt+F] Fullscreen", app.assets.fonts.default.clone())
                 .with_keys(vec![(Key::F, KeyModifier::Alt).into()])
-                .with_position(Position {
-                    x: Horizontal::AtWindowCenterByLeft { offset: 100.0 },
-                    y: Vertical::ByCenter { y: 200.0 },
-                })
+                .with_position(Position::new(
+                    Horizontal::CenterByLeft,
+                    Vertical::TopByCenter,
+                    Vec2::new(100.0, 200.0),
+                ))
                 .with_transition(Transition::CustomEvent(ButtonEvent::FullscreenMode as u8))
                 .with_fixable(true)
                 .with_pressed(settings.window.fullscreen)
@@ -61,10 +63,11 @@ impl SettingsScene {
             ButtonBuilder::new(app.assets.button.clone())
                 .with_text("[Alt+W] Window", app.assets.fonts.default.clone())
                 .with_keys(vec![(Key::W, KeyModifier::Alt).into()])
-                .with_position(Position {
-                    x: Horizontal::AtWindowCenterByRight { offset: 98.0 },
-                    y: Vertical::ByCenter { y: 200.0 },
-                })
+                .with_position(Position::new(
+                    Horizontal::CenterByRight,
+                    Vertical::TopByCenter,
+                    Vec2::new(98.0, 200.0),
+                ))
                 .with_transition(Transition::CustomEvent(ButtonEvent::WindowMode as u8))
                 .with_fixable(true)
                 .with_pressed(!settings.window.fullscreen)
@@ -82,29 +85,28 @@ impl SettingsScene {
                 label(
                     "Window mode:",
                     &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByRight {
-                            offset: 90.0 - window_btn_size.x,
-                        },
-                        y: Vertical::ByCenter { y: 200.0 },
-                    },
+                    Position::new(
+                        Horizontal::CenterByRight,
+                        Vertical::TopByCenter,
+                        Vec2::new(90.0 - window_btn_size.x, 200.0),
+                    ),
                 ),
                 label(
                     "Repeat delay:",
                     &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByRight {
-                            offset: 90.0 - window_btn_size.x,
-                        },
-                        y: Vertical::ByCenter { y: 250.0 },
-                    },
+                    Position::new(
+                        Horizontal::CenterByRight,
+                        Vertical::TopByCenter,
+                        Vec2::new(90.0 - window_btn_size.x, 250.0),
+                    ),
                 ),
                 icon_minus(
                     &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByRight { offset: 0.0 },
-                        y: Vertical::ByCenter { y: 250.0 },
-                    },
+                    Position::new(
+                        Horizontal::CenterByRight,
+                        Vertical::TopByCenter,
+                        Vec2::new(0.0, 250.0),
+                    ),
                     ButtonEvent::RepeatIntervalMinus as u8,
                 ),
                 Box::new(TextInput::int(
@@ -112,24 +114,23 @@ impl SettingsScene {
                     (1, 10000),
                     190.0,
                     app.assets.fonts.header.clone(),
-                    Position {
-                        x: Horizontal::AtWindowCenterByLeft { offset: 5.0 },
-                        y: Vertical::ByCenter { y: 250.0 },
-                    },
+                    Position::new(
+                        Horizontal::CenterByLeft,
+                        Vertical::TopByCenter,
+                        Vec2::new(5.0, 250.0),
+                    ),
                 )),
                 icon_plus(
                     &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByLeft { offset: 200.0 },
-                        y: Vertical::ByCenter { y: 250.0 },
-                    },
+                    Position::new(
+                        Horizontal::CenterByLeft,
+                        Vertical::TopByCenter,
+                        Vec2::new(200.0, 250.0),
+                    ),
                     ButtonEvent::RepeatIntervalPlus as u8,
                 ),
                 back_btn(
-                    Position::horizontal_center(
-                        0.0,
-                        Vertical::AtWindowBottomByBottom { offset: -200.0 },
-                    ),
+                    Position::horizontal_center(Vertical::BottomByBottom, Vec2::new(0.0, -200.0)),
                     &app.assets,
                 ),
             ],

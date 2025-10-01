@@ -431,6 +431,7 @@ impl Press for TextInput {
     }
 
     fn off_pressed(&mut self) {
+        self.value.validate();
         self.unpress();
     }
 

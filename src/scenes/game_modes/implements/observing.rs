@@ -98,23 +98,15 @@ impl Observing {
         let position_shift = tile_size / 2.0 + 5.0;
         let position = match Direction::from_delta(self.mouse_moved_pos.x, self.mouse_moved_pos.y) {
             Direction::NorthWest | Direction::North | Direction::West | Direction::Here => {
-                Position::at_center_by_left_top(
-                    position.x + position_shift,
-                    position.y + position_shift,
-                )
+                Position::at_center_by_left_top(position + position_shift)
             }
             Direction::East | Direction::NorthEast => Position::at_center_by_right_top(
-                position.x - position_shift,
-                position.y + position_shift,
+                position + Vec2::new(-position_shift, position_shift),
             ),
             Direction::South | Direction::SouthWest => Position::at_center_by_left_bottom(
-                position.x + position_shift,
-                position.y - position_shift,
+                position + Vec2::new(position_shift, -position_shift),
             ),
-            Direction::SouthEast => Position::at_center_by_right_bottom(
-                position.x - position_shift,
-                position.y - position_shift,
-            ),
+            Direction::SouthEast => Position::at_center_by_right_bottom(position - position_shift),
         };
         let window_size = game.window_size;
         if let Some(sprite) = &mut self.sprite {

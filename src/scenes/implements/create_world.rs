@@ -1,4 +1,5 @@
 use rand::Rng;
+use roguemetry::Vec2;
 use tetra::{Context, Event};
 
 use crate::{
@@ -46,36 +47,40 @@ impl CreateWorld {
                 label(
                     "World name:",
                     &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByRight { offset: -10.0 },
-                        y: Vertical::ByCenter { y: 200.0 },
-                    },
+                    Position::new(
+                        Horizontal::CenterByRight,
+                        Vertical::TopByCenter,
+                        Vec2::new(-10.0, 200.0),
+                    ),
                 ),
                 text_input(
                     "Test world",
                     250.0,
                     &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByLeft { offset: 0.0 },
-                        y: Vertical::ByCenter { y: 200.0 },
-                    },
+                    Position::new(
+                        Horizontal::CenterByLeft,
+                        Vertical::TopByCenter,
+                        Vec2::new(0.0, 200.0),
+                    ),
                 ),
                 label(
                     "World seed:",
                     &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByRight { offset: -10.0 },
-                        y: Vertical::ByCenter { y: 270.0 },
-                    },
+                    Position::new(
+                        Horizontal::CenterByRight,
+                        Vertical::TopByCenter,
+                        Vec2::new(-10.0, 270.0),
+                    ),
                 ),
                 text_input(
                     random_seed(&mut rng).as_str(),
                     250.0,
                     &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByLeft { offset: 0.0 },
-                        y: Vertical::ByCenter { y: 270.0 },
-                    },
+                    Position::new(
+                        Horizontal::CenterByLeft,
+                        Vertical::TopByCenter,
+                        Vec2::new(0.0, 270.0),
+                    ),
                 ),
                 back_btn,
                 randomize_btn,
@@ -83,26 +88,29 @@ impl CreateWorld {
                 error_label(
                     "Savefile with this name already exists",
                     &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 125.0 },
-                        y: Vertical::ByBottom { y: 180.0 },
-                    },
+                    Position::new(
+                        Horizontal::CenterByCenter,
+                        Vertical::TopByBottom,
+                        Vec2::new(125.0, 180.0),
+                    ),
                 ),
                 error_label(
                     "Seed shall not be empty!",
                     &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 125.0 },
-                        y: Vertical::ByBottom { y: 250.0 },
-                    },
+                    Position::new(
+                        Horizontal::CenterByCenter,
+                        Vertical::TopByBottom,
+                        Vec2::new(125.0, 250.0),
+                    ),
                 ),
                 error_label(
                     "World name shall not be empty!",
                     &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 125.0 },
-                        y: Vertical::ByBottom { y: 180.0 },
-                    },
+                    Position::new(
+                        Horizontal::CenterByCenter,
+                        Vertical::TopByBottom,
+                        Vec2::new(125.0, 180.0),
+                    ),
                 ),
             ],
         }

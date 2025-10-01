@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::path::Path;
 
-use roguemetry::Point;
+use roguemetry::{Point, Vec2};
 use tetra::{Context, Event};
 
 use crate::game::map::items::helpers::STONE_SPEAR;
@@ -213,43 +213,28 @@ fn attribute_sprites(
             200.0,
             140.0,
             assets.alert.clone(),
-            Position {
-                x: Horizontal::AtWindowCenterByCenter { offset: x },
-                y: Vertical::ByTop { y },
-            },
+            Position::horizontal_center(Vertical::TopByTop, Vec2::new(x, y)),
         )),
         decorative_label(
             attr.name(),
             assets,
-            Position {
-                x: Horizontal::AtWindowCenterByCenter { offset: x },
-                y: Vertical::ByTop { y: y + 30.0 },
-            },
+            Position::horizontal_center(Vertical::TopByTop, Vec2::new(x, y + 30.0)),
             attr.color(),
         ),
         icon_minus(
             assets,
-            Position {
-                x: Horizontal::AtWindowCenterByCenter { offset: x - 55.0 },
-                y: Vertical::ByCenter { y: y + 100.0 },
-            },
+            Position::horizontal_center(Vertical::TopByCenter, Vec2::new(x - 55.0, y + 100.0)),
             minus,
         ),
         decorative_label(
             dice.name(),
             assets,
-            Position {
-                x: Horizontal::AtWindowCenterByCenter { offset: x },
-                y: Vertical::ByCenter { y: y + 100.0 },
-            },
+            Position::horizontal_center(Vertical::TopByCenter, Vec2::new(x, y + 100.0)),
             attr.color(),
         ),
         icon_plus(
             assets,
-            Position {
-                x: Horizontal::AtWindowCenterByCenter { offset: x + 55.0 },
-                y: Vertical::ByCenter { y: y + 100.0 },
-            },
+            Position::horizontal_center(Vertical::TopByCenter, Vec2::new(x + 55.0, y + 100.0)),
             plus,
         ),
     ]
@@ -274,41 +259,36 @@ fn skill_sprites(
         colored_label(
             skill.name(),
             assets,
-            Position {
-                x: Horizontal::AtWindowCenterByLeft { offset: x },
-                y: Vertical::ByCenter { y },
-            },
+            Position::new(
+                Horizontal::CenterByLeft,
+                Vertical::TopByCenter,
+                Vec2::new(x, y),
+            ),
             attr.color(),
         ),
         icon_minus(
             assets,
-            Position {
-                x: Horizontal::AtWindowCenterByCenter {
-                    offset: x + 160.0 + offset_for_third_col,
-                },
-                y: Vertical::ByCenter { y },
-            },
+            Position::horizontal_center(
+                Vertical::TopByCenter,
+                Vec2::new(x + 160.0 + offset_for_third_col, y),
+            ),
             minus,
         ),
         colored_label(
             level.name(),
             assets,
-            Position {
-                x: Horizontal::AtWindowCenterByCenter {
-                    offset: x + 220.0 + offset_for_third_col,
-                },
-                y: Vertical::ByCenter { y },
-            },
+            Position::horizontal_center(
+                Vertical::TopByCenter,
+                Vec2::new(x + 220.0 + offset_for_third_col, y),
+            ),
             attr.color(),
         ),
         icon_plus(
             assets,
-            Position {
-                x: Horizontal::AtWindowCenterByCenter {
-                    offset: x + 280.0 + offset_for_third_col,
-                },
-                y: Vertical::ByCenter { y },
-            },
+            Position::horizontal_center(
+                Vertical::TopByCenter,
+                Vec2::new(x + 280.0 + offset_for_third_col, y),
+            ),
             plus,
         ),
     ]
@@ -338,20 +318,20 @@ impl CharacterAttributes {
         sprites.push(decorative_label(
             "Attributes' points left: 5",
             &app.assets,
-            Position::horizontal_center(0.0, Vertical::ByTop { y: 95.0 }),
+            Position::horizontal_center(Vertical::TopByTop, Vec2::new(0.0, 95.0)),
             Colors::DARK_BROWN,
         ));
         sprites.push(decorative_label(
             "Skills' points left: 15",
             &app.assets,
-            Position::horizontal_center(0.0, Vertical::ByCenter { y: 320.0 }),
+            Position::horizontal_center(Vertical::TopByCenter, Vec2::new(0.0, 320.0)),
             Colors::DARK_BROWN,
         ));
         sprites.push(Box::new(Alert::passive(
             1100.0,
             285.0,
             app.assets.alert.clone(),
-            Position::horizontal_center(0.0, Vertical::ByTop { y: 370.0 }),
+            Position::horizontal_center(Vertical::TopByTop, Vec2::new(0.0, 370.0)),
         )));
 
         for (i, (attr, skill, level)) in personality
@@ -367,13 +347,13 @@ impl CharacterAttributes {
         sprites.push(decorative_label(
             "Parry: 0",
             &app.assets,
-            Position::horizontal_center(-200.0, Vertical::ByCenter { y: 350.0 }),
+            Position::horizontal_center(Vertical::TopByCenter, Vec2::new(-200.0, 350.0)),
             Colors::DARK_GREEN,
         ));
         sprites.push(decorative_label(
             "Toughness: 0",
             &app.assets,
-            Position::horizontal_center(200.0, Vertical::ByCenter { y: 350.0 }),
+            Position::horizontal_center(Vertical::TopByCenter, Vec2::new(200.0, 350.0)),
             Colors::DARK_VIOLET,
         ));
 

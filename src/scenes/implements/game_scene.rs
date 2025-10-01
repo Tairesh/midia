@@ -54,32 +54,34 @@ impl GameScene {
             player.personality.mind.name.as_str(),
             app.assets.fonts.header.clone(),
             Colors::WHITE_SMOKE,
-            Position::by_left_top(55.0, 8.0),
+            Position::by_left_top(Vec2::new(55.0, 8.0)),
         ));
         // TODO: custom calendar
         let current_time_label = Box::new(Label::new(
             format!("{}", world_borrow.meta.current_tick),
             app.assets.fonts.default.clone(),
             Colors::WHITE_SMOKE,
-            Position::horizontal_center(0.0, Vertical::ByTop { y: 5.0 }),
+            Position::horizontal_center(Vertical::TopByTop, Vec2::new(0.0, 5.0)),
         ));
         let wield_label = Box::new(Label::new(
             "Wield:",
             app.assets.fonts.default.clone(),
             Colors::LIME,
-            Position {
-                x: Horizontal::ByLeft { x: 5.0 },
-                y: Vertical::ByCenter { y: 50.0 },
-            },
+            Position::new(
+                Horizontal::LeftByLeft,
+                Vertical::TopByCenter,
+                Vec2::new(5.0, 50.0),
+            ),
         ));
         let main_hand = player.inventory.main_hand();
         let main_hand_image = Box::new(TilesetSprite::new(
             main_hand.map(Item::looks_like).unwrap_or_default(),
             app.assets.tileset.clone(),
-            Position {
-                x: Horizontal::ByLeft { x: 60.0 },
-                y: Vertical::ByCenter { y: 47.0 },
-            },
+            Position::new(
+                Horizontal::LeftByLeft,
+                Vertical::TopByCenter,
+                Vec2::new(60.0, 47.0),
+            ),
             2.0,
             main_hand.map(Item::color),
         ));
@@ -87,10 +89,11 @@ impl GameScene {
             main_hand.map_or("nothing", Item::name),
             app.assets.fonts.default.clone(),
             Colors::LIME,
-            Position {
-                x: Horizontal::ByLeft { x: 83.0 },
-                y: Vertical::ByCenter { y: 50.0 },
-            },
+            Position::new(
+                Horizontal::LeftByLeft,
+                Vertical::TopByCenter,
+                Vec2::new(83.0, 50.0),
+            ),
         ));
 
         drop(units);

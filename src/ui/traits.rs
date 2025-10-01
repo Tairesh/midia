@@ -22,7 +22,7 @@ pub trait Positionate {
     fn rect(&self) -> Rect;
     fn set_rect(&mut self, rect: Rect);
     fn calc_rect(&mut self, owner_size: Vec2, window_size: (i32, i32)) -> Rect {
-        let left_top = self.position().as_vec(owner_size, window_size);
+        let left_top = self.position().calc(owner_size, window_size);
         Rect::new(left_top.x, left_top.y, owner_size.x, owner_size.y)
     }
     fn positionate(&mut self, ctx: &mut Context, window_size: (i32, i32)) {

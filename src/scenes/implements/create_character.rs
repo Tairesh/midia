@@ -85,75 +85,84 @@ impl CreateCharacter {
                 label(
                     "Name:",
                     &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByRight { offset: -60.0 },
-                        y: Vertical::ByCenter { y: 200.0 },
-                    },
+                    Position::new(
+                        Horizontal::CenterByRight,
+                        Vertical::TopByCenter,
+                        Vec2::new(-60.0, 200.0),
+                    ),
                 ),
                 text_input(
                     "",
                     300.0,
                     &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByLeft { offset: -40.0 },
-                        y: Vertical::ByCenter { y: 200.0 },
-                    },
+                    Position::new(
+                        Horizontal::CenterByLeft,
+                        Vertical::TopByCenter,
+                        Vec2::new(-40.0, 200.0),
+                    ),
                 ),
                 error_label(
                     "Character name shall not be empty!",
                     &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 110.0 },
-                        y: Vertical::ByBottom { y: 180.0 },
-                    },
+                    Position::new(
+                        Horizontal::CenterByCenter,
+                        Vertical::TopByBottom,
+                        Vec2::new(110.0, 180.0),
+                    ),
                 ),
                 label(
                     "Race:",
                     &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByRight { offset: -60.0 },
-                        y: Vertical::ByCenter { y: 250.0 },
-                    },
+                    Position::new(
+                        Horizontal::CenterByRight,
+                        Vertical::TopByCenter,
+                        Vec2::new(-60.0, 250.0),
+                    ),
                 ),
                 icon_left(
                     &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByLeft { offset: -40.0 },
-                        y: Vertical::ByCenter { y: 250.0 },
-                    },
+                    Position::new(
+                        Horizontal::CenterByLeft,
+                        Vertical::TopByCenter,
+                        Vec2::new(-40.0, 250.0),
+                    ),
                     ButtonEvent::RaceLeft as u8,
                 ),
                 Box::new(Label::new(
                     "Gazan",
                     app.assets.fonts.header.clone(),
                     Colors::DARK_BROWN,
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 120.0 },
-                        y: Vertical::ByCenter { y: 250.0 },
-                    },
+                    Position::new(
+                        Horizontal::CenterByCenter,
+                        Vertical::TopByCenter,
+                        Vec2::new(120.0, 250.0),
+                    ),
                 )),
                 icon_right(
                     &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByRight { offset: 260.0 },
-                        y: Vertical::ByCenter { y: 250.0 },
-                    },
+                    Position::new(
+                        Horizontal::CenterByRight,
+                        Vertical::TopByCenter,
+                        Vec2::new(260.0, 250.0),
+                    ),
                     ButtonEvent::RaceRight as u8,
                 ),
                 label(
                     "Gender:",
                     &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByRight { offset: -60.0 },
-                        y: Vertical::ByCenter { y: 295.0 },
-                    },
+                    Position::new(
+                        Horizontal::CenterByRight,
+                        Vertical::TopByCenter,
+                        Vec2::new(-60.0, 295.0),
+                    ),
                 ),
                 icon_left(
                     &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByLeft { offset: -40.0 },
-                        y: Vertical::ByCenter { y: 300.0 },
-                    },
+                    Position::new(
+                        Horizontal::CenterByLeft,
+                        Vertical::TopByCenter,
+                        Vec2::new(-40.0, 300.0),
+                    ),
                     ButtonEvent::GenderLeft as u8,
                 ),
                 text_input(
@@ -164,33 +173,37 @@ impl CreateCharacter {
                     },
                     210.0,
                     &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByLeft { offset: 5.0 },
-                        y: Vertical::ByCenter { y: 300.0 },
-                    },
+                    Position::new(
+                        Horizontal::CenterByLeft,
+                        Vertical::TopByCenter,
+                        Vec2::new(5.0, 300.0),
+                    ),
                 ),
                 icon_right(
                     &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByRight { offset: 260.0 },
-                        y: Vertical::ByCenter { y: 300.0 },
-                    },
+                    Position::new(
+                        Horizontal::CenterByRight,
+                        Vertical::TopByCenter,
+                        Vec2::new(260.0, 300.0),
+                    ),
                     ButtonEvent::GenderRight as u8,
                 ),
                 label(
                     "Age:",
                     &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByRight { offset: -60.0 },
-                        y: Vertical::ByCenter { y: 350.0 },
-                    },
+                    Position::new(
+                        Horizontal::CenterByRight,
+                        Vertical::TopByCenter,
+                        Vec2::new(-60.0, 350.0),
+                    ),
                 ),
                 icon_minus(
                     &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByLeft { offset: -40.0 },
-                        y: Vertical::ByCenter { y: 350.0 },
-                    },
+                    Position::new(
+                        Horizontal::CenterByLeft,
+                        Vertical::TopByCenter,
+                        Vec2::new(-40.0, 350.0),
+                    ),
                     ButtonEvent::AgeMinus as u8,
                 ),
                 Box::new(TextInput::int(
@@ -198,33 +211,37 @@ impl CreateCharacter {
                     (16, 99),
                     210.0,
                     app.assets.fonts.header.clone(),
-                    Position {
-                        x: Horizontal::AtWindowCenterByLeft { offset: 5.0 },
-                        y: Vertical::ByCenter { y: 350.0 },
-                    },
+                    Position::new(
+                        Horizontal::CenterByLeft,
+                        Vertical::TopByCenter,
+                        Vec2::new(5.0, 350.0),
+                    ),
                 )),
                 icon_plus(
                     &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByRight { offset: 260.0 },
-                        y: Vertical::ByCenter { y: 350.0 },
-                    },
+                    Position::new(
+                        Horizontal::CenterByRight,
+                        Vertical::TopByCenter,
+                        Vec2::new(260.0, 350.0),
+                    ),
                     ButtonEvent::AgePlus as u8,
                 ),
                 label(
                     "Body color:",
                     &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByRight { offset: -60.0 },
-                        y: Vertical::ByCenter { y: 400.0 },
-                    },
+                    Position::new(
+                        Horizontal::CenterByRight,
+                        Vertical::TopByCenter,
+                        Vec2::new(-60.0, 400.0),
+                    ),
                 ),
                 icon_left(
                     &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByLeft { offset: -40.0 },
-                        y: Vertical::ByCenter { y: 400.0 },
-                    },
+                    Position::new(
+                        Horizontal::CenterByLeft,
+                        Vertical::TopByCenter,
+                        Vec2::new(-40.0, 400.0),
+                    ),
                     ButtonEvent::ColorLeft as u8,
                 ),
                 Box::new(JustMesh::new(
@@ -237,35 +254,39 @@ impl CreateCharacter {
                     .unwrap(),
                     Some(body_color.into()),
                     Vec2::new(200.0, 42.0),
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 110.0 },
-                        y: Vertical::ByCenter { y: 400.0 },
-                    },
+                    Position::new(
+                        Horizontal::CenterByCenter,
+                        Vertical::TopByCenter,
+                        Vec2::new(110.0, 400.0),
+                    ),
                 )),
                 Box::new(Label::new(
                     body_color.name(),
                     app.assets.fonts.header.clone(),
                     body_color.text_color(),
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 110.0 },
-                        y: Vertical::ByCenter { y: 400.0 },
-                    },
+                    Position::new(
+                        Horizontal::CenterByCenter,
+                        Vertical::TopByCenter,
+                        Vec2::new(110.0, 400.0),
+                    ),
                 )),
                 icon_right(
                     &app.assets,
-                    Position {
-                        x: Horizontal::AtWindowCenterByRight { offset: 260.0 },
-                        y: Vertical::ByCenter { y: 400.0 },
-                    },
+                    Position::new(
+                        Horizontal::CenterByRight,
+                        Vertical::TopByCenter,
+                        Vec2::new(260.0, 400.0),
+                    ),
                     ButtonEvent::ColorRight as u8,
                 ),
                 Box::new(TilesetSprite::new(
                     Race::Gazan.looks_like(),
                     app.assets.tileset.clone(),
-                    Position {
-                        x: Horizontal::AtWindowCenterByCenter { offset: 50.0 },
-                        y: Vertical::ByCenter { y: 250.0 },
-                    },
+                    Position::new(
+                        Horizontal::CenterByCenter,
+                        Vertical::TopByCenter,
+                        Vec2::new(50.0, 250.0),
+                    ),
                     3.0,
                     Some(body_color.into()),
                 )),

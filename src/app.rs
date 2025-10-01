@@ -1,7 +1,7 @@
+use roguemetry::Vec2;
 use std::cell::RefCell;
 use std::path::Path;
 use std::rc::Rc;
-
 use tetra::{input::Key, window, Context, Event, State};
 
 use crate::{
@@ -29,7 +29,7 @@ impl App {
             "00",
             assets.fonts.default.clone(),
             Colors::LIME,
-            Position::by_right_top(-10.0, 10.0),
+            Position::by_right_top(Vec2::new(-10.0, 10.0)),
         );
         let mut app = Self {
             assets: Rc::new(assets),

@@ -9,7 +9,7 @@ pub use self::implements::{
     label::{ItemDisplay, Label},
     meshy::{HoverableMesh, JustMesh},
 };
-pub use self::position::{AnchorX, AnchorY, Horizontal, Position, Vertical};
+pub use self::position::{Horizontal, Position, Vertical};
 pub use self::traits::{
     Colorize, Disable, Draw, Focus, Hover, Positionate, Press, Stringify, UiSprite, Update,
     UpdateContext, UpdateContextState,

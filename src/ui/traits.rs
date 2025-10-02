@@ -2,7 +2,7 @@
 
 use super::{Alert, Button, JustMesh, Label, Layout, Position, TextInput, TilesetSprite};
 use crate::scenes::Transition;
-use roguemetry::{Rect, Vec2};
+use roguemetry::{Point, Rect, Vec2};
 use tetra::graphics::Color;
 use tetra::input::MouseButton;
 use tetra::{input, Context};
@@ -23,7 +23,7 @@ pub trait HasLayout {
 }
 
 pub trait Positionable: HasSize + HasLayout {
-    fn update_position(&mut self, ctx: &mut Context, window_size: (i32, i32)) {
+    fn update_position(&mut self, ctx: &mut Context, window_size: Vec2) {
         let owner_size = self.size(ctx);
         self.layout_mut().update(owner_size, window_size);
     }

@@ -37,7 +37,7 @@ pub struct GameScene {
     pub log: GameLog,
     shift_of_view: Point,
     pub assets: Rc<Assets>,
-    pub window_size: (i32, i32),
+    pub window_size: Vec2,
     need_redraw: bool,
     map_canvas: Option<Canvas>,
 }
@@ -304,7 +304,7 @@ impl Scene for GameScene {
         self.current_mode().borrow_mut().draw(ctx, self);
     }
 
-    fn on_resize(&mut self, _ctx: &mut Context, window_size: (i32, i32)) {
+    fn on_resize(&mut self, _ctx: &mut Context, window_size: Vec2) {
         self.window_size = window_size;
         self.need_redraw = true;
     }

@@ -104,7 +104,7 @@ impl Button {
         scale: Vec2,
         color: Option<Color>,
         ctx: &mut Context,
-        window_size: (i32, i32),
+        window_size: Vec2,
     ) {
         if let ButtonContent::Icon { tileset, .. } = &self.content {
             self.content = ButtonContent::Icon {

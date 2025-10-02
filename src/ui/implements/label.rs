@@ -56,7 +56,7 @@ impl Label {
         }
     }
 
-    pub fn update(&mut self, text: impl Into<String>, ctx: &mut Context, window_size: (i32, i32)) {
+    pub fn update(&mut self, text: impl Into<String>, ctx: &mut Context, window_size: Vec2) {
         self.set_value(text);
         self.update_position(ctx, window_size);
     }
@@ -172,7 +172,7 @@ impl ItemDisplay {
         }
     }
 
-    pub fn set_item(&mut self, item: Option<&Item>, ctx: &mut Context, window_size: (i32, i32)) {
+    pub fn set_item(&mut self, item: Option<&Item>, ctx: &mut Context, window_size: Vec2) {
         let (name, looks_like) = if let Some(item) = item {
             (item.name(), Some(item.looks_like()))
         } else {

@@ -1,5 +1,5 @@
 use crate::ui::Position;
-use roguemetry::{Rect, Vec2};
+use roguemetry::{Point, Rect, Vec2};
 use tetra::Context;
 
 /// Layout information for a UI element
@@ -41,7 +41,7 @@ impl Layout {
     }
 
     /// Updates the calculated rectangle based on the owner size and window size
-    pub fn update(&mut self, owner_size: Vec2, window_size: (i32, i32)) {
+    pub fn update(&mut self, owner_size: Vec2, window_size: Vec2) {
         let left_top = self.position().calc(owner_size, window_size);
         self.set_rect(Rect::new(
             left_top.x,
@@ -60,7 +60,7 @@ mod tests {
     fn test_layout_update() {
         let mut layout = Layout::new(Position::center());
         let owner_size = Vec2::new(100.0, 50.0);
-        let window_size = (800, 600);
+        let window_size = Vec2::new(800.0, 600.0);
 
         layout.update(owner_size, window_size);
         let rect = layout.rect();

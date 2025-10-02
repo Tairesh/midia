@@ -16,7 +16,7 @@ use crate::{
 
 pub struct App {
     pub assets: Rc<Assets>,
-    pub window_size: (i32, i32),
+    pub window_size: Vec2,
     pub world: Option<Rc<RefCell<World>>>,
     scenes: Vec<Box<dyn Scene>>,
     fps_counter: Label,
@@ -31,10 +31,11 @@ impl App {
             Colors::LIME,
             Position::by_right_top(Vec2::new(-10.0, 10.0)),
         );
+        let (w, h) = window::get_size(ctx);
         let mut app = Self {
             assets: Rc::new(assets),
             scenes: vec![],
-            window_size: window::get_size(ctx),
+            window_size: Vec2::new(w as f32, h as f32),
             world: None,
             fps_counter,
         };
@@ -53,7 +54,7 @@ impl App {
         self.on_resize(ctx, self.window_size);
     }
 
-    fn on_resize(&mut self, ctx: &mut Context, window_size: (i32, i32)) {
+    fn on_resize(&mut self, ctx: &mut Context, window_size: Vec2) {
         self.window_size = window_size;
         if let Some(scene) = self.current_scene() {
             scene.relayout(ctx, window_size);
@@ -172,7 +173,7 @@ impl State for App {
                     settings.window.width = width;
                     settings.window.height = height;
                 }
-                self.on_resize(ctx, (width, height));
+                self.on_resize(ctx, Vec2::new(width as f32, height as f32));
             }
             _ => {}
         }

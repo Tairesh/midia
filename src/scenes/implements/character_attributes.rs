@@ -194,7 +194,7 @@ pub struct CharacterAttributes {
     personality: PlayerPersonality,
     attributes_points: u8,
     skills_points: i8,
-    window_size: (i32, i32),
+    window_size: Vec2,
     sprites: Vec<Box<dyn UiSprite>>,
 }
 
@@ -640,7 +640,7 @@ impl Scene for CharacterAttributes {
         self.update_points(ctx);
     }
 
-    fn on_resize(&mut self, _ctx: &mut Context, window_size: (i32, i32)) {
+    fn on_resize(&mut self, _ctx: &mut Context, window_size: Vec2) {
         self.window_size = window_size;
     }
 

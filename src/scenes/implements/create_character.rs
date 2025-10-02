@@ -55,7 +55,7 @@ pub struct CreateCharacter {
     sprites: [Box<dyn UiSprite>; 27],
     race: PlayableRace,
     body_color: Option<BodyColor>,
-    window_size: (i32, i32),
+    window_size: Vec2,
 }
 
 impl CreateCharacter {
@@ -409,7 +409,7 @@ impl Scene for CreateCharacter {
         easy_back(&event, self.get_update_context_state())
     }
 
-    fn on_resize(&mut self, _ctx: &mut Context, window_size: (i32, i32)) {
+    fn on_resize(&mut self, _ctx: &mut Context, window_size: Vec2) {
         self.window_size = window_size;
     }
 

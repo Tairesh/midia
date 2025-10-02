@@ -1,4 +1,4 @@
-use roguemetry::Vec2;
+use roguemetry::{Point, Vec2};
 
 /// Specifies how to position a UI element horizontally relative to the window.
 #[derive(Debug, Copy, Clone)]
@@ -118,8 +118,7 @@ impl Position {
         }
     }
 
-    pub fn calc(&self, owner_size: Vec2, window_size: (i32, i32)) -> Vec2 {
-        let window_size = Vec2::new(window_size.0 as f32, window_size.1 as f32);
+    pub fn calc(&self, owner_size: Vec2, window_size: Vec2) -> Vec2 {
         let x = match self.horizontal {
             Horizontal::LeftByLeft => 0.0,
             Horizontal::CenterByCenter => window_size.x / 2.0 - owner_size.x / 2.0,
@@ -164,7 +163,7 @@ mod tests {
     #[test_case(Position::at_center_by_right_bottom(Vec2::new(-50.0, -30.0)), Vec2::new(250.0, 70.0); "center_by_right_bottom")]
     fn test_position_calc(pos: Position, expected: Vec2) {
         let owner_size = Vec2::new(100.0, 200.0);
-        let window_size = (800, 600);
+        let window_size = Vec2::new(800.0, 600.0);
         assert_eq!(pos.calc(owner_size, window_size), expected);
     }
 }

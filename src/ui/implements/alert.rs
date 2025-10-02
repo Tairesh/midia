@@ -50,9 +50,9 @@ impl Alert {
         self
     }
 
-    pub fn set_size(&mut self, ctx: &mut Context, window_size: (i32, i32)) {
-        self.width = window_size.0 as f32;
-        self.height = window_size.1 as f32;
+    pub fn set_size(&mut self, ctx: &mut Context, window_size: Vec2) {
+        self.width = window_size.x;
+        self.height = window_size.y;
         self.update_position(ctx, window_size);
     }
 }

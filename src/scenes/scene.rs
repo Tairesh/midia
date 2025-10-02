@@ -1,9 +1,9 @@
-use std::path::PathBuf;
-use tetra::{Context, Event};
-
 use crate::app::App;
 use crate::game::units::PlayerPersonality;
 use crate::ui::{SomeUISprites, SomeUISpritesMut, UpdateContext, UpdateContextState};
+use roguemetry::Vec2;
+use std::path::PathBuf;
+use tetra::{Context, Event};
 
 use super::implements::{
     CharacterAttributes, CreateCharacter, CreateWorld, Empty, GameMenu, GameScene, LoadWorld,
@@ -54,7 +54,7 @@ pub trait Scene {
     fn before_draw(&mut self, _ctx: &mut Context) {}
     fn after_draw(&mut self, _ctx: &mut Context) {}
     fn on_open(&mut self, _ctx: &mut Context) {}
-    fn on_resize(&mut self, _ctx: &mut Context, _window_size: (i32, i32)) {}
+    fn on_resize(&mut self, _ctx: &mut Context, _window_size: Vec2) {}
     fn sprites(&self) -> SomeUISprites<'_> {
         None
     }
@@ -76,7 +76,7 @@ pub trait Scene {
         }
     }
 
-    fn relayout(&mut self, ctx: &mut Context, window_size: (i32, i32)) {
+    fn relayout(&mut self, ctx: &mut Context, window_size: Vec2) {
         if let Some(sprites) = self.sprites_mut() {
             for sprite in sprites.iter_mut() {
                 sprite.update_position(ctx, window_size);

@@ -49,8 +49,7 @@ impl PikeAttack {
             self.last_mouse_position = mouse;
             self.last_zoom = zoom;
             if self.mouse_moved {
-                let (w, h) = game.window_size;
-                self.mouse_moved_pos = ((mouse - Vec2::new((w / 2) as f32, (h / 2) as f32))
+                self.mouse_moved_pos = ((mouse - game.window_size / 2.0)
                     / (game.assets.tileset.tile_size as f32 * zoom_view))
                     .into();
             }

@@ -20,10 +20,15 @@ pub fn draw(
     ctx: &mut Context,
     world: &RefCell<World>,
     assets: &Assets,
-    window_size: (i32, i32),
+    window_size: Vec2,
     shift_of_view: Point,
 ) -> Canvas {
-    let canvas = Canvas::new(ctx, window_size.0, window_size.1).unwrap();
+    let canvas = Canvas::new(
+        ctx,
+        window_size.x.round() as i32,
+        window_size.y.round() as i32,
+    )
+    .unwrap();
     tetra::graphics::set_canvas(ctx, &canvas);
     tetra::graphics::clear(ctx, Colors::BLACK);
     let world = world.borrow();
@@ -32,12 +37,11 @@ pub fn draw(
     let zoom = world.game_view.zoom.as_view();
     let tile_size = assets.tileset.tile_size as f32 * zoom;
 
-    let (width, height) = (
-        window_size.0 / tile_size as i32,
-        window_size.1 / tile_size as i32,
-    );
-    let center = Vec2::new(window_size.0 as f32, window_size.1 as f32) / 2.0
-        - Vec2::new(tile_size, tile_size) / 2.0;
+    let (width, height) = (window_size.x / tile_size, window_size.y / tile_size);
+    let width = width.round() as i32;
+    let height = height.round() as i32;
+    let center =
+        Vec2::new(window_size.x, window_size.y) / 2.0 - Vec2::new(tile_size, tile_size) / 2.0;
     let center_tile = world.units().player().pos + shift_of_view;
 
     let left_top = center_tile + (-width / 2, -height / 2);
@@ -151,7 +155,7 @@ pub fn draw_cursors(
     ctx: &mut Context,
     world: &RefCell<World>,
     assets: &Assets,
-    window_size: (i32, i32),
+    window_size: Vec2,
     cursors: Option<Vec<Cursor>>,
 ) {
     let world = world.borrow();
@@ -159,8 +163,7 @@ pub fn draw_cursors(
     let scale = world.game_view.zoom.as_scale();
     let zoom = world.game_view.zoom.as_view();
     let tile_size = assets.tileset.tile_size as f32 * zoom;
-    let center = Vec2::new(window_size.0 as f32, window_size.1 as f32) / 2.0
-        - Vec2::new(tile_size, tile_size) / 2.0;
+    let center = window_size / 2.0 - Vec2::new(tile_size, tile_size) / 2.0;
 
     if let Some(cursors) = cursors {
         for (delta, color, typ) in cursors {

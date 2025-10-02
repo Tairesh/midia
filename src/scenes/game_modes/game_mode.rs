@@ -18,7 +18,7 @@ pub trait GameModeImpl {
         Ok(())
     }
     fn draw(&mut self, _ctx: &mut Context, _game: &mut GameScene) {}
-    fn update(&mut self, ctx: &mut Context, game: &mut GameScene) -> Option<Transition>;
+    fn update(&mut self, ctx: &mut Context, game: &mut GameScene) -> Transition;
 }
 
 #[enum_dispatch(GameModeImpl)]

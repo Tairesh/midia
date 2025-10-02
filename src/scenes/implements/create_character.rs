@@ -27,7 +27,7 @@ use super::super::{
         back_randomize_next, bg, easy_back, error_label, icon_left, icon_minus, icon_plus,
         icon_right, label, subtitle, text_input, title,
     },
-    Scene, SceneImpl, Transition,
+    Scene, SceneKind, Transition,
 };
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
@@ -369,12 +369,12 @@ impl CreateCharacter {
         }
     }
 
-    fn create(&mut self) -> Option<Transition> {
+    fn create(&mut self) -> Transition {
         let name = self.name_input().value();
         if name.is_empty() {
             self.name_input().set_danger(true);
             self.name_empty().set_visible(true);
-            None
+            Transition::None
         } else {
             let gender: Gender = self.gender_input().value().into();
             let age = self.age_input().value().parse::<u8>().unwrap();
@@ -389,23 +389,23 @@ impl CreateCharacter {
                 Mind { name, gender },
                 CharSheet::default(true, race),
             );
-            Some(Transition::Push(Scene::CharacterAttributes(
+            Transition::Push(SceneKind::CharacterAttributes(
                 self.meta.path.clone(),
                 character,
-            )))
+            ))
         }
     }
 }
 
-impl SceneImpl for CreateCharacter {
-    fn on_update(&mut self, _ctx: &mut Context) -> Option<Transition> {
+impl Scene for CreateCharacter {
+    fn on_update(&mut self, _ctx: &mut Context) -> Transition {
         if !self.name_input().is_danger() && self.name_empty().visible() {
             self.name_empty().set_visible(false);
         }
-        None
+        Transition::None
     }
 
-    fn event(&mut self, _ctx: &mut Context, event: Event) -> Option<Transition> {
+    fn event(&mut self, _ctx: &mut Context, event: Event) -> Transition {
         easy_back(&event, self.get_update_context_state())
     }
 
@@ -421,7 +421,7 @@ impl SceneImpl for CreateCharacter {
         Some(&mut self.sprites)
     }
 
-    fn custom_event(&mut self, ctx: &mut Context, event: u8) -> Option<Transition> {
+    fn custom_event(&mut self, ctx: &mut Context, event: u8) -> Transition {
         let event = ButtonEvent::from(event);
         match event {
             ButtonEvent::RaceLeft | ButtonEvent::RaceRight => {
@@ -449,13 +449,13 @@ impl SceneImpl for CreateCharacter {
                     self.race_sprite().remove_color();
                 }
 
-                None
+                Transition::None
             }
             ButtonEvent::GenderLeft | ButtonEvent::GenderRight => {
                 let input = self.gender_input();
                 let value = input.value();
                 input.set_value(if value == "Male" { "Female" } else { "Male" });
-                None
+                Transition::None
             }
             ButtonEvent::AgeMinus | ButtonEvent::AgePlus => {
                 // TODO: disable buttons on maximum, minimum values
@@ -472,7 +472,7 @@ impl SceneImpl for CreateCharacter {
                     }
                     input.set_value(format!("{value}"));
                 }
-                None
+                Transition::None
             }
             ButtonEvent::ColorLeft | ButtonEvent::ColorRight => {
                 if let Some(body_color) = self.body_color {
@@ -487,11 +487,11 @@ impl SceneImpl for CreateCharacter {
                     self.color_bg().set_color(body_color);
                     self.race_sprite().set_color(body_color);
                 }
-                None
+                Transition::None
             }
             ButtonEvent::Randomize => {
                 self.randomize(ctx);
-                None
+                Transition::None
             }
             ButtonEvent::Next => self.create(),
         }

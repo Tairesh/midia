@@ -20,7 +20,7 @@ use crate::{
     },
     input,
     settings::Settings,
-    ui::{Draw, JustMesh, Label, Position, Positionate, Stringify},
+    ui::{Draw, JustMesh, Label, Position, Positionable, Stringify},
 };
 
 use super::super::{
@@ -112,10 +112,10 @@ impl Observing {
         if let Some(sprite) = &mut self.sprite {
             sprite.label.set_value(msg);
             sprite.label.set_position(position);
-            sprite.label.positionate(ctx, window_size);
+            sprite.label.update_position(ctx, window_size);
             let rect = sprite.label.rect();
             sprite.mesh = create_mesh(ctx, rect, position);
-            sprite.mesh.positionate(ctx, window_size);
+            sprite.mesh.update_position(ctx, window_size);
         } else {
             let mut label = Label::new(
                 msg,
@@ -123,10 +123,10 @@ impl Observing {
                 Colors::WHITE_SMOKE,
                 position,
             );
-            label.positionate(ctx, window_size);
+            label.update_position(ctx, window_size);
             let rect = label.rect();
             let mut mesh = create_mesh(ctx, rect, position);
-            mesh.positionate(ctx, window_size);
+            mesh.update_position(ctx, window_size);
             self.sprite = Some(Box::new(ObservingSprite { label, mesh }));
         }
     }
@@ -147,13 +147,13 @@ impl GameModeImpl for Observing {
         )])
     }
 
-    fn update(&mut self, ctx: &mut Context, game: &mut GameScene) -> Option<Transition> {
+    fn update(&mut self, ctx: &mut Context, game: &mut GameScene) -> Transition {
         self.update_mouse(ctx, game);
         let mut shifted = false;
         if input::is_key_pressed(ctx, Key::Escape) {
             game.set_shift_of_view(Point::default());
             game.modes.pop();
-            return None;
+            return Transition::None;
         } else if let Some(dir) = input::get_direction_keys_down(ctx) {
             let pos = game.world.borrow().units().player().pos
                 + game.shift_of_view()
@@ -197,7 +197,7 @@ impl GameModeImpl for Observing {
             self.update_sprite(ctx, game);
         }
 
-        None
+        Transition::None
     }
 
     fn draw(&mut self, ctx: &mut Context, _game: &mut GameScene) {

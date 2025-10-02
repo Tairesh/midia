@@ -9,16 +9,16 @@ use crate::ui::{ButtonBuilder, UiSprite, UpdateContextState};
 use crate::{
     assets::{Assets, Sprite},
     colors::Colors,
-    ui::{Button, Image, Label, Position, Positionate, TextInput, Vertical},
+    ui::{Button, Image, Label, Position, Positionable, Sizeable, TextInput, Vertical},
 };
 
 use super::Transition;
 
 pub const UI_ICONS_SCALE: Vec2 = Vec2::new(3.0, 3.0);
 
-pub(crate) fn easy_back(event: &Event, state: UpdateContextState) -> Option<Transition> {
+pub(crate) fn easy_back(event: &Event, state: UpdateContextState) -> Transition {
     if state == UpdateContextState::Focused {
-        return None;
+        return Transition::None;
     }
     match event {
         Event::MouseButtonPressed {
@@ -26,8 +26,8 @@ pub(crate) fn easy_back(event: &Event, state: UpdateContextState) -> Option<Tran
         }
         | Event::KeyPressed {
             key: Key::Backspace,
-        } => Some(Transition::Pop),
-        _ => None,
+        } => Transition::Pop,
+        _ => Transition::None,
     }
 }
 

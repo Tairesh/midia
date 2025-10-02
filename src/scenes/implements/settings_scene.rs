@@ -8,14 +8,14 @@ use crate::{
     app::App,
     settings::Settings,
     ui::{
-        Button, Horizontal, Position, Positionate, Press, SomeUISprites, SomeUISpritesMut,
-        Stringify, TextInput, UiSprite, Vertical,
+        Button, Horizontal, Position, Press, Sizeable, SomeUISprites, SomeUISpritesMut, Stringify,
+        TextInput, UiSprite, Vertical,
     },
 };
 
 use super::super::{
     helpers::{back_btn, bg, easy_back, icon_minus, icon_plus, label, title},
-    SceneImpl, Transition,
+    Scene, Transition,
 };
 
 #[derive(Debug, Copy, Clone)]
@@ -150,8 +150,8 @@ impl SettingsScene {
     }
 }
 
-impl SceneImpl for SettingsScene {
-    fn event(&mut self, _ctx: &mut Context, event: Event) -> Option<Transition> {
+impl Scene for SettingsScene {
+    fn event(&mut self, _ctx: &mut Context, event: Event) -> Transition {
         easy_back(&event, self.get_update_context_state())
     }
 
@@ -163,7 +163,7 @@ impl SceneImpl for SettingsScene {
         Some(&mut self.sprites)
     }
 
-    fn custom_event(&mut self, ctx: &mut Context, event: u8) -> Option<Transition> {
+    fn custom_event(&mut self, ctx: &mut Context, event: u8) -> Transition {
         let event = ButtonEvent::from(event);
         match event {
             ButtonEvent::FullscreenMode => {
@@ -175,7 +175,7 @@ impl SceneImpl for SettingsScene {
                     }
                     tetra::window::set_fullscreen(ctx, true).ok();
                 }
-                None
+                Transition::None
             }
             ButtonEvent::WindowMode => {
                 self.fullscreen_btn().unpress();
@@ -194,7 +194,7 @@ impl SceneImpl for SettingsScene {
                         WindowPosition::Centered(current_monitor),
                     );
                 }
-                None
+                Transition::None
             }
             ButtonEvent::RepeatIntervalMinus | ButtonEvent::RepeatIntervalPlus => {
                 let input = self.repeat_interval_input();
@@ -211,7 +211,7 @@ impl SceneImpl for SettingsScene {
                     input.set_value(format!("{value}"));
                     Settings::instance().input.repeat_interval = value;
                 }
-                None
+                Transition::None
             }
         }
     }

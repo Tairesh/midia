@@ -12,9 +12,9 @@ use tetra::{
 };
 
 use super::super::{
-    Disable, Draw, Focus, Hover, Position, Positionate, Press, Stringify, UiSprite, Update,
+    Disable, Draw, Focus, Hover, Position, Positionable, Press, Stringify, UiSprite, Update,
 };
-use crate::ui::UpdateContext;
+use crate::ui::{Sizeable, UpdateContext};
 use crate::{
     assets::PreparedFont,
     colors::Colors,
@@ -286,15 +286,7 @@ impl Draw for TextInput {
     }
 }
 
-impl Positionate for TextInput {
-    fn position(&self) -> Position {
-        self.position
-    }
-
-    fn set_position(&mut self, position: Position) {
-        self.position = position;
-    }
-
+impl Sizeable for TextInput {
     fn calc_size(&mut self, ctx: &mut Context) -> Vec2 {
         let (w, h) = (self.geometry.width, self.geometry.line_height + 16.0);
         self.bg = Some(
@@ -325,6 +317,16 @@ impl Positionate for TextInput {
         );
         Vec2::new(w, h)
     }
+}
+
+impl Positionable for TextInput {
+    fn position(&self) -> Position {
+        self.position
+    }
+
+    fn set_position(&mut self, position: Position) {
+        self.position = position;
+    }
 
     fn rect(&self) -> Rect {
         self.geometry.rect.unwrap()
@@ -336,7 +338,7 @@ impl Positionate for TextInput {
 }
 
 impl Update for TextInput {
-    fn update(&mut self, ctx: UpdateContext) -> Option<Transition> {
+    fn update(&mut self, ctx: UpdateContext) -> Transition {
         let hovered = ctx.is_hovered(self.rect());
 
         if self.state == InputState::Default && hovered {
@@ -379,7 +381,7 @@ impl Update for TextInput {
         {
             self.on_pressed();
         }
-        None
+        Transition::None
     }
 }
 

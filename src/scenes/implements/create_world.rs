@@ -13,7 +13,7 @@ use crate::{
 
 use super::super::{
     helpers::{back_randomize_next, bg, easy_back, error_label, label, text_input, title},
-    Scene, SceneImpl, Transition,
+    Scene, SceneKind, Transition,
 };
 
 const RANDOMIZE_EVENT: u8 = 1;
@@ -133,8 +133,8 @@ impl CreateWorld {
     }
 }
 
-impl SceneImpl for CreateWorld {
-    fn on_update(&mut self, _ctx: &mut Context) -> Option<Transition> {
+impl Scene for CreateWorld {
+    fn on_update(&mut self, _ctx: &mut Context) -> Transition {
         if !self.name_input().is_danger() && self.name_empty().visible() {
             self.name_empty().set_visible(false);
         }
@@ -144,10 +144,10 @@ impl SceneImpl for CreateWorld {
         if !self.seed_input().is_danger() && self.seed_error().visible() {
             self.seed_error().set_visible(false);
         }
-        None
+        Transition::None
     }
 
-    fn event(&mut self, _ctx: &mut Context, event: Event) -> Option<Transition> {
+    fn event(&mut self, _ctx: &mut Context, event: Event) -> Transition {
         easy_back(&event, self.get_update_context_state())
     }
 
@@ -159,13 +159,13 @@ impl SceneImpl for CreateWorld {
         Some(&mut self.sprites)
     }
 
-    fn custom_event(&mut self, _ctx: &mut Context, event: u8) -> Option<Transition> {
+    fn custom_event(&mut self, _ctx: &mut Context, event: u8) -> Transition {
         match event {
             RANDOMIZE_EVENT => {
                 self.name_input().set_value("Test world");
                 self.seed_input()
                     .set_value(random_seed(&mut rand::rng()).as_str());
-                None
+                Transition::None
             }
             CREATE_EVENT => {
                 let seed = self.seed_input().value();
@@ -177,10 +177,10 @@ impl SceneImpl for CreateWorld {
                 if name.is_empty() {
                     self.name_input().set_danger(true);
                     self.name_empty().set_visible(true);
-                    None
+                    Transition::None
                 } else {
                     match savefile::create(name.as_str(), seed.as_str()) {
-                        Ok(path) => Some(Transition::Replace(Scene::CreateCharacter(path))),
+                        Ok(path) => Transition::Switch(SceneKind::CreateCharacter(path)),
                         Err(err) => match err {
                             savefile::SaveError::System(err) => {
                                 panic!("Can't write savefile: {err}")
@@ -191,13 +191,13 @@ impl SceneImpl for CreateWorld {
                             savefile::SaveError::FileExists => {
                                 self.name_input().set_danger(true);
                                 self.name_error().set_visible(true);
-                                None
+                                Transition::None
                             }
                         },
                     }
                 }
             }
-            _ => None,
+            _ => Transition::None,
         }
     }
 }

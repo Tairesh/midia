@@ -8,7 +8,7 @@ use super::super::{
         ui::{SomeUISprites, SomeUISpritesMut, UiSprite},
     },
     helpers::{bg, easy_back},
-    SceneImpl,
+    Scene,
 };
 
 pub struct Empty {
@@ -23,8 +23,8 @@ impl Empty {
     }
 }
 
-impl SceneImpl for Empty {
-    fn event(&mut self, _ctx: &mut Context, event: Event) -> Option<Transition> {
+impl Scene for Empty {
+    fn event(&mut self, _ctx: &mut Context, event: Event) -> Transition {
         easy_back(&event, self.get_update_context_state())
     }
 

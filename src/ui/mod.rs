@@ -11,8 +11,8 @@ pub use self::implements::{
 };
 pub use self::position::{Horizontal, Position, Vertical};
 pub use self::traits::{
-    Colorize, Disable, Draw, Focus, Hover, Positionate, Press, Stringify, UiSprite, Update,
-    UpdateContext, UpdateContextState,
+    Colorize, Disable, Draw, Focus, Hover, Positionable, Press, Sizeable, Stringify, UiSprite,
+    Update, UpdateContext, UpdateContextState,
 };
 
 mod game_log;

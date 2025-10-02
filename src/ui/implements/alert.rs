@@ -10,7 +10,8 @@ use tetra::{
 };
 
 use super::super::{
-    Draw, Focus, Position, Positionate, UiSprite, Update, UpdateContext, UpdateContextState,
+    Draw, Focus, Position, Positionable, Sizeable, UiSprite, Update, UpdateContext,
+    UpdateContextState,
 };
 use crate::{assets::Alert as AlertAsset, input, scenes::Transition};
 
@@ -54,7 +55,7 @@ impl Alert {
     pub fn set_size(&mut self, ctx: &mut Context, window_size: (i32, i32)) {
         self.width = window_size.0 as f32;
         self.height = window_size.1 as f32;
-        self.positionate(ctx, window_size);
+        self.update_position(ctx, window_size);
     }
 }
 
@@ -81,17 +82,19 @@ impl Draw for Alert {
     }
 }
 
-impl Positionate for Alert {
+impl Sizeable for Alert {
+    fn calc_size(&mut self, _ctx: &mut Context) -> Vec2 {
+        Vec2::new(self.width, self.height)
+    }
+}
+
+impl Positionable for Alert {
     fn position(&self) -> Position {
         self.position
     }
 
     fn set_position(&mut self, position: Position) {
         self.position = position;
-    }
-
-    fn calc_size(&mut self, _ctx: &mut Context) -> Vec2 {
-        Vec2::new(self.width, self.height)
     }
 
     fn rect(&self) -> Rect {
@@ -104,21 +107,15 @@ impl Positionate for Alert {
 }
 
 impl Update for Alert {
-    fn update(&mut self, ctx: UpdateContext) -> Option<Transition> {
-        if !self.active {
-            return None;
+    fn update(&mut self, ctx: UpdateContext) -> Transition {
+        if !self.active || ctx.state == UpdateContextState::Focused {
+            return Transition::None;
         }
-        if ctx.state == UpdateContextState::Focused {
-            return None;
-        }
-        if input::is_key_pressed(ctx.ctx, Key::Escape) {
-            return Some(Transition::Pop);
-        }
-        if ctx.is_clicked(self.rect?) {
-            return Some(Transition::Pop);
+        if input::is_key_pressed(ctx.ctx, Key::Escape) || ctx.is_clicked(self.rect()) {
+            return Transition::Pop;
         }
 
-        None
+        Transition::None
     }
 }
 

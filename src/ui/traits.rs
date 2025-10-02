@@ -15,19 +15,20 @@ pub trait Draw {
     fn set_visible(&mut self, visible: bool);
 }
 
-pub trait Positionate {
+pub trait Sizeable {
+    fn calc_size(&mut self, ctx: &mut Context) -> Vec2;
+}
+
+// TODO: make Layout struct to handle position and rect, and trait with only layout_mut() method
+pub trait Positionable: Sizeable {
     fn position(&self) -> Position;
     fn set_position(&mut self, position: Position);
-    fn calc_size(&mut self, ctx: &mut Context) -> Vec2;
     fn rect(&self) -> Rect;
     fn set_rect(&mut self, rect: Rect);
-    fn calc_rect(&mut self, owner_size: Vec2, window_size: (i32, i32)) -> Rect {
+    fn update_position(&mut self, ctx: &mut Context, window_size: (i32, i32)) {
+        let owner_size = self.calc_size(ctx);
         let left_top = self.position().calc(owner_size, window_size);
-        Rect::new(left_top.x, left_top.y, owner_size.x, owner_size.y)
-    }
-    fn positionate(&mut self, ctx: &mut Context, window_size: (i32, i32)) {
-        let size = self.calc_size(ctx);
-        let rect = self.calc_rect(size, window_size);
+        let rect = Rect::new(left_top.x, left_top.y, owner_size.x, owner_size.y);
         self.set_rect(rect);
     }
 }
@@ -90,8 +91,8 @@ impl<'a> UpdateContext<'a> {
 
 pub trait Update {
     // TODO: implement a way to tell there is an yes-or-no-style alert, blocking even hovering
-    fn update(&mut self, _ctx: UpdateContext) -> Option<Transition> {
-        None
+    fn update(&mut self, _ctx: UpdateContext) -> Transition {
+        Transition::None
     }
     fn block_mouse(&self) -> bool {
         true
@@ -133,7 +134,7 @@ pub trait Focus {
     fn set_focused(&mut self, _focused: bool) {}
 }
 
-pub trait UiSprite: Draw + Positionate + Update + Focus {
+pub trait UiSprite: Draw + Positionable + Update + Focus {
     fn as_button(&mut self) -> Option<&mut Button> {
         None
     }

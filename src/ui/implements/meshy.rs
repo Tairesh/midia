@@ -6,7 +6,9 @@ use tetra::{
     input, Context,
 };
 
-use super::super::{Colorize, Draw, Focus, Hover, Position, Positionate, UiSprite, Update};
+use super::super::{
+    Colorize, Draw, Focus, Hover, Position, Positionable, Sizeable, UiSprite, Update,
+};
 use crate::scenes::Transition;
 use crate::ui::UpdateContext;
 
@@ -55,17 +57,19 @@ impl Draw for JustMesh {
     }
 }
 
-impl Positionate for JustMesh {
+impl Sizeable for JustMesh {
+    fn calc_size(&mut self, _ctx: &mut Context) -> Vec2 {
+        self.size * self.scale
+    }
+}
+
+impl Positionable for JustMesh {
     fn position(&self) -> Position {
         self.position
     }
 
     fn set_position(&mut self, position: Position) {
         self.position = position;
-    }
-
-    fn calc_size(&mut self, _ctx: &mut Context) -> Vec2 {
-        self.size * self.scale
     }
 
     fn rect(&self) -> Rect {
@@ -153,17 +157,19 @@ impl Draw for HoverableMesh {
     }
 }
 
-impl Positionate for HoverableMesh {
+impl Sizeable for HoverableMesh {
+    fn calc_size(&mut self, _ctx: &mut Context) -> Vec2 {
+        self.size
+    }
+}
+
+impl Positionable for HoverableMesh {
     fn position(&self) -> Position {
         self.position
     }
 
     fn set_position(&mut self, position: Position) {
         self.position = position;
-    }
-
-    fn calc_size(&mut self, _ctx: &mut Context) -> Vec2 {
-        self.size
     }
 
     fn rect(&self) -> Rect {
@@ -176,7 +182,7 @@ impl Positionate for HoverableMesh {
 }
 
 impl Update for HoverableMesh {
-    fn update(&mut self, ctx: UpdateContext) -> Option<Transition> {
+    fn update(&mut self, ctx: UpdateContext) -> Transition {
         let mouse = input::get_mouse_position(ctx.ctx);
         let rect = self.rect.unwrap();
         let collides = rect.contains_point(mouse);
@@ -186,7 +192,7 @@ impl Update for HoverableMesh {
         } else if self.is_hovered && !collides {
             self.off_hovered();
         }
-        None
+        Transition::None
     }
 }
 

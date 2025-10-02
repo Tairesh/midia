@@ -10,7 +10,7 @@ use tetra::{
 
 use crate::assets::{Sprite, Tileset};
 
-use super::super::{Colorize, Draw, Focus, Position, Positionate, UiSprite, Update};
+use super::super::{Colorize, Draw, Focus, Position, Positionable, Sizeable, UiSprite, Update};
 
 pub struct Image {
     texture: Texture,
@@ -104,15 +104,7 @@ impl Draw for Image {
     }
 }
 
-impl Positionate for Image {
-    fn position(&self) -> Position {
-        self.position
-    }
-
-    fn set_position(&mut self, position: Position) {
-        self.position = position;
-    }
-
+impl Sizeable for Image {
     fn calc_size(&mut self, ctx: &mut Context) -> Vec2 {
         if self.repeat || self.auto_size {
             self.window_size = window::get_size(ctx);
@@ -131,6 +123,16 @@ impl Positionate for Image {
             (w as f32, h as f32)
         };
         Vec2::new(size.0 * self.scale.x, size.1 * self.scale.y)
+    }
+}
+
+impl Positionable for Image {
+    fn position(&self) -> Position {
+        self.position
+    }
+
+    fn set_position(&mut self, position: Position) {
+        self.position = position;
     }
 
     fn rect(&self) -> Rect {
@@ -217,18 +219,20 @@ impl Draw for TilesetSprite {
     }
 }
 
-impl Positionate for TilesetSprite {
+impl Sizeable for TilesetSprite {
+    fn calc_size(&mut self, _ctx: &mut Context) -> Vec2 {
+        let size = Tileset::get_size(self.sprite);
+        size * self.scale
+    }
+}
+
+impl Positionable for TilesetSprite {
     fn position(&self) -> Position {
         self.position
     }
 
     fn set_position(&mut self, position: Position) {
         self.position = position;
-    }
-
-    fn calc_size(&mut self, _ctx: &mut Context) -> Vec2 {
-        let size = Tileset::get_size(self.sprite);
-        size * self.scale
     }
 
     fn rect(&self) -> Rect {

@@ -17,13 +17,13 @@ use crate::{
     colors::Colors,
     savefile::{self, savefiles, savefiles_exists, Meta},
     ui::{
-        Alert, Horizontal, HoverableMesh, Label, Position, Positionate, SomeUISprites,
+        Alert, Horizontal, HoverableMesh, Label, Position, Sizeable, SomeUISprites,
         SomeUISpritesMut, UiSprite, Vertical,
     },
     VERSION,
 };
 
-use super::super::{helpers::easy_back, Scene, SceneImpl, Transition};
+use super::super::{helpers::easy_back, Scene, SceneKind, Transition};
 
 const KEYS: [Key; 10] = [
     Key::Num1,
@@ -179,8 +179,8 @@ impl LoadWorld {
     }
 }
 
-impl SceneImpl for LoadWorld {
-    fn event(&mut self, _ctx: &mut Context, event: Event) -> Option<Transition> {
+impl Scene for LoadWorld {
+    fn event(&mut self, _ctx: &mut Context, event: Event) -> Transition {
         easy_back(&event, self.get_update_context_state())
     }
 
@@ -192,16 +192,16 @@ impl SceneImpl for LoadWorld {
         Some(&mut self.sprites)
     }
 
-    fn custom_event(&mut self, _ctx: &mut Context, event: u8) -> Option<Transition> {
+    fn custom_event(&mut self, _ctx: &mut Context, event: u8) -> Transition {
         let i = (event / 2) as usize;
-        let path = self.paths.get(i)?;
+        let path = self.paths.get(i).expect("Invalid savefile index");
         if event.is_multiple_of(2) {
             // load
             if let Some(meta) = savefile::load(path) {
                 if savefile::has_avatar(path) {
-                    Some(Transition::LoadWorld(path.clone()))
+                    Transition::LoadWorld(path.clone())
                 } else {
-                    Some(Transition::Replace(Scene::CreateCharacter(meta.path)))
+                    Transition::Switch(SceneKind::CreateCharacter(meta.path))
                 }
             } else {
                 panic!("Can't load savefile: {}", path.display());
@@ -210,9 +210,9 @@ impl SceneImpl for LoadWorld {
             // delete
             savefile::delete(path);
             if savefiles_exists() {
-                Some(Transition::Replace(Scene::LoadWorld))
+                Transition::Switch(SceneKind::LoadWorld)
             } else {
-                Some(Transition::Pop)
+                Transition::Pop
             }
         }
     }

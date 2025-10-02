@@ -15,7 +15,9 @@ use crate::{
     game::map::Item,
 };
 
-use super::super::{Colorize, Draw, Focus, Position, Positionate, Stringify, UiSprite, Update};
+use super::super::{
+    Colorize, Draw, Focus, Position, Positionable, Sizeable, Stringify, UiSprite, Update,
+};
 
 pub struct Label {
     text: Text,
@@ -57,7 +59,7 @@ impl Label {
 
     pub fn update(&mut self, text: impl Into<String>, ctx: &mut Context, window_size: (i32, i32)) {
         self.set_value(text);
-        self.positionate(ctx, window_size);
+        self.update_position(ctx, window_size);
     }
 }
 
@@ -81,18 +83,20 @@ impl Draw for Label {
     }
 }
 
-impl Positionate for Label {
+impl Sizeable for Label {
+    fn calc_size(&mut self, ctx: &mut Context) -> Vec2 {
+        let rect = self.text.get_bounds(ctx).unwrap();
+        Vec2::new(rect.width, f32::max(self.line_height, rect.height))
+    }
+}
+
+impl Positionable for Label {
     fn position(&self) -> Position {
         self.position
     }
 
     fn set_position(&mut self, position: Position) {
         self.position = position;
-    }
-
-    fn calc_size(&mut self, ctx: &mut Context) -> Vec2 {
-        let rect = self.text.get_bounds(ctx).unwrap();
-        Vec2::new(rect.width, f32::max(self.line_height, rect.height))
     }
 
     fn rect(&self) -> Rect {
@@ -191,7 +195,7 @@ impl ItemDisplay {
                 self.icon = false;
             }
             self.text.set_content(name);
-            self.positionate(ctx, window_size);
+            self.update_position(ctx, window_size);
         }
     }
 }
@@ -227,15 +231,7 @@ impl Draw for ItemDisplay {
     }
 }
 
-impl Positionate for ItemDisplay {
-    fn position(&self) -> Position {
-        self.position
-    }
-
-    fn set_position(&mut self, position: Position) {
-        self.position = position;
-    }
-
+impl Sizeable for ItemDisplay {
     fn calc_size(&mut self, ctx: &mut Context) -> Vec2 {
         let rect = self.text.get_bounds(ctx).unwrap();
         if self.icon {
@@ -246,6 +242,16 @@ impl Positionate for ItemDisplay {
         } else {
             Vec2::new(rect.width, rect.height)
         }
+    }
+}
+
+impl Positionable for ItemDisplay {
+    fn position(&self) -> Position {
+        self.position
+    }
+
+    fn set_position(&mut self, position: Position) {
+        self.position = position;
     }
 
     fn rect(&self) -> Rect {

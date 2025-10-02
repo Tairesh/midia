@@ -19,7 +19,7 @@ use super::super::{
     super::{implements::GameScene, Transition},
     Cursor, CursorType, GameModeImpl,
 };
-
+// TODO: Refactor: this whole file, it's almost identical to Shooting mode
 pub struct PikeAttack {
     last_shift: Instant,
     last_mouse_position: Vec2,
@@ -135,12 +135,12 @@ impl GameModeImpl for PikeAttack {
         )
     }
 
-    fn update(&mut self, ctx: &mut Context, game: &mut GameScene) -> Option<Transition> {
+    fn update(&mut self, ctx: &mut Context, game: &mut GameScene) -> Transition {
         self.update_mouse(ctx, game);
         if input::is_key_pressed(ctx, Key::Escape) {
             game.set_shift_of_view(Point::default());
             game.modes.pop();
-            return None;
+            return Transition::None;
         } else if input::is_some_of_keys_pressed(ctx, &[Key::F, Key::Space, Key::Enter])
             || input::is_mouse_button_down(ctx, MouseButton::Left)
         {
@@ -151,7 +151,7 @@ impl GameModeImpl for PikeAttack {
             game.try_start_action(action);
             game.set_shift_of_view(Point::default());
             game.modes.pop();
-            return None;
+            return Transition::None;
         } else if let Some(dir) = input::get_direction_keys_down(ctx) {
             let damage = game
                 .world
@@ -178,6 +178,6 @@ impl GameModeImpl for PikeAttack {
 
         self.shift_of_view = game.shift_of_view();
 
-        None
+        Transition::None
     }
 }

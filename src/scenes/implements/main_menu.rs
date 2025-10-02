@@ -13,7 +13,7 @@ use crate::{
     VERSION,
 };
 
-use super::super::{helpers::bg, Scene, SceneImpl, Transition};
+use super::super::{helpers::bg, Scene, SceneKind, Transition};
 
 pub struct MainMenu {
     sprites: [Box<dyn UiSprite>; 7],
@@ -40,7 +40,7 @@ impl MainMenu {
                     Vertical::CenterByTop,
                     Vec2::zero(),
                 ))
-                .with_transition(Transition::Push(Scene::LoadWorld))
+                .with_transition(Transition::Push(SceneKind::LoadWorld))
                 .build()
                 .with_disabled(true),
         );
@@ -52,7 +52,7 @@ impl MainMenu {
                     Vertical::CenterByTop,
                     Vec2::new(0.0, 50.0),
                 ))
-                .with_transition(Transition::Push(Scene::CreateWorld))
+                .with_transition(Transition::Push(SceneKind::CreateWorld))
                 .build(),
         );
         let settings_btn = Box::new(
@@ -63,7 +63,7 @@ impl MainMenu {
                     Vertical::CenterByTop,
                     Vec2::new(0.0, 100.0),
                 ))
-                .with_transition(Transition::Push(Scene::Settings))
+                .with_transition(Transition::Push(SceneKind::Settings))
                 .build(),
         );
         let exit_btn = Box::new(
@@ -97,7 +97,7 @@ impl MainMenu {
     }
 }
 
-impl SceneImpl for MainMenu {
+impl Scene for MainMenu {
     fn on_open(&mut self, _ctx: &mut Context) {
         self.select_btn().set_disabled(!savefiles_exists());
     }

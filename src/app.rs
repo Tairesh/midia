@@ -9,16 +9,16 @@ use crate::{
     colors::Colors,
     game::world::World,
     savefile,
-    scenes::{Scene, SceneImpl, Transition},
+    scenes::{Scene, SceneKind, Transition},
     settings::Settings,
-    ui::{Draw, Label, Position, Positionate, Stringify},
+    ui::{Draw, Label, Position, Positionable, Stringify},
 };
 
 pub struct App {
     pub assets: Rc<Assets>,
     pub window_size: (i32, i32),
     pub world: Option<Rc<RefCell<World>>>,
-    scenes: Vec<Box<dyn SceneImpl>>,
+    scenes: Vec<Box<dyn Scene>>,
     fps_counter: Label,
 }
 
@@ -38,11 +38,11 @@ impl App {
             world: None,
             fps_counter,
         };
-        app.push_scene(ctx, Scene::MainMenu);
+        app.push_scene(ctx, SceneKind::MainMenu);
         Ok(app)
     }
 
-    fn current_scene(&mut self) -> Option<&mut Box<dyn SceneImpl>> {
+    fn current_scene(&mut self) -> Option<&mut Box<dyn Scene>> {
         self.scenes.last_mut()
     }
 
@@ -58,7 +58,7 @@ impl App {
         if let Some(scene) = self.current_scene() {
             scene.reposition_all_sprites(ctx, window_size);
             scene.on_resize(ctx, window_size);
-            self.fps_counter.positionate(ctx, window_size);
+            self.fps_counter.update_position(ctx, window_size);
         }
     }
 
@@ -67,30 +67,30 @@ impl App {
         self.on_open(ctx);
     }
 
-    fn replace_scene(&mut self, ctx: &mut Context, scene: Scene) {
+    fn switch_scene(&mut self, ctx: &mut Context, scene: SceneKind) {
         self.scenes.pop();
         self.push_scene(ctx, scene);
     }
 
-    fn push_scene(&mut self, ctx: &mut Context, scene: Scene) {
-        self.scenes.push(scene.into_impl(self, ctx));
+    fn push_scene(&mut self, ctx: &mut Context, scene: SceneKind) {
+        self.scenes.push(scene.create(self, ctx));
         self.on_open(ctx);
     }
 
     fn transit(&mut self, ctx: &mut Context, transition: Transition) {
         match transition {
+            Transition::None => {}
             Transition::Push(s) => self.push_scene(ctx, s),
             Transition::Pop => self.pop_scene(ctx),
-            Transition::Replace(s) => self.replace_scene(ctx, s),
+            Transition::Switch(s) => self.switch_scene(ctx, s),
             Transition::CustomEvent(event) => {
                 if let Some(scene) = self.current_scene() {
-                    if let Some(transition) = scene.custom_event(ctx, event) {
-                        self.transit(ctx, transition);
-                    }
+                    let transition = scene.custom_event(ctx, event);
+                    self.transit(ctx, transition);
                 }
             }
             Transition::Quit => window::quit(ctx),
-            Transition::GoMainMenu => {
+            Transition::ExitToMainMenu => {
                 self.unload_world();
                 self.scenes.drain(1..);
                 self.on_open(ctx);
@@ -103,7 +103,7 @@ impl App {
         match savefile::load_world(path) {
             Ok(world) => {
                 self.world = Some(Rc::new(RefCell::new(world)));
-                self.push_scene(ctx, Scene::Game);
+                self.push_scene(ctx, SceneKind::Game);
             }
             Err(e) => {
                 println!("Failed to load world: {e:?}");
@@ -127,9 +127,8 @@ impl App {
 impl State for App {
     fn update(&mut self, ctx: &mut Context) -> tetra::Result {
         if let Some(scene) = self.current_scene() {
-            if let Some(transition) = scene.update(ctx) {
-                self.transit(ctx, transition);
-            }
+            let transition = scene.update(ctx);
+            self.transit(ctx, transition);
         } else {
             self.transit(ctx, Transition::Quit);
         }
@@ -176,9 +175,8 @@ impl State for App {
         }
 
         if let Some(scene) = self.current_scene() {
-            if let Some(transition) = scene.event(ctx, event) {
-                self.transit(ctx, transition);
-            }
+            let transition = scene.event(ctx, event);
+            self.transit(ctx, transition);
         }
 
         Ok(())

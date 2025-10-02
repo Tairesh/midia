@@ -27,7 +27,7 @@ use crate::{
 
 use super::super::{
     game_modes::{implements::Walking, Cursor, GameMode, GameModeImpl},
-    map_view, SceneImpl, Transition,
+    map_view, Scene, Transition,
 };
 
 pub struct GameScene {
@@ -180,7 +180,7 @@ impl GameScene {
         self.shift_of_view
     }
 
-    pub fn mode_update(&mut self, ctx: &mut Context) -> Option<Transition> {
+    pub fn mode_update(&mut self, ctx: &mut Context) -> Transition {
         self.current_mode().borrow_mut().update(ctx, self)
     }
 
@@ -245,8 +245,8 @@ impl GameScene {
     }
 }
 
-impl SceneImpl for GameScene {
-    fn on_update(&mut self, ctx: &mut Context) -> Option<Transition> {
+impl Scene for GameScene {
+    fn on_update(&mut self, ctx: &mut Context) -> Transition {
         if input::is_mouse_scrolled_down(ctx)
             || input::is_key_with_mod_pressed(ctx, (Key::Z, KeyModifier::Shift))
         {
@@ -261,7 +261,7 @@ impl SceneImpl for GameScene {
             self.make_world_tick(ctx);
             self.need_redraw = true;
 
-            None
+            Transition::None
         } else {
             self.mode_update(ctx)
         }

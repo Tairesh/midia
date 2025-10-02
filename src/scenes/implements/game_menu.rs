@@ -8,7 +8,7 @@ use crate::{
     ui::{Alert, Position, SomeUISprites, SomeUISpritesMut, UiSprite, Vertical},
 };
 
-use super::super::{Scene, SceneImpl, Transition};
+use super::super::{Scene, SceneKind, Transition};
 
 pub struct GameMenu {
     sprites: [Box<dyn UiSprite>; 4],
@@ -34,7 +34,7 @@ impl GameMenu {
                     Vertical::CenterByBottom,
                     Vec2::new(0.0, 20.0),
                 ))
-                .with_transition(Transition::Replace(Scene::Settings))
+                .with_transition(Transition::Switch(SceneKind::Settings))
                 .build(),
         );
         let quit_btn = Box::new(
@@ -45,7 +45,7 @@ impl GameMenu {
                     Vertical::CenterByBottom,
                     Vec2::new(0.0, 70.0),
                 ))
-                .with_transition(Transition::GoMainMenu)
+                .with_transition(Transition::ExitToMainMenu)
                 .build(),
         );
 
@@ -55,7 +55,7 @@ impl GameMenu {
     }
 }
 
-impl SceneImpl for GameMenu {
+impl Scene for GameMenu {
     fn sprites(&self) -> SomeUISprites<'_> {
         Some(&self.sprites)
     }

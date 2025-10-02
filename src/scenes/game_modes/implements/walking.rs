@@ -15,7 +15,7 @@ use crate::{
 };
 
 use super::super::{
-    super::{implements::GameScene, Scene, Transition},
+    super::{implements::GameScene, SceneKind, Transition},
     implements::{Interacting, MeleeAttack, Observing, PikeAttack, Shooting, Throwing},
     GameModeImpl, PlayerCommand,
 };
@@ -41,12 +41,12 @@ impl Default for Walking {
 impl GameModeImpl for Walking {
     // TODO: refactor this method
     #[allow(clippy::too_many_lines)]
-    fn update(&mut self, ctx: &mut Context, game: &mut GameScene) -> Option<Transition> {
+    fn update(&mut self, ctx: &mut Context, game: &mut GameScene) -> Transition {
         for key in input::get_key_with_mod_pressed(ctx) {
             if let Some(&action) = Settings::instance().input.keybindings.get(&key) {
                 match action {
                     KeyBindingAction::MainMenu => {
-                        return Some(Transition::Push(Scene::GameMenu));
+                        return Transition::Push(SceneKind::GameMenu);
                     }
                     KeyBindingAction::Examine => {
                         game.push_mode(Interacting::new(PlayerCommand::Examine).into());
@@ -97,7 +97,7 @@ impl GameModeImpl for Walking {
                                 drop(units);
                                 drop(world);
                                 game.push_mode(PikeAttack::new().into());
-                                return None;
+                                return Transition::None;
                             }
                         }
                         drop(units);
@@ -173,6 +173,6 @@ impl GameModeImpl for Walking {
             }
         }
 
-        None
+        Transition::None
     }
 }

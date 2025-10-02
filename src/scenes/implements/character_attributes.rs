@@ -21,7 +21,7 @@ use crate::{
             back_randomize_reset_next, bg, colored_label, decorative_label, easy_back, icon_minus,
             icon_plus, title,
         },
-        SceneImpl, Transition,
+        Scene, Transition,
     },
     ui::{
         Alert, Disable, Horizontal, Label, Position, SomeUISprites, SomeUISpritesMut, UiSprite,
@@ -631,8 +631,8 @@ impl CharacterAttributes {
     }
 }
 
-impl SceneImpl for CharacterAttributes {
-    fn event(&mut self, _ctx: &mut Context, event: Event) -> Option<Transition> {
+impl Scene for CharacterAttributes {
+    fn event(&mut self, _ctx: &mut Context, event: Event) -> Transition {
         easy_back(&event, self.get_update_context_state())
     }
 
@@ -652,8 +652,7 @@ impl SceneImpl for CharacterAttributes {
         Some(&mut self.sprites)
     }
 
-    // TODO: refactor and delete this allow
-    fn custom_event(&mut self, ctx: &mut Context, event: u8) -> Option<Transition> {
+    fn custom_event(&mut self, ctx: &mut Context, event: u8) -> Transition {
         let event = ButtonEvent::from(event);
         if let Ok(attribute) = Attribute::try_from(event) {
             if event.is_minus() {
@@ -694,7 +693,7 @@ impl SceneImpl for CharacterAttributes {
         }
 
         if matches!(event, ButtonEvent::Next) {
-            return Some(self.next());
+            return self.next();
         }
 
         match event {
@@ -703,6 +702,6 @@ impl SceneImpl for CharacterAttributes {
             _ => {}
         }
 
-        None
+        Transition::None
     }
 }

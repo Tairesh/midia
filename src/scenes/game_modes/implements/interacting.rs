@@ -49,7 +49,7 @@ impl GameModeImpl for Interacting {
         self.command.can_start(world)
     }
 
-    fn update(&mut self, ctx: &mut Context, game: &mut GameScene) -> Option<Transition> {
+    fn update(&mut self, ctx: &mut Context, game: &mut GameScene) -> Transition {
         if input::is_key_pressed(ctx, Key::Escape) {
             game.modes.pop();
         } else if let Some(dir) = input::get_direction_keys_down(ctx) {
@@ -71,6 +71,6 @@ impl GameModeImpl for Interacting {
             }
             game.modes.pop();
         }
-        None
+        Transition::None
     }
 }

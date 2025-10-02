@@ -8,7 +8,9 @@ use tetra::{
     Context,
 };
 
-use super::super::{Disable, Draw, Focus, Hover, Position, Positionate, Press, UiSprite, Update};
+use super::super::{
+    Disable, Draw, Focus, Hover, Position, Positionable, Press, Sizeable, UiSprite, Update,
+};
 use crate::assets::Sprite;
 use crate::ui::UpdateContext;
 use crate::{
@@ -112,7 +114,7 @@ impl Button {
                 tileset: tileset.clone(),
             }
         }
-        self.positionate(ctx, window_size);
+        self.update_position(ctx, window_size);
     }
 
     pub fn with_disabled(mut self, val: bool) -> Self {
@@ -205,15 +207,7 @@ impl Draw for Button {
     }
 }
 
-impl Positionate for Button {
-    fn position(&self) -> Position {
-        self.position
-    }
-
-    fn set_position(&mut self, position: Position) {
-        self.position = position;
-    }
-
+impl Sizeable for Button {
     fn calc_size(&mut self, ctx: &mut Context) -> Vec2 {
         let content_size = self.content_size(ctx);
         let offset_x = self.content.offset();
@@ -226,6 +220,16 @@ impl Positionate for Button {
             },
         )
     }
+}
+
+impl Positionable for Button {
+    fn position(&self) -> Position {
+        self.position
+    }
+
+    fn set_position(&mut self, position: Position) {
+        self.position = position;
+    }
 
     fn rect(&self) -> Rect {
         self.rect.unwrap()
@@ -237,9 +241,9 @@ impl Positionate for Button {
 }
 
 impl Update for Button {
-    fn update(&mut self, ctx: UpdateContext) -> Option<Transition> {
+    fn update(&mut self, ctx: UpdateContext) -> Transition {
         if self.disabled() {
-            return None;
+            return Transition::None;
         }
         if !self.keys.is_empty() && !ctx.is_focused() {
             let mut on_pressed = false;
@@ -256,10 +260,10 @@ impl Update for Button {
                 self.on_pressed();
             } else if off_pressed {
                 self.off_pressed();
-                return Some(self.on_click.clone());
+                return self.on_click.clone();
             }
         }
-        let hovered = ctx.is_hovered(self.rect?);
+        let hovered = ctx.is_hovered(self.rect());
         if !self.hovered() && hovered {
             self.on_hovered();
         } else if self.hovered() && !hovered {
@@ -271,10 +275,10 @@ impl Update for Button {
         } else if self.pressed() && input::is_mouse_button_released(ctx.ctx, MouseButton::Left) {
             self.off_pressed();
             if hovered {
-                return Some(self.on_click.clone());
+                return self.on_click.clone();
             }
         }
-        None
+        Transition::None
     }
 }
 
@@ -343,7 +347,7 @@ impl UiSprite for Button {
 pub struct ButtonBuilder {
     keys: Vec<KeyWithMod>,
     content: Option<ButtonContent>,
-    on_click: Option<Transition>,
+    on_click: Transition,
     position: Option<Position>,
     asset: Rc<ButtonAsset>,
     scale: Vec2,
@@ -358,7 +362,7 @@ impl ButtonBuilder {
         Self {
             keys: Vec::new(),
             content: None,
-            on_click: None,
+            on_click: Transition::None,
             position: None,
             asset,
             scale: Vec2::new(3.0, 3.0),
@@ -408,7 +412,7 @@ impl ButtonBuilder {
     }
 
     pub fn with_transition(mut self, transition: Transition) -> Self {
-        self.on_click = Some(transition);
+        self.on_click = transition;
 
         self
     }
@@ -462,7 +466,7 @@ impl ButtonBuilder {
         Button {
             keys: self.keys,
             content: self.content.unwrap(),
-            on_click: self.on_click.unwrap(),
+            on_click: self.on_click,
             position: self.position.unwrap(),
             asset: self.asset,
             scale: self.scale,

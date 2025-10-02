@@ -1,13 +1,11 @@
 #![allow(dead_code)]
 
+use super::{Alert, Button, JustMesh, Label, Layout, Position, TextInput, TilesetSprite};
 use crate::scenes::Transition;
-use crate::ui::JustMesh;
 use roguemetry::{Rect, Vec2};
 use tetra::graphics::Color;
 use tetra::input::MouseButton;
 use tetra::{input, Context};
-
-use super::{Alert, Button, Label, Position, TextInput, TilesetSprite};
 
 pub trait Draw {
     fn draw(&mut self, ctx: &mut Context);
@@ -15,21 +13,19 @@ pub trait Draw {
     fn set_visible(&mut self, visible: bool);
 }
 
-pub trait Sizeable {
-    fn calc_size(&mut self, ctx: &mut Context) -> Vec2;
+pub trait HasSize {
+    fn size(&mut self, ctx: &mut Context) -> Vec2;
 }
 
-// TODO: make Layout struct to handle position and rect, and trait with only layout_mut() method
-pub trait Positionable: Sizeable {
-    fn position(&self) -> Position;
-    fn set_position(&mut self, position: Position);
-    fn rect(&self) -> Rect;
-    fn set_rect(&mut self, rect: Rect);
+pub trait HasLayout {
+    fn layout(&self) -> &Layout;
+    fn layout_mut(&mut self) -> &mut Layout;
+}
+
+pub trait Positionable: HasSize + HasLayout {
     fn update_position(&mut self, ctx: &mut Context, window_size: (i32, i32)) {
-        let owner_size = self.calc_size(ctx);
-        let left_top = self.position().calc(owner_size, window_size);
-        let rect = Rect::new(left_top.x, left_top.y, owner_size.x, owner_size.y);
-        self.set_rect(rect);
+        let owner_size = self.size(ctx);
+        self.layout_mut().update(owner_size, window_size);
     }
 }
 

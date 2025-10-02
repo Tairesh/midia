@@ -9,7 +9,8 @@ use tetra::{
 };
 
 use super::super::{
-    Disable, Draw, Focus, Hover, Position, Positionable, Press, Sizeable, UiSprite, Update,
+    Disable, Draw, Focus, HasLayout, HasSize, Hover, Layout, Position, Positionable, Press,
+    UiSprite, Update,
 };
 use crate::assets::Sprite;
 use crate::ui::UpdateContext;
@@ -85,13 +86,12 @@ impl ButtonState {
 }
 
 pub struct Button {
+    layout: Layout,
     keys: Vec<KeyWithMod>,
     content: ButtonContent,
     on_click: Transition,
-    position: Position,
     asset: Rc<ButtonAsset>,
     scale: Vec2,
-    rect: Option<Rect>,
     state: ButtonState,
     fixable: bool,
     visible: bool,
@@ -147,7 +147,7 @@ impl Button {
 
 impl Draw for Button {
     fn draw(&mut self, ctx: &mut Context) {
-        let rect = self.rect.unwrap();
+        let rect = self.layout.rect();
         let mut vec = Vec2::new(rect.x, rect.y);
         let content_size = self.content_size(ctx);
 
@@ -207,8 +207,8 @@ impl Draw for Button {
     }
 }
 
-impl Sizeable for Button {
-    fn calc_size(&mut self, ctx: &mut Context) -> Vec2 {
+impl HasSize for Button {
+    fn size(&mut self, ctx: &mut Context) -> Vec2 {
         let content_size = self.content_size(ctx);
         let offset_x = self.content.offset();
         Vec2::new(
@@ -222,23 +222,17 @@ impl Sizeable for Button {
     }
 }
 
-impl Positionable for Button {
-    fn position(&self) -> Position {
-        self.position
+impl HasLayout for Button {
+    fn layout(&self) -> &Layout {
+        &self.layout
     }
 
-    fn set_position(&mut self, position: Position) {
-        self.position = position;
-    }
-
-    fn rect(&self) -> Rect {
-        self.rect.unwrap()
-    }
-
-    fn set_rect(&mut self, rect: Rect) {
-        self.rect = Some(rect);
+    fn layout_mut(&mut self) -> &mut Layout {
+        &mut self.layout
     }
 }
+
+impl Positionable for Button {}
 
 impl Update for Button {
     fn update(&mut self, ctx: UpdateContext) -> Transition {
@@ -263,7 +257,7 @@ impl Update for Button {
                 return self.on_click.clone();
             }
         }
-        let hovered = ctx.is_hovered(self.rect());
+        let hovered = ctx.is_hovered(self.layout().rect());
         if !self.hovered() && hovered {
             self.on_hovered();
         } else if self.hovered() && !hovered {
@@ -458,19 +452,13 @@ impl ButtonBuilder {
     }
 
     pub fn build(self) -> Button {
-        assert!(
-            !(self.content.is_none() || self.on_click.is_none() || self.position.is_none()),
-            "Invalid button config"
-        );
-
         Button {
+            layout: Layout::new(self.position.expect("Button Position is None")),
             keys: self.keys,
-            content: self.content.unwrap(),
+            content: self.content.expect("ButtonContent is None"),
             on_click: self.on_click,
-            position: self.position.unwrap(),
             asset: self.asset,
             scale: self.scale,
-            rect: None,
             state: self.state,
             fixable: self.fixable,
             visible: self.visible,

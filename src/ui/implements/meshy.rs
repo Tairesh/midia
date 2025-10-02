@@ -7,17 +7,17 @@ use tetra::{
 };
 
 use super::super::{
-    Colorize, Draw, Focus, Hover, Position, Positionable, Sizeable, UiSprite, Update,
+    Colorize, Draw, Focus, HasLayout, HasSize, Hover, Layout, Position, Positionable, UiSprite,
+    Update,
 };
 use crate::scenes::Transition;
 use crate::ui::UpdateContext;
 
 pub struct JustMesh {
+    layout: Layout,
     mesh: Mesh,
     color: Option<Color>,
     size: Vec2,
-    position: Position,
-    rect: Option<Rect>,
     visible: bool,
     scale: Vec2,
 }
@@ -28,8 +28,7 @@ impl JustMesh {
             mesh,
             color,
             size,
-            position,
-            rect: None,
+            layout: Layout::new(position),
             visible: true,
             scale: Vec2::one(),
         }
@@ -38,7 +37,7 @@ impl JustMesh {
 
 impl Draw for JustMesh {
     fn draw(&mut self, ctx: &mut Context) {
-        let rect = self.rect.unwrap();
+        let rect = self.layout.rect();
         self.mesh.draw(
             ctx,
             DrawParams::new()
@@ -57,29 +56,23 @@ impl Draw for JustMesh {
     }
 }
 
-impl Sizeable for JustMesh {
-    fn calc_size(&mut self, _ctx: &mut Context) -> Vec2 {
+impl HasSize for JustMesh {
+    fn size(&mut self, _ctx: &mut Context) -> Vec2 {
         self.size * self.scale
     }
 }
 
-impl Positionable for JustMesh {
-    fn position(&self) -> Position {
-        self.position
+impl HasLayout for JustMesh {
+    fn layout(&self) -> &Layout {
+        &self.layout
     }
 
-    fn set_position(&mut self, position: Position) {
-        self.position = position;
-    }
-
-    fn rect(&self) -> Rect {
-        self.rect.unwrap()
-    }
-
-    fn set_rect(&mut self, rect: Rect) {
-        self.rect = Some(rect);
+    fn layout_mut(&mut self) -> &mut Layout {
+        &mut self.layout
     }
 }
+
+impl Positionable for JustMesh {}
 
 impl Colorize for JustMesh {
     fn color(&self) -> Color {
@@ -102,12 +95,11 @@ impl UiSprite for JustMesh {
 }
 
 pub struct HoverableMesh {
+    layout: Layout,
     mesh: Mesh,
     bg_color: Color,
     bg_color_hover: Color,
     size: Vec2,
-    position: Position,
-    rect: Option<Rect>,
     visible: bool,
     is_hovered: bool,
 }
@@ -121,12 +113,11 @@ impl HoverableMesh {
         position: Position,
     ) -> Self {
         Self {
+            layout: Layout::new(position),
             mesh,
             bg_color,
             bg_color_hover,
             size,
-            position,
-            rect: None,
             visible: true,
             is_hovered: false,
         }
@@ -135,7 +126,7 @@ impl HoverableMesh {
 
 impl Draw for HoverableMesh {
     fn draw(&mut self, ctx: &mut Context) {
-        let rect = self.rect.unwrap();
+        let rect = self.layout.rect();
         self.mesh.draw(
             ctx,
             DrawParams::new()
@@ -157,34 +148,28 @@ impl Draw for HoverableMesh {
     }
 }
 
-impl Sizeable for HoverableMesh {
-    fn calc_size(&mut self, _ctx: &mut Context) -> Vec2 {
+impl HasSize for HoverableMesh {
+    fn size(&mut self, _ctx: &mut Context) -> Vec2 {
         self.size
     }
 }
 
-impl Positionable for HoverableMesh {
-    fn position(&self) -> Position {
-        self.position
+impl HasLayout for HoverableMesh {
+    fn layout(&self) -> &Layout {
+        &self.layout
     }
 
-    fn set_position(&mut self, position: Position) {
-        self.position = position;
-    }
-
-    fn rect(&self) -> Rect {
-        self.rect.unwrap()
-    }
-
-    fn set_rect(&mut self, rect: Rect) {
-        self.rect = Some(rect);
+    fn layout_mut(&mut self) -> &mut Layout {
+        &mut self.layout
     }
 }
+
+impl Positionable for HoverableMesh {}
 
 impl Update for HoverableMesh {
     fn update(&mut self, ctx: UpdateContext) -> Transition {
         let mouse = input::get_mouse_position(ctx.ctx);
-        let rect = self.rect.unwrap();
+        let rect = self.layout.rect();
         let collides = rect.contains_point(mouse);
         // no check for blocking cause it uses as background light
         if !self.is_hovered && collides {

@@ -16,14 +16,14 @@ use crate::{
 };
 
 use super::super::{
-    Colorize, Draw, Focus, Position, Positionable, Sizeable, Stringify, UiSprite, Update,
+    Colorize, Draw, Focus, HasLayout, HasSize, Layout, Position, Positionable, Stringify, UiSprite,
+    Update,
 };
 
 pub struct Label {
+    layout: Layout,
     text: Text,
     color: Color,
-    position: Position,
-    rect: Option<Rect>,
     visible: bool,
     line_height: f32,
 }
@@ -36,10 +36,9 @@ impl Label {
         position: Position,
     ) -> Self {
         Self {
+            layout: Layout::new(position),
             text: Text::new(text, font.font),
             color,
-            position,
-            rect: None,
             visible: true,
             line_height: font.line_height,
         }
@@ -65,7 +64,7 @@ impl Label {
 
 impl Draw for Label {
     fn draw(&mut self, ctx: &mut Context) {
-        let rect = self.rect.unwrap();
+        let rect = self.layout.rect();
         self.text.draw(
             ctx,
             DrawParams::new()
@@ -83,30 +82,24 @@ impl Draw for Label {
     }
 }
 
-impl Sizeable for Label {
-    fn calc_size(&mut self, ctx: &mut Context) -> Vec2 {
+impl HasSize for Label {
+    fn size(&mut self, ctx: &mut Context) -> Vec2 {
         let rect = self.text.get_bounds(ctx).unwrap();
         Vec2::new(rect.width, f32::max(self.line_height, rect.height))
     }
 }
 
-impl Positionable for Label {
-    fn position(&self) -> Position {
-        self.position
+impl HasLayout for Label {
+    fn layout(&self) -> &Layout {
+        &self.layout
     }
 
-    fn set_position(&mut self, position: Position) {
-        self.position = position;
-    }
-
-    fn rect(&self) -> Rect {
-        self.rect.unwrap()
-    }
-
-    fn set_rect(&mut self, rect: Rect) {
-        self.rect = Some(rect);
+    fn layout_mut(&mut self) -> &mut Layout {
+        &mut self.layout
     }
 }
+
+impl Positionable for Label {}
 
 impl Colorize for Label {
     fn color(&self) -> Color {
@@ -143,14 +136,13 @@ impl UiSprite for Label {
 }
 
 pub struct ItemDisplay {
+    layout: Layout,
     text: Text,
     color: Color,
     icon: bool,
     tileset: Rc<Tileset>,
     looks_like: Sprite,
     scale: Vec2,
-    position: Position,
-    rect: Option<Rect>,
     visible: bool,
 }
 
@@ -169,14 +161,13 @@ impl ItemDisplay {
             ("(empty)", Sprite::Empty)
         };
         Self {
+            layout: Layout::new(position),
             text: Text::new(name, font.font),
             color,
             icon: item.is_some(),
             tileset,
             looks_like,
             scale,
-            position,
-            rect: None,
             visible: true,
         }
     }
@@ -202,7 +193,7 @@ impl ItemDisplay {
 
 impl Draw for ItemDisplay {
     fn draw(&mut self, ctx: &mut Context) {
-        let rect = self.rect.unwrap();
+        let rect = self.layout.rect();
         let text_pos = if self.icon {
             self.tileset.draw_sprite(
                 ctx,
@@ -231,8 +222,8 @@ impl Draw for ItemDisplay {
     }
 }
 
-impl Sizeable for ItemDisplay {
-    fn calc_size(&mut self, ctx: &mut Context) -> Vec2 {
+impl HasSize for ItemDisplay {
+    fn size(&mut self, ctx: &mut Context) -> Vec2 {
         let rect = self.text.get_bounds(ctx).unwrap();
         if self.icon {
             Vec2::new(
@@ -245,23 +236,17 @@ impl Sizeable for ItemDisplay {
     }
 }
 
-impl Positionable for ItemDisplay {
-    fn position(&self) -> Position {
-        self.position
+impl HasLayout for ItemDisplay {
+    fn layout(&self) -> &Layout {
+        &self.layout
     }
 
-    fn set_position(&mut self, position: Position) {
-        self.position = position;
-    }
-
-    fn rect(&self) -> Rect {
-        self.rect.unwrap()
-    }
-
-    fn set_rect(&mut self, rect: Rect) {
-        self.rect = Some(rect);
+    fn layout_mut(&mut self) -> &mut Layout {
+        &mut self.layout
     }
 }
+
+impl Positionable for ItemDisplay {}
 
 impl Colorize for ItemDisplay {
     fn color(&self) -> Color {

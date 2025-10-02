@@ -17,7 +17,7 @@ use crate::{
     colors::Colors,
     savefile::{self, savefiles, savefiles_exists, Meta},
     ui::{
-        Alert, Horizontal, HoverableMesh, Label, Position, Sizeable, SomeUISprites,
+        Alert, HasSize, Horizontal, HoverableMesh, Label, Position, SomeUISprites,
         SomeUISpritesMut, UiSprite, Vertical,
     },
     VERSION,
@@ -121,7 +121,7 @@ impl LoadWorld {
                 Vec2::new(-275.0, y + 30.0),
             ),
         ));
-        let version_label_size = version_label.calc_size(ctx);
+        let version_label_size = version_label.size(ctx);
         sprites.push(version_label);
         let time: DateTime<Local> = savefile.time.into();
         sprites.push(Box::new(Label::new(

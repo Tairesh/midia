@@ -76,7 +76,7 @@ pub trait Scene {
         }
     }
 
-    fn reposition_all_sprites(&mut self, ctx: &mut Context, window_size: (i32, i32)) {
+    fn relayout(&mut self, ctx: &mut Context, window_size: (i32, i32)) {
         if let Some(sprites) = self.sprites_mut() {
             for sprite in sprites.iter_mut() {
                 sprite.update_position(ctx, window_size);
@@ -102,7 +102,7 @@ pub trait Scene {
                     return transition;
                 }
                 if sprite.visible() && sprite.block_mouse() {
-                    blocked.push(sprite.rect());
+                    blocked.push(sprite.layout().rect());
                 }
             }
         }

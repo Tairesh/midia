@@ -11,6 +11,11 @@ use tetra::{
     Context,
 };
 
+use super::super::{
+    super::{implements::GameScene, Transition},
+    Cursor, CursorType, GameModeImpl,
+};
+use crate::ui::HasLayout;
 use crate::{
     colors::Colors,
     game::{
@@ -21,11 +26,6 @@ use crate::{
     input,
     settings::Settings,
     ui::{Draw, JustMesh, Label, Position, Positionable, Stringify},
-};
-
-use super::super::{
-    super::{implements::GameScene, Transition},
-    Cursor, CursorType, GameModeImpl,
 };
 
 struct ObservingSprite {
@@ -111,9 +111,9 @@ impl Observing {
         let window_size = game.window_size;
         if let Some(sprite) = &mut self.sprite {
             sprite.label.set_value(msg);
-            sprite.label.set_position(position);
+            sprite.label.layout_mut().set_position(position);
             sprite.label.update_position(ctx, window_size);
-            let rect = sprite.label.rect();
+            let rect = sprite.label.layout().rect();
             sprite.mesh = create_mesh(ctx, rect, position);
             sprite.mesh.update_position(ctx, window_size);
         } else {
@@ -124,7 +124,7 @@ impl Observing {
                 position,
             );
             label.update_position(ctx, window_size);
-            let rect = label.rect();
+            let rect = label.layout().rect();
             let mut mesh = create_mesh(ctx, rect, position);
             mesh.update_position(ctx, window_size);
             self.sprite = Some(Box::new(ObservingSprite { label, mesh }));

@@ -10,8 +10,8 @@ use tetra::{
 };
 
 use super::super::{
-    Draw, Focus, Position, Positionable, Sizeable, UiSprite, Update, UpdateContext,
-    UpdateContextState,
+    Draw, Focus, HasLayout, HasSize, Layout, Position, Positionable, UiSprite, Update,
+    UpdateContext, UpdateContextState,
 };
 use crate::{assets::Alert as AlertAsset, input, scenes::Transition};
 
@@ -20,8 +20,7 @@ pub struct Alert {
     scale: Vec2,
     width: f32,
     height: f32,
-    position: Position,
-    rect: Option<Rect>,
+    layout: Layout,
     visible: bool,
     active: bool,
 }
@@ -33,8 +32,7 @@ impl Alert {
             scale: Vec2::new(3.0, 3.0),
             width,
             height,
-            position,
-            rect: None,
+            layout: Layout::new(position),
             visible: true,
             active: true,
         }
@@ -61,7 +59,7 @@ impl Alert {
 
 impl Draw for Alert {
     fn draw(&mut self, ctx: &mut Context) {
-        let rect = self.rect.unwrap();
+        let rect = self.layout().rect();
         self.asset.texture.draw_nine_slice(
             ctx,
             &self.asset.nineslice,
@@ -82,36 +80,30 @@ impl Draw for Alert {
     }
 }
 
-impl Sizeable for Alert {
-    fn calc_size(&mut self, _ctx: &mut Context) -> Vec2 {
+impl HasSize for Alert {
+    fn size(&mut self, _ctx: &mut Context) -> Vec2 {
         Vec2::new(self.width, self.height)
     }
 }
 
-impl Positionable for Alert {
-    fn position(&self) -> Position {
-        self.position
+impl HasLayout for Alert {
+    fn layout(&self) -> &Layout {
+        &self.layout
     }
 
-    fn set_position(&mut self, position: Position) {
-        self.position = position;
-    }
-
-    fn rect(&self) -> Rect {
-        self.rect.unwrap()
-    }
-
-    fn set_rect(&mut self, rect: Rect) {
-        self.rect = Some(rect);
+    fn layout_mut(&mut self) -> &mut Layout {
+        &mut self.layout
     }
 }
+
+impl Positionable for Alert {}
 
 impl Update for Alert {
     fn update(&mut self, ctx: UpdateContext) -> Transition {
         if !self.active || ctx.state == UpdateContextState::Focused {
             return Transition::None;
         }
-        if input::is_key_pressed(ctx.ctx, Key::Escape) || ctx.is_clicked(self.rect()) {
+        if input::is_key_pressed(ctx.ctx, Key::Escape) || ctx.is_clicked(self.layout().rect()) {
             return Transition::Pop;
         }
 

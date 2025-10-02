@@ -9,7 +9,7 @@ use crate::ui::{ButtonBuilder, UiSprite, UpdateContextState};
 use crate::{
     assets::{Assets, Sprite},
     colors::Colors,
-    ui::{Button, Image, Label, Position, Positionable, Sizeable, TextInput, Vertical},
+    ui::{Button, HasLayout, HasSize, Image, Label, Position, TextInput, Vertical},
 };
 
 use super::Transition;
@@ -166,39 +166,45 @@ pub(crate) fn back_randomize_next(
     next_text: &str,
 ) -> [Box<dyn UiSprite>; 3] {
     let mut randomize_btn = randomize_btn(assets, Position::zero(), randomize);
-    let randomize_btn_size = randomize_btn.calc_size(ctx);
+    let randomize_btn_size = randomize_btn.size(ctx);
 
     let mut back_btn = back_btn(Position::zero(), assets);
-    let back_btn_size = back_btn.calc_size(ctx);
+    let back_btn_size = back_btn.size(ctx);
 
     let mut next_btn = next_btn(assets, Position::zero(), next, next_text);
-    let next_btn_size = next_btn.calc_size(ctx);
+    let next_btn_size = next_btn.size(ctx);
 
     let total_width = randomize_btn_size.x + back_btn_size.x + next_btn_size.x + 4.0;
 
     // positionate them in center
-    back_btn.set_position(Position::horizontal_center(
-        Vertical::BottomByBottom,
-        Vec2::new(-total_width / 2.0 + back_btn_size.x / 2.0, -50.0),
-    ));
-    randomize_btn.set_position(Position::horizontal_center(
-        Vertical::BottomByBottom,
-        Vec2::new(
-            -total_width / 2.0 + back_btn_size.x + randomize_btn_size.x / 2.0 + 2.0,
-            -50.0,
-        ),
-    ));
-    next_btn.set_position(Position::horizontal_center(
-        Vertical::BottomByBottom,
-        Vec2::new(
-            -total_width / 2.0
-                + back_btn_size.x
-                + randomize_btn_size.x
-                + next_btn_size.x / 2.0
-                + 4.0,
-            -50.0,
-        ),
-    ));
+    back_btn
+        .layout_mut()
+        .set_position(Position::horizontal_center(
+            Vertical::BottomByBottom,
+            Vec2::new(-total_width / 2.0 + back_btn_size.x / 2.0, -50.0),
+        ));
+    randomize_btn
+        .layout_mut()
+        .set_position(Position::horizontal_center(
+            Vertical::BottomByBottom,
+            Vec2::new(
+                -total_width / 2.0 + back_btn_size.x + randomize_btn_size.x / 2.0 + 2.0,
+                -50.0,
+            ),
+        ));
+    next_btn
+        .layout_mut()
+        .set_position(Position::horizontal_center(
+            Vertical::BottomByBottom,
+            Vec2::new(
+                -total_width / 2.0
+                    + back_btn_size.x
+                    + randomize_btn_size.x
+                    + next_btn_size.x / 2.0
+                    + 4.0,
+                -50.0,
+            ),
+        ));
 
     [back_btn, randomize_btn, next_btn]
 }
@@ -223,55 +229,63 @@ pub(crate) fn back_randomize_reset_next(
     next_text: &str,
 ) -> [Box<dyn UiSprite>; 4] {
     let mut randomize_btn = randomize_btn(assets, Position::zero(), randomize);
-    let randomize_btn_size = randomize_btn.calc_size(ctx);
+    let randomize_btn_size = randomize_btn.size(ctx);
 
     let mut back_btn = back_btn(Position::zero(), assets);
-    let back_btn_size = back_btn.calc_size(ctx);
+    let back_btn_size = back_btn.size(ctx);
 
     let mut reset_btn = reset_btn(assets, Position::zero(), reset);
-    let reset_btn_size = reset_btn.calc_size(ctx);
+    let reset_btn_size = reset_btn.size(ctx);
 
     let mut next_btn = next_btn(assets, Position::zero(), next, next_text);
-    let next_btn_size = next_btn.calc_size(ctx);
+    let next_btn_size = next_btn.size(ctx);
 
     let total_width =
         randomize_btn_size.x + back_btn_size.x + reset_btn_size.x + next_btn_size.x + 6.0;
 
     // positionate them in center
-    back_btn.set_position(Position::horizontal_center(
-        Vertical::BottomByBottom,
-        Vec2::new(-total_width / 2.0 + back_btn_size.x / 2.0, -50.0),
-    ));
-    randomize_btn.set_position(Position::horizontal_center(
-        Vertical::BottomByBottom,
-        Vec2::new(
-            -total_width / 2.0 + back_btn_size.x + randomize_btn_size.x / 2.0 + 2.0,
-            -50.0,
-        ),
-    ));
-    reset_btn.set_position(Position::horizontal_center(
-        Vertical::BottomByBottom,
-        Vec2::new(
-            -total_width / 2.0
-                + back_btn_size.x
-                + randomize_btn_size.x
-                + reset_btn_size.x / 2.0
-                + 4.0,
-            -50.0,
-        ),
-    ));
-    next_btn.set_position(Position::horizontal_center(
-        Vertical::BottomByBottom,
-        Vec2::new(
-            -total_width / 2.0
-                + back_btn_size.x
-                + randomize_btn_size.x
-                + reset_btn_size.x
-                + next_btn_size.x / 2.0
-                + 6.0,
-            -50.0,
-        ),
-    ));
+    back_btn
+        .layout_mut()
+        .set_position(Position::horizontal_center(
+            Vertical::BottomByBottom,
+            Vec2::new(-total_width / 2.0 + back_btn_size.x / 2.0, -50.0),
+        ));
+    randomize_btn
+        .layout_mut()
+        .set_position(Position::horizontal_center(
+            Vertical::BottomByBottom,
+            Vec2::new(
+                -total_width / 2.0 + back_btn_size.x + randomize_btn_size.x / 2.0 + 2.0,
+                -50.0,
+            ),
+        ));
+    reset_btn
+        .layout_mut()
+        .set_position(Position::horizontal_center(
+            Vertical::BottomByBottom,
+            Vec2::new(
+                -total_width / 2.0
+                    + back_btn_size.x
+                    + randomize_btn_size.x
+                    + reset_btn_size.x / 2.0
+                    + 4.0,
+                -50.0,
+            ),
+        ));
+    next_btn
+        .layout_mut()
+        .set_position(Position::horizontal_center(
+            Vertical::BottomByBottom,
+            Vec2::new(
+                -total_width / 2.0
+                    + back_btn_size.x
+                    + randomize_btn_size.x
+                    + reset_btn_size.x
+                    + next_btn_size.x / 2.0
+                    + 6.0,
+                -50.0,
+            ),
+        ));
 
     [back_btn, randomize_btn, reset_btn, next_btn]
 }

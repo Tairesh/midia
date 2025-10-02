@@ -10,16 +10,17 @@ use tetra::{
 
 use crate::assets::{Sprite, Tileset};
 
-use super::super::{Colorize, Draw, Focus, Position, Positionable, Sizeable, UiSprite, Update};
+use super::super::{
+    Colorize, Draw, Focus, HasLayout, HasSize, Layout, Position, Positionable, UiSprite, Update,
+};
 
 pub struct Image {
+    layout: Layout,
     texture: Texture,
     region: Option<Rectangle>,
     color: Option<Color>,
     nine_slice: Option<(NineSlice, f32, f32)>,
     scale: Vec2,
-    position: Position,
-    rect: Option<Rect>,
     visible: bool,
     repeat: bool,
     auto_size: bool,
@@ -30,12 +31,11 @@ impl Image {
     pub fn new(texture: Texture, position: Position) -> Self {
         Image {
             texture,
+            layout: Layout::new(position),
             region: None,
             color: None,
             nine_slice: None,
             scale: Vec2::new(1.0, 1.0),
-            position,
-            rect: None,
             visible: true,
             repeat: false,
             auto_size: false,
@@ -70,7 +70,7 @@ impl Image {
 
 impl Draw for Image {
     fn draw(&mut self, ctx: &mut Context) {
-        let rect = self.rect.unwrap();
+        let rect = self.layout.rect();
         let params = DrawParams::new()
             .position(Vec2::new(rect.x, rect.y))
             .scale(self.scale)
@@ -104,8 +104,8 @@ impl Draw for Image {
     }
 }
 
-impl Sizeable for Image {
-    fn calc_size(&mut self, ctx: &mut Context) -> Vec2 {
+impl HasSize for Image {
+    fn size(&mut self, ctx: &mut Context) -> Vec2 {
         if self.repeat || self.auto_size {
             self.window_size = window::get_size(ctx);
         }
@@ -126,23 +126,17 @@ impl Sizeable for Image {
     }
 }
 
-impl Positionable for Image {
-    fn position(&self) -> Position {
-        self.position
+impl HasLayout for Image {
+    fn layout(&self) -> &Layout {
+        &self.layout
     }
 
-    fn set_position(&mut self, position: Position) {
-        self.position = position;
-    }
-
-    fn rect(&self) -> Rect {
-        self.rect.unwrap()
-    }
-
-    fn set_rect(&mut self, rect: Rect) {
-        self.rect = Some(rect);
+    fn layout_mut(&mut self) -> &mut Layout {
+        &mut self.layout
     }
 }
+
+impl Positionable for Image {}
 
 impl Colorize for Image {
     fn color(&self) -> Color {
@@ -161,11 +155,10 @@ impl Focus for Image {}
 impl UiSprite for Image {}
 
 pub struct TilesetSprite {
+    layout: Layout,
     sprite: Sprite,
     scale: Vec2,
     tileset: Rc<Tileset>,
-    position: Position,
-    rect: Option<Rect>,
     visible: bool,
     color: Option<Color>,
 }
@@ -179,11 +172,10 @@ impl TilesetSprite {
         color: Option<Color>,
     ) -> Self {
         TilesetSprite {
+            layout: Layout::new(position),
             sprite: sprite.into(),
             scale: Vec2::new(scale, scale),
             tileset,
-            position,
-            rect: None,
             visible: true,
             color,
         }
@@ -200,7 +192,7 @@ impl TilesetSprite {
 
 impl Draw for TilesetSprite {
     fn draw(&mut self, ctx: &mut Context) {
-        let rect = self.rect.unwrap();
+        let rect = self.layout.rect();
         let mut params = DrawParams::new()
             .position(Vec2::new(rect.x, rect.y))
             .scale(self.scale);
@@ -219,30 +211,24 @@ impl Draw for TilesetSprite {
     }
 }
 
-impl Sizeable for TilesetSprite {
-    fn calc_size(&mut self, _ctx: &mut Context) -> Vec2 {
+impl HasSize for TilesetSprite {
+    fn size(&mut self, _ctx: &mut Context) -> Vec2 {
         let size = Tileset::get_size(self.sprite);
         size * self.scale
     }
 }
 
-impl Positionable for TilesetSprite {
-    fn position(&self) -> Position {
-        self.position
+impl HasLayout for TilesetSprite {
+    fn layout(&self) -> &Layout {
+        &self.layout
     }
 
-    fn set_position(&mut self, position: Position) {
-        self.position = position;
-    }
-
-    fn rect(&self) -> Rect {
-        self.rect.unwrap()
-    }
-
-    fn set_rect(&mut self, rect: Rect) {
-        self.rect = Some(rect);
+    fn layout_mut(&mut self) -> &mut Layout {
+        &mut self.layout
     }
 }
+
+impl Positionable for TilesetSprite {}
 
 impl Colorize for TilesetSprite {
     fn color(&self) -> Color {

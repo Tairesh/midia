@@ -8,7 +8,7 @@ use crate::{
     app::App,
     settings::Settings,
     ui::{
-        Button, Horizontal, Position, Press, Sizeable, SomeUISprites, SomeUISpritesMut, Stringify,
+        Button, HasSize, Horizontal, Position, Press, SomeUISprites, SomeUISpritesMut, Stringify,
         TextInput, UiSprite, Vertical,
     },
 };
@@ -73,7 +73,7 @@ impl SettingsScene {
                 .with_pressed(!settings.window.fullscreen)
                 .build(),
         );
-        let window_btn_size = window_btn.calc_size(ctx);
+        let window_btn_size = window_btn.size(ctx);
 
         Self {
             // Order is matter, change hardcoded indices in functions below if modified

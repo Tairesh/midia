@@ -1,7 +1,7 @@
 use roguemetry::Vec2;
 
 /// Specifies how to position a UI element horizontally relative to the window.
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub enum Horizontal {
     /// Align left edge of the element to the left edge of the window
     LeftByLeft,
@@ -16,7 +16,7 @@ pub enum Horizontal {
 }
 
 /// Specifies how to position a UI element vertically relative to the window.
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub enum Vertical {
     /// Align top edge of the element to the top edge of the window
     TopByTop,
@@ -34,7 +34,7 @@ pub enum Vertical {
     BottomByBottom,
 }
 
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub struct Position {
     horizontal: Horizontal,
     vertical: Vertical,

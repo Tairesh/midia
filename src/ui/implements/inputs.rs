@@ -12,9 +12,9 @@ use tetra::{
 };
 
 use super::super::{
-    Disable, Draw, Focus, Hover, Position, Positionable, Press, Stringify, UiSprite, Update,
+    Disable, Draw, Focus, HasLayout, HasSize, Hover, Layout, Position, Positionable, Press,
+    Stringify, UiSprite, Update, UpdateContext,
 };
-use crate::ui::{Sizeable, UpdateContext};
 use crate::{
     assets::PreparedFont,
     colors::Colors,
@@ -103,7 +103,6 @@ impl InputValue {
 struct InputGeometry {
     pub width: f32,
     pub line_height: f32,
-    pub rect: Option<Rect>,
 }
 
 struct InputBlink {
@@ -137,8 +136,8 @@ pub enum InputState {
 }
 
 pub struct TextInput {
+    layout: Layout,
     value: InputValue,
-    position: Position,
     geometry: InputGeometry,
     state: InputState,
     blink: InputBlink,
@@ -157,10 +156,10 @@ impl TextInput {
     ) -> Self {
         let value = value.into();
         Self {
+            layout: Layout::new(position),
             geometry: InputGeometry {
                 width,
                 line_height: font.line_height,
-                rect: None,
             },
             value: InputValue::new(ValueType::String { max_length: 32 }, value, font),
             blink: InputBlink {
@@ -172,7 +171,6 @@ impl TextInput {
             bg: None,
             border: None,
             cursor: None,
-            position,
         }
     }
 
@@ -233,7 +231,7 @@ impl TextInput {
 
 impl Draw for TextInput {
     fn draw(&mut self, ctx: &mut Context) {
-        let rect = self.geometry.rect.unwrap();
+        let rect = self.layout.rect();
         if let Some(bg_color) = self.bg_color() {
             self.bg.as_ref().unwrap().draw(
                 ctx,
@@ -286,8 +284,8 @@ impl Draw for TextInput {
     }
 }
 
-impl Sizeable for TextInput {
-    fn calc_size(&mut self, ctx: &mut Context) -> Vec2 {
+impl HasSize for TextInput {
+    fn size(&mut self, ctx: &mut Context) -> Vec2 {
         let (w, h) = (self.geometry.width, self.geometry.line_height + 16.0);
         self.bg = Some(
             Mesh::rounded_rectangle(
@@ -319,27 +317,20 @@ impl Sizeable for TextInput {
     }
 }
 
-impl Positionable for TextInput {
-    fn position(&self) -> Position {
-        self.position
+impl HasLayout for TextInput {
+    fn layout(&self) -> &Layout {
+        &self.layout
     }
 
-    fn set_position(&mut self, position: Position) {
-        self.position = position;
-    }
-
-    fn rect(&self) -> Rect {
-        self.geometry.rect.unwrap()
-    }
-
-    fn set_rect(&mut self, rect: Rect) {
-        self.geometry.rect = Some(rect);
+    fn layout_mut(&mut self) -> &mut Layout {
+        &mut self.layout
     }
 }
+impl Positionable for TextInput {}
 
 impl Update for TextInput {
     fn update(&mut self, ctx: UpdateContext) -> Transition {
-        let hovered = ctx.is_hovered(self.rect());
+        let hovered = ctx.is_hovered(self.layout.rect());
 
         if self.state == InputState::Default && hovered {
             self.on_hovered();

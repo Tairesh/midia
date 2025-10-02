@@ -56,7 +56,7 @@ impl App {
     fn on_resize(&mut self, ctx: &mut Context, window_size: (i32, i32)) {
         self.window_size = window_size;
         if let Some(scene) = self.current_scene() {
-            scene.reposition_all_sprites(ctx, window_size);
+            scene.relayout(ctx, window_size);
             scene.on_resize(ctx, window_size);
             self.fps_counter.update_position(ctx, window_size);
         }

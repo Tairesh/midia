@@ -9,14 +9,16 @@ pub use self::implements::{
     label::{ItemDisplay, Label},
     meshy::{HoverableMesh, JustMesh},
 };
+pub use self::layout::Layout;
 pub use self::position::{Horizontal, Position, Vertical};
 pub use self::traits::{
-    Colorize, Disable, Draw, Focus, Hover, Positionable, Press, Sizeable, Stringify, UiSprite,
-    Update, UpdateContext, UpdateContextState,
+    Colorize, Disable, Draw, Focus, HasLayout, HasSize, Hover, Positionable, Press, Stringify,
+    UiSprite, Update, UpdateContext, UpdateContextState,
 };
 
 mod game_log;
 mod implements;
+mod layout;
 mod position;
 mod traits;
 

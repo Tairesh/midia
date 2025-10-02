@@ -122,32 +122,35 @@ impl App {
             panic!("World isn't loaded!")
         }
     }
+
+    #[inline]
+    fn step_scene(
+        &mut self,
+        ctx: &mut Context,
+        f: impl FnOnce(&mut dyn Scene, &mut Context) -> Transition,
+    ) {
+        if let Some(scene) = self.current_scene() {
+            let transition = f(&mut **scene, ctx);
+            self.transit(ctx, transition);
+        }
+    }
 }
 
 impl State for App {
     fn update(&mut self, ctx: &mut Context) -> tetra::Result {
-        if let Some(scene) = self.current_scene() {
-            let transition = scene.update(ctx);
-            self.transit(ctx, transition);
-        } else {
-            self.transit(ctx, Transition::Quit);
-        }
+        self.step_scene(ctx, |s, ctx| s.update(ctx));
 
         Ok(())
     }
 
     fn draw(&mut self, ctx: &mut Context) -> tetra::Result {
-        if let Some(scene) = self.current_scene() {
-            scene.before_draw(ctx);
-            if let Some(sprites) = scene.sprites_mut() {
-                for sprite in &mut *sprites {
-                    if sprite.visible() {
-                        sprite.draw(ctx);
-                    }
-                }
-            }
-            scene.after_draw(ctx);
-        }
+        self.step_scene(ctx, |s, ctx| {
+            s.before_draw(ctx);
+            s.draw_sprites(ctx);
+            s.after_draw(ctx);
+
+            Transition::None
+        });
         if Settings::instance().debug.show_fps {
             let fps = (tetra::time::get_fps(ctx).round() as u8).to_string();
             if !self.fps_counter.value().eq(&fps) {
@@ -174,10 +177,7 @@ impl State for App {
             _ => {}
         }
 
-        if let Some(scene) = self.current_scene() {
-            let transition = scene.event(ctx, event);
-            self.transit(ctx, transition);
-        }
+        self.step_scene(ctx, |s, ctx| s.event(ctx, event));
 
         Ok(())
     }

@@ -109,4 +109,14 @@ pub trait Scene {
 
         Transition::None
     }
+
+    fn draw_sprites(&mut self, ctx: &mut Context) {
+        if let Some(sprites) = self.sprites_mut() {
+            for sprite in sprites.iter_mut() {
+                if sprite.visible() {
+                    sprite.draw(ctx);
+                }
+            }
+        }
+    }
 }

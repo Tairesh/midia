@@ -5,10 +5,7 @@ use tetra::Context;
 use crate::scenes::helpers::back_btn;
 use crate::{
     app::App,
-    ui::{
-        draw_sprites, Alert, ButtonBuilder, Position, SomeUISprites, SomeUISpritesMut, UiSprite,
-        Vertical,
-    },
+    ui::{draw_sprites, Alert, ButtonBuilder, Position, UISpritesCollection, UiSprite, Vertical},
 };
 
 use super::super::{Scene, SceneKind, Transition};
@@ -63,11 +60,7 @@ impl Scene for GameMenu {
         draw_sprites(ctx, &mut self.sprites);
     }
 
-    fn sprites(&self) -> SomeUISprites<'_> {
-        Some(&self.sprites)
-    }
-
-    fn sprites_mut(&mut self) -> SomeUISpritesMut<'_> {
+    fn sprites_mut(&mut self) -> UISpritesCollection<'_> {
         Some(&mut self.sprites)
     }
 }

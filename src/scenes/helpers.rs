@@ -5,7 +5,7 @@ use tetra::{
     Context, Event,
 };
 
-use crate::ui::{ButtonBuilder, UiSprite, UpdateContextState};
+use crate::ui::{ButtonBuilder, UiSprite};
 use crate::{
     assets::{Assets, Sprite},
     colors::Colors,
@@ -16,10 +16,7 @@ use super::Transition;
 
 pub const UI_ICONS_SCALE: Vec2 = Vec2::new(3.0, 3.0);
 
-pub(crate) fn easy_back(event: &Event, state: UpdateContextState) -> Transition {
-    if state == UpdateContextState::Focused {
-        return Transition::None;
-    }
+pub(crate) fn easy_back(event: &Event) -> Transition {
     match event {
         Event::MouseButtonPressed {
             button: MouseButton::X1,

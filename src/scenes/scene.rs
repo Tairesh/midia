@@ -1,6 +1,6 @@
 use crate::app::App;
 use crate::game::units::PlayerPersonality;
-use crate::ui::{SomeUISprites, SomeUISpritesMut, UpdateContext, UpdateContextState};
+use crate::ui::{UISpritesCollection, UpdateContext, UpdateContextState};
 use roguemetry::Vec2;
 use std::path::PathBuf;
 use tetra::{Context, Event};
@@ -54,25 +54,11 @@ pub trait Scene {
     fn draw(&mut self, ctx: &mut Context);
     fn on_open(&mut self, _ctx: &mut Context) {}
     fn on_resize(&mut self, _ctx: &mut Context, _window_size: Vec2) {}
-    fn sprites(&self) -> SomeUISprites<'_> {
-        None
-    }
-    fn sprites_mut(&mut self) -> SomeUISpritesMut<'_> {
+    fn sprites_mut(&mut self) -> UISpritesCollection<'_> {
         None
     }
     fn custom_event(&mut self, _ctx: &mut Context, _event: u8) -> Transition {
         Transition::None
-    }
-
-    fn get_update_context_state(&self) -> UpdateContextState {
-        if self
-            .sprites()
-            .is_some_and(|sprites| sprites.iter().any(|s| s.focused()))
-        {
-            UpdateContextState::Focused
-        } else {
-            UpdateContextState::Normal
-        }
     }
 
     fn relayout(&mut self, ctx: &mut Context, window_size: Vec2) {
@@ -89,20 +75,30 @@ pub trait Scene {
             return transition;
         }
 
-        // TODO: find a way to optimize this shit
-        let state = self.get_update_context_state();
-        if let Some(sprites) = self.sprites_mut() {
-            // creating same big useless vec of Rects EVERY frame
-            let mut blocked = Vec::with_capacity(sprites.len());
-            for sprite in sprites.iter_mut().rev() {
-                let context = UpdateContext::new(ctx, &blocked, state);
-                let transition = sprite.update(context);
-                if transition.is_some() {
-                    return transition;
-                }
-                if sprite.visible() && sprite.block_mouse() {
-                    blocked.push(sprite.layout().rect());
-                }
+        let Some(sprites) = self.sprites_mut() else {
+            return Transition::None;
+        };
+        if sprites.is_empty() {
+            return Transition::None;
+        }
+
+        let state = if sprites.iter().any(|s| s.focused()) {
+            UpdateContextState::Focused
+        } else {
+            UpdateContextState::Normal
+        };
+
+        let mut blocked = Vec::with_capacity(sprites.len());
+
+        for sprite in sprites.iter_mut().rev() {
+            let context = UpdateContext::new(ctx, &blocked, state);
+            let transition = sprite.update(context);
+            if transition.is_some() {
+                return transition;
+            }
+
+            if sprite.visible() && sprite.block_mouse() {
+                blocked.push(sprite.layout().rect());
             }
         }
 

@@ -24,8 +24,8 @@ use crate::{
         Scene, Transition,
     },
     ui::{
-        draw_sprites, Alert, Disable, Horizontal, Label, Position, SomeUISprites, SomeUISpritesMut,
-        UiSprite, Vertical,
+        draw_sprites, Alert, Disable, Horizontal, Label, Position, UISpritesCollection, UiSprite,
+        Vertical,
     },
 };
 
@@ -634,7 +634,7 @@ impl CharacterAttributes {
 
 impl Scene for CharacterAttributes {
     fn event(&mut self, _ctx: &mut Context, event: Event) -> Transition {
-        easy_back(&event, self.get_update_context_state())
+        easy_back(&event)
     }
 
     fn draw(&mut self, ctx: &mut Context) {
@@ -649,11 +649,7 @@ impl Scene for CharacterAttributes {
         self.window_size = window_size;
     }
 
-    fn sprites(&self) -> SomeUISprites<'_> {
-        Some(&self.sprites)
-    }
-
-    fn sprites_mut(&mut self) -> SomeUISpritesMut<'_> {
+    fn sprites_mut(&mut self) -> UISpritesCollection<'_> {
         Some(&mut self.sprites)
     }
 

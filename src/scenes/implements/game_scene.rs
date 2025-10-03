@@ -24,8 +24,8 @@ use crate::{
     input,
     settings::Settings,
     ui::{
-        draw_sprites, Colorize, GameLog, Horizontal, Label, Position, SomeUISprites,
-        SomeUISpritesMut, TilesetSprite, UiSprite, Vertical,
+        draw_sprites, Colorize, GameLog, Horizontal, Label, Position, TilesetSprite,
+        UISpritesCollection, UiSprite, Vertical,
     },
 };
 
@@ -307,11 +307,7 @@ impl Scene for GameScene {
         self.need_redraw = true;
     }
 
-    fn sprites(&self) -> SomeUISprites<'_> {
-        Some(&self.sprites)
-    }
-
-    fn sprites_mut(&mut self) -> SomeUISpritesMut<'_> {
+    fn sprites_mut(&mut self) -> UISpritesCollection<'_> {
         Some(&mut self.sprites)
     }
 }

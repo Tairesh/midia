@@ -17,8 +17,8 @@ use crate::{
     },
     savefile::{self, Meta},
     ui::{
-        draw_sprites, Button, Colorize, Draw, Horizontal, JustMesh, Label, Position, SomeUISprites,
-        SomeUISpritesMut, Stringify, TextInput, TilesetSprite, UiSprite, Vertical,
+        draw_sprites, Button, Colorize, Draw, Horizontal, JustMesh, Label, Position, Stringify,
+        TextInput, TilesetSprite, UISpritesCollection, UiSprite, Vertical,
     },
 };
 
@@ -411,18 +411,18 @@ impl Scene for CreateCharacter {
     }
 
     fn event(&mut self, _ctx: &mut Context, event: Event) -> Transition {
-        easy_back(&event, self.get_update_context_state())
+        if self.sprites.iter().any(|s| s.focused()) {
+            return Transition::None;
+        }
+
+        easy_back(&event)
     }
 
     fn on_resize(&mut self, _ctx: &mut Context, window_size: Vec2) {
         self.window_size = window_size;
     }
 
-    fn sprites(&self) -> SomeUISprites<'_> {
-        Some(&self.sprites)
-    }
-
-    fn sprites_mut(&mut self) -> SomeUISpritesMut<'_> {
+    fn sprites_mut(&mut self) -> UISpritesCollection<'_> {
         Some(&mut self.sprites)
     }
 

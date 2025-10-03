@@ -1,13 +1,6 @@
 use tetra::{Context, Event};
 
-use super::super::{
-    super::{
-        app::App,
-        ui::{SomeUISprites, SomeUISpritesMut},
-    },
-    helpers::easy_back,
-    Scene,
-};
+use super::super::{super::app::App, helpers::easy_back, Scene};
 use crate::scenes::Transition;
 use crate::ui::{Draw, Image};
 
@@ -25,18 +18,10 @@ impl Empty {
 
 impl Scene for Empty {
     fn event(&mut self, _ctx: &mut Context, event: Event) -> Transition {
-        easy_back(&event, self.get_update_context_state())
+        easy_back(&event)
     }
 
     fn draw(&mut self, ctx: &mut Context) {
         self.bg.draw(ctx);
-    }
-
-    fn sprites(&self) -> SomeUISprites<'_> {
-        None
-    }
-
-    fn sprites_mut(&mut self) -> SomeUISpritesMut<'_> {
-        None
     }
 }

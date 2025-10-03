@@ -17,7 +17,7 @@ use crate::{
     savefile::{self, savefiles, savefiles_exists, Meta},
     ui::{
         draw_sprites, Alert, ButtonBuilder, HasSize, Horizontal, HoverableMesh, Label, Position,
-        SomeUISprites, SomeUISpritesMut, UiSprite, Vertical,
+        UISpritesCollection, UiSprite, Vertical,
     },
     VERSION,
 };
@@ -180,18 +180,14 @@ impl LoadWorld {
 
 impl Scene for LoadWorld {
     fn event(&mut self, _ctx: &mut Context, event: Event) -> Transition {
-        easy_back(&event, self.get_update_context_state())
+        easy_back(&event)
     }
 
     fn draw(&mut self, ctx: &mut Context) {
         draw_sprites(ctx, &mut self.sprites);
     }
 
-    fn sprites(&self) -> SomeUISprites<'_> {
-        Some(&self.sprites)
-    }
-
-    fn sprites_mut(&mut self) -> SomeUISpritesMut<'_> {
+    fn sprites_mut(&mut self) -> UISpritesCollection<'_> {
         Some(&mut self.sprites)
     }
 

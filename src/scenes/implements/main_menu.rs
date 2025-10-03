@@ -6,8 +6,8 @@ use crate::{
     colors::Colors,
     savefile::savefiles_exists,
     ui::{
-        draw_sprites, Button, ButtonBuilder, Disable, Image, Label, Position, SomeUISprites,
-        SomeUISpritesMut, UiSprite, Vertical,
+        draw_sprites, Button, ButtonBuilder, Disable, Image, Label, Position, UISpritesCollection,
+        UiSprite, Vertical,
     },
     VERSION,
 };
@@ -105,11 +105,7 @@ impl Scene for MainMenu {
         self.select_btn().set_disabled(!savefiles_exists());
     }
 
-    fn sprites(&self) -> SomeUISprites<'_> {
-        Some(&self.sprites)
-    }
-
-    fn sprites_mut(&mut self) -> SomeUISpritesMut<'_> {
+    fn sprites_mut(&mut self) -> UISpritesCollection<'_> {
         Some(&mut self.sprites)
     }
 }

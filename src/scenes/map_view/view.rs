@@ -50,13 +50,13 @@ pub fn draw(
     let mut map = world.map();
     map.load_tiles_between(left_top, right_bottom);
 
-    // TODO: is_visible takes like 12% of processing time
     let tiles = map
         .tiles_between(left_top, right_bottom)
         .into_iter()
-        .filter(|(pos, _)| world.is_visible(*pos))
-        .collect::<Vec<(Point, &Tile)>>();
-    for &(pos, tile) in &tiles {
+        // TODO: is_visible takes like 12% of processing time
+        .map(|(p, t)| (p, t, world.is_visible(p)))
+        .collect::<Vec<(Point, &Tile, bool)>>();
+    for &(pos, tile, is_visible) in &tiles {
         let delta = Vec2::from(pos - center_tile);
         let position = center + delta * tile_size;
 
@@ -74,30 +74,45 @@ pub fn draw(
                     .scale(scale)
                     .color(tile.terrain.color().unwrap_or(Colors::WHITE)),
             );
-        }
-        if let Some(item) = tile.top_item() {
-            let this_tile_size = Tileset::get_size(item.looks_like());
-            let mut correction = -(this_tile_size - asset_tile_size) * zoom;
-            correction.x /= 2.0;
-
-            assets.tileset.draw_sprite(
-                ctx,
-                item.looks_like(),
-                DrawParams::new()
-                    .position(position + correction)
-                    .scale(scale)
-                    .color(item.color()),
-            );
-            if tile.items.len() > 1 {
+            if !world.is_visible(pos) {
                 assets.tileset.draw_sprite(
                     ctx,
-                    Sprite::Highlight,
-                    DrawParams::new().position(position).scale(scale),
+                    Sprite::Fill,
+                    DrawParams::new()
+                        .position(position)
+                        .scale(scale)
+                        .color(Colors::BLACKED_OUT),
                 );
             }
         }
+        if is_visible {
+            if let Some(item) = tile.top_item() {
+                let this_tile_size = Tileset::get_size(item.looks_like());
+                let mut correction = -(this_tile_size - asset_tile_size) * zoom;
+                correction.x /= 2.0;
+
+                assets.tileset.draw_sprite(
+                    ctx,
+                    item.looks_like(),
+                    DrawParams::new()
+                        .position(position + correction)
+                        .scale(scale)
+                        .color(item.color()),
+                );
+                if tile.items.len() > 1 {
+                    assets.tileset.draw_sprite(
+                        ctx,
+                        Sprite::Highlight,
+                        DrawParams::new().position(position).scale(scale),
+                    );
+                }
+            }
+        }
     }
-    for &(pos, tile) in &tiles {
+    for &(pos, tile, is_visible) in &tiles {
+        if !is_visible {
+            continue;
+        }
         let position = center + Vec2::from(pos - center_tile) * tile_size;
 
         for i in tile.units.iter().copied() {
@@ -118,7 +133,7 @@ pub fn draw(
             }
         }
     }
-    for &(pos, tile) in &tiles {
+    for &(pos, tile, is_visible) in &tiles {
         let position = center + Vec2::from(pos - center_tile) * tile_size;
 
         let this_tile_size = Tileset::get_size(tile.terrain.looks_like());
@@ -129,6 +144,11 @@ pub fn draw(
         if this_tile_size != asset_tile_size {
             let mut correction = -(this_tile_size - asset_tile_size) * zoom;
             correction.x /= 2.0;
+            let color = if is_visible {
+                tile.terrain.color().unwrap_or(Colors::WHITE)
+            } else {
+                Colors::DARK_GRAY
+            };
 
             assets.tileset.draw_sprite(
                 ctx,
@@ -136,7 +156,7 @@ pub fn draw(
                 DrawParams::new()
                     .position(position + correction)
                     .scale(scale)
-                    .color(tile.terrain.color().unwrap_or(Colors::WHITE)),
+                    .color(color),
             );
         }
     }

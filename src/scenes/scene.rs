@@ -51,8 +51,7 @@ pub trait Scene {
     fn event(&mut self, _ctx: &mut Context, _event: Event) -> Transition {
         Transition::None
     }
-    fn before_draw(&mut self, _ctx: &mut Context) {}
-    fn after_draw(&mut self, _ctx: &mut Context) {}
+    fn draw(&mut self, ctx: &mut Context);
     fn on_open(&mut self, _ctx: &mut Context) {}
     fn on_resize(&mut self, _ctx: &mut Context, _window_size: Vec2) {}
     fn sprites(&self) -> SomeUISprites<'_> {
@@ -108,15 +107,5 @@ pub trait Scene {
         }
 
         Transition::None
-    }
-
-    fn draw_sprites(&mut self, ctx: &mut Context) {
-        if let Some(sprites) = self.sprites_mut() {
-            for sprite in sprites.iter_mut() {
-                if sprite.visible() {
-                    sprite.draw(ctx);
-                }
-            }
-        }
     }
 }

@@ -1,24 +1,24 @@
 use tetra::{Context, Event};
 
-use crate::scenes::Transition;
-
 use super::super::{
     super::{
         app::App,
-        ui::{SomeUISprites, SomeUISpritesMut, UiSprite},
+        ui::{SomeUISprites, SomeUISpritesMut},
     },
-    helpers::{bg, easy_back},
+    helpers::easy_back,
     Scene,
 };
+use crate::scenes::Transition;
+use crate::ui::{Draw, Image};
 
 pub struct Empty {
-    sprites: [Box<dyn UiSprite>; 1],
+    bg: Image,
 }
 
 impl Empty {
     pub fn new(_ctx: &mut Context, app: &App) -> Self {
         Self {
-            sprites: [bg(&app.assets)],
+            bg: Image::auto_size(app.assets.images.bg.clone()),
         }
     }
 }
@@ -28,11 +28,15 @@ impl Scene for Empty {
         easy_back(&event, self.get_update_context_state())
     }
 
+    fn draw(&mut self, ctx: &mut Context) {
+        self.bg.draw(ctx);
+    }
+
     fn sprites(&self) -> SomeUISprites<'_> {
-        Some(&self.sprites)
+        None
     }
 
     fn sprites_mut(&mut self) -> SomeUISpritesMut<'_> {
-        Some(&mut self.sprites)
+        None
     }
 }

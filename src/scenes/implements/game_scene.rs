@@ -8,6 +8,10 @@ use tetra::{
     Context,
 };
 
+use super::super::{
+    game_modes::{implements::Walking, Cursor, GameMode, GameModeImpl},
+    map_view, Scene, Transition,
+};
 use crate::{
     app::App,
     assets::Assets,
@@ -20,17 +24,13 @@ use crate::{
     input,
     settings::Settings,
     ui::{
-        Colorize, GameLog, Horizontal, Label, Position, SomeUISprites, SomeUISpritesMut,
-        TilesetSprite, UiSprite, Vertical,
+        draw_sprites, Colorize, GameLog, Horizontal, Label, Position, SomeUISprites,
+        SomeUISpritesMut, TilesetSprite, UiSprite, Vertical,
     },
 };
 
-use super::super::{
-    game_modes::{implements::Walking, Cursor, GameMode, GameModeImpl},
-    map_view, Scene, Transition,
-};
-
 pub struct GameScene {
+    // TODO: Use struct instead of array for better readability
     sprites: [Box<dyn UiSprite>; 5],
     pub world: Rc<RefCell<World>>,
     pub modes: Vec<Rc<RefCell<GameMode>>>,
@@ -267,7 +267,7 @@ impl Scene for GameScene {
         }
     }
 
-    fn before_draw(&mut self, ctx: &mut Context) {
+    fn draw(&mut self, ctx: &mut Context) {
         if self.need_redraw || self.map_canvas.is_none() {
             self.map_canvas = Some(map_view::view::draw(
                 ctx,
@@ -280,10 +280,8 @@ impl Scene for GameScene {
         }
 
         self.map_canvas.as_mut().unwrap().draw(ctx, Vec2::zero());
-    }
 
-    fn after_draw(&mut self, ctx: &mut Context) {
-        // TODO: move this to UI
+        draw_sprites(ctx, &mut self.sprites);
 
         map_view::view::draw_cursors(
             ctx,

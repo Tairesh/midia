@@ -6,8 +6,8 @@ use crate::{
     app::App,
     savefile,
     ui::{
-        Draw, Horizontal, Label, Position, SomeUISprites, SomeUISpritesMut, Stringify, TextInput,
-        UiSprite, Vertical,
+        draw_sprites, Draw, Horizontal, Label, Position, SomeUISprites, SomeUISpritesMut,
+        Stringify, TextInput, UiSprite, Vertical,
     },
 };
 
@@ -24,6 +24,7 @@ fn random_seed<R: Rng + ?Sized>(rng: &mut R) -> String {
 }
 
 pub struct CreateWorld {
+    // TODO: use some struct instead of array
     sprites: [Box<dyn UiSprite>; 12],
 }
 
@@ -149,6 +150,10 @@ impl Scene for CreateWorld {
 
     fn event(&mut self, _ctx: &mut Context, event: Event) -> Transition {
         easy_back(&event, self.get_update_context_state())
+    }
+
+    fn draw(&mut self, ctx: &mut Context) {
+        draw_sprites(ctx, &mut self.sprites);
     }
 
     fn sprites(&self) -> SomeUISprites<'_> {

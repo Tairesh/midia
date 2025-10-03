@@ -17,7 +17,7 @@ use crate::{
     },
     savefile::{self, Meta},
     ui::{
-        Button, Colorize, Draw, Horizontal, JustMesh, Label, Position, SomeUISprites,
+        draw_sprites, Button, Colorize, Draw, Horizontal, JustMesh, Label, Position, SomeUISprites,
         SomeUISpritesMut, Stringify, TextInput, TilesetSprite, UiSprite, Vertical,
     },
 };
@@ -52,6 +52,7 @@ impl From<u8> for ButtonEvent {
 
 pub struct CreateCharacter {
     meta: Meta,
+    // TODO: Use struct instead of array for better readability
     sprites: [Box<dyn UiSprite>; 27],
     race: PlayableRace,
     body_color: Option<BodyColor>,
@@ -403,6 +404,10 @@ impl Scene for CreateCharacter {
             self.name_empty().set_visible(false);
         }
         Transition::None
+    }
+
+    fn draw(&mut self, ctx: &mut Context) {
+        draw_sprites(ctx, &mut self.sprites);
     }
 
     fn event(&mut self, _ctx: &mut Context, event: Event) -> Transition {

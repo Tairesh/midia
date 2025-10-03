@@ -3,13 +3,12 @@ use tetra::input::{Key, KeyModifier};
 use tetra::window::WindowPosition;
 use tetra::{Context, Event};
 
-use crate::ui::ButtonBuilder;
 use crate::{
     app::App,
     settings::Settings,
     ui::{
-        Button, HasSize, Horizontal, Position, Press, SomeUISprites, SomeUISpritesMut, Stringify,
-        TextInput, UiSprite, Vertical,
+        draw_sprites, Button, ButtonBuilder, HasSize, Horizontal, Position, Press, SomeUISprites,
+        SomeUISpritesMut, Stringify, TextInput, UiSprite, Vertical,
     },
 };
 
@@ -153,6 +152,10 @@ impl SettingsScene {
 impl Scene for SettingsScene {
     fn event(&mut self, _ctx: &mut Context, event: Event) -> Transition {
         easy_back(&event, self.get_update_context_state())
+    }
+
+    fn draw(&mut self, ctx: &mut Context) {
+        draw_sprites(ctx, &mut self.sprites);
     }
 
     fn sprites(&self) -> SomeUISprites<'_> {

@@ -11,14 +11,13 @@ use tetra::{
     Context, Event,
 };
 
-use crate::ui::ButtonBuilder;
 use crate::{
     app::App,
     colors::Colors,
     savefile::{self, savefiles, savefiles_exists, Meta},
     ui::{
-        Alert, HasSize, Horizontal, HoverableMesh, Label, Position, SomeUISprites,
-        SomeUISpritesMut, UiSprite, Vertical,
+        draw_sprites, Alert, ButtonBuilder, HasSize, Horizontal, HoverableMesh, Label, Position,
+        SomeUISprites, SomeUISpritesMut, UiSprite, Vertical,
     },
     VERSION,
 };
@@ -182,6 +181,10 @@ impl LoadWorld {
 impl Scene for LoadWorld {
     fn event(&mut self, _ctx: &mut Context, event: Event) -> Transition {
         easy_back(&event, self.get_update_context_state())
+    }
+
+    fn draw(&mut self, ctx: &mut Context) {
+        draw_sprites(ctx, &mut self.sprites);
     }
 
     fn sprites(&self) -> SomeUISprites<'_> {

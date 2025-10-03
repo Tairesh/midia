@@ -1,11 +1,14 @@
 use roguemetry::Vec2;
 use tetra::input::Key;
+use tetra::Context;
 
 use crate::scenes::helpers::back_btn;
-use crate::ui::ButtonBuilder;
 use crate::{
     app::App,
-    ui::{Alert, Position, SomeUISprites, SomeUISpritesMut, UiSprite, Vertical},
+    ui::{
+        draw_sprites, Alert, ButtonBuilder, Position, SomeUISprites, SomeUISpritesMut, UiSprite,
+        Vertical,
+    },
 };
 
 use super::super::{Scene, SceneKind, Transition};
@@ -56,6 +59,10 @@ impl GameMenu {
 }
 
 impl Scene for GameMenu {
+    fn draw(&mut self, ctx: &mut Context) {
+        draw_sprites(ctx, &mut self.sprites);
+    }
+
     fn sprites(&self) -> SomeUISprites<'_> {
         Some(&self.sprites)
     }

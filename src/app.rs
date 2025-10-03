@@ -146,10 +146,7 @@ impl State for App {
 
     fn draw(&mut self, ctx: &mut Context) -> tetra::Result {
         self.step_scene(ctx, |s, ctx| {
-            s.before_draw(ctx);
-            s.draw_sprites(ctx);
-            s.after_draw(ctx);
-
+            s.draw(ctx);
             Transition::None
         });
         if Settings::instance().debug.show_fps {

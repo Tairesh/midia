@@ -1,14 +1,13 @@
 use roguemetry::Vec2;
 use tetra::{input::Key, Context};
 
-use crate::ui::ButtonBuilder;
 use crate::{
     app::App,
     colors::Colors,
     savefile::savefiles_exists,
     ui::{
-        Button, Disable, Image, Label, Position, SomeUISprites, SomeUISpritesMut, UiSprite,
-        Vertical,
+        draw_sprites, Button, ButtonBuilder, Disable, Image, Label, Position, SomeUISprites,
+        SomeUISpritesMut, UiSprite, Vertical,
     },
     VERSION,
 };
@@ -98,6 +97,10 @@ impl MainMenu {
 }
 
 impl Scene for MainMenu {
+    fn draw(&mut self, ctx: &mut Context) {
+        draw_sprites(ctx, &mut self.sprites);
+    }
+
     fn on_open(&mut self, _ctx: &mut Context) {
         self.select_btn().set_disabled(!savefiles_exists());
     }

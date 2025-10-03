@@ -24,8 +24,8 @@ use crate::{
         Scene, Transition,
     },
     ui::{
-        Alert, Disable, Horizontal, Label, Position, SomeUISprites, SomeUISpritesMut, UiSprite,
-        Vertical,
+        draw_sprites, Alert, Disable, Horizontal, Label, Position, SomeUISprites, SomeUISpritesMut,
+        UiSprite, Vertical,
     },
 };
 
@@ -365,6 +365,7 @@ impl CharacterAttributes {
             ButtonEvent::Next as u8,
             "Create character",
         ));
+        println!("Sprites in character attributes: {}", sprites.len());
 
         Self {
             sprites,
@@ -634,6 +635,10 @@ impl CharacterAttributes {
 impl Scene for CharacterAttributes {
     fn event(&mut self, _ctx: &mut Context, event: Event) -> Transition {
         easy_back(&event, self.get_update_context_state())
+    }
+
+    fn draw(&mut self, ctx: &mut Context) {
+        draw_sprites(ctx, &mut self.sprites);
     }
 
     fn on_open(&mut self, ctx: &mut Context) {

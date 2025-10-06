@@ -33,3 +33,6 @@ winres = "0.1"
 
 [dev-dependencies]
 test-case = "3.0"
+
+[features]
+sdl_build_from_source = ["tetra/sdl_build_from_source"]

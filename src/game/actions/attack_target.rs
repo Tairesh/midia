@@ -31,7 +31,7 @@ impl AttackTarget {
     pub fn pos(self, world: &World) -> Point {
         match self {
             Self::Terrain(pos) => pos,
-            Self::Avatar(id) => world.units().get_unit(id).pos(),
+            Self::Avatar(id) => world.units.get_unit(id).pos(),
         }
     }
 

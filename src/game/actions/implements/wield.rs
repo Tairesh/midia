@@ -17,8 +17,7 @@ pub struct WieldFromGround {
 
 impl ActionImpl for WieldFromGround {
     fn is_possible(&self, actor_id: usize, world: &World) -> ActionPossibility {
-        let units = world.units();
-        let actor = units.get_unit(actor_id);
+        let actor = world.units.get_unit(actor_id);
         if actor.char_sheet().shock {
             return No("You are in shock".to_string());
         }
@@ -35,9 +34,8 @@ impl ActionImpl for WieldFromGround {
     }
 
     fn on_finish(&self, action: &Action, world: &mut World) {
-        let mut units = world.units_mut();
-        let owner = action.owner_mut(&mut units);
-        let pos = owner.pos() + self.dir;
+        let pos = action.owner_mut(world).pos() + self.dir;
+        let owner = action.owner(world);
         let item = world.map().get_tile_mut(pos).items.pop();
         if let Some(item) = item {
             let mut msg = format!(
@@ -58,7 +56,7 @@ impl ActionImpl for WieldFromGround {
                     }
                 }
             }
-            owner.inventory_mut().unwrap().wield(item);
+            action.owner_mut(world).inventory_mut().unwrap().wield(item);
             world
                 .log()
                 .push(LogEvent::new(msg, pos, LogCategory::Success));
@@ -87,7 +85,7 @@ mod tests {
             .push(Item::new(GOD_AXE));
 
         assert!(world
-            .units()
+            .units
             .player()
             .inventory()
             .unwrap()
@@ -104,32 +102,37 @@ mod tests {
             &world,
         )
         .unwrap();
-        world.units_mut().player_mut().set_action(Some(action));
+        world.units.player_mut().set_action(Some(action));
         world.tick();
 
-        let units = world.units();
-        let item = units.player().inventory().unwrap().main_hand().unwrap();
+        let item = world
+            .units
+            .player()
+            .inventory()
+            .unwrap()
+            .main_hand()
+            .unwrap();
         assert_eq!(item.proto().id, GOD_AXE);
         assert_eq!(0, world.map().get_tile(Point::new(1, 0)).items.len());
     }
 
     #[test]
     fn test_wielding_two_handed_items() {
-        let world = prepare_world();
+        let mut world = prepare_world();
         world
-            .units_mut()
+            .units
             .player_mut()
             .inventory_mut()
             .unwrap()
             .wield(Item::new(STONE_SHOVEL));
         assert!(world
-            .units()
+            .units
             .player()
             .inventory
             .can_wield(&Item::new(STONE_SHOVEL))
             .is_err());
         assert!(world
-            .units()
+            .units
             .player()
             .inventory
             .can_wield(&Item::new(ROCK))
@@ -156,19 +159,19 @@ mod tests {
     fn test_wielding_one_handed_items() {
         let mut world = prepare_world();
         world
-            .units_mut()
+            .units
             .player_mut()
             .inventory_mut()
             .unwrap()
             .wield(Item::new(GOD_AXE));
         assert!(world
-            .units()
+            .units
             .player()
             .inventory
             .can_wield(&Item::new(ROCK))
             .is_ok());
         assert!(world
-            .units()
+            .units
             .player()
             .inventory
             .can_wield(&Item::new(STONE_SHOVEL))
@@ -190,15 +193,14 @@ mod tests {
             &world,
         )
         .unwrap();
-        world.units_mut().player_mut().set_action(Some(action));
+        world.units.player_mut().set_action(Some(action));
         world.tick();
 
-        let units = world.units();
-        let item = units.player().inventory.main_hand().unwrap();
+        let item = world.units.player().inventory.main_hand().unwrap();
         assert_eq!(item.proto().id, book_debug().proto().id);
         assert_eq!(0, world.map().get_tile(Point::new(1, 0)).items.len());
         assert!(world
-            .units()
+            .units
             .player()
             .inventory
             .can_wield(&Item::new(ROCK))

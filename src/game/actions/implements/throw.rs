@@ -63,14 +63,14 @@ mod tests {
         let target = Point::new(3, 0);
         add_dummy(&mut world, target);
         world
-            .units_mut()
+            .units
             .player_mut()
             .inventory_mut()
             .unwrap()
             .wield(Item::new(ROCK));
 
         let action = Action::new(0, Throw::new(target, &world), &world).unwrap();
-        world.units_mut().player_mut().set_action(Some(action));
+        world.units.player_mut().set_action(Some(action));
         world.tick();
 
         assert_eq!(world.meta.current_tick, ATTACK_MOVES as u128);
@@ -91,12 +91,7 @@ mod tests {
 
         let target = Point::new(3, 0);
         add_dummy(&mut world, target);
-        world
-            .units_mut()
-            .player_mut()
-            .inventory_mut()
-            .unwrap()
-            .clear();
+        world.units.player_mut().inventory_mut().unwrap().clear();
 
         assert!(Action::new(0, Throw::new(target, &world), &world).is_err());
     }
@@ -109,7 +104,7 @@ mod tests {
         let target = Point::new(15, 0);
         add_dummy(&mut world, target);
         world
-            .units_mut()
+            .units
             .player_mut()
             .inventory_mut()
             .unwrap()
@@ -126,7 +121,7 @@ mod tests {
         let target = Point::new(3, 0);
         add_dummy(&mut world, target);
         world
-            .units_mut()
+            .units
             .player_mut()
             .inventory_mut()
             .unwrap()
@@ -154,17 +149,15 @@ mod tests {
     fn test_throwing_at_moving_target() {
         let mut world = prepare_world();
         let target = Point::new(3, 0);
-        let mut units = world.units_mut();
-        let player = units.player_mut();
+        let player = world.units.player_mut();
         let inventory = player.inventory_mut().unwrap();
         inventory.wield(Item::new(ROCK));
-        drop(units);
 
         let monster = add_monster(&mut world, target);
 
         // Wait 5 ticks to make sure monster will move.
         let action = Action::new(0, Skip::new(5), &world).unwrap();
-        world.units_mut().player_mut().set_action(Some(action));
+        world.units.player_mut().set_action(Some(action));
         world.tick();
 
         let action = Throw::new(target, &world);
@@ -178,7 +171,7 @@ mod tests {
             panic!("Unexpected action: {:?}", action);
         }
         let action = Action::new(0, action, &world).unwrap();
-        world.units_mut().player_mut().set_action(Some(action));
+        world.units.player_mut().set_action(Some(action));
         world.tick();
 
         let mut log = world.log();
@@ -190,7 +183,7 @@ mod tests {
         );
         drop(log);
         assert_eq!(
-            world.units().get_unit(monster).pos(),
+            world.units.get_unit(monster).pos(),
             target + Direction::West
         );
     }

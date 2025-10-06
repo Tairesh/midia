@@ -17,8 +17,7 @@ pub struct Close {
 
 impl ActionImpl for Close {
     fn is_possible(&self, actor_id: usize, world: &World) -> ActionPossibility {
-        let units = world.units();
-        let actor = units.get_unit(actor_id);
+        let actor = world.units.get_unit(actor_id);
         let pos = actor.pos() + self.dir;
         let mut map = world.map();
         let tile = map.get_tile(pos);
@@ -47,8 +46,7 @@ impl ActionImpl for Close {
     }
 
     fn on_finish(&self, action: &Action, world: &mut World) {
-        let units = world.units();
-        let owner = action.owner(&units);
+        let owner = action.owner(world);
         let pos = owner.pos() + self.dir;
         let mut map = world.map();
         let tile = map.get_tile_mut(pos);
@@ -71,7 +69,6 @@ impl ActionImpl for Close {
         tile.terrain = new_terrain;
 
         drop(map);
-        drop(units);
         world.calc_fov();
     }
 }
@@ -101,8 +98,8 @@ mod tests {
             dir: Direction::East,
         };
         if let Ok(action) = Action::new(0, typ.into(), &world) {
-            world.units_mut().player_mut().set_action(Some(action));
-            while world.units().player().action().is_some() {
+            world.units.player_mut().set_action(Some(action));
+            while world.units.player().action().is_some() {
                 world.tick();
             }
         } else {

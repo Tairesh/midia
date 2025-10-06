@@ -47,7 +47,7 @@ pub fn ranged_attack_unit(
             calculate_hit(
                 attack_type,
                 attacker,
-                world.units().get_unit(random_target).as_fighter(),
+                world.units.get_unit(random_target).as_fighter(),
                 false,
             ),
         )

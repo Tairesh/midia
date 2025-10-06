@@ -33,20 +33,22 @@ impl Action {
         }
     }
 
-    pub fn owner<'a>(&self, units: &'a Units) -> &'a dyn Avatar {
-        units.get_unit(self.owner)
+    #[inline]
+    pub fn owner<'a>(&self, world: &'a World) -> &'a dyn Avatar {
+        world.units.get_unit(self.owner)
     }
 
-    pub fn owner_mut<'a>(&self, units: &'a mut Units) -> &'a mut dyn Avatar {
-        units.get_unit_mut(self.owner)
+    #[inline]
+    pub fn owner_mut<'a>(&self, world: &'a mut World) -> &'a mut dyn Avatar {
+        world.units.get_unit_mut(self.owner)
     }
 
     fn cancel_action(&self, world: &mut World, reason: String) {
-        self.owner_mut(&mut world.units_mut()).set_action(None);
+        self.owner_mut(world).set_action(None);
         if self.owner == 0 {
             world.log().push(LogEvent::new(
                 reason,
-                self.owner(&world.units()).pos(),
+                self.owner(world).pos(),
                 LogCategory::Warning,
             ));
         }

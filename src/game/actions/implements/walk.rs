@@ -34,8 +34,7 @@ impl Walk {
 
 impl ActionImpl for Walk {
     fn is_possible(&self, actor_id: usize, world: &World) -> ActionPossibility {
-        let units = world.units();
-        let actor = units.get_unit(actor_id);
+        let actor = world.units.get_unit(actor_id);
         let pos = actor.pos() + self.dir;
         let mut map = world.map();
         let tile = map.get_tile(pos);
@@ -46,7 +45,7 @@ impl ActionImpl for Walk {
         if let Some(unit_id) = unit_on_tile {
             return No(format!(
                 "{} is on the way",
-                world.units().get_unit(unit_id).name_for_actions()
+                world.units.get_unit(unit_id).name_for_actions()
             ));
         }
         Yes({
@@ -63,7 +62,7 @@ impl ActionImpl for Walk {
 
     fn on_finish(&self, action: &Action, world: &mut World) {
         world.move_avatar(action.owner, self.dir);
-        let pos = world.units().get_unit(action.owner).pos();
+        let pos = world.units.get_unit(action.owner).pos();
         if action.length > 20 && action.owner == 0 {
             world.log().push(LogEvent::new(
                 format!(
@@ -97,10 +96,10 @@ mod tests {
             dir: Direction::East,
         };
         let action = Action::new(0, typ.into(), &world).unwrap();
-        world.units_mut().player_mut().set_action(Some(action));
+        world.units.player_mut().set_action(Some(action));
         world.tick();
 
-        assert_eq!(Point::new(1, 0), world.units().player().pos());
+        assert_eq!(Point::new(1, 0), world.units.player().pos());
     }
 
     #[test]
@@ -151,7 +150,7 @@ mod tests {
             &world,
         )
         .unwrap();
-        world.units_mut().player_mut().set_action(Some(action));
+        world.units.player_mut().set_action(Some(action));
         let action = Action::new(
             npc,
             Walk {
@@ -161,20 +160,20 @@ mod tests {
             &world,
         )
         .unwrap();
-        world.units_mut().get_unit_mut(npc).set_action(Some(action));
+        world.units.get_unit_mut(npc).set_action(Some(action));
         world.tick();
-        assert_eq!(Point::new(0, 1), world.units().player().pos());
-        assert_eq!(Point::new(1, 0), world.units().get_unit(npc).pos());
-        assert!(world.units().player().action().is_none());
+        assert_eq!(Point::new(0, 1), world.units.player().pos());
+        assert_eq!(Point::new(1, 0), world.units.get_unit(npc).pos());
+        assert!(world.units.player().action().is_none());
 
         let action = Action::new(0, Skip::one().into(), &world).unwrap();
-        world.units_mut().player_mut().set_action(Some(action));
+        world.units.player_mut().set_action(Some(action));
         world.tick();
         assert!(matches!(
-            world.units().get_unit(npc).action().unwrap().typ,
+            world.units.get_unit(npc).action().unwrap().typ,
             ActionType::Skip(..)
         ));
-        assert_eq!(Point::new(1, 0), world.units().get_unit(npc).pos());
+        assert_eq!(Point::new(1, 0), world.units.get_unit(npc).pos());
         assert_eq!(1, world.map().get_tile(Point::new(0, 1)).units.len());
         assert_eq!(1, world.map().get_tile(Point::new(1, 0)).units.len());
         assert_eq!(0, world.map().get_tile(Point::new(0, 0)).units.len());
@@ -188,30 +187,24 @@ mod tests {
         let npc2 = add_dummy(&mut world, Point::new(0, 1));
 
         let action = Action::new(npc1, Walk::new(Direction::South).into(), &world).unwrap();
-        world
-            .units_mut()
-            .get_unit_mut(npc1)
-            .set_action(Some(action));
+        world.units.get_unit_mut(npc1).set_action(Some(action));
         let action = Action::new(npc2, Walk::new(Direction::East).into(), &world).unwrap();
-        world
-            .units_mut()
-            .get_unit_mut(npc2)
-            .set_action(Some(action));
+        world.units.get_unit_mut(npc2).set_action(Some(action));
         let skip = Action::new(0, Skip::new(20).into(), &world).unwrap();
-        world.units_mut().player_mut().set_action(Some(skip));
+        world.units.player_mut().set_action(Some(skip));
         world.tick();
-        let pos1 = world.units().get_unit(npc1).pos();
-        let pos2 = world.units().get_unit(npc2).pos();
+        let pos1 = world.units.get_unit(npc1).pos();
+        let pos2 = world.units.get_unit(npc2).pos();
         assert!(
             (Point::new(1, 1) == pos1 && Point::new(0, 1) == pos2)
                 || (Point::new(1, 1) == pos2 && Point::new(1, 0) == pos1)
         );
         assert!(matches!(
-            world.units().get_unit(npc1).action().unwrap().typ,
+            world.units.get_unit(npc1).action().unwrap().typ,
             ActionType::Skip(..)
         ));
         assert!(matches!(
-            world.units().get_unit(npc2).action().unwrap().typ,
+            world.units.get_unit(npc2).action().unwrap().typ,
             ActionType::Skip(..)
         ));
     }

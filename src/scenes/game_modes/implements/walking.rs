@@ -90,46 +90,35 @@ impl GameModeImpl for Walking {
                         game.push_mode(Throwing::new().into());
                     }
                     KeyBindingAction::RangeAttack => {
-                        let units = game.world.units();
-                        if let Some(weapon) = units.player().inventory.main_hand() {
+                        if let Some(weapon) = game.world.units.player().inventory.main_hand() {
                             if weapon.melee_damage().distance > 0 {
-                                drop(units);
                                 game.push_mode(PikeAttack::new().into());
                                 return Transition::None;
                             }
                         }
-                        drop(units);
                         game.push_mode(Shooting::new().into());
                     }
                     KeyBindingAction::Reload => {
                         game.try_start_action(Reload::new());
                     }
                     KeyBindingAction::SwapHands => {
-                        game.world.units_mut().player_mut().inventory.swap_hands();
+                        game.world.units.player_mut().inventory.swap_hands();
                         let event =
-                            LogEvent::info("You swap your hands", game.world.units().player().pos);
+                            LogEvent::info("You swap your hands", game.world.units.player().pos);
                         game.world.log().push(event);
                         game.update_ui(ctx);
                     }
                     KeyBindingAction::Inventory => {
                         // TODO: inventory game scene
-                        let items: Vec<String> = game
-                            .world
-                            .units()
-                            .player()
+                        let player = game.world.units.player();
+                        let items: Vec<String> = player
                             .inventory
                             .iter_wear()
                             .map(|i| i.name().to_string())
                             .collect();
-                        let armor = game.world.units().player().armor(BodySlot::Torso);
-                        let toughness = game
-                            .world
-                            .units()
-                            .player()
-                            .personality
-                            .char_sheet
-                            .toughness();
-                        let parry = game.world.units().player().parry();
+                        let armor = player.armor(BodySlot::Torso);
+                        let toughness = player.personality.char_sheet.toughness();
+                        let parry = player.parry();
                         game.log.log(
                             format!(
                                 "You wear: {}, armor value is {armor}, toughness: {toughness}, parry: {parry}",

@@ -25,8 +25,8 @@ use super::{
 pub struct World {
     pub meta: Meta,
     pub game_view: GameView,
+    pub units: Units,
     // TODO: get rid of RefCell
-    units: Rc<RefCell<Units>>,
     map: RefCell<Map>,
     fov: Fov,
     pub log: RefCell<Log>,
@@ -47,18 +47,17 @@ impl World {
             map: RefCell::new(Map::new(meta.seed, chunks, changed)),
             meta,
             game_view,
-            units: Rc::new(RefCell::new(Units::new(units))),
+            units: Units::new(units),
             fov: Fov::default(),
             log: RefCell::new(log),
         };
-        world.units_mut().load_units();
+        world.units.load_units();
         world.calc_fov();
         world
     }
 
     pub fn create(meta: Meta, avatar: Player) -> Self {
-        let mut units = HashMap::new();
-        units.insert(0, Box::new(avatar) as Box<dyn Avatar>);
+        let units = HashMap::from([(0, Box::new(avatar) as Box<dyn Avatar>)]);
         let mut world = Self::new(meta, GameView::default(), Log::new(), units, HashMap::new());
 
         // TODO: don't forget to remove
@@ -94,7 +93,7 @@ impl World {
             CharSheet::default(false, Race::Bug),
         )));
 
-        world.units().iter().for_each(|(&i, unit)| {
+        world.units.iter().for_each(|(&i, unit)| {
             world.map.borrow_mut().get_tile_mut(unit.pos()).on_step(i);
         });
 
@@ -102,17 +101,12 @@ impl World {
     }
 
     pub fn calc_fov(&mut self) {
-        let center = self.units().player().pos();
+        let center = self.units.player().pos();
         // TODO: weather and outside lighting system
         // TODO: add light sources
         // TODO: add periodic Notice roll
         // TODO: add memory
-        let current_tick = self.meta.current_tick;
-        let vision_range = self
-            .units_mut()
-            .player_mut()
-            .char_sheet_mut()
-            .sight_range(current_tick);
+        let vision_range = self.units.player().char_sheet().sight_range();
         self.fov.set_visible(field_of_view_set(
             center,
             vision_range as i32,
@@ -140,37 +134,24 @@ impl World {
         self.fov.visible().contains(&pos.into())
     }
 
-    pub fn units_clone(&self) -> Rc<RefCell<Units>> {
-        self.units.clone()
-    }
-
-    pub fn units_mut(&self) -> RefMut<'_, Units> {
-        self.units.borrow_mut()
-    }
-
-    pub fn units(&self) -> Ref<'_, Units> {
-        self.units.borrow()
-    }
-
     pub fn move_avatar(&mut self, unit_id: usize, dir: Direction) {
-        let mut pos = self.units().get_unit(unit_id).pos();
+        let mut pos = self.units.get_unit(unit_id).pos();
         let (old_chunk, _) = pos.to_chunk();
         self.map().get_tile_mut(pos).off_step(unit_id);
         pos += dir;
-        let mut units = self.units_mut();
-        let unit = units.get_unit_mut(unit_id);
+        let unit = self.units.get_unit_mut(unit_id);
         unit.set_pos(pos);
         unit.view_mut().try_set_direction(dir);
+        let unit = self.units.get_unit(unit_id);
         self.map().get_tile_mut(pos).on_step(unit_id);
         if unit.is_player() && old_chunk != pos.to_chunk().0 {
-            units.load_units();
+            self.units.load_units();
         }
-        drop(units);
-        if self.units().get_unit(unit_id).is_player() {
+        if self.units.get_unit(unit_id).is_player() {
             self.calc_fov();
             self.log().push(LogEvent::debug(
                 format!("You moved to {pos:?}"),
-                self.units().player().pos(),
+                self.units.player().pos(),
             ));
         }
     }
@@ -214,7 +195,7 @@ impl World {
                     .copied()
                     .map(|i| {
                         (if multiline { " - " } else { "" }).to_string()
-                            + self.units().get_unit(i).name()
+                            + self.units.get_unit(i).name()
                     })
                     .collect(),
             );
@@ -226,7 +207,7 @@ impl World {
 
     pub fn add_unit(&mut self, unit: Box<dyn Avatar>) -> usize {
         let pos = unit.pos();
-        let new_id = self.units_mut().add_unit(unit);
+        let new_id = self.units.add_unit(unit);
         self.map().get_tile_mut(pos).units.insert(new_id);
 
         new_id
@@ -234,7 +215,7 @@ impl World {
 
     fn plan(&mut self) {
         let mut units_to_act = HashMap::new();
-        for unit in self.units().loaded_units() {
+        for unit in self.units.loaded_units() {
             if unit.action().is_some() {
                 continue;
             }
@@ -245,7 +226,7 @@ impl World {
 
         for (unit_id, ai) in units_to_act {
             let action = AIManager::instance().plan(ai, unit_id, self);
-            self.units_mut().get_unit_mut(unit_id).set_action(action);
+            self.units.get_unit_mut(unit_id).set_action(action);
         }
     }
 
@@ -260,17 +241,17 @@ impl World {
         self.plan();
 
         let actions: Vec<Action> = self
-            .units()
+            .units
             .loaded_units()
             .filter_map(|u| u.action().cloned())
             .collect();
         for action in actions {
-            if self.units().get_unit(action.owner).char_sheet().is_dead() {
+            if self.units.get_unit(action.owner).char_sheet().is_dead() {
                 continue;
             }
             action.act(self);
             if self.meta.current_tick >= action.finish {
-                self.units_mut().get_unit_mut(action.owner).set_action(None);
+                self.units.get_unit_mut(action.owner).set_action(None);
             }
         }
     }
@@ -281,8 +262,20 @@ impl World {
     /// Shocked units trying to get out of the shock
     fn shock_out(&mut self) {
         let current_tick = self.meta.current_tick;
-        for unit in self.units_mut().loaded_units_mut() {
-            if unit.char_sheet_mut().try_to_shock_out(current_tick) {
+        let out_of_shock: Vec<usize> = self
+            .units
+            .loaded_units()
+            .filter(|u| u.char_sheet().can_try_to_shock_out(current_tick))
+            .map(Avatar::id)
+            .collect();
+        for unit_id in out_of_shock {
+            if self
+                .units
+                .get_unit_mut(unit_id)
+                .char_sheet_mut()
+                .try_to_shock_out(current_tick)
+            {
+                let unit = self.units.get_unit(unit_id);
                 self.log().push(LogEvent::info(
                     format!(
                         "{} {} out of the shock!",
@@ -300,10 +293,9 @@ impl World {
             return;
         }
         let current_tick = self.meta.current_tick;
-        let pos = self.units().get_unit(unit_id).pos();
+        let pos = self.units.get_unit(unit_id).pos();
         let items_dropped = self
             .units
-            .borrow_mut()
             .get_unit_mut(unit_id)
             .apply_hit(hit, current_tick);
         if let Some(items_dropped) = items_dropped {
@@ -312,17 +304,18 @@ impl World {
             }
         }
 
-        if self.units().get_unit(unit_id).char_sheet().is_dead() {
+        let unit = self.units.get_unit(unit_id);
+        if unit.char_sheet().is_dead() {
             self.log().push(LogEvent::danger(
                 format!(
                     "{} {} dead!",
-                    self.units().get_unit(unit_id).name_for_actions(),
-                    self.units().get_unit(unit_id).pronouns().is_are(),
+                    unit.name_for_actions(),
+                    unit.pronouns().is_are(),
                 ),
                 pos,
             ));
             self.map().get_tile_mut(pos).units.remove(&unit_id);
-            self.units_mut().unload_unit(unit_id);
+            self.units.unload_unit(unit_id);
         }
     }
 
@@ -330,7 +323,7 @@ impl World {
         self.act();
 
         let mut spend = 0;
-        while self.units().player().action().is_some() && spend < Self::SPEND_LIMIT {
+        while self.units.player().action().is_some() && spend < Self::SPEND_LIMIT {
             self.meta.current_tick += 1;
             spend += 1;
             self.act();
@@ -422,19 +415,15 @@ pub mod tests {
         world.map().get_tile_mut(Point::new(2, 0)).terrain = Dirt::default().into();
         let action = Action::new(1, Walk::new(Direction::East).into(), &world).unwrap();
         let length = action.length;
-        let mut units = world.units_mut();
-        let monster = units.get_unit_mut(monster_id);
+        let monster = world.units.get_unit_mut(monster_id);
         monster.set_action(Some(action));
-        assert_eq!(Point::new(0, 0), units.player().pos());
-        assert_eq!(Point::new(1, 0), units.get_unit(monster_id).pos());
-        drop(units);
-        world.units_mut().player_mut().set_action(Some(
-            Action::new(0, Skip::new(length).into(), &world).unwrap(),
-        ));
+        assert_eq!(Point::new(0, 0), world.units.player().pos());
+        assert_eq!(Point::new(1, 0), world.units.get_unit(monster_id).pos());
+        let action = Action::new(0, Skip::new(length).into(), &world).unwrap();
+        world.units.player_mut().set_action(Some(action));
         world.tick();
-        let units = world.units();
-        assert_eq!(Point::new(0, 0), units.player().pos());
-        assert_eq!(Point::new(2, 0), units.get_unit(monster_id).pos())
+        assert_eq!(Point::new(0, 0), world.units.player().pos());
+        assert_eq!(Point::new(2, 0), world.units.get_unit(monster_id).pos())
     }
 
     #[test]
@@ -443,7 +432,7 @@ pub mod tests {
         assert!(world
             .fov
             .visible()
-            .contains(&world.units().player().pos().into()));
+            .contains(&world.units.player().pos().into()));
 
         world.map().get_tile_mut(Point::new(1, 0)).terrain = Dirt::default().into();
         world.map().get_tile_mut(Point::new(2, 0)).terrain = Boulder::new(BoulderSize::Huge).into();

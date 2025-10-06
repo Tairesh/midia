@@ -64,7 +64,7 @@ fn serialize_world(world: &World) -> Result<String, Error> {
             .map_err(Error::from)?
             .as_str(),
     );
-    for (_, unit) in world.units().iter() {
+    for (_, unit) in world.units.iter() {
         data.push('\n');
         data.push_str(serde_json::to_string(unit).map_err(Error::from)?.as_str());
     }

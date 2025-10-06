@@ -39,7 +39,7 @@ pub fn draw(
     let height = height.round() as i32;
     let center =
         Vec2::new(window_size.x, window_size.y) / 2.0 - Vec2::new(tile_size, tile_size) / 2.0;
-    let center_tile = world.units().player().pos + shift_of_view;
+    let center_tile = world.units.player().pos + shift_of_view;
 
     let left_top = center_tile + (-width / 2, -height / 2);
     let right_bottom = center_tile + (width / 2, height / 2);
@@ -119,7 +119,7 @@ pub fn draw(
                 position,
                 zoom,
                 true,
-                world.units().get_unit(i).as_fighter().as_avatar(),
+                world.units.get_unit(i).as_fighter().as_avatar(),
             );
             if !tile.items.is_empty() {
                 assets.tileset.draw_sprite(

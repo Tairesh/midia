@@ -34,8 +34,7 @@ pub fn is_possible(
     world: &World,
     attack_type: AttackType,
 ) -> ActionPossibility {
-    let units = world.units();
-    let actor = units.get_unit(actor_id);
+    let actor = world.units.get_unit(actor_id);
     if actor.char_sheet().shock {
         return No("You are in shock".to_string());
     }
@@ -148,7 +147,7 @@ fn finish_unit(unit_id: usize, world: &mut World, attack_type: AttackType, actio
         _ => unit_id,
     };
 
-    let target = world.units().get_unit(victim_id).pos();
+    let target = world.units.get_unit(victim_id).pos();
     handle_ammo_use(world, action, attack_type, target);
 }
 
@@ -179,9 +178,8 @@ fn get_unit_attack_result(
     attack_type: AttackType,
     action: &Action,
 ) -> UnitRangedAttackResult {
-    let units = world.units();
-    let owner = action.owner(&units);
-    let unit = units.get_unit(unit_id);
+    let owner = action.owner(world);
+    let unit = world.units.get_unit(unit_id);
     ranged_attack_unit(attack_type, owner.as_fighter(), unit.as_fighter(), world)
 }
 
@@ -201,15 +199,14 @@ fn log_unit_attack_result(
     unit_id: usize,
     owner_id: usize,
 ) {
-    let units = world.units();
-    let owner = units.get_unit(owner_id);
+    let owner = world.units.get_unit(owner_id);
     let ends_s = owner.pronouns().verb_ends_with_s();
     let weapon_name = owner.as_fighter().weapon(attack_type).unwrap().name;
-    let unit = units.get_unit(unit_id);
+    let unit = world.units.get_unit(unit_id);
     let target = unit.pos();
     match attack_result {
         UnitRangedAttackResult::InnocentBystander(victim_id, hit) => {
-            let victim = units.get_unit(*victim_id);
+            let victim = world.units.get_unit(*victim_id);
             let damage = hit.params.damage.to_string();
             for event in unit_attack_success(
                 owner,
@@ -295,12 +292,11 @@ fn log_unit_attack_result(
 fn handle_ammo_use(world: &mut World, action: &Action, attack_type: AttackType, target: Point) {
     let item = match attack_type {
         AttackType::Throw => action
-            .owner_mut(&mut world.units_mut())
+            .owner_mut(world)
             .inventory_mut()
             .and_then(Inventory::main_hand_take),
         AttackType::Shoot => {
-            let mut units = world.units_mut();
-            let owner = action.owner_mut(&mut units);
+            let owner = action.owner_mut(world);
             if let Some(weapon) = owner.inventory_mut().unwrap().main_hand_mut() {
                 if weapon.need_ammo().is_some() {
                     weapon.container_mut().unwrap().items.pop()
@@ -318,8 +314,7 @@ fn handle_ammo_use(world: &mut World, action: &Action, attack_type: AttackType, 
         world.map().get_tile_mut(target).items.push(item);
     }
 
-    let mut units = world.units_mut();
-    let owner = action.owner_mut(&mut units);
+    let owner = action.owner_mut(world);
     let auto_reload = owner
         .inventory()
         .unwrap()

@@ -65,25 +65,20 @@ mod tests {
         let target = Point::new(3, 0);
         add_dummy(&mut world, target);
         world
-            .units_mut()
+            .units
             .player_mut()
             .inventory_mut()
             .unwrap()
             .wield(Item::new(WOODEN_SHORTBOW));
-        world
-            .units_mut()
-            .player_mut()
-            .inventory_mut()
-            .unwrap()
-            .wear(
-                Item::new(QUIVER).with_items_inside([Item::new(WOODEN_ARROW)]),
-                0,
-            );
+        world.units.player_mut().inventory_mut().unwrap().wear(
+            Item::new(QUIVER).with_items_inside([Item::new(WOODEN_ARROW)]),
+            0,
+        );
 
         // Can't shoot before loading arrow to bow.
         assert!(Action::new(0, Shoot::new(target, &world).into(), &world).is_err());
         world
-            .units_mut()
+            .units
             .player_mut()
             .inventory_mut()
             .unwrap()
@@ -91,7 +86,7 @@ mod tests {
             .ok();
 
         let action = Action::new(0, Shoot::new(target, &world).into(), &world).unwrap();
-        world.units_mut().player_mut().set_action(Some(action));
+        world.units.player_mut().set_action(Some(action));
         world.tick();
 
         assert_eq!(world.meta.current_tick, ATTACK_MOVES as u128);
@@ -119,12 +114,7 @@ mod tests {
 
         let target = Point::new(3, 0);
         add_dummy(&mut world, target);
-        world
-            .units_mut()
-            .player_mut()
-            .inventory_mut()
-            .unwrap()
-            .clear();
+        world.units.player_mut().inventory_mut().unwrap().clear();
 
         assert!(Action::new(0, Shoot::new(target, &world).into(), &world).is_err());
     }
@@ -135,21 +125,16 @@ mod tests {
         assert_eq!(world.meta.current_tick, 0);
 
         world
-            .units_mut()
+            .units
             .player_mut()
             .inventory_mut()
             .unwrap()
             .wield(Item::new(WOODEN_SHORTBOW));
-        world
-            .units_mut()
-            .player_mut()
-            .inventory_mut()
-            .unwrap()
-            .wear(
-                Item::new(QUIVER).with_items_inside([Item::new(WOODEN_ARROW)]),
-                0,
-            );
-        world.units_mut().player_mut().inventory.reload().ok();
+        world.units.player_mut().inventory_mut().unwrap().wear(
+            Item::new(QUIVER).with_items_inside([Item::new(WOODEN_ARROW)]),
+            0,
+        );
+        world.units.player_mut().inventory.reload().ok();
 
         // Distance of wooden shortbow is 12 so we can shoot to 12*4=48 tiles.
         let target_far = Point::new(48, 0);
@@ -167,20 +152,15 @@ mod tests {
 
         let target = Point::new(3, 0);
         add_dummy(&mut world, target);
+        world.units.player_mut().inventory_mut().unwrap().clear();
         world
-            .units_mut()
-            .player_mut()
-            .inventory_mut()
-            .unwrap()
-            .clear();
-        world
-            .units_mut()
+            .units
             .player_mut()
             .inventory_mut()
             .unwrap()
             .wield(Item::new(WOODEN_SHORTBOW));
         world
-            .units_mut()
+            .units
             .player_mut()
             .inventory_mut()
             .unwrap()
@@ -196,22 +176,17 @@ mod tests {
         let target = Point::new(3, 0);
         add_dummy(&mut world, target);
         world
-            .units_mut()
+            .units
             .player_mut()
             .inventory_mut()
             .unwrap()
             .wield(Item::new(WOODEN_CROSSBOW));
-        world
-            .units_mut()
-            .player_mut()
-            .inventory_mut()
-            .unwrap()
-            .wear(
-                Item::new(QUIVER).with_items_inside(vec![Item::new(WOODEN_BOLT); 10]),
-                0,
-            );
+        world.units.player_mut().inventory_mut().unwrap().wear(
+            Item::new(QUIVER).with_items_inside(vec![Item::new(WOODEN_BOLT); 10]),
+            0,
+        );
         assert!(world
-            .units_mut()
+            .units
             .player_mut()
             .inventory_mut()
             .unwrap()
@@ -219,7 +194,7 @@ mod tests {
             .is_ok());
 
         let action = Action::new(0, Shoot::new(target, &world).into(), &world).unwrap();
-        world.units_mut().player_mut().set_action(Some(action));
+        world.units.player_mut().set_action(Some(action));
         world.tick();
 
         assert_eq!(world.meta.current_tick, ATTACK_MOVES as u128);
@@ -244,8 +219,7 @@ mod tests {
     fn test_shooting_at_moving_target() {
         let mut world = prepare_world();
         let target = Point::new(5, 0);
-        let mut units = world.units_mut();
-        let player = units.player_mut();
+        let player = world.units.player_mut();
         let inventory = player.inventory_mut().unwrap();
         inventory.wield(Item::new(WOODEN_CROSSBOW));
         inventory.wear(
@@ -254,17 +228,13 @@ mod tests {
         );
         assert!(inventory.reload().is_ok());
 
-        drop(units);
         let monster = add_monster(&mut world, target);
         let action = Action::new(monster, Walk::new(Direction::West), &world).unwrap();
-        world
-            .units_mut()
-            .get_unit_mut(monster)
-            .set_action(Some(action));
+        world.units.get_unit_mut(monster).set_action(Some(action));
 
         // Wait 5 ticks to make sure monster will move.
         let action = Action::new(0, Skip::new(5).into(), &world).unwrap();
-        world.units_mut().player_mut().set_action(Some(action));
+        world.units.player_mut().set_action(Some(action));
         world.tick();
 
         let action = Shoot::new(target, &world);
@@ -278,7 +248,7 @@ mod tests {
             panic!("Unexpected action: {:?}", action);
         }
         let action = Action::new(0, action.into(), &world).unwrap();
-        world.units_mut().player_mut().set_action(Some(action));
+        world.units.player_mut().set_action(Some(action));
         world.tick();
 
         let mut log = world.log();
@@ -292,7 +262,7 @@ mod tests {
         );
         drop(log);
         assert_eq!(
-            world.units().get_unit(monster).pos(),
+            world.units.get_unit(monster).pos(),
             target + Direction::West
         );
     }

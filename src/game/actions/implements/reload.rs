@@ -20,8 +20,7 @@ impl Reload {
 
 impl ActionImpl for Reload {
     fn is_possible(&self, actor_id: usize, world: &World) -> ActionPossibility {
-        let units = world.units();
-        let actor = units.get_unit(actor_id);
+        let actor = world.units.get_unit(actor_id);
         actor
             .inventory()
             .map_or(No("You have no inventory".to_string()), |inventory| {
@@ -56,15 +55,14 @@ impl ActionImpl for Reload {
     }
 
     fn on_finish(&self, action: &Action, world: &mut World) {
-        let mut units = world.units_mut();
         action
-            .owner_mut(&mut units)
+            .owner_mut(world)
             .inventory_mut()
             .unwrap()
             .reload()
             .ok();
         let weapon_name = action
-            .owner(&units)
+            .owner(world)
             .inventory()
             .unwrap()
             .main_hand()
@@ -73,14 +71,14 @@ impl ActionImpl for Reload {
         world.log().push(LogEvent::success(
             format!(
                 "{} reload{} your {weapon_name}",
-                action.owner(&units).name_for_actions(),
-                if action.owner(&units).pronouns().verb_ends_with_s() {
+                action.owner(world).name_for_actions(),
+                if action.owner(world).pronouns().verb_ends_with_s() {
                     "s"
                 } else {
                     ""
                 }
             ),
-            action.owner(&units).pos(),
+            action.owner(world).pos(),
         ));
     }
 }
@@ -97,28 +95,18 @@ mod tests {
 
     #[test]
     fn test_cant_reload_without_weapon() {
-        let world = prepare_world();
-        world
-            .units_mut()
-            .player_mut()
-            .inventory_mut()
-            .unwrap()
-            .clear();
+        let mut world = prepare_world();
+        world.units.player_mut().inventory_mut().unwrap().clear();
 
         assert!(Action::new(0, Reload {}.into(), &world).is_err());
     }
 
     #[test]
     fn test_cant_reload_without_ammo() {
-        let world = prepare_world();
+        let mut world = prepare_world();
+        world.units.player_mut().inventory_mut().unwrap().clear();
         world
-            .units_mut()
-            .player_mut()
-            .inventory_mut()
-            .unwrap()
-            .clear();
-        world
-            .units_mut()
+            .units
             .player_mut()
             .inventory_mut()
             .unwrap()
@@ -129,22 +117,17 @@ mod tests {
 
     #[test]
     fn test_cant_reload_when_weapon_is_full() {
-        let world = prepare_world();
+        let mut world = prepare_world();
         world
-            .units_mut()
+            .units
             .player_mut()
             .inventory_mut()
             .unwrap()
             .wield(Item::new(WOODEN_SHORTBOW).with_items_inside([Item::new(WOODEN_ARROW)]));
-        world
-            .units_mut()
-            .player_mut()
-            .inventory_mut()
-            .unwrap()
-            .wear(
-                Item::new(QUIVER).with_items_inside([Item::new(WOODEN_ARROW)]),
-                0,
-            );
+        world.units.player_mut().inventory_mut().unwrap().wear(
+            Item::new(QUIVER).with_items_inside([Item::new(WOODEN_ARROW)]),
+            0,
+        );
 
         assert!(Action::new(0, Reload {}.into(), &world).is_err());
     }
@@ -153,23 +136,18 @@ mod tests {
     fn test_reload_bow() {
         let mut world = prepare_world();
         world
-            .units_mut()
+            .units
             .player_mut()
             .inventory_mut()
             .unwrap()
             .wield(Item::new(WOODEN_SHORTBOW));
-        world
-            .units_mut()
-            .player_mut()
-            .inventory_mut()
-            .unwrap()
-            .wear(
-                Item::new(QUIVER).with_items_inside([Item::new(WOODEN_ARROW)]),
-                0,
-            );
+        world.units.player_mut().inventory_mut().unwrap().wear(
+            Item::new(QUIVER).with_items_inside([Item::new(WOODEN_ARROW)]),
+            0,
+        );
         assert_eq!(
             world
-                .units()
+                .units
                 .player()
                 .inventory()
                 .unwrap()
@@ -183,12 +161,12 @@ mod tests {
         );
 
         let action = Action::new(0, Reload {}.into(), &world).unwrap();
-        world.units_mut().player_mut().set_action(Some(action));
+        world.units.player_mut().set_action(Some(action));
         world.tick();
 
         assert_eq!(
             world
-                .units()
+                .units
                 .player()
                 .inventory()
                 .unwrap()
@@ -207,23 +185,18 @@ mod tests {
     fn test_reload_crossbow() {
         let mut world = prepare_world();
         world
-            .units_mut()
+            .units
             .player_mut()
             .inventory_mut()
             .unwrap()
             .wield(Item::new(WOODEN_CROSSBOW));
-        world
-            .units_mut()
-            .player_mut()
-            .inventory_mut()
-            .unwrap()
-            .wear(
-                Item::new(QUIVER).with_items_inside([Item::new(WOODEN_BOLT)]),
-                0,
-            );
+        world.units.player_mut().inventory_mut().unwrap().wear(
+            Item::new(QUIVER).with_items_inside([Item::new(WOODEN_BOLT)]),
+            0,
+        );
         assert_eq!(
             world
-                .units()
+                .units
                 .player()
                 .inventory()
                 .unwrap()
@@ -237,12 +210,12 @@ mod tests {
         );
 
         let action = Action::new(0, Reload {}.into(), &world).unwrap();
-        world.units_mut().player_mut().set_action(Some(action));
+        world.units.player_mut().set_action(Some(action));
         world.tick();
 
         assert_eq!(
             world
-                .units()
+                .units
                 .player()
                 .inventory()
                 .unwrap()

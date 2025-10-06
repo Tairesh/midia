@@ -37,7 +37,7 @@ impl GameModeImpl for Interacting {
         } else {
             DIR9.into_iter()
                 .filter(|&d| {
-                    let pos = world.units().player().pos + d;
+                    let pos = world.units.player().pos + d;
                     self.command.highlight_tile(world.map().get_tile(pos))
                 })
                 .map(|d| (d.into(), Colors::WHITE_SMOKE, CursorType::Select))
@@ -62,7 +62,7 @@ impl GameModeImpl for Interacting {
                 let action = match self.command {
                     PlayerCommand::Open => Open { dir }.into(),
                     PlayerCommand::Close => Close { dir }.into(),
-                    PlayerCommand::Read => Read::new(dir, game.world.units().player()),
+                    PlayerCommand::Read => Read::new(dir, game.world.units.player()),
                     PlayerCommand::Drop => DropMainHand { dir }.into(),
                     PlayerCommand::WieldFromGround => WieldFromGround { dir }.into(),
                     PlayerCommand::Examine => unreachable!(),

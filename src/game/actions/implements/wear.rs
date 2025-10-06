@@ -13,8 +13,7 @@ pub struct Wear {}
 
 impl ActionImpl for Wear {
     fn is_possible(&self, actor_id: usize, world: &World) -> ActionPossibility {
-        let units = world.units();
-        let actor = units.get_unit(actor_id);
+        let actor = world.units.get_unit(actor_id);
         if actor.char_sheet().shock {
             return No("You are in shock".to_string());
         }
@@ -43,14 +42,13 @@ impl ActionImpl for Wear {
     }
 
     fn on_finish(&self, action: &Action, world: &mut World) {
-        let mut units = world.units_mut();
         if let Some(item) = action
-            .owner_mut(&mut units)
+            .owner_mut(world)
             .inventory_mut()
             .unwrap()
             .main_hand_take()
         {
-            let owner = action.owner(&units);
+            let owner = action.owner(world);
             world.log().push(LogEvent::success(
                 format!(
                     "{} put{} on the {}.",
@@ -64,7 +62,7 @@ impl ActionImpl for Wear {
             for variant in 0..item.proto().wearable.as_ref().unwrap().variants.len() {
                 if owner.inventory().unwrap().can_wear(&item, variant) {
                     action
-                        .owner_mut(&mut units)
+                        .owner_mut(world)
                         .inventory_mut()
                         .unwrap()
                         .wear(item, variant);
@@ -86,22 +84,17 @@ mod tests {
     #[test]
     fn test_wear() {
         let mut world = prepare_world();
+        world.units.player_mut().inventory_mut().unwrap().clear();
         world
-            .units_mut()
-            .player_mut()
-            .inventory_mut()
-            .unwrap()
-            .clear();
-        world
-            .units_mut()
+            .units
             .player_mut()
             .inventory_mut()
             .unwrap()
             .wield(Item::new(CLOAK));
 
         if let Ok(action) = Action::new(0, Wear {}.into(), &world) {
-            world.units_mut().player_mut().set_action(Some(action));
-            while world.units().player().action().is_some() {
+            world.units.player_mut().set_action(Some(action));
+            while world.units.player().action().is_some() {
                 world.tick();
             }
         } else {
@@ -110,14 +103,14 @@ mod tests {
 
         assert!(world.log().new_events()[0].msg.contains("put on the cloak"));
         assert!(world
-            .units()
+            .units
             .player()
             .inventory()
             .unwrap()
             .main_hand()
             .is_none());
         assert!(world
-            .units()
+            .units
             .player()
             .inventory()
             .unwrap()
@@ -127,17 +120,12 @@ mod tests {
 
     #[test]
     fn test_wear_invalid_items() {
-        let world = prepare_world();
-        world
-            .units_mut()
-            .player_mut()
-            .inventory_mut()
-            .unwrap()
-            .clear();
+        let mut world = prepare_world();
+        world.units.player_mut().inventory_mut().unwrap().clear();
         assert!(Action::new(0, Wear {}.into(), &world).is_err());
 
         world
-            .units_mut()
+            .units
             .player_mut()
             .inventory_mut()
             .unwrap()

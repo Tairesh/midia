@@ -46,8 +46,7 @@ impl GameScene {
     // TODO: refactor this method
     #[allow(clippy::too_many_lines)]
     pub fn new(app: &App, world: World) -> Self {
-        let units = world.units();
-        let player = units.player();
+        let player = world.units.player();
         let name_label = Box::new(Label::new(
             player.personality.mind.name.as_str(),
             app.assets.fonts.header.clone(),
@@ -94,7 +93,6 @@ impl GameScene {
             ),
         ));
 
-        drop(units);
         Self {
             sprites: [
                 name_label,
@@ -128,19 +126,13 @@ impl GameScene {
     }
 
     pub fn try_rotate_player(&mut self, dir: Direction) {
-        if self
-            .world
-            .units_mut()
-            .player_mut()
-            .view
-            .try_set_direction(dir)
-        {
+        if self.world.units.player_mut().view.try_set_direction(dir) {
             self.need_redraw = true;
         }
     }
 
     pub fn examine(&mut self, dir: Direction) {
-        let pos = self.world.units().player().pos + dir;
+        let pos = self.world.units.player().pos + dir;
         self.log
             .log(self.world.this_is(pos, false), Colors::WHITE_SMOKE);
         self.need_redraw = true;
@@ -156,7 +148,7 @@ impl GameScene {
         let action = Action::new(0, typ, &self.world);
         match action {
             Ok(action) => {
-                self.world.units_mut().player_mut().set_action(Some(action));
+                self.world.units.player_mut().set_action(Some(action));
                 self.need_redraw = true;
             }
             Err(msg) => self.cancel_action_msg(msg),
@@ -218,13 +210,10 @@ impl GameScene {
         self.current_time_label()
             .update(current_time, ctx, window_size);
 
-        let units = self.world.units();
-        let main_hand_item = units.player().inventory.main_hand();
+        let main_hand_item = self.world.units.player().inventory.main_hand();
         let main_hand_item_name = main_hand_item.map_or("nothing", Item::name).to_string();
         let main_hand_item_sprite = main_hand_item.map(Item::looks_like).unwrap_or_default();
         let main_hand_item_color = main_hand_item.map(Item::color).unwrap_or_default();
-
-        drop(units);
 
         self.main_hand_display_label()
             .update(main_hand_item_name, ctx, window_size);
@@ -247,7 +236,7 @@ impl Scene for GameScene {
             self.need_redraw = true;
         }
 
-        if self.world.units().player().action.is_some() {
+        if self.world.units.player().action.is_some() {
             self.make_world_tick(ctx);
             self.need_redraw = true;
 
@@ -287,7 +276,7 @@ impl Scene for GameScene {
             Vec2::new(5.0, 5.0),
             3.0,
             false,
-            self.world.units().player_as_avatar(),
+            self.world.units.player_as_avatar(),
         );
         self.current_mode().borrow_mut().draw(ctx, self);
     }

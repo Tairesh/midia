@@ -29,8 +29,7 @@ mod tests {
         let npc = add_dummy(&mut world, Point::new(1, 1));
         world.plan_test();
 
-        let units = world.units();
-        let npc = units.get_unit(npc).as_monster().unwrap();
+        let npc = world.units.get_unit(npc).as_monster().unwrap();
         assert!(npc.action().is_some());
         let action = npc.action().unwrap();
         assert!(matches!(action.typ, ActionType::Skip(..)));

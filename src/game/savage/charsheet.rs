@@ -19,8 +19,6 @@ pub struct CharSheet {
     pub shock: bool,
     #[serde(default)]
     pub last_shock_out_roll: u128,
-    #[serde(default)]
-    pub last_notice_roll: (u128, u32),
 }
 
 impl CharSheet {
@@ -33,7 +31,6 @@ impl CharSheet {
             wounds: vec![],
             shock: false,
             last_shock_out_roll: 0,
-            last_notice_roll: (0, 0),
         }
     }
 
@@ -152,7 +149,7 @@ impl CharSheet {
         self.wounds.len() > wounds_limit
     }
 
-    fn can_try_to_shock_out(&self, current_tick: u128) -> bool {
+    pub fn can_try_to_shock_out(&self, current_tick: u128) -> bool {
         self.shock && (current_tick - self.last_shock_out_roll) >= 10
     }
 
@@ -179,24 +176,9 @@ impl CharSheet {
         }
     }
 
-    fn need_new_notice_roll(&self, current_tick: u128) -> bool {
-        self.last_notice_roll.0 == 0 || (self.last_notice_roll.0 + 500) < current_tick
-    }
-
-    pub fn sight_range(&mut self, current_tick: u128) -> u32 {
+    pub fn sight_range(&self) -> u32 {
         // TODO: traits
-        if self.need_new_notice_roll(current_tick) {
-            let notice = self.get_skill_with_modifiers(Skill::Notice);
-            let sight_range = notice.value() as u32 * 5
-                + if self.wild_card { 10 } else { 5 }
-                + match notice.roll_explosive().successes() {
-                    0 => 0,
-                    1 => 5,
-                    2.. => 10,
-                };
-            self.last_notice_roll = (current_tick, sight_range);
-        }
-
-        self.last_notice_roll.1
+        let notice = self.get_skill_with_modifiers(Skill::Notice);
+        notice.value() as u32 * 5 + if self.wild_card { 10 } else { 5 }
     }
 }

@@ -18,8 +18,7 @@ pub struct DropMainHand {
 
 impl ActionImpl for DropMainHand {
     fn is_possible(&self, actor_id: usize, world: &World) -> ActionPossibility {
-        let units = world.units();
-        let actor = units.get_unit(actor_id);
+        let actor = world.units.get_unit(actor_id);
         let inventory = actor.inventory();
         if inventory.is_none() || inventory.unwrap().main_hand().is_none() {
             return No("You have nothing to drop".to_string());
@@ -45,13 +44,12 @@ impl ActionImpl for DropMainHand {
 
     fn on_finish(&self, action: &Action, world: &mut World) {
         let item = action
-            .owner_mut(&mut world.units_mut())
+            .owner_mut(world)
             .inventory_mut()
             .unwrap()
             .main_hand_take()
             .unwrap();
-        let units = world.units();
-        let owner = action.owner(&units);
+        let owner = action.owner(world);
         let pos = owner.pos() + self.dir;
         let name = item.name().to_string();
         world.map().get_tile_mut(pos).items.push(item);
@@ -79,11 +77,9 @@ mod tests {
         let mut world = prepare_world();
         world.map().get_tile_mut(Point::new(0, 0)).terrain = Dirt::default().into();
         world.map().get_tile_mut(Point::new(0, 0)).items.clear();
-        let mut units = world.units_mut();
-        let player = units.player_mut();
+        let player = world.units.player_mut();
         player.inventory_mut().unwrap().clear();
         player.inventory_mut().unwrap().wield(Item::new(GOD_AXE));
-        drop(units);
 
         let action = Action::new(
             0,
@@ -94,12 +90,12 @@ mod tests {
             &world,
         )
         .unwrap();
-        world.units_mut().player_mut().set_action(Some(action));
+        world.units.player_mut().set_action(Some(action));
         world.tick();
 
-        assert_eq!(Point::new(0, 0), world.units().player().pos());
+        assert_eq!(Point::new(0, 0), world.units.player().pos());
         assert!(world
-            .units()
+            .units
             .player()
             .inventory()
             .unwrap()

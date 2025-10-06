@@ -24,8 +24,7 @@ impl Open {
 
 impl ActionImpl for Open {
     fn is_possible(&self, actor_id: usize, world: &World) -> ActionPossibility {
-        let units = world.units();
-        let actor = units.get_unit(actor_id);
+        let actor = world.units.get_unit(actor_id);
         let pos = actor.pos() + self.dir;
         let mut map = world.map();
         let tile = map.get_tile(pos);
@@ -38,8 +37,7 @@ impl ActionImpl for Open {
     }
 
     fn on_finish(&self, action: &Action, world: &mut World) {
-        let units = world.units();
-        let owner = action.owner(&units);
+        let owner = action.owner(world);
         let pos = owner.pos() + self.dir;
         let mut map = world.map();
         let tile = map.get_tile_mut(pos);
@@ -63,7 +61,6 @@ impl ActionImpl for Open {
         tile.items.append(&mut items);
 
         drop(map);
-        drop(units);
         world.calc_fov();
     }
 }
@@ -86,8 +83,8 @@ mod tests {
             Chest::new(vec![Item::new(WOODEN_SPLINTER)], false).into();
 
         let action = Action::new(0, Open::new(Direction::East), &world).unwrap();
-        world.units_mut().player_mut().set_action(Some(action));
-        while world.units().player().action().is_some() {
+        world.units.player_mut().set_action(Some(action));
+        while world.units.player().action().is_some() {
             world.tick();
         }
 

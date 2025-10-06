@@ -1,15 +1,15 @@
-use crate::app::App;
-use crate::game::units::PlayerPersonality;
-use crate::ui::{UISpritesCollection, UpdateContext, UpdateContextState};
-use roguemetry::Vec2;
-use std::path::PathBuf;
-use tetra::{Context, Event};
-
 use super::implements::{
     CharacterAttributes, CreateCharacter, CreateWorld, Empty, GameMenu, GameScene, LoadWorld,
     MainMenu, SettingsScene,
 };
 use super::Transition;
+use crate::app::App;
+use crate::game::units::PlayerPersonality;
+use crate::savefile;
+use crate::ui::{UISpritesCollection, UpdateContext, UpdateContextState};
+use roguemetry::Vec2;
+use std::path::PathBuf;
+use tetra::{Context, Event};
 
 #[derive(Debug, Clone)]
 pub enum SceneKind {
@@ -21,8 +21,8 @@ pub enum SceneKind {
     LoadWorld,
     CreateCharacter(PathBuf),
     CharacterAttributes(PathBuf, PlayerPersonality),
-    Game,
     GameMenu,
+    Game(PathBuf),
 }
 
 impl SceneKind {
@@ -38,8 +38,13 @@ impl SceneKind {
             SceneKind::CharacterAttributes(path, personality) => {
                 Box::new(CharacterAttributes::new(&path, personality, app, ctx))
             }
-            SceneKind::Game => Box::new(GameScene::new(app)),
             SceneKind::GameMenu => Box::new(GameMenu::new(app)),
+            SceneKind::Game(path) => Box::new(GameScene::new(
+                app,
+                savefile::load_world(&path).unwrap_or_else(|e| {
+                    panic!("Failed to load world from {}: {e:?}", path.display())
+                }),
+            )),
         }
     }
 }

@@ -198,7 +198,7 @@ impl Scene for LoadWorld {
             // load
             if let Some(meta) = savefile::load(path) {
                 if savefile::has_avatar(path) {
-                    Transition::LoadWorld(path.clone())
+                    Transition::Push(SceneKind::Game(path.clone()))
                 } else {
                     Transition::Switch(SceneKind::CreateCharacter(meta.path))
                 }

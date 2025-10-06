@@ -6,6 +6,7 @@ use tetra::{Context, Event};
 
 use crate::game::map::items::helpers::STONE_SPEAR;
 use crate::game::Item;
+use crate::scenes::SceneKind;
 use crate::{
     app::App,
     assets::Assets,
@@ -28,7 +29,6 @@ use crate::{
         Vertical,
     },
 };
-
 // TODO: Move this to separate file
 
 #[allow(dead_code)]
@@ -298,13 +298,12 @@ impl CharacterAttributes {
     pub fn new(path: &Path, personality: PlayerPersonality, app: &App, ctx: &mut Context) -> Self {
         let meta = savefile::load(path).unwrap();
 
-        let mut sprites: Vec<Box<dyn UiSprite>> = vec![
-            bg(&app.assets),
-            title(
-                format!("Choose attributes & skills of {}", personality.mind.name),
-                &app.assets,
-            ),
-        ];
+        let mut sprites: Vec<Box<dyn UiSprite>> = Vec::with_capacity(100);
+        sprites.push(bg(&app.assets));
+        sprites.push(title(
+            format!("Choose attributes & skills of {}", personality.mind.name),
+            &app.assets,
+        ));
         for (i, (attr, dice)) in personality
             .char_sheet
             .attributes
@@ -365,7 +364,6 @@ impl CharacterAttributes {
             ButtonEvent::Next as u8,
             "Create character",
         ));
-        println!("Sprites in character attributes: {}", sprites.len());
 
         Self {
             sprites,
@@ -548,7 +546,7 @@ impl CharacterAttributes {
         let mut world = World::create(self.meta.clone(), avatar);
         world.save();
 
-        Transition::LoadWorld(self.meta.path.clone())
+        Transition::Push(SceneKind::Game(self.meta.path.clone()))
     }
 
     fn attribute_labels() -> HashMap<Attribute, usize> {

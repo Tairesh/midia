@@ -62,7 +62,7 @@ impl GameModeImpl for Interacting {
                 let action = match self.command {
                     PlayerCommand::Open => Open { dir }.into(),
                     PlayerCommand::Close => Close { dir }.into(),
-                    PlayerCommand::Read => Read::new(dir, game.world.borrow().units().player()),
+                    PlayerCommand::Read => Read::new(dir, game.world.units().player()),
                     PlayerCommand::Drop => DropMainHand { dir }.into(),
                     PlayerCommand::WieldFromGround => WieldFromGround { dir }.into(),
                     PlayerCommand::Examine => unreachable!(),

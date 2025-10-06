@@ -25,6 +25,7 @@ use super::{
 pub struct World {
     pub meta: Meta,
     pub game_view: GameView,
+    // TODO: get rid of RefCell
     units: Rc<RefCell<Units>>,
     map: RefCell<Map>,
     fov: Fov,

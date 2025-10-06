@@ -1,14 +1,10 @@
 use roguemetry::Vec2;
-use std::cell::RefCell;
-use std::path::Path;
 use std::rc::Rc;
 use tetra::{input::Key, window, Context, Event, State};
 
 use crate::{
     assets::Assets,
     colors::Colors,
-    game::world::World,
-    savefile,
     scenes::{Scene, SceneKind, Transition},
     settings::Settings,
     ui::{Draw, Label, Position, Positionable, Stringify},
@@ -17,7 +13,6 @@ use crate::{
 pub struct App {
     pub assets: Rc<Assets>,
     pub window_size: Vec2,
-    pub world: Option<Rc<RefCell<World>>>,
     scenes: Vec<Box<dyn Scene>>,
     fps_counter: Label,
 }
@@ -36,7 +31,6 @@ impl App {
             assets: Rc::new(assets),
             scenes: vec![],
             window_size: Vec2::new(w as f32, h as f32),
-            world: None,
             fps_counter,
         };
         app.push_scene(ctx, SceneKind::MainMenu);
@@ -92,35 +86,9 @@ impl App {
             }
             Transition::Quit => window::quit(ctx),
             Transition::ExitToMainMenu => {
-                self.unload_world();
                 self.scenes.drain(1..);
                 self.on_open(ctx);
             }
-            Transition::LoadWorld(path) => self.load_world(ctx, &path),
-        }
-    }
-
-    fn load_world(&mut self, ctx: &mut Context, path: &Path) {
-        match savefile::load_world(path) {
-            Ok(world) => {
-                self.world = Some(Rc::new(RefCell::new(world)));
-                self.push_scene(ctx, SceneKind::Game);
-            }
-            Err(e) => {
-                println!("Failed to load world: {e:?}");
-            }
-        }
-    }
-
-    fn unload_world(&mut self) {
-        self.world = None;
-    }
-
-    pub fn get_world(&self) -> Rc<RefCell<World>> {
-        if let Some(world) = &self.world {
-            world.clone()
-        } else {
-            panic!("World isn't loaded!")
         }
     }
 

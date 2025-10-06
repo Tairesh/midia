@@ -48,10 +48,10 @@ impl GameModeImpl for MeleeAttack {
         if input::is_key_pressed(ctx, Key::Escape) {
             game.modes.pop();
         } else if let Some(dir) = input::get_direction_keys_down(ctx) {
-            self.target = Some(game.world.borrow().units().player().pos + dir);
+            self.target = Some(game.world.units().player().pos + dir);
             game.try_rotate_player(dir);
         } else if let Some(target) = self.target {
-            let action = Melee::new(target, &game.world.borrow());
+            let action = Melee::new(target, &game.world);
             game.try_start_action(action);
             game.modes.pop();
         }

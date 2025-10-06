@@ -32,7 +32,7 @@ use crate::{
 pub struct GameScene {
     // TODO: Use struct instead of array for better readability
     sprites: [Box<dyn UiSprite>; 5],
-    pub world: Rc<RefCell<World>>,
+    pub world: World,
     pub modes: Vec<Rc<RefCell<GameMode>>>,
     pub log: GameLog,
     shift_of_view: Point,
@@ -45,10 +45,8 @@ pub struct GameScene {
 impl GameScene {
     // TODO: refactor this method
     #[allow(clippy::too_many_lines)]
-    pub fn new(app: &App) -> Self {
-        let world = app.get_world();
-        let world_borrow = world.borrow();
-        let units = world_borrow.units();
+    pub fn new(app: &App, world: World) -> Self {
+        let units = world.units();
         let player = units.player();
         let name_label = Box::new(Label::new(
             player.personality.mind.name.as_str(),
@@ -58,7 +56,7 @@ impl GameScene {
         ));
         // TODO: custom calendar
         let current_time_label = Box::new(Label::new(
-            format!("{}", world_borrow.meta.current_tick),
+            format!("{}", world.meta.current_tick),
             app.assets.fonts.default.clone(),
             Colors::WHITE_SMOKE,
             Position::horizontal_center(Vertical::TopByTop, Vec2::new(0.0, 5.0)),
@@ -97,7 +95,6 @@ impl GameScene {
         ));
 
         drop(units);
-        drop(world_borrow);
         Self {
             sprites: [
                 name_label,
@@ -122,7 +119,7 @@ impl GameScene {
     }
 
     pub fn push_mode(&mut self, mode: GameMode) {
-        match mode.can_push(&self.world.borrow()) {
+        match mode.can_push(&self.world) {
             Ok(..) => self.modes.push(Rc::new(RefCell::new(mode))),
             Err(s) => {
                 self.log.log(s, Colors::LIGHT_CORAL);
@@ -133,7 +130,6 @@ impl GameScene {
     pub fn try_rotate_player(&mut self, dir: Direction) {
         if self
             .world
-            .borrow_mut()
             .units_mut()
             .player_mut()
             .view
@@ -144,9 +140,9 @@ impl GameScene {
     }
 
     pub fn examine(&mut self, dir: Direction) {
-        let pos = self.world.borrow().units().player().pos + dir;
+        let pos = self.world.units().player().pos + dir;
         self.log
-            .log(self.world.borrow().this_is(pos, false), Colors::WHITE_SMOKE);
+            .log(self.world.this_is(pos, false), Colors::WHITE_SMOKE);
         self.need_redraw = true;
     }
 
@@ -157,14 +153,10 @@ impl GameScene {
     }
 
     pub fn try_start_action(&mut self, typ: ActionType) {
-        let action = Action::new(0, typ, &self.world.borrow());
+        let action = Action::new(0, typ, &self.world);
         match action {
             Ok(action) => {
-                self.world
-                    .borrow_mut()
-                    .units_mut()
-                    .player_mut()
-                    .set_action(Some(action));
+                self.world.units_mut().player_mut().set_action(Some(action));
                 self.need_redraw = true;
             }
             Err(msg) => self.cancel_action_msg(msg),
@@ -185,11 +177,11 @@ impl GameScene {
     }
 
     pub fn tile_size(&self) -> f32 {
-        self.assets.tileset.tile_size as f32 * self.world.borrow().game_view.zoom.as_view()
+        self.assets.tileset.tile_size as f32 * self.world.game_view.zoom.as_view()
     }
 
     fn make_world_tick(&mut self, ctx: &mut Context) {
-        self.world.borrow_mut().tick();
+        self.world.tick();
 
         self.update_ui(ctx);
     }
@@ -207,14 +199,14 @@ impl GameScene {
     }
 
     fn cursors(&self) -> Option<Vec<Cursor>> {
-        self.current_mode().borrow().cursors(&self.world.borrow())
+        self.current_mode().borrow().cursors(&self.world)
     }
 
     pub fn update_ui(&mut self, ctx: &mut Context) {
         // TODO: refactor
         self.need_redraw = true;
 
-        for event in self.world.borrow().log().new_events() {
+        for event in self.world.log().new_events() {
             if event.category == LogCategory::Debug && !Settings::instance().debug.show_debug_log {
                 continue;
             }
@@ -222,19 +214,17 @@ impl GameScene {
         }
 
         let window_size = self.window_size;
-        let current_time = format!("{}", self.world.borrow().meta.current_tick);
+        let current_time = format!("{}", self.world.meta.current_tick);
         self.current_time_label()
             .update(current_time, ctx, window_size);
 
-        let world = self.world.borrow();
-        let units = world.units();
+        let units = self.world.units();
         let main_hand_item = units.player().inventory.main_hand();
         let main_hand_item_name = main_hand_item.map_or("nothing", Item::name).to_string();
         let main_hand_item_sprite = main_hand_item.map(Item::looks_like).unwrap_or_default();
         let main_hand_item_color = main_hand_item.map(Item::color).unwrap_or_default();
 
         drop(units);
-        drop(world);
 
         self.main_hand_display_label()
             .update(main_hand_item_name, ctx, window_size);
@@ -250,14 +240,14 @@ impl Scene for GameScene {
         if input::is_mouse_scrolled_down(ctx)
             || input::is_key_with_mod_pressed(ctx, (Key::Z, KeyModifier::Shift))
         {
-            self.world.borrow_mut().game_view.zoom.dec();
+            self.world.game_view.zoom.dec();
             self.need_redraw = true;
         } else if input::is_mouse_scrolled_up(ctx) || input::is_key_with_mod_pressed(ctx, Key::Z) {
-            self.world.borrow_mut().game_view.zoom.inc();
+            self.world.game_view.zoom.inc();
             self.need_redraw = true;
         }
 
-        if self.world.borrow().units().player().action.is_some() {
+        if self.world.units().player().action.is_some() {
             self.make_world_tick(ctx);
             self.need_redraw = true;
 
@@ -297,7 +287,7 @@ impl Scene for GameScene {
             Vec2::new(5.0, 5.0),
             3.0,
             false,
-            self.world.borrow().units().player_as_avatar(),
+            self.world.units().player_as_avatar(),
         );
         self.current_mode().borrow_mut().draw(ctx, self);
     }
@@ -314,6 +304,6 @@ impl Scene for GameScene {
 
 impl Drop for GameScene {
     fn drop(&mut self) {
-        self.world.borrow_mut().save();
+        self.world.save();
     }
 }

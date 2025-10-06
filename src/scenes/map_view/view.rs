@@ -1,5 +1,3 @@
-use std::cell::RefCell;
-
 use roguemetry::{Point, Vec2};
 use tetra::{
     graphics::{Canvas, DrawParams},
@@ -18,7 +16,7 @@ use crate::{
 #[allow(clippy::too_many_lines)]
 pub fn draw(
     ctx: &mut Context,
-    world: &RefCell<World>,
+    world: &World,
     assets: &Assets,
     window_size: Vec2,
     shift_of_view: Point,
@@ -31,7 +29,6 @@ pub fn draw(
     .unwrap();
     tetra::graphics::set_canvas(ctx, &canvas);
     tetra::graphics::clear(ctx, Colors::BLACK);
-    let world = world.borrow();
 
     let scale = world.game_view.zoom.as_scale();
     let zoom = world.game_view.zoom.as_view();
@@ -173,13 +170,11 @@ pub fn draw(
 
 pub fn draw_cursors(
     ctx: &mut Context,
-    world: &RefCell<World>,
+    world: &World,
     assets: &Assets,
     window_size: Vec2,
     cursors: Option<Vec<Cursor>>,
 ) {
-    let world = world.borrow();
-
     let scale = world.game_view.zoom.as_scale();
     let zoom = world.game_view.zoom.as_view();
     let tile_size = assets.tileset.tile_size as f32 * zoom;

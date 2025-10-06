@@ -43,8 +43,8 @@ impl Shooting {
 
     fn update_mouse(&mut self, ctx: &mut Context, game: &mut GameScene) {
         let mouse = input::get_mouse_position(ctx);
-        let zoom_view = game.world.borrow().game_view.zoom.as_view();
-        let zoom = game.world.borrow().game_view.zoom.0;
+        let zoom_view = game.world.game_view.zoom.as_view();
+        let zoom = game.world.game_view.zoom.0;
         if mouse != self.last_mouse_position || zoom != self.last_zoom {
             self.last_mouse_position = mouse;
             self.last_zoom = zoom;
@@ -125,10 +125,8 @@ impl GameModeImpl for Shooting {
         } else if input::is_some_of_keys_pressed(ctx, &[Key::F, Key::Space, Key::Enter])
             || input::is_mouse_button_down(ctx, MouseButton::Left)
         {
-            let pos = game.world.borrow().units().player().pos
-                + game.shift_of_view()
-                + self.mouse_moved_pos;
-            let action = Shoot::new(pos, &game.world.borrow());
+            let pos = game.world.units().player().pos + game.shift_of_view() + self.mouse_moved_pos;
+            let action = Shoot::new(pos, &game.world);
             game.try_start_action(action);
             game.set_shift_of_view(Point::default());
             game.modes.pop();
@@ -136,7 +134,6 @@ impl GameModeImpl for Shooting {
         } else if let Some(dir) = input::get_direction_keys_down(ctx) {
             let damage = game
                 .world
-                .borrow()
                 .units()
                 .player()
                 .weapon(AttackType::Shoot)

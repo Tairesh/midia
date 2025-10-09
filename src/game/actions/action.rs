@@ -46,7 +46,7 @@ impl Action {
     fn cancel_action(&self, world: &mut World, reason: String) {
         self.owner_mut(world).set_action(None);
         if self.owner == 0 {
-            world.log().push(LogEvent::new(
+            world.log.push(LogEvent::new(
                 reason,
                 self.owner(world).pos(),
                 LogCategory::Warning,

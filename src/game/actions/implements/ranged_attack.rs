@@ -233,11 +233,11 @@ fn log_unit_attack_result(
                     },
                 ),
             ) {
-                world.log().push(event);
+                world.log.push(event);
             }
         }
         UnitRangedAttackResult::Miss => {
-            world.log().push(LogEvent::warning(
+            world.log.push(LogEvent::warning(
                 format!(
                     "{} {} {} at {} but miss{}.",
                     owner.name_for_actions(),
@@ -274,7 +274,7 @@ fn log_unit_attack_result(
                     },
                 ),
             ) {
-                world.log().push(event);
+                world.log.push(event);
             }
         }
         _ => {}

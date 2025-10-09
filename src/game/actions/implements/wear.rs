@@ -49,7 +49,7 @@ impl ActionImpl for Wear {
             .main_hand_take()
         {
             let owner = action.owner(world);
-            world.log().push(LogEvent::success(
+            let event = LogEvent::success(
                 format!(
                     "{} put{} on the {}.",
                     owner.name_for_actions(),
@@ -57,7 +57,7 @@ impl ActionImpl for Wear {
                     item.name()
                 ),
                 owner.pos(),
-            ));
+            );
             // TODO: use variant
             for variant in 0..item.proto().wearable.as_ref().unwrap().variants.len() {
                 if owner.inventory().unwrap().can_wear(&item, variant) {
@@ -69,6 +69,7 @@ impl ActionImpl for Wear {
                     break;
                 }
             }
+            world.log.push(event);
         }
     }
 }
@@ -101,7 +102,7 @@ mod tests {
             panic!("Cannot wear");
         }
 
-        assert!(world.log().new_events()[0].msg.contains("put on the cloak"));
+        assert!(world.log.new_events()[0].msg.contains("put on the cloak"));
         assert!(world
             .units
             .player()

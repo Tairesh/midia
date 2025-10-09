@@ -53,7 +53,7 @@ impl ActionImpl for DropMainHand {
         let pos = action.owner(world).pos() + self.dir;
         let name = item.name().to_string();
         world.map.get_tile_mut(pos).items.push(item);
-        world.log().push(LogEvent::new(
+        world.log.push(LogEvent::new(
             format!(
                 "{} dropped the {name}",
                 action.owner(world).name_for_actions()

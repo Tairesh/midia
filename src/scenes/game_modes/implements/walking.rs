@@ -105,7 +105,7 @@ impl GameModeImpl for Walking {
                         game.world.units.player_mut().inventory.swap_hands();
                         let event =
                             LogEvent::info("You swap your hands", game.world.units.player().pos);
-                        game.world.log().push(event);
+                        game.world.log.push(event);
                         game.update_ui(ctx);
                     }
                     KeyBindingAction::Inventory => {

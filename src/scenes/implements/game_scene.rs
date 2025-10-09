@@ -198,7 +198,7 @@ impl GameScene {
         // TODO: refactor
         self.need_redraw = true;
 
-        for event in self.world.log().new_events() {
+        for event in self.world.log.new_events() {
             if event.category == LogCategory::Debug && !Settings::instance().debug.show_debug_log {
                 continue;
             }

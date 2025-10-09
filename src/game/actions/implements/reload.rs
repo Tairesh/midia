@@ -68,7 +68,7 @@ impl ActionImpl for Reload {
             .main_hand()
             .unwrap()
             .name();
-        world.log().push(LogEvent::success(
+        world.log.push(LogEvent::success(
             format!(
                 "{} reload{} your {weapon_name}",
                 action.owner(world).name_for_actions(),

@@ -77,7 +77,7 @@ impl ActionImpl for Walk {
                 .map
                 .get_tile_opt(pos)
                 .map_or("void", |t| t.terrain.name());
-            world.log().push(LogEvent::new(
+            world.log.push(LogEvent::new(
                 format!("It takes a long time to walk through the {terrain_name}"),
                 pos,
                 LogCategory::Info,

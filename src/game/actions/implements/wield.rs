@@ -68,7 +68,7 @@ impl ActionImpl for WieldFromGround {
         }
         action.owner_mut(world).inventory_mut().unwrap().wield(item);
         world
-            .log()
+            .log
             .push(LogEvent::new(msg, pos, LogCategory::Success));
     }
 }

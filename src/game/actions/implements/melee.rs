@@ -52,7 +52,7 @@ impl Melee {
         let attack = melee_smash_terrain(owner.as_fighter(), &tile.terrain);
         match attack {
             TerrainMeleeAttackResult::Miss => {
-                world.log().push(LogEvent::info(
+                world.log.push(LogEvent::info(
                     format!(
                         "{} tr{} to break the {} with {} {} but miss{}!",
                         owner.name_for_actions(),
@@ -74,7 +74,7 @@ impl Melee {
                 ));
             }
             TerrainMeleeAttackResult::Hit(damage) => {
-                world.log().push(LogEvent::info(
+                world.log.push(LogEvent::info(
                     format!(
                         "{} hit{} the {} with {} {} dealing {damage} damage but it didn't break it.",
                         owner.name_for_actions(),
@@ -91,7 +91,7 @@ impl Melee {
                 ));
             }
             TerrainMeleeAttackResult::Success(damage) => {
-                world.log().push(LogEvent::info(
+                world.log.push(LogEvent::info(
                     format!(
                         "{} hit{} the {} with {} {} dealing {damage} damage and completely destroying it.",
                         owner.name_for_actions(),
@@ -152,13 +152,13 @@ impl Melee {
                         }
                     ),
                 ) {
-                    world.log().push(event);
+                    world.log.push(event);
                 }
 
                 world.apply_damage(unit_id, hit);
             }
             UnitMeleeAttackResult::Miss => {
-                world.log().push(LogEvent::warning(
+                world.log.push(LogEvent::warning(
                     format!(
                         "{} attack{} {} with {} {weapon_name} but miss{}.",
                         owner.name_for_actions(),
@@ -187,7 +187,7 @@ impl Melee {
         let owner = action.owner(world);
         let weapon = owner.as_fighter().weapon(AttackType::Melee).unwrap().name;
 
-        world.log().push(LogEvent::info(
+        world.log.push(LogEvent::info(
             format!(
                 "{} wave{} {} {weapon} in the air.",
                 owner.name_for_actions(),
@@ -265,8 +265,7 @@ mod tests {
         world.tick();
 
         assert_eq!(world.meta.current_tick, ATTACK_MOVES as u128);
-        let mut log = world.log();
-        let event = &log.new_events()[0];
+        let event = &world.log.new_events()[0];
         assert!(
             event.msg.contains("with your fists"),
             "msg \"{}\" doesn't contains \"with your fists\"",
@@ -292,8 +291,7 @@ mod tests {
         world.tick();
 
         assert_eq!(world.meta.current_tick, ATTACK_MOVES as u128);
-        let mut log = world.log();
-        let event = &log.new_events()[0];
+        let event = &world.log.new_events()[0];
         assert!(
             event.msg.contains("with your god axe"),
             "msg \"{}\" doesn't contains \"with your god axe\"",
@@ -318,8 +316,7 @@ mod tests {
         world.tick();
 
         assert_eq!(world.meta.current_tick, ATTACK_MOVES as u128);
-        let mut log = world.log();
-        let event = &log.new_events()[0];
+        let event = &world.log.new_events()[0];
         assert!(
             event
                 .msg
@@ -346,8 +343,7 @@ mod tests {
         world.tick();
 
         assert_eq!(world.meta.current_tick, ATTACK_MOVES as u128);
-        let mut log = world.log();
-        let event = &log.new_events()[0];
+        let event = &world.log.new_events()[0];
         assert!(
             event.msg.contains("wave your stone knife in the air"),
             "msg \"{}\" doesn't contains \"wave your stone knife in the air\"",
@@ -371,8 +367,7 @@ mod tests {
         world.tick();
 
         assert_eq!(world.meta.current_tick, ATTACK_MOVES as u128);
-        let mut log = world.log();
-        let event = &log.new_events()[0];
+        let event = &world.log.new_events()[0];
         assert!(
             event.msg.contains("the small boulder with your fists"),
             "msg \"{}\" doesn't contains \"the small boulder with your fists\"",
@@ -392,8 +387,7 @@ mod tests {
         world.tick();
 
         assert_eq!(world.meta.current_tick, ATTACK_MOVES as u128);
-        let mut log = world.log();
-        let event = &log.new_events()[0];
+        let event = &world.log.new_events()[0];
         assert!(
             event.msg.contains("wave your fangs in the air"),
             "msg \"{}\" doesn't contains \"wave your fangs in the air\"",
@@ -417,8 +411,7 @@ mod tests {
         world.units.player_mut().set_action(Some(action));
         world.tick();
 
-        let mut log = world.log();
-        let event = &log.new_events()[0];
+        let event = &world.log.new_events()[0];
         assert!(
             event.msg.contains("You attack Dummy with your stone spear"),
             "msg \"{}\" doesn't contains \"You attack Dummy with your stone spear\"",

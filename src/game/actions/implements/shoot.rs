@@ -91,8 +91,7 @@ mod tests {
 
         assert_eq!(world.meta.current_tick, ATTACK_MOVES as u128);
 
-        let mut log = world.log();
-        let event = &log.new_events()[0];
+        let event = &world.log.new_events()[0];
         assert!(
             event
                 .msg
@@ -199,8 +198,7 @@ mod tests {
 
         assert_eq!(world.meta.current_tick, ATTACK_MOVES as u128);
 
-        let mut log = world.log();
-        let event = &log.new_events()[0];
+        let event = &world.log.new_events()[0];
         assert!(
             event
                 .msg
@@ -251,8 +249,7 @@ mod tests {
         world.units.player_mut().set_action(Some(action));
         world.tick();
 
-        let mut log = world.log();
-        let event = &log.new_events()[0];
+        let event = &world.log.new_events()[0];
         assert!(
             event
                 .msg
@@ -260,7 +257,6 @@ mod tests {
             "msg \"{}\" doesn't contains \"shoot from a wooden crossbow (wooden bolt)\"",
             event.msg
         );
-        drop(log);
         assert_eq!(
             world.units.get_unit(monster).pos(),
             target + Direction::West

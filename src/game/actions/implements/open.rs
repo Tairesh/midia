@@ -44,7 +44,7 @@ impl ActionImpl for Open {
             return;
         };
 
-        world.log.borrow_mut().push(LogEvent::new(
+        world.log.push(LogEvent::new(
             format!(
                 "{} open{} the {}",
                 owner.name_for_actions(),
@@ -90,14 +90,12 @@ mod tests {
             world.tick();
         }
 
-        let mut log = world.log();
-        let event = &log.new_events()[0];
+        let event = &world.log.new_events()[0];
         assert!(
             event.msg.contains("You open the closed chest"),
             "event: {:?}",
             event
         );
-        drop(log);
         let tile = world.map.get_tile(Point::new(1, 0));
         assert!(tile.terrain.supports_action(TerrainInteractAction::Close));
         assert_eq!(tile.items.len(), 1);

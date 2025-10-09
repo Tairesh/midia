@@ -28,7 +28,7 @@ pub struct World {
     pub units: Units,
     pub map: Map,
     fov: Fov,
-    pub log: RefCell<Log>,
+    pub log: Log,
     // TODO: add Rng created with seed
     // TODO: add WorldLog
 }
@@ -48,7 +48,7 @@ impl World {
             game_view,
             units: Units::new(units),
             fov: Fov::default(),
-            log: RefCell::new(log),
+            log,
         };
         world.units.load_units();
         world.calc_fov();
@@ -141,15 +141,11 @@ impl World {
         }
         if self.units.get_unit(unit_id).is_player() {
             self.calc_fov();
-            self.log().push(LogEvent::debug(
+            self.log.push(LogEvent::debug(
                 format!("You moved to {pos:?}"),
                 self.units.player().pos(),
             ));
         }
-    }
-
-    pub fn log(&self) -> RefMut<'_, Log> {
-        self.log.borrow_mut()
     }
 
     // TODO: move this somewhere else
@@ -269,7 +265,7 @@ impl World {
                 .try_to_shock_out(current_tick)
             {
                 let unit = self.units.get_unit(unit_id);
-                self.log().push(LogEvent::info(
+                self.log.push(LogEvent::info(
                     format!(
                         "{} {} out of the shock!",
                         unit.name_for_actions(),
@@ -299,7 +295,7 @@ impl World {
 
         let unit = self.units.get_unit(unit_id);
         if unit.char_sheet().is_dead() {
-            self.log().push(LogEvent::danger(
+            self.log.push(LogEvent::danger(
                 format!(
                     "{} {} dead!",
                     unit.name_for_actions(),

@@ -53,7 +53,7 @@ impl ActionImpl for Close {
             return;
         };
 
-        world.log().push(LogEvent::new(
+        world.log.push(LogEvent::new(
             format!(
                 "{} close{} the {}",
                 owner.name_for_actions(),
@@ -108,23 +108,16 @@ mod tests {
             panic!("Cannot close");
         }
 
-        let mut log = world.log();
-        let event = &log.new_events()[0];
+        let event = &world.log.new_events()[0];
         assert!(
             event.msg.contains("You close the chest"),
             "event: {:?}",
             event
         );
-        drop(log);
-        assert!(world
-            .map
-            .get_tile(Point::new(1, 0))
-            .terrain
-            .supports_action(TerrainInteractAction::Open));
-        assert!(world.map.get_tile(Point::new(1, 0)).items.is_empty());
-        if let Terrain::Chest(Chest { items_inside, open }) =
-            &world.map.get_tile(Point::new(1, 0)).terrain
-        {
+        let tile = world.map.get_tile(Point::new(1, 0));
+        assert!(tile.terrain.supports_action(TerrainInteractAction::Open));
+        assert!(tile.items.is_empty());
+        if let Terrain::Chest(Chest { items_inside, open }) = &tile.terrain {
             assert!(!open);
             assert_eq!(items_inside.len(), 1);
             assert_eq!(items_inside[0].proto().id, WOODEN_SPLINTER);

@@ -64,7 +64,7 @@ impl ActionImpl for Read {
             let pos = owner.pos() + self.dir;
             let text = world.map.get_tile(pos).read();
             world
-                .log()
+                .log
                 .push(LogEvent::new(text, pos, LogCategory::Success));
         }
     }
@@ -101,8 +101,7 @@ mod tests {
             panic!("Cannot read");
         }
 
-        let mut log = world.log();
-        let event = &log.new_events()[0];
+        let event = &world.log.new_events()[0];
         assert!(
             event
                 .msg

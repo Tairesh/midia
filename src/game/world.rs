@@ -30,7 +30,6 @@ pub struct World {
     fov: Fov,
     pub log: Log,
     // TODO: add Rng created with seed
-    // TODO: add WorldLog
 }
 
 impl World {

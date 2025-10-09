@@ -247,7 +247,7 @@ mod tests {
     #[test_case(KeyWithMod::shift(Key::A), "\"Shift+A\"")]
     #[test_case(KeyWithMod::new(Key::Delete, false, true, true), "\"Ctrl+Alt+Delete\"")]
     fn test_serializing_key_with_mod(kwm: KeyWithMod, expected: &str) {
-        let serialized = serde_json::to_string(&kwm).unwrap();
+        let serialized = serde_json::to_string(&kwm).expect("Can't serialize KeyWithMod");
         assert_eq!(serialized, expected);
     }
 
@@ -255,8 +255,8 @@ mod tests {
     #[test_case("\"A\"", KeyWithMod::from_key(Key::A))]
     #[test_case("\"Shift+A\"", KeyWithMod::shift(Key::A))]
     #[test_case("\"Ctrl+Alt+Delete\"", KeyWithMod::new(Key::Delete, false, true, true))]
-    fn test_deserializing_key_with_mod(serialized: &str, expected: KeyWithMod) {
-        let kwm: KeyWithMod = serde_json::from_str(serialized).unwrap();
+    fn test_deserializing_key_with_mod(data: &str, expected: KeyWithMod) {
+        let kwm: KeyWithMod = serde_json::from_str(data).expect("Can't deserialize KeyWithMod");
         assert_eq!(kwm, expected);
     }
 }

@@ -135,7 +135,7 @@ impl Button {
             ButtonContent::Text(text, height) => text
                 .get_bounds(ctx)
                 .map(|b| Vec2::new(b.width, *height))
-                .unwrap(),
+                .expect("Button Text has no bounds"),
             ButtonContent::Empty(size) => *size,
             ButtonContent::Icon { scale, tileset, .. } => Vec2::new(
                 tileset.tile_size as f32 * scale.x,

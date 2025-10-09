@@ -67,6 +67,7 @@ impl TerrainInteract for Boulder {
             BoulderSize::Small => 8,
         };
 
+        // TODO: seeded world rng maybe?
         let mut rng = rand::rng();
         let dirt_variant = rng.random::<DirtVariant>();
         let shards_count = match self.size {

@@ -37,6 +37,7 @@ pub enum UpdateContextState {
     Focused,
 }
 
+// TODO: implement a way to tell there is an yes-or-no-style alert, blocking even hovering
 pub struct UpdateContext<'a> {
     pub ctx: &'a mut Context,
     /// Rectangles of UI elements above current one, blocking mouse interaction
@@ -86,7 +87,6 @@ impl<'a> UpdateContext<'a> {
 }
 
 pub trait Update {
-    // TODO: implement a way to tell there is an yes-or-no-style alert, blocking even hovering
     fn update(&mut self, _ctx: UpdateContext) -> Transition {
         Transition::None
     }

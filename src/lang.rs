@@ -1,16 +1,22 @@
-#[allow(dead_code)]
-const CONSONANTS: [char; 21] = [
-    'b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'w', 'x',
-    'y', 'z',
-];
+// const CONSONANTS: [char; 21] = [
+//     'b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'w', 'x',
+//     'y', 'z',
+// ];
 const VOWELS: [char; 5] = ['a', 'e', 'i', 'o', 'u'];
 const WORDS_WITH_SILENT_H: [&str; 3] = ["hour", "honest", "honor"];
 const WORDS_WITH_U_OR_O: [&str; 7] = ["union", "one", "unit", "unique", "unite", "use", "usual"];
 
 pub fn a(word: impl Into<String>) -> String {
-    let word = word.into();
-    if (VOWELS.contains(&word.chars().next().unwrap())
-        && !WORDS_WITH_U_OR_O.iter().any(|w| word.starts_with(w)))
+    let word = word.into().trim().to_lowercase();
+    if word.is_empty() {
+        return String::new();
+    }
+
+    let Some(first_char) = word.chars().next() else {
+        return String::new();
+    };
+
+    if (VOWELS.contains(&first_char) && !WORDS_WITH_U_OR_O.iter().any(|w| word.starts_with(w)))
         || WORDS_WITH_SILENT_H.iter().any(|w| word.starts_with(w))
     {
         format!("an {word}")
@@ -27,10 +33,10 @@ pub trait Capitalize: AsRef<str> {
 impl<T: AsRef<str>> Capitalize for T {
     fn capitalize(&self) -> String {
         let mut chars = self.as_ref().chars();
-        match chars.next() {
-            None => String::new(),
-            Some(first) => first.to_uppercase().chain(chars).collect(),
-        }
+        let Some(first_char) = chars.next() else {
+            return String::new();
+        };
+        first_char.to_uppercase().chain(chars).collect()
     }
 }
 

@@ -122,7 +122,9 @@ mod tests {
     use roguemetry::Point;
 
     use crate::game::map::items::helpers::{CLOAK, GOD_AXE};
+    use crate::game::races::Sex;
     use crate::game::traits::Name;
+    use crate::game::Race;
 
     use super::{super::tests::helpers::tester_girl, *};
 
@@ -134,7 +136,24 @@ mod tests {
         assert_eq!(player.name_for_actions(), "you");
     }
 
-    // TODO: test_npc_name
+    #[test]
+    fn test_monster_name() {
+        let mut monster = Monster::new(
+            AI::Dummy,
+            Point::new(0, 0),
+            "Dummy".to_string(),
+            Appearance {
+                race: Race::Gazan,
+                age: 20,
+                body_color: None,
+                sex: Sex::Other,
+            },
+            Pronouns::ItIts,
+            CharSheet::default(false, Race::Gazan),
+        );
+        monster.set_id(1);
+        assert_eq!(monster.name_for_actions(), "Dummy");
+    }
 
     #[test]
     fn test_die() {

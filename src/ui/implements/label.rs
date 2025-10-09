@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use std::rc::Rc;
 
 use roguemetry::{Rect, Vec2};
@@ -84,7 +82,7 @@ impl Draw for Label {
 
 impl HasSize for Label {
     fn size(&mut self, ctx: &mut Context) -> Vec2 {
-        let rect = self.text.get_bounds(ctx).unwrap();
+        let rect = self.text.get_bounds(ctx).expect("Text has no bounds");
         Vec2::new(rect.width, f32::max(self.line_height, rect.height))
     }
 }
@@ -135,6 +133,8 @@ impl UiSprite for Label {
     }
 }
 
+// TODO: Use in inventory display
+#[allow(dead_code)]
 pub struct ItemDisplay {
     layout: Layout,
     text: Text,
@@ -146,6 +146,7 @@ pub struct ItemDisplay {
     visible: bool,
 }
 
+#[allow(dead_code)]
 impl ItemDisplay {
     pub fn new(
         item: Option<&Item>,
@@ -224,7 +225,7 @@ impl Draw for ItemDisplay {
 
 impl HasSize for ItemDisplay {
     fn size(&mut self, ctx: &mut Context) -> Vec2 {
-        let rect = self.text.get_bounds(ctx).unwrap();
+        let rect = self.text.get_bounds(ctx).expect("Label text has no bounds");
         if self.icon {
             Vec2::new(
                 self.tileset.tile_size as f32 * self.scale.x + 5.0 + rect.width,

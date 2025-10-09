@@ -73,15 +73,17 @@ impl CharSheet {
 
     pub fn walk_koeff(&self) -> f32 {
         // TODO: write tests for moving for different races and wounds
-        let mut k_wounds = 1.0;
+        let mut speed = self.race.walk_koeff();
         for &wound in &self.wounds {
             if wound == Wound::LeftLeg || wound == Wound::RightLeg {
-                k_wounds *= 0.75;
+                speed -= 0.25;
             }
         }
-        let k_shock = if self.shock { 0.5 } else { 1.0 };
+        if self.shock {
+            speed -= 0.5;
+        }
 
-        k_wounds * k_shock * self.race.walk_koeff()
+        speed.clamp(0.0, 10.0)
     }
 
     pub fn get_attribute_with_modifiers(&self, attribute: Attribute) -> DiceWithModifier {

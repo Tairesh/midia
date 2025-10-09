@@ -311,7 +311,7 @@ fn handle_ammo_use(world: &mut World, action: &Action, attack_type: AttackType, 
     };
 
     if let Some(item) = item {
-        world.map().get_tile_mut(target).items.push(item);
+        world.map.get_tile_mut(target).items.push(item);
     }
 
     let owner = action.owner_mut(world);

@@ -40,13 +40,16 @@ impl Melee {
             return false;
         };
         let owner = action.owner(world);
+        let Some(tile) = world.map.get_tile_opt(target) else {
+            return false;
+        };
         let weapon = owner.as_fighter().weapon(AttackType::Melee).unwrap();
         let can_smash = weapon.damage.damage_types.contains(&DamageType::Blunt)
-            && world.map().get_tile(target).terrain.smash().is_some();
+            && tile.terrain.smash().is_some();
         if !can_smash {
             return false;
         }
-        let attack = melee_smash_terrain(owner.as_fighter(), &world.map().get_tile(target).terrain);
+        let attack = melee_smash_terrain(owner.as_fighter(), &tile.terrain);
         match attack {
             TerrainMeleeAttackResult::Miss => {
                 world.log().push(LogEvent::info(
@@ -58,7 +61,7 @@ impl Melee {
                         } else {
                             "y"
                         },
-                        world.map().get_tile(target).terrain.name(),
+                        tile.terrain.name(),
                         owner.pronouns().possessive_adjective(),
                         weapon.name,
                         if owner.pronouns().verb_ends_with_s() {
@@ -80,7 +83,7 @@ impl Melee {
                         } else {
                             ""
                         },
-                        world.map().get_tile(target).terrain.name(),
+                        tile.terrain.name(),
                         owner.pronouns().possessive_adjective(),
                         weapon.name,
                     ),
@@ -97,16 +100,15 @@ impl Melee {
                         } else {
                             ""
                         },
-                        world.map().get_tile(target).terrain.name(),
+                        tile.terrain.name(),
                         owner.pronouns().possessive_adjective(),
                         weapon.name,
                     ),
                     target,
                 ));
-                let (new_terrain, mut items) =
-                    world.map().get_tile(target).terrain.smash().unwrap().result;
-                world.map().get_tile_mut(target).terrain = new_terrain;
-                world.map().get_tile_mut(target).items.append(&mut items);
+                let (new_terrain, mut items) = tile.terrain.smash().unwrap().result;
+                world.map.get_tile_mut(target).terrain = new_terrain;
+                world.map.get_tile_mut(target).items.append(&mut items);
             }
         }
 
@@ -304,7 +306,7 @@ mod tests {
         let mut world = prepare_world();
         assert_eq!(world.meta.current_tick, 0);
 
-        world.map().get_tile_mut(Point::new(1, 0)).terrain = Boulder::default().into();
+        world.map.get_tile_mut(Point::new(1, 0)).terrain = Boulder::default().into();
         world
             .units
             .player_mut()
@@ -332,7 +334,7 @@ mod tests {
         let mut world = prepare_world();
         assert_eq!(world.meta.current_tick, 0);
 
-        world.map().get_tile_mut(Point::new(1, 0)).terrain = Boulder::default().into();
+        world.map.get_tile_mut(Point::new(1, 0)).terrain = Boulder::default().into();
         world
             .units
             .player_mut()
@@ -362,7 +364,7 @@ mod tests {
             Race::Gazan
         );
 
-        world.map().get_tile_mut(Point::new(1, 0)).terrain = Boulder::default().into();
+        world.map.get_tile_mut(Point::new(1, 0)).terrain = Boulder::default().into();
         world.units.player_mut().inventory_mut().unwrap().clear();
         let action = Action::new(0, Melee::new(Point::new(1, 0), &world).into(), &world).unwrap();
         world.units.player_mut().set_action(Some(action));
@@ -384,7 +386,7 @@ mod tests {
         world.units.player_mut().personality.appearance.race = Race::Lagnam;
         world.units.player_mut().inventory_mut().unwrap().clear();
 
-        world.map().get_tile_mut(Point::new(1, 0)).terrain = Boulder::default().into();
+        world.map.get_tile_mut(Point::new(1, 0)).terrain = Boulder::default().into();
         let action = Action::new(0, Melee::new(Point::new(1, 0), &world).into(), &world).unwrap();
         world.units.player_mut().set_action(Some(action));
         world.tick();

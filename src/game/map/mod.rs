@@ -29,15 +29,20 @@ pub struct Map {
     noise: FastNoise,
 }
 
+fn default_noise(seed: u64) -> FastNoise {
+    let mut noise = FastNoise::seeded(seed);
+    noise.set_noise_type(NoiseType::PerlinFractal);
+    noise.set_fractal_type(FractalType::FBM);
+    noise.set_fractal_octaves(5);
+    noise.set_fractal_gain(0.6);
+    noise.set_fractal_lacunarity(2.0);
+    noise.set_frequency(2.0);
+    noise
+}
+
 impl Map {
     pub fn new(seed: u64, chunks: HashMap<ChunkPos, Chunk>, changed: HashSet<ChunkPos>) -> Self {
-        let mut noise = FastNoise::seeded(seed);
-        noise.set_noise_type(NoiseType::PerlinFractal);
-        noise.set_fractal_type(FractalType::FBM);
-        noise.set_fractal_octaves(5);
-        noise.set_fractal_gain(0.6);
-        noise.set_fractal_lacunarity(2.0);
-        noise.set_frequency(2.0);
+        let noise = default_noise(seed);
 
         Self {
             seed,
@@ -105,6 +110,21 @@ impl Map {
             }
         }
         tiles
+    }
+
+    pub fn get_passage_cost(&self, pos: Point) -> Option<u32> {
+        let tile = self.get_tile_opt(pos)?;
+        match tile.passage() {
+            Passage::Impassable => None,
+            Passage::Passable(cost) => Some(cost),
+            Passage::TemporaryImpassable(unit_id) => {
+                if unit_id == 0 {
+                    Some(Passage::UNIT_PASSAGE_COST)
+                } else {
+                    None
+                }
+            }
+        }
     }
 }
 

@@ -35,7 +35,13 @@ pub fn ranged_attack_unit(
     if throw_roll.natural == 1 {
         let units_to_hit = DIR8
             .into_iter()
-            .flat_map(|dir| world.map().get_tile(defender.pos() + dir).units.clone())
+            .filter_map(|dir| {
+                world
+                    .map
+                    .get_tile_opt(defender.pos() + dir)
+                    .map(|t| t.units.clone())
+            })
+            .flatten()
             .collect::<Vec<_>>();
         if units_to_hit.is_empty() {
             return UnitRangedAttackResult::Miss;

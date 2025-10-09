@@ -16,7 +16,7 @@ use crate::{
 #[allow(clippy::too_many_lines)]
 pub fn draw(
     ctx: &mut Context,
-    world: &World,
+    world: &mut World,
     assets: &Assets,
     window_size: Vec2,
     shift_of_view: Point,
@@ -44,10 +44,10 @@ pub fn draw(
     let left_top = center_tile + (-width / 2, -height / 2);
     let right_bottom = center_tile + (width / 2, height / 2);
 
-    let mut map = world.map();
-    map.load_tiles_between(left_top, right_bottom);
+    world.map.load_tiles_between(left_top, right_bottom);
 
-    let tiles = map
+    let tiles = world
+        .map
         .tiles_between(left_top, right_bottom)
         .into_iter()
         // TODO: is_visible takes like 12% of processing time

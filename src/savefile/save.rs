@@ -69,9 +69,8 @@ fn serialize_world(world: &World) -> Result<String, Error> {
         data.push_str(serde_json::to_string(unit).map_err(Error::from)?.as_str());
     }
     data.push_str("\n/units");
-    let mut map = world.map();
-    for coords in map.changed.clone() {
-        let chunk = map.get_chunk(coords);
+    for coords in world.map.changed.clone() {
+        let chunk = world.map.chunks.get(&coords).expect("Missing chunk");
         data.push('\n');
         data.push_str(serde_json::to_string(chunk).map_err(Error::from)?.as_str());
     }

@@ -18,49 +18,58 @@ pub struct WieldFromGround {
 impl ActionImpl for WieldFromGround {
     fn is_possible(&self, actor_id: usize, world: &World) -> ActionPossibility {
         let actor = world.units.get_unit(actor_id);
+        if actor.inventory().is_none() {
+            return No("You don't have an inventory".to_string());
+        }
+        if actor.char_sheet().is_dead() {
+            return No("You are dead".to_string());
+        }
         if actor.char_sheet().shock {
             return No("You are in shock".to_string());
         }
 
         let pos = actor.pos() + self.dir;
-        if let Some(item) = world.map().get_tile(pos).items.last() {
-            match actor.inventory().unwrap().can_wield(item) {
-                Ok(..) => Yes(item.wield_time().round() as u32),
-                Err(e) => No(e),
-            }
-        } else {
-            No("There is nothing to pick up".to_string())
+        let Some(tile) = world.map.get_tile_opt(pos) else {
+            return No("There is nothing to pick up there".to_string());
+        };
+        let Some(item) = tile.items.last() else {
+            return No("There is nothing to pick up".to_string());
+        };
+
+        match actor.inventory().unwrap().can_wield(item) {
+            Ok(..) => Yes(item.wield_time().round() as u32),
+            Err(e) => No(e),
         }
     }
 
     fn on_finish(&self, action: &Action, world: &mut World) {
-        let pos = action.owner_mut(world).pos() + self.dir;
+        let pos = action.owner(world).pos() + self.dir;
+        let Some(item) = world.map.get_tile_mut(pos).items.pop() else {
+            return;
+        };
         let owner = action.owner(world);
-        let item = world.map().get_tile_mut(pos).items.pop();
-        if let Some(item) = item {
-            let mut msg = format!(
-                "{} wield{} the {}.",
-                owner.name_for_actions(),
-                if owner.is_player() { "" } else { "s" },
-                item.name()
-            );
-            if owner.is_player() {
-                if let Some(dice) = item.melee_damage().minimum_strength {
-                    if owner
-                        .char_sheet()
-                        .get_attribute_with_modifiers(Attribute::Strength)
-                        .dice()
-                        < dice
-                    {
-                        msg += " You are not strong enough to use it effectively.";
-                    }
+        let mut msg = format!(
+            "{} wield{} the {}.",
+            owner.name_for_actions(),
+            if owner.is_player() { "" } else { "s" },
+            item.name()
+        );
+        if owner.is_player() {
+            if let Some(dice) = item.melee_damage().minimum_strength {
+                if owner
+                    .char_sheet()
+                    .get_attribute_with_modifiers(Attribute::Strength)
+                    .dice()
+                    < dice
+                {
+                    msg += " You are not strong enough to use it effectively.";
                 }
             }
-            action.owner_mut(world).inventory_mut().unwrap().wield(item);
-            world
-                .log()
-                .push(LogEvent::new(msg, pos, LogCategory::Success));
         }
+        action.owner_mut(world).inventory_mut().unwrap().wield(item);
+        world
+            .log()
+            .push(LogEvent::new(msg, pos, LogCategory::Success));
     }
 }
 
@@ -77,9 +86,9 @@ mod tests {
     #[test]
     fn test_wielding() {
         let mut world = prepare_world();
-        world.map().get_tile_mut(Point::new(1, 0)).items.clear();
+        world.map.get_tile_mut(Point::new(1, 0)).items.clear();
         world
-            .map()
+            .map
             .get_tile_mut(Point::new(1, 0))
             .items
             .push(Item::new(GOD_AXE));
@@ -113,7 +122,7 @@ mod tests {
             .main_hand()
             .unwrap();
         assert_eq!(item.proto().id, GOD_AXE);
-        assert_eq!(0, world.map().get_tile(Point::new(1, 0)).items.len());
+        assert_eq!(0, world.map.get_tile(Point::new(1, 0)).items.len());
     }
 
     #[test]
@@ -138,9 +147,9 @@ mod tests {
             .can_wield(&Item::new(ROCK))
             .is_err());
 
-        world.map().get_tile_mut(Point::new(1, 0)).items.clear();
+        world.map.get_tile_mut(Point::new(1, 0)).items.clear();
         world
-            .map()
+            .map
             .get_tile_mut(Point::new(1, 0))
             .items
             .push(Item::new(GOD_AXE));
@@ -177,9 +186,9 @@ mod tests {
             .can_wield(&Item::new(STONE_SHOVEL))
             .is_err());
 
-        world.map().get_tile_mut(Point::new(1, 0)).items.clear();
+        world.map.get_tile_mut(Point::new(1, 0)).items.clear();
         world
-            .map()
+            .map
             .get_tile_mut(Point::new(1, 0))
             .items
             .push(book_debug());
@@ -198,7 +207,7 @@ mod tests {
 
         let item = world.units.player().inventory.main_hand().unwrap();
         assert_eq!(item.proto().id, book_debug().proto().id);
-        assert_eq!(0, world.map().get_tile(Point::new(1, 0)).items.len());
+        assert_eq!(0, world.map.get_tile(Point::new(1, 0)).items.len());
         assert!(world
             .units
             .player()

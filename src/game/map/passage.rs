@@ -7,6 +7,9 @@ pub enum Passage {
 }
 
 impl Passage {
+    /// Units can't actually pass through other units, so this is just a dummy "big" value for pathfinding purposes.
+    pub const UNIT_PASSAGE_COST: u32 = 100;
+
     pub fn is_passable(self) -> bool {
         self != Passage::Impassable
     }

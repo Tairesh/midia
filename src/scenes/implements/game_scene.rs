@@ -250,7 +250,7 @@ impl Scene for GameScene {
         if self.need_redraw || self.map_canvas.is_none() {
             self.map_canvas = Some(map_view::view::draw(
                 ctx,
-                &self.world,
+                &mut self.world,
                 &self.assets,
                 self.window_size,
                 self.shift_of_view,

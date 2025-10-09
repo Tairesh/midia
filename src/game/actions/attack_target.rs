@@ -12,11 +12,18 @@ pub enum AttackTarget {
 
 impl AttackTarget {
     pub fn auto(pos: Point, world: &World) -> Self {
-        let unit_id = world.map().get_tile(pos).units.iter().copied().next();
-        if let Some(unit_id) = unit_id {
-            Self::avatar(unit_id)
-        } else {
+        let Some(tile) = world.map.get_tile_opt(pos) else {
+            return Self::terrain(pos);
+        };
+
+        let Some(unit_id) = tile.units.iter().copied().next() else {
+            return Self::terrain(pos);
+        };
+
+        if world.units.get_unit(unit_id).char_sheet().is_dead() {
             Self::terrain(pos)
+        } else {
+            Self::avatar(unit_id)
         }
     }
 

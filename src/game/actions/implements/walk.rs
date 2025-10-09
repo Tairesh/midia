@@ -35,9 +35,14 @@ impl Walk {
 impl ActionImpl for Walk {
     fn is_possible(&self, actor_id: usize, world: &World) -> ActionPossibility {
         let actor = world.units.get_unit(actor_id);
+        if actor.char_sheet().is_dead() {
+            return No("You are dead".to_string());
+        }
+
         let pos = actor.pos() + self.dir;
-        let mut map = world.map();
-        let tile = map.get_tile(pos);
+        let Some(tile) = world.map.get_tile_opt(pos) else {
+            return No("You can't walk there".to_string());
+        };
         if !tile.terrain.is_passable() {
             return No(format!("You can't walk to the {}", tile.terrain.name()));
         }
@@ -48,14 +53,18 @@ impl ActionImpl for Walk {
                 world.units.get_unit(unit_id).name_for_actions()
             ));
         }
+        let k_character = actor.char_sheet().walk_koeff();
+        if k_character == 0.0 {
+            return No("You can't walk".to_string());
+        }
+
         Yes({
             let k_diagonal = if self.dir.is_diagonal() { SQRT_2 } else { 1.0 };
-            let k_character = actor.char_sheet().walk_koeff();
             let k = k_diagonal * k_character;
             if let Passable(pass_time) = tile.terrain.passage() {
                 (pass_time as f32 * k).round() as u32
             } else {
-                0
+                unreachable!(); // already checked is_passable above
             }
         })
     }
@@ -64,11 +73,12 @@ impl ActionImpl for Walk {
         world.move_avatar(action.owner, self.dir);
         let pos = world.units.get_unit(action.owner).pos();
         if action.length > 20 && action.owner == 0 {
+            let terrain_name = world
+                .map
+                .get_tile_opt(pos)
+                .map_or("void", |t| t.terrain.name());
             world.log().push(LogEvent::new(
-                format!(
-                    "It takes a long time to walk through the {}",
-                    world.map().get_tile(pos).terrain.name()
-                ),
+                format!("It takes a long time to walk through the {terrain_name}"),
                 pos,
                 LogCategory::Info,
             ));
@@ -90,7 +100,7 @@ mod tests {
     #[test]
     fn test_walking() {
         let mut world = prepare_world();
-        world.map().get_tile_mut(Point::new(1, 0)).terrain = Dirt::default().into();
+        world.map.get_tile_mut(Point::new(1, 0)).terrain = Dirt::default().into();
 
         let typ = Walk {
             dir: Direction::East,
@@ -104,8 +114,8 @@ mod tests {
 
     #[test]
     fn test_walking_fail_to_impassable_terrain() {
-        let world = prepare_world();
-        world.map().get_tile_mut(Point::new(1, 0)).terrain = Boulder::new(BoulderSize::Huge).into();
+        let mut world = prepare_world();
+        world.map.get_tile_mut(Point::new(1, 0)).terrain = Boulder::new(BoulderSize::Huge).into();
 
         assert!(Action::new(
             0,
@@ -121,7 +131,7 @@ mod tests {
     #[test]
     fn test_walking_fail_to_unit() {
         let mut world = prepare_world();
-        world.map().get_tile_mut(Point::new(1, 0)).terrain = Dirt::default().into();
+        world.map.get_tile_mut(Point::new(1, 0)).terrain = Dirt::default().into();
         add_dummy(&mut world, Point::new(1, 0));
 
         assert!(Action::new(
@@ -138,7 +148,7 @@ mod tests {
     #[test]
     fn test_fail_walking_two_units_to_same_place() {
         let mut world = prepare_world();
-        world.map().get_tile_mut(Point::new(0, 1)).terrain = Dirt::default().into();
+        world.map.get_tile_mut(Point::new(0, 1)).terrain = Dirt::default().into();
         let npc = add_dummy(&mut world, Point::new(1, 0));
 
         let action = Action::new(
@@ -174,15 +184,15 @@ mod tests {
             ActionType::Skip(..)
         ));
         assert_eq!(Point::new(1, 0), world.units.get_unit(npc).pos());
-        assert_eq!(1, world.map().get_tile(Point::new(0, 1)).units.len());
-        assert_eq!(1, world.map().get_tile(Point::new(1, 0)).units.len());
-        assert_eq!(0, world.map().get_tile(Point::new(0, 0)).units.len());
+        assert_eq!(1, world.map.get_tile(Point::new(0, 1)).units.len());
+        assert_eq!(1, world.map.get_tile(Point::new(1, 0)).units.len());
+        assert_eq!(0, world.map.get_tile(Point::new(0, 0)).units.len());
     }
 
     #[test]
     fn test_two_monsters_cant_walk_to_same_tile() {
         let mut world = prepare_world();
-        world.map().get_tile_mut(Point::new(1, 1)).terrain = Dirt::default().into();
+        world.map.get_tile_mut(Point::new(1, 1)).terrain = Dirt::default().into();
         let npc1 = add_dummy(&mut world, Point::new(1, 0));
         let npc2 = add_dummy(&mut world, Point::new(0, 1));
 

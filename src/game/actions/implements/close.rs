@@ -19,8 +19,9 @@ impl ActionImpl for Close {
     fn is_possible(&self, actor_id: usize, world: &World) -> ActionPossibility {
         let actor = world.units.get_unit(actor_id);
         let pos = actor.pos() + self.dir;
-        let mut map = world.map();
-        let tile = map.get_tile(pos);
+        let Some(tile) = world.map.get_tile_opt(pos) else {
+            return No("There is nothing to close there".to_string());
+        };
 
         if !tile.terrain.supports_action(TerrainInteractAction::Close) {
             return No(format!("You can't close the {}", tile.terrain.name()));
@@ -46,10 +47,11 @@ impl ActionImpl for Close {
     }
 
     fn on_finish(&self, action: &Action, world: &mut World) {
+        let pos = action.owner(world).pos() + self.dir;
         let owner = action.owner(world);
-        let pos = owner.pos() + self.dir;
-        let mut map = world.map();
-        let tile = map.get_tile_mut(pos);
+        let Some(tile) = world.map.get_tile_opt(pos) else {
+            return;
+        };
 
         world.log().push(LogEvent::new(
             format!(
@@ -65,10 +67,10 @@ impl ActionImpl for Close {
             pos,
             LogCategory::Info,
         ));
+        let tile = world.map.get_tile_mut(pos);
         let new_terrain = tile.terrain.close(tile.items.drain(..).collect());
         tile.terrain = new_terrain;
 
-        drop(map);
         world.calc_fov();
     }
 }
@@ -87,9 +89,9 @@ mod tests {
     #[test]
     fn test_closing() {
         let mut world = prepare_world();
-        world.map().get_tile_mut(Point::new(1, 0)).terrain = Chest::new(Vec::new(), true).into();
+        world.map.get_tile_mut(Point::new(1, 0)).terrain = Chest::new(Vec::new(), true).into();
         world
-            .map()
+            .map
             .get_tile_mut(Point::new(1, 0))
             .items
             .push(Item::new(WOODEN_SPLINTER));
@@ -113,14 +115,15 @@ mod tests {
             "event: {:?}",
             event
         );
+        drop(log);
         assert!(world
-            .map()
+            .map
             .get_tile(Point::new(1, 0))
             .terrain
             .supports_action(TerrainInteractAction::Open));
-        assert!(world.map().get_tile(Point::new(1, 0)).items.is_empty());
+        assert!(world.map.get_tile(Point::new(1, 0)).items.is_empty());
         if let Terrain::Chest(Chest { items_inside, open }) =
-            &world.map().get_tile(Point::new(1, 0)).terrain
+            &world.map.get_tile(Point::new(1, 0)).terrain
         {
             assert!(!open);
             assert_eq!(items_inside.len(), 1);
@@ -132,8 +135,8 @@ mod tests {
 
     #[test]
     fn test_cant_close_closed_chest() {
-        let world = prepare_world();
-        world.map().get_tile_mut(Point::new(1, 0)).terrain = Chest::new(Vec::new(), false).into();
+        let mut world = prepare_world();
+        world.map.get_tile_mut(Point::new(1, 0)).terrain = Chest::new(Vec::new(), false).into();
         let action = Action::new(
             0,
             Close {

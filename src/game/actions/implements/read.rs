@@ -40,8 +40,9 @@ impl ActionImpl for Read {
         }
 
         let pos = actor.pos() + self.dir;
-        let mut map = world.map();
-        let tile = map.get_tile(pos);
+        let Some(tile) = world.map.get_tile_opt(pos) else {
+            return No("There is nothing to read there".to_string());
+        };
         if tile.is_readable() {
             // Every character takes one tick to read, wow!
             let reading_time = tile.read().len() as f32;
@@ -61,11 +62,10 @@ impl ActionImpl for Read {
         let owner = action.owner(world);
         if owner.is_player() {
             let pos = owner.pos() + self.dir;
-            world.log().push(LogEvent::new(
-                world.map().get_tile(pos).read(),
-                pos,
-                LogCategory::Success,
-            ));
+            let text = world.map.get_tile(pos).read();
+            world
+                .log()
+                .push(LogEvent::new(text, pos, LogCategory::Success));
         }
     }
 }
@@ -83,9 +83,9 @@ mod tests {
     #[test]
     fn test_reading() {
         let mut world = prepare_world();
-        world.map().get_tile_mut(Point::new(1, 0)).items.clear();
+        world.map.get_tile_mut(Point::new(1, 0)).items.clear();
         world
-            .map()
+            .map
             .get_tile_mut(Point::new(1, 0))
             .items
             .push(book_debug());
@@ -114,10 +114,10 @@ mod tests {
 
     #[test]
     fn test_cant_read() {
-        let world = prepare_world();
-        world.map().get_tile_mut(Point::new(1, 0)).items.clear();
+        let mut world = prepare_world();
+        world.map.get_tile_mut(Point::new(1, 0)).items.clear();
         world
-            .map()
+            .map
             .get_tile_mut(Point::new(1, 0))
             .items
             .push(book_debug());
@@ -128,10 +128,10 @@ mod tests {
 
     #[test]
     fn test_slow_read() {
-        let world = prepare_world();
-        world.map().get_tile_mut(Point::new(1, 0)).items.clear();
+        let mut world = prepare_world();
+        world.map.get_tile_mut(Point::new(1, 0)).items.clear();
         world
-            .map()
+            .map
             .get_tile_mut(Point::new(1, 0))
             .items
             .push(book_debug());
@@ -143,10 +143,10 @@ mod tests {
 
     #[test]
     fn test_fast_read() {
-        let world = prepare_world();
-        world.map().get_tile_mut(Point::new(1, 0)).items.clear();
+        let mut world = prepare_world();
+        world.map.get_tile_mut(Point::new(1, 0)).items.clear();
         world
-            .map()
+            .map
             .get_tile_mut(Point::new(1, 0))
             .items
             .push(book_debug());

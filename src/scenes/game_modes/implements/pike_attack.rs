@@ -104,11 +104,10 @@ impl GameModeImpl for PikeAttack {
                 }
 
                 if !point.is_zero()
-                    && !world
-                        .map()
-                        .get_tile(world.units.player().pos + point)
-                        .units
-                        .is_empty()
+                    && world
+                        .map
+                        .get_tile_opt(world.units.player().pos + point)
+                        .is_some_and(|t| !t.units.is_empty())
                 {
                     cursors.push((point - self.shift_of_view, Colors::RED, CursorType::Select));
                 }

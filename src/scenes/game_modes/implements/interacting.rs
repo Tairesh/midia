@@ -38,7 +38,10 @@ impl GameModeImpl for Interacting {
             DIR9.into_iter()
                 .filter(|&d| {
                     let pos = world.units.player().pos + d;
-                    self.command.highlight_tile(world.map().get_tile(pos))
+                    let Some(tile) = world.map.get_tile_opt(pos) else {
+                        return false;
+                    };
+                    self.command.highlight_tile(tile)
                 })
                 .map(|d| (d.into(), Colors::WHITE_SMOKE, CursorType::Select))
                 .collect()

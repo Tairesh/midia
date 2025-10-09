@@ -85,12 +85,12 @@ impl AIImpl for BasicMonsterAI {
         }
 
         let regenerate = if let Some(path) = self.selected_pathes.get(&unit_id) {
-            !path.check(&world.map(), pos, player_pos)
+            !path.check(&world.map, pos, player_pos)
         } else {
             true
         };
         if regenerate {
-            let new_path = SelectedPath::new(&world.map(), pos, player_pos);
+            let new_path = SelectedPath::new(&world.map, pos, player_pos);
             if let Some(new_path) = new_path {
                 self.selected_pathes.insert(unit_id, new_path);
             } else {
@@ -115,8 +115,8 @@ mod tests {
 
     use crate::game::actions::AttackTarget;
     use crate::game::map::terrains::{Boulder, BoulderSize, Dirt, DirtVariant};
-    use crate::game::world::tests::{add_monster, prepare_world};
-    use crate::game::Avatar;
+    use crate::game::world::tests::{add_monster, boulder, dirt, prepare_world};
+    use crate::game::{Avatar, Terrain};
 
     use super::*;
 
@@ -124,8 +124,7 @@ mod tests {
     fn test_monster_walk_to_player() {
         let mut world = prepare_world();
         for i in 0..2 {
-            world.map().get_tile_mut(Point::new(i, 0)).terrain =
-                Dirt::new(DirtVariant::Dirt1).into();
+            world.map.get_tile_mut(Point::new(i, 0)).terrain = dirt();
         }
         let npc = add_monster(&mut world, Point::new(2, 0));
         world.plan_test();
@@ -162,17 +161,15 @@ mod tests {
     #[test]
     fn test_monster_finds_path() {
         let mut world = prepare_world();
-        world.map().get_tile_mut(Point::new(2, 0)).terrain = Boulder::new(BoulderSize::Huge).into();
-        world.map().get_tile_mut(Point::new(2, 1)).terrain = Boulder::new(BoulderSize::Huge).into();
-        world.map().get_tile_mut(Point::new(2, -1)).terrain =
-            Boulder::new(BoulderSize::Huge).into();
-        world.map().get_tile_mut(Point::new(3, -1)).terrain =
-            Boulder::new(BoulderSize::Huge).into();
-        world.map().get_tile_mut(Point::new(3, 1)).terrain = Dirt::new(DirtVariant::Dirt1).into();
-        world.map().get_tile_mut(Point::new(2, 2)).terrain = Dirt::new(DirtVariant::Dirt1).into();
-        world.map().get_tile_mut(Point::new(1, 2)).terrain = Dirt::new(DirtVariant::Dirt1).into();
-        world.map().get_tile_mut(Point::new(1, 1)).terrain = Dirt::new(DirtVariant::Dirt1).into();
-        world.map().get_tile_mut(Point::new(1, 0)).terrain = Dirt::new(DirtVariant::Dirt1).into();
+        world.map.get_tile_mut(Point::new(2, 0)).terrain = boulder();
+        world.map.get_tile_mut(Point::new(2, 1)).terrain = boulder();
+        world.map.get_tile_mut(Point::new(2, -1)).terrain = boulder();
+        world.map.get_tile_mut(Point::new(3, -1)).terrain = boulder();
+        world.map.get_tile_mut(Point::new(3, 1)).terrain = dirt();
+        world.map.get_tile_mut(Point::new(2, 2)).terrain = dirt();
+        world.map.get_tile_mut(Point::new(1, 2)).terrain = dirt();
+        world.map.get_tile_mut(Point::new(1, 1)).terrain = dirt();
+        world.map.get_tile_mut(Point::new(1, 0)).terrain = dirt();
         let npc = add_monster(&mut world, Point::new(3, 0));
         world.plan_test();
 

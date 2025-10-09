@@ -26,8 +26,9 @@ impl ActionImpl for Open {
     fn is_possible(&self, actor_id: usize, world: &World) -> ActionPossibility {
         let actor = world.units.get_unit(actor_id);
         let pos = actor.pos() + self.dir;
-        let mut map = world.map();
-        let tile = map.get_tile(pos);
+        let Some(tile) = world.map.get_tile_opt(pos) else {
+            return No("There is nothing to open there".to_string());
+        };
 
         if !tile.terrain.supports_action(TerrainInteractAction::Open) {
             return No(format!("You can't open the {}", tile.terrain.name()));
@@ -37,12 +38,13 @@ impl ActionImpl for Open {
     }
 
     fn on_finish(&self, action: &Action, world: &mut World) {
+        let pos = action.owner(world).pos() + self.dir;
         let owner = action.owner(world);
-        let pos = owner.pos() + self.dir;
-        let mut map = world.map();
-        let tile = map.get_tile_mut(pos);
+        let Some(tile) = world.map.get_tile_opt(pos) else {
+            return;
+        };
 
-        world.log().push(LogEvent::new(
+        world.log.borrow_mut().push(LogEvent::new(
             format!(
                 "{} open{} the {}",
                 owner.name_for_actions(),
@@ -56,11 +58,11 @@ impl ActionImpl for Open {
             pos,
             LogCategory::Info,
         ));
+        let tile = world.map.get_tile_mut(pos);
         let (new_terrain, mut items) = tile.terrain.open();
         tile.terrain = new_terrain;
         tile.items.append(&mut items);
 
-        drop(map);
         world.calc_fov();
     }
 }
@@ -79,7 +81,7 @@ mod tests {
     #[test]
     fn test_opening() {
         let mut world = prepare_world();
-        world.map().get_tile_mut(Point::new(1, 0)).terrain =
+        world.map.get_tile_mut(Point::new(1, 0)).terrain =
             Chest::new(vec![Item::new(WOODEN_SPLINTER)], false).into();
 
         let action = Action::new(0, Open::new(Direction::East), &world).unwrap();
@@ -95,22 +97,17 @@ mod tests {
             "event: {:?}",
             event
         );
-        assert!(world
-            .map()
-            .get_tile(Point::new(1, 0))
-            .terrain
-            .supports_action(TerrainInteractAction::Close));
-        assert_eq!(world.map().get_tile(Point::new(1, 0)).items.len(), 1);
-        assert_eq!(
-            world.map().get_tile(Point::new(1, 0)).items[0].proto().id,
-            WOODEN_SPLINTER
-        );
+        drop(log);
+        let tile = world.map.get_tile(Point::new(1, 0));
+        assert!(tile.terrain.supports_action(TerrainInteractAction::Close));
+        assert_eq!(tile.items.len(), 1);
+        assert_eq!(tile.items[0].proto().id, WOODEN_SPLINTER);
     }
 
     #[test]
     fn test_cant_open_already_opened() {
-        let world = prepare_world();
-        world.map().get_tile_mut(Point::new(1, 0)).terrain = Chest::new(Vec::new(), true).into();
+        let mut world = prepare_world();
+        world.map.get_tile_mut(Point::new(1, 0)).terrain = Chest::new(Vec::new(), true).into();
 
         let action = Action::new(0, Open::new(Direction::East), &world);
         assert!(action.is_err());

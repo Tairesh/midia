@@ -33,11 +33,11 @@ impl GameModeImpl for MeleeAttack {
             DIR8.iter()
                 .copied()
                 .filter(|&dir| {
-                    !world
-                        .map()
-                        .get_tile(world.units.player().pos + dir)
-                        .units
-                        .is_empty()
+                    let pos = world.units.player().pos + dir;
+                    let Some(tile) = world.map.get_tile_opt(pos) else {
+                        return false;
+                    };
+                    !tile.units.is_empty()
                 })
                 .map(|dir| (dir.into(), Colors::RED, CursorType::Select))
                 .collect()

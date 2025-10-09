@@ -24,8 +24,9 @@ impl ActionImpl for DropMainHand {
             return No("You have nothing to drop".to_string());
         }
         let pos = actor.pos() + self.dir;
-        let mut map = world.map();
-        let tile = map.get_tile(pos);
+        let Some(tile) = world.map.get_tile_opt(pos) else {
+            return No("There is no space to drop items there".to_string());
+        };
         if !tile.terrain.supports_action(TerrainInteractAction::Drop) {
             return No(format!(
                 "You can't put items on the {}",
@@ -49,12 +50,14 @@ impl ActionImpl for DropMainHand {
             .unwrap()
             .main_hand_take()
             .unwrap();
-        let owner = action.owner(world);
-        let pos = owner.pos() + self.dir;
+        let pos = action.owner(world).pos() + self.dir;
         let name = item.name().to_string();
-        world.map().get_tile_mut(pos).items.push(item);
+        world.map.get_tile_mut(pos).items.push(item);
         world.log().push(LogEvent::new(
-            format!("{} dropped the {name}", owner.name_for_actions()),
+            format!(
+                "{} dropped the {name}",
+                action.owner(world).name_for_actions()
+            ),
             pos,
             LogCategory::Info,
         ));
@@ -75,8 +78,8 @@ mod tests {
     #[test]
     fn test_dropping() {
         let mut world = prepare_world();
-        world.map().get_tile_mut(Point::new(0, 0)).terrain = Dirt::default().into();
-        world.map().get_tile_mut(Point::new(0, 0)).items.clear();
+        world.map.get_tile_mut(Point::new(0, 0)).terrain = Dirt::default().into();
+        world.map.get_tile_mut(Point::new(0, 0)).items.clear();
         let player = world.units.player_mut();
         player.inventory_mut().unwrap().clear();
         player.inventory_mut().unwrap().wield(Item::new(GOD_AXE));
@@ -101,9 +104,8 @@ mod tests {
             .unwrap()
             .main_hand()
             .is_none());
-        let mut map = world.map();
-        assert_eq!(1, map.get_tile(Point::new(0, 0)).items.len());
-        let item = map.get_tile(Point::new(0, 0)).items.first().unwrap();
+        assert_eq!(1, world.map.get_tile(Point::new(0, 0)).items.len());
+        let item = world.map.get_tile(Point::new(0, 0)).items.first().unwrap();
         assert_eq!(item.proto().id, GOD_AXE);
     }
 }

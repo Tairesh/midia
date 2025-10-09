@@ -26,8 +26,7 @@ pub struct World {
     pub meta: Meta,
     pub game_view: GameView,
     pub units: Units,
-    // TODO: get rid of RefCell
-    map: RefCell<Map>,
+    pub map: Map,
     fov: Fov,
     pub log: RefCell<Log>,
     // TODO: add Rng created with seed
@@ -44,7 +43,7 @@ impl World {
     ) -> Self {
         let changed = chunks.keys().copied().collect();
         let mut world = Self {
-            map: RefCell::new(Map::new(meta.seed, chunks, changed)),
+            map: Map::new(meta.seed, chunks, changed),
             meta,
             game_view,
             units: Units::new(units),
@@ -62,7 +61,7 @@ impl World {
 
         // TODO: don't forget to remove
         world
-            .map()
+            .map
             .get_tile_mut(Point::new(0, 0))
             .items
             .push(Item::new(BONE_KNIFE));
@@ -94,7 +93,7 @@ impl World {
         )));
 
         world.units.iter().for_each(|(&i, unit)| {
-            world.map.borrow_mut().get_tile_mut(unit.pos()).on_step(i);
+            world.map.get_tile_mut(unit.pos()).on_step(i);
         });
 
         world
@@ -107,11 +106,8 @@ impl World {
         // TODO: add periodic Notice roll
         // TODO: add memory
         let vision_range = self.units.player().char_sheet().sight_range();
-        self.fov.set_visible(field_of_view_set(
-            center,
-            vision_range as i32,
-            &self.map.borrow(),
-        ));
+        self.fov
+            .set_visible(field_of_view_set(center, vision_range as i32, &self.map));
     }
 
     pub fn save(&mut self) {
@@ -126,10 +122,6 @@ impl World {
             .ok();
     }
 
-    pub fn map(&self) -> RefMut<'_, Map> {
-        self.map.borrow_mut()
-    }
-
     pub fn is_visible(&self, pos: impl Into<Point>) -> bool {
         self.fov.visible().contains(&pos.into())
     }
@@ -137,13 +129,13 @@ impl World {
     pub fn move_avatar(&mut self, unit_id: usize, dir: Direction) {
         let mut pos = self.units.get_unit(unit_id).pos();
         let (old_chunk, _) = pos.to_chunk();
-        self.map().get_tile_mut(pos).off_step(unit_id);
+        self.map.get_tile_mut(pos).off_step(unit_id);
         pos += dir;
         let unit = self.units.get_unit_mut(unit_id);
         unit.set_pos(pos);
         unit.view_mut().try_set_direction(dir);
         let unit = self.units.get_unit(unit_id);
-        self.map().get_tile_mut(pos).on_step(unit_id);
+        self.map.get_tile_mut(pos).on_step(unit_id);
         if unit.is_player() && old_chunk != pos.to_chunk().0 {
             self.units.load_units();
         }
@@ -162,8 +154,9 @@ impl World {
 
     // TODO: move this somewhere else
     pub fn this_is(&self, pos: Point, multiline: bool) -> String {
-        let mut map = self.map();
-        let tile = map.get_tile(pos);
+        let Some(tile) = self.map.get_tile_opt(pos) else {
+            return "There is nothing here.".to_string();
+        };
         let mut this_is = format!("This is {}.", lang::a(tile.terrain.name()));
         if multiline {
             this_is = this_is.replace(". ", ".\n");
@@ -208,7 +201,7 @@ impl World {
     pub fn add_unit(&mut self, unit: Box<dyn Avatar>) -> usize {
         let pos = unit.pos();
         let new_id = self.units.add_unit(unit);
-        self.map().get_tile_mut(pos).units.insert(new_id);
+        self.map.get_tile_mut(pos).units.insert(new_id);
 
         new_id
     }
@@ -300,7 +293,7 @@ impl World {
             .apply_hit(hit, current_tick);
         if let Some(items_dropped) = items_dropped {
             for item in items_dropped {
-                self.map().get_tile_mut(pos).items.push(item);
+                self.map.get_tile_mut(pos).items.push(item);
             }
         }
 
@@ -314,7 +307,7 @@ impl World {
                 ),
                 pos,
             ));
-            self.map().get_tile_mut(pos).units.remove(&unit_id);
+            self.map.get_tile_mut(pos).units.remove(&unit_id);
             self.units.unload_unit(unit_id);
         }
     }
@@ -335,9 +328,6 @@ impl World {
 pub mod tests {
     use std::collections::HashMap;
 
-    use crate::game::{AttrLevel, SkillLevel};
-    use roguemetry::Point;
-
     use super::{
         super::{
             actions::implements::{Skip, Walk},
@@ -350,20 +340,31 @@ pub mod tests {
         savefile::{GameView, Meta},
         Action, Direction, Log, Player, TerrainView, World,
     };
+    use crate::game::map::terrains::DirtVariant;
+    use crate::game::{AttrLevel, SkillLevel, Terrain};
+    use roguemetry::Point;
+
+    pub fn boulder() -> Terrain {
+        Boulder::new(BoulderSize::Huge).into()
+    }
+
+    pub fn dirt() -> Terrain {
+        Dirt::new(DirtVariant::Dirt1).into()
+    }
 
     pub fn prepare_world() -> World {
-        let world = World::new(
+        let mut world = World::new(
             Meta::new("test", 1),
             GameView::default(),
             Log::new(),
             HashMap::from([(
-                0 as usize,
+                0usize,
                 Box::new(Player::new(tester_girl(), Point::new(0, 0))) as Box<dyn Avatar>,
             )]),
             HashMap::new(),
         );
-        world.map().get_tile_mut(Point::new(0, 0)).terrain = Dirt::default().into();
-        world.map().get_tile_mut(Point::new(0, 0)).units.insert(0);
+        world.map.get_tile_mut(Point::new(0, 0)).terrain = dirt();
+        world.map.get_tile_mut(Point::new(0, 0)).units.insert(0);
 
         world
     }
@@ -412,7 +413,7 @@ pub mod tests {
         let mut world = prepare_world();
         let monster_id = add_dummy(&mut world, Point::new(1, 0));
 
-        world.map().get_tile_mut(Point::new(2, 0)).terrain = Dirt::default().into();
+        world.map.get_tile_mut(Point::new(2, 0)).terrain = dirt();
         let action = Action::new(1, Walk::new(Direction::East).into(), &world).unwrap();
         let length = action.length;
         let monster = world.units.get_unit_mut(monster_id);
@@ -434,14 +435,14 @@ pub mod tests {
             .visible()
             .contains(&world.units.player().pos().into()));
 
-        world.map().get_tile_mut(Point::new(1, 0)).terrain = Dirt::default().into();
-        world.map().get_tile_mut(Point::new(2, 0)).terrain = Boulder::new(BoulderSize::Huge).into();
+        world.map.get_tile_mut(Point::new(1, 0)).terrain = dirt();
+        world.map.get_tile_mut(Point::new(2, 0)).terrain = boulder();
         assert!(!world
-            .map()
+            .map
             .get_tile(Point::new(2, 0))
             .terrain
             .is_transparent());
-        world.map().get_tile_mut(Point::new(3, 0));
+        world.map.get_tile_mut(Point::new(3, 0));
 
         world.move_avatar(0, Direction::East);
         assert!(world.is_visible(Point::new(1, 0)));

@@ -25,7 +25,7 @@ use crate::{
 use super::super::{
     helpers::{
         back_randomize_next, bg, easy_back, error_label, icon_left, icon_minus, icon_plus,
-        icon_right, label, subtitle, text_input, title,
+        icon_right, label, subtitle, text_input, title, window_size,
     },
     Scene, SceneKind, Transition,
 };
@@ -56,7 +56,6 @@ pub struct CreateCharacter {
     sprites: [Box<dyn UiSprite>; 27],
     race: PlayableRace,
     body_color: Option<BodyColor>,
-    window_size: Vec2,
 }
 
 impl CreateCharacter {
@@ -297,7 +296,6 @@ impl CreateCharacter {
             ],
             meta,
             race: PlayableRace::Gazan,
-            window_size: app.window_size,
             body_color: Some(body_color),
         }
     }
@@ -353,7 +351,7 @@ impl CreateCharacter {
             .set_value(character.appearance.age.to_string());
         self.race = character.appearance.race.into();
         let race_name = self.race.name().to_string();
-        let window_size = self.window_size;
+        let window_size = window_size(ctx);
         self.race_name().update(race_name, ctx, window_size);
         self.body_color = character.appearance.body_color;
         let race = Race::from(self.race);
@@ -418,10 +416,6 @@ impl Scene for CreateCharacter {
         easy_back(&event)
     }
 
-    fn on_resize(&mut self, _ctx: &mut Context, window_size: Vec2) {
-        self.window_size = window_size;
-    }
-
     fn sprites_mut(&mut self) -> UISpritesCollection<'_> {
         Some(&mut self.sprites)
     }
@@ -436,7 +430,7 @@ impl Scene for CreateCharacter {
                     _ => unreachable!(),
                 };
                 let name = self.race.name().to_string();
-                let window_size = self.window_size;
+                let window_size = window_size(ctx);
                 self.race_name().update(name, ctx, window_size);
                 let race = Race::from(self.race);
                 self.race_sprite().set_sprite(race.looks_like());
@@ -486,7 +480,7 @@ impl Scene for CreateCharacter {
                         next_color(body_color, &colors, event == ButtonEvent::ColorRight);
                     self.body_color = Some(body_color);
                     let name = body_color.name();
-                    let window_size = self.window_size;
+                    let window_size = window_size(ctx);
                     self.color_name().update(name, ctx, window_size);
                     self.color_name().set_color(body_color.text_color());
                     self.color_bg().set_color(body_color);

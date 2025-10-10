@@ -12,7 +12,7 @@ use tetra::{
 };
 
 use super::super::{
-    super::{implements::GameScene, Transition},
+    super::{helpers::window_size, implements::GameScene, Transition},
     Cursor, CursorType, GameModeImpl,
 };
 use crate::ui::HasLayout;
@@ -76,7 +76,7 @@ impl Observing {
             self.last_mouse_position = mouse;
             self.last_zoom = zoom;
             if self.mouse_moved {
-                self.mouse_moved_pos = ((mouse - game.window_size / 2.0)
+                self.mouse_moved_pos = ((mouse - window_size(ctx) / 2.0)
                     / (game.assets.tileset.tile_size as f32 * zoom_view))
                     .into();
             }
@@ -106,7 +106,7 @@ impl Observing {
             ),
             Direction::SouthEast => Position::at_center_by_right_bottom(position - position_shift),
         };
-        let window_size = game.window_size;
+        let window_size = window_size(ctx);
         if let Some(sprite) = &mut self.sprite {
             sprite.label.set_value(msg);
             sprite.label.layout_mut().set_position(position);
@@ -143,6 +143,13 @@ impl GameModeImpl for Observing {
             Colors::LIME,
             CursorType::Select,
         )])
+    }
+
+    fn draw(&mut self, ctx: &mut Context, _game: &mut GameScene) {
+        if let Some(sprite) = &mut self.sprite {
+            sprite.mesh.draw(ctx);
+            sprite.label.draw(ctx);
+        }
     }
 
     fn update(&mut self, ctx: &mut Context, game: &mut GameScene) -> Transition {
@@ -192,12 +199,5 @@ impl GameModeImpl for Observing {
         }
 
         Transition::None
-    }
-
-    fn draw(&mut self, ctx: &mut Context, _game: &mut GameScene) {
-        if let Some(sprite) = &mut self.sprite {
-            sprite.mesh.draw(ctx);
-            sprite.label.draw(ctx);
-        }
     }
 }

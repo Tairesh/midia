@@ -20,7 +20,7 @@ use crate::{
     scenes::{
         helpers::{
             back_randomize_reset_next, bg, colored_label, decorative_label, easy_back, icon_minus,
-            icon_plus, title,
+            icon_plus, title, window_size,
         },
         Scene, Transition,
     },
@@ -194,7 +194,6 @@ pub struct CharacterAttributes {
     personality: PlayerPersonality,
     attributes_points: u8,
     skills_points: i8,
-    window_size: Vec2,
     sprites: Vec<Box<dyn UiSprite>>,
 }
 
@@ -369,7 +368,6 @@ impl CharacterAttributes {
             sprites,
             attributes_points: 5,
             skills_points: 15,
-            window_size: app.window_size,
             meta,
             personality,
         }
@@ -415,7 +413,7 @@ impl CharacterAttributes {
         let parry = self.personality.char_sheet.parry();
         let toughness = self.personality.char_sheet.toughness();
 
-        let window_size = self.window_size;
+        let window_size = window_size(ctx);
         self.parry_label()
             .update(format!("Parry: {parry}"), ctx, window_size);
         self.toughness_label()
@@ -506,7 +504,7 @@ impl CharacterAttributes {
     }
 
     fn update_attributes_and_skills(&mut self, ctx: &mut Context) {
-        let window_size = self.window_size;
+        let window_size = window_size(ctx);
 
         for (attribute, value) in self.personality.char_sheet.attributes.get_attributes() {
             self.attribute_label(attribute)
@@ -566,7 +564,7 @@ impl CharacterAttributes {
 
     fn update_attribute_label(&mut self, attribute: Attribute, ctx: &mut Context) {
         let dice_name = self.get_attribute(attribute).name().to_string();
-        let window_size = self.window_size;
+        let window_size = window_size(ctx);
         self.attribute_label(attribute)
             .update(dice_name, ctx, window_size);
         self.update_points(ctx);
@@ -599,7 +597,7 @@ impl CharacterAttributes {
 
     fn update_skill_label(&mut self, skill: Skill, ctx: &mut Context) {
         let skill_name = self.get_skill(skill).name().to_string();
-        let window_size = self.window_size;
+        let window_size = window_size(ctx);
         self.skill_label(skill).update(skill_name, ctx, window_size);
         self.update_points(ctx);
     }
@@ -641,10 +639,6 @@ impl Scene for CharacterAttributes {
 
     fn on_open(&mut self, ctx: &mut Context) {
         self.update_points(ctx);
-    }
-
-    fn on_resize(&mut self, _ctx: &mut Context, window_size: Vec2) {
-        self.window_size = window_size;
     }
 
     fn sprites_mut(&mut self) -> UISpritesCollection<'_> {

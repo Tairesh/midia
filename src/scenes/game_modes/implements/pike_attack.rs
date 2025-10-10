@@ -16,7 +16,7 @@ use crate::{
 };
 
 use super::super::{
-    super::{implements::GameScene, Transition},
+    super::{helpers::window_size, implements::GameScene, Transition},
     Cursor, CursorType, GameModeImpl,
 };
 // TODO: Refactor: this whole file, it's almost identical to Shooting mode
@@ -49,7 +49,7 @@ impl PikeAttack {
             self.last_mouse_position = mouse;
             self.last_zoom = zoom;
             if self.mouse_moved {
-                self.mouse_moved_pos = ((mouse - game.window_size / 2.0)
+                self.mouse_moved_pos = ((mouse - window_size(ctx) / 2.0)
                     / (game.assets.tileset.tile_size as f32 * zoom_view))
                     .into();
             }

@@ -10,6 +10,7 @@ use tetra::{
 
 use super::super::{
     game_modes::{implements::Walking, Cursor, GameMode, GameModeImpl},
+    helpers::window_size,
     map_view, Scene, Transition,
 };
 use crate::{
@@ -37,7 +38,6 @@ pub struct GameScene {
     pub log: GameLog,
     shift_of_view: Point,
     pub assets: Rc<Assets>,
-    pub window_size: Vec2,
     need_redraw: bool,
     map_canvas: Option<Canvas>,
 }
@@ -105,7 +105,6 @@ impl GameScene {
             log: GameLog::new(app.assets.fonts.default.font.clone()),
             shift_of_view: Point::default(),
             assets: app.assets.clone(),
-            window_size: app.window_size,
             world,
             need_redraw: true,
             map_canvas: None,
@@ -205,7 +204,7 @@ impl GameScene {
             self.log.log(event.msg.as_str(), event.category.into());
         }
 
-        let window_size = self.window_size;
+        let window_size = window_size(ctx);
         let current_time = format!("{}", self.world.meta.current_tick);
         self.current_time_label()
             .update(current_time, ctx, window_size);
@@ -247,12 +246,13 @@ impl Scene for GameScene {
     }
 
     fn draw(&mut self, ctx: &mut Context) {
+        let window_size = window_size(ctx);
         if self.need_redraw || self.map_canvas.is_none() {
             self.map_canvas = Some(map_view::view::draw(
                 ctx,
                 &mut self.world,
                 &self.assets,
-                self.window_size,
+                window_size,
                 self.shift_of_view,
             ));
             self.need_redraw = false;
@@ -262,13 +262,7 @@ impl Scene for GameScene {
 
         draw_sprites(ctx, &mut self.sprites);
 
-        map_view::view::draw_cursors(
-            ctx,
-            &self.world,
-            &self.assets,
-            self.window_size,
-            self.cursors(),
-        );
+        map_view::view::draw_cursors(ctx, &self.world, &self.assets, window_size, self.cursors());
         map_view::ui::draw_log(ctx, &mut self.log);
         map_view::view::draw_unit(
             ctx,
@@ -281,8 +275,7 @@ impl Scene for GameScene {
         self.current_mode().borrow_mut().draw(ctx, self);
     }
 
-    fn on_resize(&mut self, _ctx: &mut Context, window_size: Vec2) {
-        self.window_size = window_size;
+    fn on_resize(&mut self, _ctx: &mut Context, _window_size: Vec2) {
         self.need_redraw = true;
     }
 

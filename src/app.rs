@@ -12,7 +12,6 @@ use crate::{
 
 pub struct App {
     pub assets: Rc<Assets>,
-    pub window_size: Vec2,
     scenes: Vec<Box<dyn Scene>>,
     fps_counter: Label,
 }
@@ -26,11 +25,9 @@ impl App {
             Colors::LIME,
             Position::by_right_top(Vec2::new(-10.0, 10.0)),
         );
-        let (w, h) = window::get_size(ctx);
         let mut app = Self {
             assets: Rc::new(assets),
             scenes: vec![],
-            window_size: Vec2::new(w as f32, h as f32),
             fps_counter,
         };
         app.push_scene(ctx, SceneKind::MainMenu);
@@ -45,11 +42,12 @@ impl App {
         if let Some(scene) = self.current_scene() {
             scene.on_open(ctx);
         }
-        self.on_resize(ctx, self.window_size);
+        let window_size = window::get_size(ctx);
+        let window_size = Vec2::new(window_size.0 as f32, window_size.1 as f32);
+        self.on_resize(ctx, window_size);
     }
 
     fn on_resize(&mut self, ctx: &mut Context, window_size: Vec2) {
-        self.window_size = window_size;
         if let Some(scene) = self.current_scene() {
             scene.relayout(ctx, window_size);
             scene.on_resize(ctx, window_size);

@@ -16,6 +16,11 @@ use super::Transition;
 
 pub const UI_ICONS_SCALE: Vec2 = Vec2::new(3.0, 3.0);
 
+pub(crate) fn window_size(ctx: &mut Context) -> Vec2 {
+    let window_size = tetra::window::get_size(ctx);
+    Vec2::new(window_size.0 as f32, window_size.1 as f32)
+}
+
 pub(crate) fn easy_back(event: &Event) -> Transition {
     match event {
         Event::MouseButtonPressed {

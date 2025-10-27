@@ -258,10 +258,10 @@ mod tests {
         assert_eq!(world.meta.current_tick, 0);
 
         add_dummy(&mut world, Point::new(1, 0));
-        world.units.player_mut().inventory_mut().unwrap().clear();
+        world.player_inventory_mut().clear();
 
         let action = Action::new(0, Melee::new(Point::new(1, 0), &world).into(), &world).unwrap();
-        world.units.player_mut().set_action(Some(action));
+        world.player_mut().set_action(Some(action));
         world.tick();
 
         assert_eq!(world.meta.current_tick, ATTACK_MOVES as u128);
@@ -279,15 +279,10 @@ mod tests {
         assert_eq!(world.meta.current_tick, 0);
 
         add_dummy(&mut world, Point::new(1, 0));
-        world
-            .units
-            .player_mut()
-            .inventory_mut()
-            .unwrap()
-            .wield(Item::new(GOD_AXE));
+        world.player_inventory_mut().wield(Item::new(GOD_AXE));
 
         let action = Action::new(0, Melee::new(Point::new(1, 0), &world).into(), &world).unwrap();
-        world.units.player_mut().set_action(Some(action));
+        world.player_mut().set_action(Some(action));
         world.tick();
 
         assert_eq!(world.meta.current_tick, ATTACK_MOVES as u128);
@@ -305,14 +300,9 @@ mod tests {
         assert_eq!(world.meta.current_tick, 0);
 
         world.map.get_tile_mut(Point::new(1, 0)).terrain = Boulder::default().into();
-        world
-            .units
-            .player_mut()
-            .inventory_mut()
-            .unwrap()
-            .wield(Item::new(DEMONIC_SAP));
+        world.player_inventory_mut().wield(Item::new(DEMONIC_SAP));
         let action = Action::new(0, Melee::new(Point::new(1, 0), &world).into(), &world).unwrap();
-        world.units.player_mut().set_action(Some(action));
+        world.player_mut().set_action(Some(action));
         world.tick();
 
         assert_eq!(world.meta.current_tick, ATTACK_MOVES as u128);
@@ -332,14 +322,9 @@ mod tests {
         assert_eq!(world.meta.current_tick, 0);
 
         world.map.get_tile_mut(Point::new(1, 0)).terrain = Boulder::default().into();
-        world
-            .units
-            .player_mut()
-            .inventory_mut()
-            .unwrap()
-            .wield(Item::new(STONE_KNIFE));
+        world.player_inventory_mut().wield(Item::new(STONE_KNIFE));
         let action = Action::new(0, Melee::new(Point::new(1, 0), &world).into(), &world).unwrap();
-        world.units.player_mut().set_action(Some(action));
+        world.player_mut().set_action(Some(action));
         world.tick();
 
         assert_eq!(world.meta.current_tick, ATTACK_MOVES as u128);
@@ -355,15 +340,12 @@ mod tests {
     fn test_smash_with_fists() {
         let mut world = prepare_world();
         assert_eq!(world.meta.current_tick, 0);
-        assert_eq!(
-            world.units.player().personality.appearance.race,
-            Race::Gazan
-        );
+        assert_eq!(world.player().personality.appearance.race, Race::Gazan);
 
         world.map.get_tile_mut(Point::new(1, 0)).terrain = Boulder::default().into();
-        world.units.player_mut().inventory_mut().unwrap().clear();
+        world.player_inventory_mut().clear();
         let action = Action::new(0, Melee::new(Point::new(1, 0), &world).into(), &world).unwrap();
-        world.units.player_mut().set_action(Some(action));
+        world.player_mut().set_action(Some(action));
         world.tick();
 
         assert_eq!(world.meta.current_tick, ATTACK_MOVES as u128);
@@ -378,12 +360,12 @@ mod tests {
     #[test]
     fn test_cant_smash_with_fangs() {
         let mut world = prepare_world();
-        world.units.player_mut().personality.appearance.race = Race::Lagnam;
-        world.units.player_mut().inventory_mut().unwrap().clear();
+        world.player_mut().personality.appearance.race = Race::Lagnam;
+        world.player_inventory_mut().clear();
 
         world.map.get_tile_mut(Point::new(1, 0)).terrain = Boulder::default().into();
         let action = Action::new(0, Melee::new(Point::new(1, 0), &world).into(), &world).unwrap();
-        world.units.player_mut().set_action(Some(action));
+        world.player_mut().set_action(Some(action));
         world.tick();
 
         assert_eq!(world.meta.current_tick, ATTACK_MOVES as u128);
@@ -398,17 +380,12 @@ mod tests {
     #[test]
     fn test_spear_attack() {
         let mut world = prepare_world();
-        world
-            .units
-            .player_mut()
-            .inventory_mut()
-            .unwrap()
-            .wield(Item::new(STONE_SPEAR));
+        world.player_inventory_mut().wield(Item::new(STONE_SPEAR));
 
         let target = Point::new(2, 0);
         add_dummy(&mut world, target);
         let action = Action::new(0, Melee::new(target, &world).into(), &world).unwrap();
-        world.units.player_mut().set_action(Some(action));
+        world.player_mut().set_action(Some(action));
         world.tick();
 
         let event = &world.log.new_events()[0];
@@ -422,12 +399,7 @@ mod tests {
     #[test]
     fn test_spear_cant_attack_on_distance_3() {
         let mut world = prepare_world();
-        world
-            .units
-            .player_mut()
-            .inventory_mut()
-            .unwrap()
-            .wield(Item::new(STONE_SPEAR));
+        world.player_inventory_mut().wield(Item::new(STONE_SPEAR));
 
         let target = Point::new(3, 0);
         assert!(Action::new(0, Melee::new(target, &world).into(), &world).is_err());

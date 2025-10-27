@@ -70,9 +70,7 @@ impl TerrainInteract for Chest {
         let dirt_variant = rng.random::<DirtVariant>();
         let splinters_count = rng.random_range(1..=3);
         let mut items = self.items_inside.clone();
-        for _ in 0..splinters_count {
-            items.push(Item::new(WOODEN_SPLINTER));
-        }
+        items.push(Item::new(WOODEN_SPLINTER).with_stack(splinters_count));
         let result = (Dirt::new(dirt_variant).into(), items);
 
         Some(TerrainSmash::new(8, result))

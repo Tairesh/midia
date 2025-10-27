@@ -62,7 +62,7 @@ impl BasicMonsterAI {
 
 impl AIImpl for BasicMonsterAI {
     fn plan(&mut self, unit_id: usize, world: &World) -> Option<Action> {
-        let player_pos = world.units.player().pos();
+        let player_pos = world.player().pos();
         let unit = world.units.get_unit(unit_id).as_monster()?;
         let pos = unit.pos();
         let distance = pos.distance_to(player_pos).floor() as u32;

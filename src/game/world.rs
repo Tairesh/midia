@@ -18,7 +18,7 @@ use super::{
     races::{BodyColor, Pronouns, Race, Sex},
     savage::HitResult,
     traits::Name,
-    units::{Appearance, Avatar, Monster, Player, Units},
+    units::{Appearance, Avatar, Inventory, Monster, Player, Units},
     Action, CharSheet, Chunk, ChunkPos, Item, Log, LogEvent, Map, TilePos,
 };
 
@@ -171,7 +171,7 @@ impl World {
                 &mut tile
                     .items
                     .iter()
-                    .map(|item| (if multiline { " - " } else { "" }).to_string() + item.name())
+                    .map(|item| (if multiline { " - " } else { "" }).to_string() + &item.name())
                     .collect(),
             );
         }
@@ -317,6 +317,22 @@ impl World {
             self.act();
         }
     }
+
+    pub fn player(&self) -> &Player {
+        self.units.player()
+    }
+
+    pub fn player_mut(&mut self) -> &mut Player {
+        self.units.player_mut()
+    }
+
+    pub fn player_inventory(&self) -> &Inventory {
+        self.units.player().inventory().unwrap()
+    }
+
+    pub fn player_inventory_mut(&mut self) -> &mut Inventory {
+        self.units.player_mut().inventory_mut().unwrap()
+    }
 }
 
 #[cfg(test)]
@@ -413,22 +429,19 @@ pub mod tests {
         let length = action.length;
         let monster = world.units.get_unit_mut(monster_id);
         monster.set_action(Some(action));
-        assert_eq!(Point::new(0, 0), world.units.player().pos());
+        assert_eq!(Point::new(0, 0), world.player().pos());
         assert_eq!(Point::new(1, 0), world.units.get_unit(monster_id).pos());
         let action = Action::new(0, Skip::new(length).into(), &world).unwrap();
-        world.units.player_mut().set_action(Some(action));
+        world.player_mut().set_action(Some(action));
         world.tick();
-        assert_eq!(Point::new(0, 0), world.units.player().pos());
+        assert_eq!(Point::new(0, 0), world.player().pos());
         assert_eq!(Point::new(2, 0), world.units.get_unit(monster_id).pos())
     }
 
     #[test]
     pub fn test_fov() {
         let mut world = prepare_world();
-        assert!(world
-            .fov
-            .visible()
-            .contains(&world.units.player().pos().into()));
+        assert!(world.fov.visible().contains(&world.player().pos().into()));
 
         world.map.get_tile_mut(Point::new(1, 0)).terrain = dirt();
         world.map.get_tile_mut(Point::new(2, 0)).terrain = boulder();

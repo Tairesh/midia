@@ -45,7 +45,7 @@ mod tests {
 
         assert_eq!(0, world.meta.current_tick);
         let action = Action::new(0, Skip::new(ticks), &world).unwrap();
-        world.units.player_mut().set_action(Some(action));
+        world.player_mut().set_action(Some(action));
         world.tick();
         assert_eq!(ticks as u128, world.meta.current_tick);
     }

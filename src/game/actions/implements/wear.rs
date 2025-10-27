@@ -85,17 +85,12 @@ mod tests {
     #[test]
     fn test_wear() {
         let mut world = prepare_world();
-        world.units.player_mut().inventory_mut().unwrap().clear();
-        world
-            .units
-            .player_mut()
-            .inventory_mut()
-            .unwrap()
-            .wield(Item::new(CLOAK));
+        world.player_inventory_mut().clear();
+        world.player_inventory_mut().wield(Item::new(CLOAK));
 
         if let Ok(action) = Action::new(0, Wear {}.into(), &world) {
-            world.units.player_mut().set_action(Some(action));
-            while world.units.player().action().is_some() {
+            world.player_mut().set_action(Some(action));
+            while world.player().action().is_some() {
                 world.tick();
             }
         } else {
@@ -103,18 +98,9 @@ mod tests {
         }
 
         assert!(world.log.new_events()[0].msg.contains("put on the cloak"));
+        assert!(world.player_inventory().main_hand().is_none());
         assert!(world
-            .units
-            .player()
-            .inventory()
-            .unwrap()
-            .main_hand()
-            .is_none());
-        assert!(world
-            .units
-            .player()
-            .inventory()
-            .unwrap()
+            .player_inventory()
             .iter_wear()
             .any(|i| i.proto().id == "cloak"));
     }
@@ -122,15 +108,10 @@ mod tests {
     #[test]
     fn test_wear_invalid_items() {
         let mut world = prepare_world();
-        world.units.player_mut().inventory_mut().unwrap().clear();
+        world.player_inventory_mut().clear();
         assert!(Action::new(0, Wear {}.into(), &world).is_err());
 
-        world
-            .units
-            .player_mut()
-            .inventory_mut()
-            .unwrap()
-            .wield(Item::new(GOD_AXE));
+        world.player_inventory_mut().wield(Item::new(GOD_AXE));
         assert!(Action::new(0, Wear {}.into(), &world).is_err());
     }
 }

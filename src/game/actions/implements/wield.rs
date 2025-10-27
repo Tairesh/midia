@@ -93,13 +93,7 @@ mod tests {
             .items
             .push(Item::new(GOD_AXE));
 
-        assert!(world
-            .units
-            .player()
-            .inventory()
-            .unwrap()
-            .main_hand()
-            .is_none());
+        assert!(world.player_inventory().main_hand().is_none());
         assert_eq!(0, world.meta.current_tick);
 
         let action = Action::new(
@@ -111,16 +105,10 @@ mod tests {
             &world,
         )
         .unwrap();
-        world.units.player_mut().set_action(Some(action));
+        world.player_mut().set_action(Some(action));
         world.tick();
 
-        let item = world
-            .units
-            .player()
-            .inventory()
-            .unwrap()
-            .main_hand()
-            .unwrap();
+        let item = world.player_inventory().main_hand().unwrap();
         assert_eq!(item.proto().id, GOD_AXE);
         assert_eq!(0, world.map.get_tile(Point::new(1, 0)).items.len());
     }
@@ -128,12 +116,7 @@ mod tests {
     #[test]
     fn test_wielding_two_handed_items() {
         let mut world = prepare_world();
-        world
-            .units
-            .player_mut()
-            .inventory_mut()
-            .unwrap()
-            .wield(Item::new(STONE_SHOVEL));
+        world.player_inventory_mut().wield(Item::new(STONE_SHOVEL));
         assert!(world
             .units
             .player()
@@ -167,12 +150,7 @@ mod tests {
     #[test]
     fn test_wielding_one_handed_items() {
         let mut world = prepare_world();
-        world
-            .units
-            .player_mut()
-            .inventory_mut()
-            .unwrap()
-            .wield(Item::new(GOD_AXE));
+        world.player_inventory_mut().wield(Item::new(GOD_AXE));
         assert!(world
             .units
             .player()
@@ -202,10 +180,10 @@ mod tests {
             &world,
         )
         .unwrap();
-        world.units.player_mut().set_action(Some(action));
+        world.player_mut().set_action(Some(action));
         world.tick();
 
-        let item = world.units.player().inventory.main_hand().unwrap();
+        let item = world.player().inventory.main_hand().unwrap();
         assert_eq!(item.proto().id, book_debug().proto().id);
         assert_eq!(0, world.map.get_tile(Point::new(1, 0)).items.len());
         assert!(world

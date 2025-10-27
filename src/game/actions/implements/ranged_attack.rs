@@ -39,46 +39,39 @@ pub fn is_possible(
         return No("You are in shock".to_string());
     }
 
-    if actor.as_fighter().weapon(attack_type).is_none() {
-        return No(format!(
-            "You have nothing to {}.",
-            attack_type.verb_a(false)
-        ));
-    }
+    let Some(weapon) = actor.as_fighter().weapon(attack_type) else {
+        return No(format!("You have nothing to {}.", attack_type.name()));
+    };
 
     // TODO: check for natural weapon
-    let weapon = actor.inventory().unwrap().main_hand().unwrap();
+    let weapon_item = actor.inventory().unwrap().main_hand().unwrap();
 
-    if let Some(NeedAmmoValue { typ, .. }) = weapon.need_ammo() {
-        if !weapon.has_ammo(typ) {
-            return No(format!("You have no ammo in {}!", a(weapon.name())));
+    if let Some(NeedAmmoValue { typ, .. }) = weapon_item.need_ammo() {
+        if !weapon_item.has_ammo(typ) {
+            return No(format!("You have no ammo in {}!", a(weapon_item.name())));
         }
     }
 
     let damage_value = match attack_type {
         AttackType::Throw => {
-            if let Some(throw_value) = weapon.throw_damage() {
+            if let Some(throw_value) = weapon_item.throw_damage() {
                 throw_value
             } else {
-                return No(format!("You can't throw {}.", a(weapon.name())));
+                return No(format!("You can't throw {}.", a(weapon_item.name())));
             }
         }
         AttackType::Shoot => {
-            if let Some(ranged_value) = weapon.ranged_damage() {
+            if let Some(ranged_value) = weapon_item.ranged_damage() {
                 ranged_value
             } else {
-                return No(format!("You can't shoot from {}.", a(weapon.name())));
+                return No(format!("You can't shoot from {}.", a(weapon_item.name())));
             }
         }
         AttackType::Melee => unreachable!(),
     };
     let close_distance = damage_value.distance;
     if close_distance == 0 {
-        return No(format!(
-            "You can't {} {}.",
-            attack_type.verb_a(false),
-            a(weapon.name())
-        ));
+        return No(format!("You can't {}.", attack_type.verb_a(false, &weapon),));
     }
 
     let pos = attack_target.pos(world);
@@ -86,9 +79,8 @@ pub fn is_possible(
 
     match distance {
         RangedDistance::Unreachable => No(format!(
-            "You can't {} {} that far.",
-            attack_type.verb_a(false),
-            a(weapon.name())
+            "You can't {} that far.",
+            attack_type.verb_a(false, &weapon),
         )),
         RangedDistance::Melee => {
             if attack_type == AttackType::Shoot {
@@ -201,7 +193,7 @@ fn log_unit_attack_result(
 ) {
     let owner = world.units.get_unit(owner_id);
     let ends_s = owner.pronouns().verb_ends_with_s();
-    let weapon_name = owner.as_fighter().weapon(attack_type).unwrap().name;
+    let weapon = owner.as_fighter().weapon(attack_type).unwrap();
     let unit = world.units.get_unit(unit_id);
     let target = unit.pos();
     match attack_result {
@@ -213,10 +205,9 @@ fn log_unit_attack_result(
                 unit,
                 hit,
                 format!(
-                    "{} {} {} at {} but miss{} and hit{} {}, dealing {} damage{}.",
+                    "{} {} at {} but miss{} and hit{} {}, dealing {} damage{}.",
                     owner.name_for_actions(),
-                    attack_type.verb_a(ends_s),
-                    a(weapon_name),
+                    attack_type.verb_a(ends_s, &weapon),
                     unit.name_for_actions(),
                     if ends_s { "es" } else { "" },
                     if ends_s { "s" } else { "" },
@@ -239,10 +230,9 @@ fn log_unit_attack_result(
         UnitRangedAttackResult::Miss => {
             world.log.push(LogEvent::warning(
                 format!(
-                    "{} {} {} at {} but miss{}.",
+                    "{} {} at {} but miss{}.",
                     owner.name_for_actions(),
-                    attack_type.verb_a(ends_s),
-                    a(weapon_name),
+                    attack_type.verb_a(ends_s, &weapon),
                     unit.name_for_actions(),
                     if ends_s { "es" } else { "" },
                 ),
@@ -256,10 +246,9 @@ fn log_unit_attack_result(
                 unit,
                 hit,
                 format!(
-                    "{} {} {} at {} and hit{}, dealing {} damage{}.",
+                    "{} {} at {} and hit{}, dealing {} damage{}.",
                     owner.name_for_actions(),
-                    attack_type.verb_a(ends_s),
-                    a(weapon_name),
+                    attack_type.verb_a(ends_s, &weapon),
                     unit.name_for_actions(),
                     if ends_s { "s" } else { "" },
                     if hit.params.damage == 0 {

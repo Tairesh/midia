@@ -29,6 +29,8 @@ pub struct Item {
     looks_like: Option<Sprite>,
     #[serde(default, rename = "t")]
     container: Option<Container>,
+    #[serde(default, rename = "q")]
+    stack: Option<u8>,
 }
 
 impl Item {
@@ -42,6 +44,7 @@ impl Item {
             readable: None,
             looks_like: None,
             container: None,
+            stack: None,
         };
         if let Some(material) = item.proto().color_from_material {
             item.colored = Some(material.into());
@@ -73,6 +76,7 @@ impl Item {
             looks_like: None,
             container: None,
             custom_proto: Some(proto),
+            stack: None,
         }
     }
 
@@ -125,6 +129,12 @@ impl Item {
         self
     }
 
+    pub fn with_stack(mut self, count: u8) -> Self {
+        assert!(self.proto().stackable, "Trying to stack non-stackable item");
+        self.stack = Some(count);
+        self
+    }
+
     pub fn color(&self) -> Color {
         if let &Some(color) = &self.colored {
             return color;
@@ -171,6 +181,14 @@ impl Item {
 
     pub fn is_container(&self) -> bool {
         self.container.is_some()
+    }
+
+    pub fn is_stack(&self) -> bool {
+        self.stack.is_some()
+    }
+
+    pub fn quantity(&self) -> u8 {
+        self.stack.unwrap_or(1)
     }
 
     pub fn drop_time(&self) -> f32 {
@@ -249,12 +267,35 @@ impl Item {
 }
 
 impl Name for Item {
-    fn name(&self) -> &str {
+    fn name(&self) -> String {
         if let Some(named) = &self.named {
-            return named;
+            return named.clone();
         }
 
-        &self.proto().name
+        let name = self.proto().name.clone();
+
+        if let Some(stack) = self.stack {
+            if stack > 1 {
+                return format!("{name}s [x{stack}]");
+            }
+        }
+        if let Some(container) = &self.container {
+            // If it's a ranged weapon, showing (1/1) is not very useful so we'll show (empty/loaded) instead
+            if self.need_ammo().is_some() && container.is_for_ammo() {
+                if container.volume_used() == 0 {
+                    return format!("{name} (empty)");
+                } else if container.max_volume == container.volume_used() {
+                    return format!("{name} (loaded)");
+                }
+            }
+            return format!(
+                "{name} ({}/{})",
+                container.volume_used(),
+                container.max_volume,
+            );
+        }
+
+        name
     }
 }
 
@@ -270,7 +311,7 @@ impl LooksLike for Item {
 
 #[cfg(test)]
 mod tests {
-    use crate::game::map::items::helpers::{BACKPACK, GOD_AXE, QUIVER, WOODEN_ARROW};
+    use crate::game::map::items::helpers::{BACKPACK, GOD_AXE, LAZULI, QUIVER, WOODEN_ARROW};
     use crate::game::traits::Name;
 
     use super::Item;
@@ -278,7 +319,7 @@ mod tests {
     #[test]
     fn test_backpack() {
         let mut backpack = Item::new(BACKPACK);
-        assert_eq!(backpack.name(), "leather backpack");
+        assert_eq!(backpack.name(), "leather backpack (0/30)");
         if let Some(container) = backpack.container_mut() {
             assert_eq!(container.max_volume, 30);
             assert!(!container.is_for_ammo());
@@ -286,6 +327,7 @@ mod tests {
             let axe = Item::new(GOD_AXE);
             container.push_item(axe);
             assert_eq!(container.volume_used(), 1);
+            assert_eq!(backpack.name(), "leather backpack (1/30)");
         } else {
             panic!("backpack is not a container");
         }
@@ -294,7 +336,7 @@ mod tests {
     #[test]
     fn test_quiver() {
         let mut quiver = Item::new(QUIVER);
-        assert_eq!(quiver.name(), "leather quiver");
+        assert_eq!(quiver.name(), "leather quiver (0/15)");
         if let Some(container) = quiver.container_mut() {
             assert_eq!(container.max_volume, 15);
             assert!(container.is_for_ammo());
@@ -305,8 +347,15 @@ mod tests {
             let arrow = Item::new(WOODEN_ARROW);
             container.push_item(arrow);
             assert_eq!(container.volume_used(), 1);
+            assert_eq!(quiver.name(), "leather quiver (1/15)");
         } else {
             panic!("backpack is not a container");
         }
+    }
+
+    #[test]
+    fn test_stackable_item() {
+        let stack = Item::new(LAZULI).with_stack(10);
+        assert_eq!(stack.name(), "lazurite gems [x10]");
     }
 }

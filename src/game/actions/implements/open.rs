@@ -85,8 +85,8 @@ mod tests {
             Chest::new(vec![Item::new(WOODEN_SPLINTER)], false).into();
 
         let action = Action::new(0, Open::new(Direction::East), &world).unwrap();
-        world.units.player_mut().set_action(Some(action));
-        while world.units.player().action().is_some() {
+        world.player_mut().set_action(Some(action));
+        while world.player().action().is_some() {
             world.tick();
         }
 

@@ -12,7 +12,8 @@
       "damage_modifier": {
         "damage": -1
       }
-    }
+    },
+    "stackable": true
   },
   {
     "type": "item",
@@ -27,7 +28,8 @@
       "damage_modifier": {
         "damage": 0
       }
-    }
+    },
+    "stackable": true
   },
   {
     "type": "item",
@@ -42,7 +44,8 @@
       "damage_modifier": {
         "penetration": 2
       }
-    }
+    },
+    "stackable": true
   },
   {
     "type": "item",
@@ -57,7 +60,8 @@
       "damage_modifier": {
         "penetration": 4
       }
-    }
+    },
+    "stackable": true
   },
   {
     "type": "item",
@@ -73,7 +77,8 @@
         "penetration": 2,
         "damage": 2
       }
-    }
+    },
+    "stackable": true
   },
   {
     "type": "item",
@@ -88,7 +93,8 @@
       "damage_modifier": {
         "damage": 1
       }
-    }
+    },
+    "stackable": true
   },
   {
     "type": "item",
@@ -103,7 +109,8 @@
       "damage_modifier": {
         "damage": -1
       }
-    }
+    },
+    "stackable": true
   },
   {
     "type": "item",
@@ -118,7 +125,8 @@
       "damage_modifier": {
         "damage": -1
       }
-    }
+    },
+    "stackable": true
   },
   {
     "type": "item",
@@ -133,7 +141,8 @@
       "damage_modifier": {
         "damage": 0
       }
-    }
+    },
+    "stackable": true
   },
   {
     "type": "item",
@@ -148,7 +157,8 @@
       "damage_modifier": {
         "penetration": 2
       }
-    }
+    },
+    "stackable": true
   },
   {
     "type": "item",
@@ -163,7 +173,8 @@
       "damage_modifier": {
         "penetration": 4
       }
-    }
+    },
+    "stackable": true
   },
   {
     "type": "item",
@@ -179,7 +190,8 @@
         "penetration": 2,
         "damage": 2
       }
-    }
+    },
+    "stackable": true
   },
   {
     "type": "item",
@@ -194,7 +206,8 @@
       "damage_modifier": {
         "damage": 1
       }
-    }
+    },
+    "stackable": true
   },
   {
     "type": "item",
@@ -209,6 +222,7 @@
       "damage_modifier": {
         "damage": -1
       }
-    }
+    },
+    "stackable": true
   }
 ]

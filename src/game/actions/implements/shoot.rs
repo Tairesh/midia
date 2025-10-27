@@ -64,29 +64,21 @@ mod tests {
 
         let target = Point::new(3, 0);
         add_dummy(&mut world, target);
-        world
-            .units
-            .player_mut()
-            .inventory_mut()
-            .unwrap()
-            .wield(Item::new(WOODEN_SHORTBOW));
-        world.units.player_mut().inventory_mut().unwrap().wear(
+
+        let inventory = world.player_inventory_mut();
+        inventory.clear();
+        inventory.wield(Item::new(WOODEN_SHORTBOW));
+        inventory.wear(
             Item::new(QUIVER).with_items_inside([Item::new(WOODEN_ARROW)]),
             0,
         );
 
-        // Can't shoot before loading arrow to bow.
+        // Ensure we can't shoot before loading arrow to bow.
         assert!(Action::new(0, Shoot::new(target, &world).into(), &world).is_err());
-        world
-            .units
-            .player_mut()
-            .inventory_mut()
-            .unwrap()
-            .reload()
-            .ok();
+        world.player_inventory_mut().reload().ok();
 
         let action = Action::new(0, Shoot::new(target, &world).into(), &world).unwrap();
-        world.units.player_mut().set_action(Some(action));
+        world.player_mut().set_action(Some(action));
         world.tick();
 
         assert_eq!(world.meta.current_tick, ATTACK_MOVES as u128);
@@ -95,8 +87,8 @@ mod tests {
         assert!(
             event
                 .msg
-                .contains("shoot from a wooden short bow (wooden arrow) at"),
-            "msg \"{}\" doesn't contains \"shoot from a wooden short bow (wooden arrow) at\"",
+                .contains("shoot the wooden arrow from a wooden short bow (loaded) at"),
+            "msg \"{}\" doesn't contains \"shoot the wooden arrow from a wooden short bow (loaded) at\"",
             event.msg
         );
 
@@ -113,7 +105,7 @@ mod tests {
 
         let target = Point::new(3, 0);
         add_dummy(&mut world, target);
-        world.units.player_mut().inventory_mut().unwrap().clear();
+        world.player_inventory_mut().clear();
 
         assert!(Action::new(0, Shoot::new(target, &world).into(), &world).is_err());
     }
@@ -123,17 +115,14 @@ mod tests {
         let mut world = prepare_world();
         assert_eq!(world.meta.current_tick, 0);
 
-        world
-            .units
-            .player_mut()
-            .inventory_mut()
-            .unwrap()
-            .wield(Item::new(WOODEN_SHORTBOW));
-        world.units.player_mut().inventory_mut().unwrap().wear(
+        let inventory = world.player_inventory_mut();
+        inventory.clear();
+        inventory.wield(Item::new(WOODEN_SHORTBOW));
+        inventory.wear(
             Item::new(QUIVER).with_items_inside([Item::new(WOODEN_ARROW)]),
             0,
         );
-        world.units.player_mut().inventory.reload().ok();
+        inventory.reload().ok();
 
         // Distance of wooden shortbow is 12 so we can shoot to 12*4=48 tiles.
         let target_far = Point::new(48, 0);
@@ -151,20 +140,11 @@ mod tests {
 
         let target = Point::new(3, 0);
         add_dummy(&mut world, target);
-        world.units.player_mut().inventory_mut().unwrap().clear();
-        world
-            .units
-            .player_mut()
-            .inventory_mut()
-            .unwrap()
-            .wield(Item::new(WOODEN_SHORTBOW));
-        world
-            .units
-            .player_mut()
-            .inventory_mut()
-            .unwrap()
-            .reload()
-            .ok();
+
+        let inventory = world.player_inventory_mut();
+        inventory.clear();
+        inventory.wield(Item::new(WOODEN_SHORTBOW));
+        inventory.reload().ok();
 
         assert!(Action::new(0, Shoot::new(target, &world).into(), &world).is_err());
     }
@@ -174,26 +154,18 @@ mod tests {
         let mut world = prepare_world();
         let target = Point::new(3, 0);
         add_dummy(&mut world, target);
-        world
-            .units
-            .player_mut()
-            .inventory_mut()
-            .unwrap()
-            .wield(Item::new(WOODEN_CROSSBOW));
-        world.units.player_mut().inventory_mut().unwrap().wear(
+
+        let inventory = world.player_inventory_mut();
+        inventory.clear();
+        inventory.wield(Item::new(WOODEN_CROSSBOW));
+        inventory.wear(
             Item::new(QUIVER).with_items_inside(vec![Item::new(WOODEN_BOLT); 10]),
             0,
         );
-        assert!(world
-            .units
-            .player_mut()
-            .inventory_mut()
-            .unwrap()
-            .reload()
-            .is_ok());
+        assert!(inventory.reload().is_ok());
 
         let action = Action::new(0, Shoot::new(target, &world).into(), &world).unwrap();
-        world.units.player_mut().set_action(Some(action));
+        world.player_mut().set_action(Some(action));
         world.tick();
 
         assert_eq!(world.meta.current_tick, ATTACK_MOVES as u128);
@@ -202,14 +174,14 @@ mod tests {
         assert!(
             event
                 .msg
-                .contains("shoot from a wooden crossbow (wooden bolt)"),
-            "msg \"{}\" doesn't contains \"shoot from a wooden crossbow (wooden bolt)\"",
+                .contains("shoot the wooden bolt from a wooden crossbow (loaded) at"),
+            "msg \"{}\" doesn't contains \"shoot the wooden bolt from a wooden crossbow (loaded) at\"",
             event.msg
         );
 
         assert!(
             Action::new(0, Shoot::new(target, &world).into(), &world).is_err(),
-            "Assert we can't shoot second time cause there is no more bolts in a crossbow"
+            "Assert we can't shoot second time cause there are no more bolts in a crossbow"
         );
     }
 
@@ -217,8 +189,8 @@ mod tests {
     fn test_shooting_at_moving_target() {
         let mut world = prepare_world();
         let target = Point::new(5, 0);
-        let player = world.units.player_mut();
-        let inventory = player.inventory_mut().unwrap();
+        let inventory = world.player_inventory_mut();
+        inventory.clear();
         inventory.wield(Item::new(WOODEN_CROSSBOW));
         inventory.wear(
             Item::new(QUIVER).with_items_inside(vec![Item::new(WOODEN_BOLT); 10]),
@@ -232,7 +204,7 @@ mod tests {
 
         // Wait 5 ticks to make sure monster will move.
         let action = Action::new(0, Skip::new(5).into(), &world).unwrap();
-        world.units.player_mut().set_action(Some(action));
+        world.player_mut().set_action(Some(action));
         world.tick();
 
         let action = Shoot::new(target, &world);
@@ -246,15 +218,15 @@ mod tests {
             panic!("Unexpected action: {:?}", action);
         }
         let action = Action::new(0, action.into(), &world).unwrap();
-        world.units.player_mut().set_action(Some(action));
+        world.player_mut().set_action(Some(action));
         world.tick();
 
         let event = &world.log.new_events()[0];
         assert!(
             event
                 .msg
-                .contains("shoot from a wooden crossbow (wooden bolt)"),
-            "msg \"{}\" doesn't contains \"shoot from a wooden crossbow (wooden bolt)\"",
+                .contains("shoot the wooden bolt from a wooden crossbow (loaded) at"),
+            "msg \"{}\" doesn't contains \"shoot the wooden bolt from a wooden crossbow (loaded) at\"",
             event.msg
         );
         assert_eq!(

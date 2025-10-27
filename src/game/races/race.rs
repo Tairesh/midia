@@ -113,14 +113,17 @@ impl Race {
         match self {
             Race::Gazan | Race::Nyarnik => Weapon {
                 name: "fists".to_string(),
+                ammo_name: None,
                 damage: DamageValue::strength(DamageType::Blunt),
             },
             Race::Totik | Race::Lagnam => Weapon {
                 name: "fangs".to_string(),
+                ammo_name: None,
                 damage: DamageValue::simple(DamageDice::D4, DamageType::Pierce),
             },
             Race::Bug => Weapon {
                 name: "mandibles".to_string(),
+                ammo_name: None,
                 // TODO: poison
                 damage: DamageValue::simple(DamageDice::D6, DamageType::Pierce),
             },
@@ -148,8 +151,8 @@ impl From<Race> for &str {
 }
 
 impl Name for Race {
-    fn name(&self) -> &'static str {
-        (*self).into()
+    fn name(&self) -> String {
+        <&str>::from(*self).to_string()
     }
 }
 
@@ -230,7 +233,7 @@ impl Distribution<PlayableRace> for StandardUniform {
 }
 
 impl Name for PlayableRace {
-    fn name(&self) -> &'static str {
-        (*self).into()
+    fn name(&self) -> String {
+        <&str>::from(*self).to_string()
     }
 }

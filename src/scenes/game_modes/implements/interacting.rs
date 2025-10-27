@@ -37,7 +37,7 @@ impl GameModeImpl for Interacting {
         } else {
             DIR9.into_iter()
                 .filter(|&d| {
-                    let pos = world.units.player().pos + d;
+                    let pos = world.player().pos + d;
                     let Some(tile) = world.map.get_tile_opt(pos) else {
                         return false;
                     };
@@ -65,7 +65,7 @@ impl GameModeImpl for Interacting {
                 let action = match self.command {
                     PlayerCommand::Open => Open { dir }.into(),
                     PlayerCommand::Close => Close { dir }.into(),
-                    PlayerCommand::Read => Read::new(dir, game.world.units.player()),
+                    PlayerCommand::Read => Read::new(dir, game.world.player()),
                     PlayerCommand::Drop => DropMainHand { dir }.into(),
                     PlayerCommand::WieldFromGround => WieldFromGround { dir }.into(),
                     PlayerCommand::Examine => unreachable!(),

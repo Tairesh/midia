@@ -106,7 +106,7 @@ impl GameModeImpl for PikeAttack {
                 if !point.is_zero()
                     && world
                         .map
-                        .get_tile_opt(world.units.player().pos + point)
+                        .get_tile_opt(world.player().pos + point)
                         .is_some_and(|t| !t.units.is_empty())
                 {
                     cursors.push((point - self.shift_of_view, Colors::RED, CursorType::Select));
@@ -118,7 +118,7 @@ impl GameModeImpl for PikeAttack {
     }
 
     fn can_push(&self, world: &World) -> Result<(), String> {
-        world.units.player().inventory.main_hand().map_or(
+        world.player().inventory.main_hand().map_or(
             Err("You have nothing in your hands!".to_string()),
             |weapon| {
                 if weapon.melee_damage().distance == 0 {
@@ -142,7 +142,7 @@ impl GameModeImpl for PikeAttack {
         } else if input::is_some_of_keys_pressed(ctx, &[Key::F, Key::Space, Key::Enter])
             || input::is_mouse_button_down(ctx, MouseButton::Left)
         {
-            let pos = game.world.units.player().pos + game.shift_of_view() + self.mouse_moved_pos;
+            let pos = game.world.player().pos + game.shift_of_view() + self.mouse_moved_pos;
             let action = Melee::new(pos, &game.world);
             game.try_start_action(action);
             game.set_shift_of_view(Point::default());

@@ -85,7 +85,7 @@ impl Observing {
     }
 
     fn update_sprite(&mut self, ctx: &mut Context, game: &mut GameScene) {
-        let pos = game.world.units.player().pos + game.shift_of_view() + self.mouse_moved_pos;
+        let pos = game.world.player().pos + game.shift_of_view() + self.mouse_moved_pos;
         let msg = if game.world.is_visible(pos) {
             game.world.this_is(pos, true)
         } else {
@@ -160,8 +160,7 @@ impl GameModeImpl for Observing {
             game.modes.pop();
             return Transition::None;
         } else if let Some(dir) = input::get_direction_keys_down(ctx) {
-            let pos =
-                game.world.units.player().pos + game.shift_of_view() + self.mouse_moved_pos + dir;
+            let pos = game.world.player().pos + game.shift_of_view() + self.mouse_moved_pos + dir;
             if game.world.is_visible(pos) {
                 let now = Instant::now();
                 if now.duration_since(self.last_shift).subsec_millis()
@@ -180,7 +179,7 @@ impl GameModeImpl for Observing {
         if input::is_mouse_button_pressed(ctx, input::MouseButton::Left)
             && Settings::instance().debug.god_mode
         {
-            let pos = game.world.units.player().pos + game.shift_of_view() + self.mouse_moved_pos;
+            let pos = game.world.player().pos + game.shift_of_view() + self.mouse_moved_pos;
             let color = rand::rng().sample(BugColorDistribution {});
             game.world.add_unit(Box::new(Monster::new(
                 AI::BasicMonster,

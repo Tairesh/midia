@@ -106,10 +106,10 @@ mod tests {
             dir: Direction::East,
         };
         let action = Action::new(0, typ.into(), &world).unwrap();
-        world.units.player_mut().set_action(Some(action));
+        world.player_mut().set_action(Some(action));
         world.tick();
 
-        assert_eq!(Point::new(1, 0), world.units.player().pos());
+        assert_eq!(Point::new(1, 0), world.player().pos());
     }
 
     #[test]
@@ -160,7 +160,7 @@ mod tests {
             &world,
         )
         .unwrap();
-        world.units.player_mut().set_action(Some(action));
+        world.player_mut().set_action(Some(action));
         let action = Action::new(
             npc,
             Walk {
@@ -172,12 +172,12 @@ mod tests {
         .unwrap();
         world.units.get_unit_mut(npc).set_action(Some(action));
         world.tick();
-        assert_eq!(Point::new(0, 1), world.units.player().pos());
+        assert_eq!(Point::new(0, 1), world.player().pos());
         assert_eq!(Point::new(1, 0), world.units.get_unit(npc).pos());
-        assert!(world.units.player().action().is_none());
+        assert!(world.player().action().is_none());
 
         let action = Action::new(0, Skip::one().into(), &world).unwrap();
-        world.units.player_mut().set_action(Some(action));
+        world.player_mut().set_action(Some(action));
         world.tick();
         assert!(matches!(
             world.units.get_unit(npc).action().unwrap().typ,
@@ -201,7 +201,7 @@ mod tests {
         let action = Action::new(npc2, Walk::new(Direction::East).into(), &world).unwrap();
         world.units.get_unit_mut(npc2).set_action(Some(action));
         let skip = Action::new(0, Skip::new(20).into(), &world).unwrap();
-        world.units.player_mut().set_action(Some(skip));
+        world.player_mut().set_action(Some(skip));
         world.tick();
         let pos1 = world.units.get_unit(npc1).pos();
         let pos2 = world.units.get_unit(npc2).pos();

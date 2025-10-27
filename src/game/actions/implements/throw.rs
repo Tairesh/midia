@@ -62,15 +62,10 @@ mod tests {
 
         let target = Point::new(3, 0);
         add_dummy(&mut world, target);
-        world
-            .units
-            .player_mut()
-            .inventory_mut()
-            .unwrap()
-            .wield(Item::new(ROCK));
+        world.player_inventory_mut().wield(Item::new(ROCK));
 
         let action = Action::new(0, Throw::new(target, &world), &world).unwrap();
-        world.units.player_mut().set_action(Some(action));
+        world.player_mut().set_action(Some(action));
         world.tick();
 
         assert_eq!(world.meta.current_tick, ATTACK_MOVES as u128);
@@ -78,7 +73,7 @@ mod tests {
         let event = &world.log.new_events()[0];
         assert!(
             event.msg.contains("throw a rock at"),
-            "msg \"{}\" doesn't contains \"throw your rock to\"",
+            "msg \"{}\" doesn't contains \"throw a rock at\"",
             event.msg
         );
     }
@@ -90,7 +85,7 @@ mod tests {
 
         let target = Point::new(3, 0);
         add_dummy(&mut world, target);
-        world.units.player_mut().inventory_mut().unwrap().clear();
+        world.player_inventory_mut().clear();
 
         assert!(Action::new(0, Throw::new(target, &world), &world).is_err());
     }
@@ -102,12 +97,7 @@ mod tests {
 
         let target = Point::new(15, 0);
         add_dummy(&mut world, target);
-        world
-            .units
-            .player_mut()
-            .inventory_mut()
-            .unwrap()
-            .wield(Item::new(ROCK));
+        world.player_inventory_mut().wield(Item::new(ROCK));
 
         assert!(Action::new(0, Throw::new(target, &world), &world).is_err());
     }
@@ -120,10 +110,7 @@ mod tests {
         let target = Point::new(3, 0);
         add_dummy(&mut world, target);
         world
-            .units
-            .player_mut()
-            .inventory_mut()
-            .unwrap()
+            .player_inventory_mut()
             .wield(Item::custom(ItemPrototype {
                 id: "big_thing".to_string(),
                 name: "big thing".to_string(),
@@ -139,6 +126,7 @@ mod tests {
                 ranged_damage: None,
                 need_ammo: None,
                 is_ammo: None,
+                stackable: false,
             }));
 
         assert!(Action::new(0, Throw::new(target, &world), &world).is_err());
@@ -148,15 +136,13 @@ mod tests {
     fn test_throwing_at_moving_target() {
         let mut world = prepare_world();
         let target = Point::new(3, 0);
-        let player = world.units.player_mut();
-        let inventory = player.inventory_mut().unwrap();
-        inventory.wield(Item::new(ROCK));
+        world.player_inventory_mut().wield(Item::new(ROCK));
 
         let monster = add_monster(&mut world, target);
 
         // Wait 5 ticks to make sure monster will move.
         let action = Action::new(0, Skip::new(5), &world).unwrap();
-        world.units.player_mut().set_action(Some(action));
+        world.player_mut().set_action(Some(action));
         world.tick();
 
         let action = Throw::new(target, &world);
@@ -170,7 +156,7 @@ mod tests {
             panic!("Unexpected action: {:?}", action);
         }
         let action = Action::new(0, action, &world).unwrap();
-        world.units.player_mut().set_action(Some(action));
+        world.player_mut().set_action(Some(action));
         world.tick();
 
         let event = &world.log.new_events()[0];

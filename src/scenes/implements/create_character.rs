@@ -350,7 +350,7 @@ impl CreateCharacter {
         self.age_input()
             .set_value(character.appearance.age.to_string());
         self.race = character.appearance.race.into();
-        let race_name = self.race.name().to_string();
+        let race_name = self.race.name();
         let window_size = window_size(ctx);
         self.race_name().update(race_name, ctx, window_size);
         self.body_color = character.appearance.body_color;
@@ -429,7 +429,7 @@ impl Scene for CreateCharacter {
                     ButtonEvent::RaceRight => self.race.next(),
                     _ => unreachable!(),
                 };
-                let name = self.race.name().to_string();
+                let name = self.race.name();
                 let window_size = window_size(ctx);
                 self.race_name().update(name, ctx, window_size);
                 let race = Race::from(self.race);

@@ -32,8 +32,8 @@ impl From<Dice> for &str {
 }
 
 impl Name for Dice {
-    fn name(&self) -> &'static str {
-        (*self).into()
+    fn name(&self) -> String {
+        <&str>::from(*self).to_string()
     }
 }
 

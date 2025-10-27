@@ -134,7 +134,7 @@ pub const BOOK: &str = "book";
 pub const WOODEN_SPLINTER: &str = "wooden_splinter";
 // pub const FLESH_CHUNK: &str = "flesh_chunk";
 // pub const BONE: &str = "bone";
-// pub const LAZULI: &str = "lazuli";
+pub const LAZULI: &str = "lazuli";
 
 // pub const WOODEN_SHOVEL: &str = "shovel_wood";
 pub const STONE_SHOVEL: &str = "shovel_stone";
@@ -166,6 +166,7 @@ pub fn dead_body(appearance: &Appearance) -> Item {
         is_ammo: None,
         need_ammo: None,
         color_from_material: Some(Material::Flesh),
+        stackable: false,
     });
     if let Some(color) = appearance.body_color {
         body.with_colored(color)

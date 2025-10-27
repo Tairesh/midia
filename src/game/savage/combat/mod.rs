@@ -1,3 +1,5 @@
+use crate::game::units::Weapon;
+use crate::lang::a;
 pub use hit::HitResult;
 pub use melee::{
     melee_attack_unit, melee_smash_terrain, TerrainMeleeAttackResult, UnitMeleeAttackResult,
@@ -16,19 +18,40 @@ pub enum AttackType {
 }
 
 impl AttackType {
+    pub fn name(self) -> &'static str {
+        match self {
+            AttackType::Melee => "melee",
+            AttackType::Throw => "throw",
+            AttackType::Shoot => "shoot from",
+        }
+    }
+
     /// E.g. "shoot from[ a bow]", "throw[ a spear]", "attack with[ a sword]"
-    pub fn verb_a(self, with_s: bool) -> &'static str {
+    pub fn verb_a(self, with_s: bool, weapon: &Weapon) -> String {
+        let weapon_name = a(&weapon.name);
         if with_s {
             match self {
-                AttackType::Melee => "attacks with",
-                AttackType::Throw => "throws",
-                AttackType::Shoot => "shoots from",
+                AttackType::Melee => format!("attacks with {weapon_name}"),
+                AttackType::Throw => format!("throws {weapon_name}"),
+                AttackType::Shoot => {
+                    if let Some(ammo) = &weapon.ammo_name {
+                        format!("shoots the {ammo} from {weapon_name}")
+                    } else {
+                        format!("shoots from {weapon_name}")
+                    }
+                }
             }
         } else {
             match self {
-                AttackType::Melee => "attack with",
-                AttackType::Throw => "throw",
-                AttackType::Shoot => "shoot from",
+                AttackType::Melee => format!("attack with {weapon_name}"),
+                AttackType::Throw => format!("throw {weapon_name}"),
+                AttackType::Shoot => {
+                    if let Some(ammo) = &weapon.ammo_name {
+                        format!("shoot the {ammo} from {weapon_name}")
+                    } else {
+                        format!("shoot from {weapon_name}")
+                    }
+                }
             }
         }
     }

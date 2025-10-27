@@ -45,7 +45,7 @@ impl DiceWithModifier {
 
 impl From<DiceWithModifier> for String {
     fn from(dice: DiceWithModifier) -> Self {
-        let dice_name = dice.0.name().to_string();
+        let dice_name = dice.0.name();
         match dice.1 {
             0 => dice_name,
             _ => dice_name + if dice.1 > 0 { "+" } else { "" } + format!("{}", dice.1).as_str(),

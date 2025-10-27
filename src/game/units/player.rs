@@ -1,7 +1,3 @@
-use roguemetry::Point;
-use serde::{Deserialize, Serialize};
-use tetra::graphics::Color;
-
 use super::{
     super::{
         races::Pronouns,
@@ -10,6 +6,9 @@ use super::{
     },
     Appearance, Avatar, AvatarView, Fighter, Inventory, PlayerPersonality, Weapon,
 };
+use roguemetry::Point;
+use serde::{Deserialize, Serialize};
+use tetra::graphics::Color;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Player {
@@ -136,10 +135,12 @@ impl Fighter for Player {
     }
 
     fn weapon(&self, attack_type: AttackType) -> Option<Weapon> {
+        // TODO: refactor with Weapon::from_item
         if let Some(weapon) = self.inventory.main_hand() {
-            if attack_type != AttackType::Shoot || weapon.need_ammo().is_none() {
+            if attack_type == AttackType::Melee || weapon.need_ammo().is_none() {
                 return weapon.damage(attack_type).map(|damage| Weapon {
-                    name: weapon.name().to_string(),
+                    name: weapon.name(),
+                    ammo_name: None,
                     damage,
                 });
             }
@@ -153,14 +154,16 @@ impl Fighter for Player {
                         damage.damage.dices.push(dice);
                     }
                     return Some(Weapon {
-                        name: format!("{} ({})", weapon.name(), ammo.name()),
+                        name: weapon.name(),
+                        ammo_name: Some(ammo.name()),
                         damage,
                     });
                 }
             }
 
             return weapon.damage(attack_type).map(|damage| Weapon {
-                name: weapon.name().to_string(),
+                name: weapon.name(),
+                ammo_name: None,
                 damage,
             });
         }

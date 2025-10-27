@@ -99,7 +99,7 @@ impl GameModeImpl for Shooting {
     }
 
     fn can_push(&self, world: &World) -> Result<(), String> {
-        world.units.player().inventory.main_hand().map_or(
+        world.player().inventory.main_hand().map_or(
             Err("You have nothing in your hands!".to_string()),
             |item| {
                 if item.ranged_damage().is_none() {
@@ -125,7 +125,7 @@ impl GameModeImpl for Shooting {
         } else if input::is_some_of_keys_pressed(ctx, &[Key::F, Key::Space, Key::Enter])
             || input::is_mouse_button_down(ctx, MouseButton::Left)
         {
-            let pos = game.world.units.player().pos + game.shift_of_view() + self.mouse_moved_pos;
+            let pos = game.world.player().pos + game.shift_of_view() + self.mouse_moved_pos;
             let action = Shoot::new(pos, &game.world);
             game.try_start_action(action);
             game.set_shift_of_view(Point::default());

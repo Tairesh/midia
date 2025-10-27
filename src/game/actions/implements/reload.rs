@@ -96,7 +96,7 @@ mod tests {
     #[test]
     fn test_cant_reload_without_weapon() {
         let mut world = prepare_world();
-        world.units.player_mut().inventory_mut().unwrap().clear();
+        world.player_inventory_mut().clear();
 
         assert!(Action::new(0, Reload {}.into(), &world).is_err());
     }
@@ -104,13 +104,9 @@ mod tests {
     #[test]
     fn test_cant_reload_without_ammo() {
         let mut world = prepare_world();
-        world.units.player_mut().inventory_mut().unwrap().clear();
-        world
-            .units
-            .player_mut()
-            .inventory_mut()
-            .unwrap()
-            .wield(Item::new(WOODEN_SHORTBOW));
+        let inventory = world.player_inventory_mut();
+        inventory.clear();
+        inventory.wield(Item::new(WOODEN_SHORTBOW));
 
         assert!(Action::new(0, Reload {}.into(), &world).is_err());
     }
@@ -118,13 +114,10 @@ mod tests {
     #[test]
     fn test_cant_reload_when_weapon_is_full() {
         let mut world = prepare_world();
-        world
-            .units
-            .player_mut()
-            .inventory_mut()
-            .unwrap()
-            .wield(Item::new(WOODEN_SHORTBOW).with_items_inside([Item::new(WOODEN_ARROW)]));
-        world.units.player_mut().inventory_mut().unwrap().wear(
+        let inventory = world.player_inventory_mut();
+        inventory.clear();
+        inventory.wield(Item::new(WOODEN_SHORTBOW).with_items_inside([Item::new(WOODEN_ARROW)]));
+        inventory.wear(
             Item::new(QUIVER).with_items_inside([Item::new(WOODEN_ARROW)]),
             0,
         );
@@ -135,22 +128,16 @@ mod tests {
     #[test]
     fn test_reload_bow() {
         let mut world = prepare_world();
-        world
-            .units
-            .player_mut()
-            .inventory_mut()
-            .unwrap()
-            .wield(Item::new(WOODEN_SHORTBOW));
-        world.units.player_mut().inventory_mut().unwrap().wear(
+        let inventory = world.player_inventory_mut();
+        inventory.clear();
+        inventory.wield(Item::new(WOODEN_SHORTBOW));
+        inventory.wear(
             Item::new(QUIVER).with_items_inside([Item::new(WOODEN_ARROW)]),
             0,
         );
+        // Ensure the bow is empty
         assert_eq!(
-            world
-                .units
-                .player()
-                .inventory()
-                .unwrap()
+            inventory
                 .main_hand()
                 .unwrap()
                 .container()
@@ -161,15 +148,12 @@ mod tests {
         );
 
         let action = Action::new(0, Reload {}.into(), &world).unwrap();
-        world.units.player_mut().set_action(Some(action));
+        world.player_mut().set_action(Some(action));
         world.tick();
 
         assert_eq!(
             world
-                .units
-                .player()
-                .inventory()
-                .unwrap()
+                .player_inventory()
                 .main_hand()
                 .unwrap()
                 .container()
@@ -178,28 +162,23 @@ mod tests {
                 .len(),
             1
         );
+        // Check that the action took 0 ticks
         assert_eq!(world.meta.current_tick, 0);
     }
 
     #[test]
     fn test_reload_crossbow() {
         let mut world = prepare_world();
-        world
-            .units
-            .player_mut()
-            .inventory_mut()
-            .unwrap()
-            .wield(Item::new(WOODEN_CROSSBOW));
-        world.units.player_mut().inventory_mut().unwrap().wear(
+        let inventory = world.player_inventory_mut();
+        inventory.clear();
+        inventory.wield(Item::new(WOODEN_CROSSBOW));
+        inventory.wear(
             Item::new(QUIVER).with_items_inside([Item::new(WOODEN_BOLT)]),
             0,
         );
+        // Ensure the crossbow is empty
         assert_eq!(
-            world
-                .units
-                .player()
-                .inventory()
-                .unwrap()
+            inventory
                 .main_hand()
                 .unwrap()
                 .container()
@@ -210,15 +189,12 @@ mod tests {
         );
 
         let action = Action::new(0, Reload {}.into(), &world).unwrap();
-        world.units.player_mut().set_action(Some(action));
+        world.player_mut().set_action(Some(action));
         world.tick();
 
         assert_eq!(
             world
-                .units
-                .player()
-                .inventory()
-                .unwrap()
+                .player_inventory()
                 .main_hand()
                 .unwrap()
                 .container()
@@ -227,6 +203,7 @@ mod tests {
                 .len(),
             1
         );
+        // Check that the action took 10 ticks
         assert_eq!(world.meta.current_tick, 10);
     }
 }

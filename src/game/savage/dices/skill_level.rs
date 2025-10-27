@@ -55,8 +55,8 @@ impl From<SkillLevel> for &str {
 }
 
 impl Name for SkillLevel {
-    fn name(&self) -> &'static str {
-        (*self).into()
+    fn name(&self) -> String {
+        <&str>::from(*self).to_string()
     }
 }
 

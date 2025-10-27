@@ -100,8 +100,8 @@ mod tests {
             dir: Direction::East,
         };
         if let Ok(action) = Action::new(0, typ.into(), &world) {
-            world.units.player_mut().set_action(Some(action));
-            while world.units.player().action().is_some() {
+            world.player_mut().set_action(Some(action));
+            while world.player().action().is_some() {
                 world.tick();
             }
         } else {

@@ -18,7 +18,8 @@
     "//": "add sharp rocks and rubble",
     "is_ammo": {
       "typ": "ROCK"
-    }
+    },
+    "stackable": true
   },
   {
     "type": "item",
@@ -26,6 +27,17 @@
     "name": "wooden splinter",
     "looks_like": "wooden_splinter",
     "size": "SMALL",
-    "materials": ["wood"]
+    "materials": ["wood"],
+    "stackable": true
+  },
+  {
+    "type": "item",
+    "id": "lazuli",
+    "name": "lazurite gem",
+    "description": "A polished lazurite gem, deep blue in color.",
+    "looks_like": "lazuli",
+    "size": "TINY",
+    "materials": ["lapis_lazuli"],
+    "stackable": true
   }
 ]

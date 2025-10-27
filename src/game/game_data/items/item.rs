@@ -47,4 +47,6 @@ pub struct ItemPrototype {
     pub need_ammo: Option<NeedAmmoValue>,
     #[serde(default)]
     pub is_ammo: Option<IsAmmoValue>,
+    #[serde(default)]
+    pub stackable: bool,
 }

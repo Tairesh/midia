@@ -46,7 +46,7 @@ impl GameScene {
     // TODO: refactor this method
     #[allow(clippy::too_many_lines)]
     pub fn new(app: &App, world: World) -> Self {
-        let player = world.units.player();
+        let player = world.player();
         let name_label = Box::new(Label::new(
             player.personality.mind.name.as_str(),
             app.assets.fonts.header.clone(),
@@ -83,7 +83,7 @@ impl GameScene {
             main_hand.map(Item::color),
         ));
         let main_hand_display = Box::new(Label::new(
-            main_hand.map_or("nothing", Item::name),
+            main_hand.map_or("nothing".to_string(), Item::name),
             app.assets.fonts.default.clone(),
             Colors::LIME,
             Position::new(
@@ -125,13 +125,13 @@ impl GameScene {
     }
 
     pub fn try_rotate_player(&mut self, dir: Direction) {
-        if self.world.units.player_mut().view.try_set_direction(dir) {
+        if self.world.player_mut().view.try_set_direction(dir) {
             self.need_redraw = true;
         }
     }
 
     pub fn examine(&mut self, dir: Direction) {
-        let pos = self.world.units.player().pos + dir;
+        let pos = self.world.player().pos + dir;
         self.log
             .log(self.world.this_is(pos, false), Colors::WHITE_SMOKE);
         self.need_redraw = true;
@@ -147,7 +147,7 @@ impl GameScene {
         let action = Action::new(0, typ, &self.world);
         match action {
             Ok(action) => {
-                self.world.units.player_mut().set_action(Some(action));
+                self.world.player_mut().set_action(Some(action));
                 self.need_redraw = true;
             }
             Err(msg) => self.cancel_action_msg(msg),
@@ -209,8 +209,8 @@ impl GameScene {
         self.current_time_label()
             .update(current_time, ctx, window_size);
 
-        let main_hand_item = self.world.units.player().inventory.main_hand();
-        let main_hand_item_name = main_hand_item.map_or("nothing", Item::name).to_string();
+        let main_hand_item = self.world.player().inventory.main_hand();
+        let main_hand_item_name = main_hand_item.map_or("nothing".to_string(), Item::name);
         let main_hand_item_sprite = main_hand_item.map(Item::looks_like).unwrap_or_default();
         let main_hand_item_color = main_hand_item.map(Item::color).unwrap_or_default();
 
@@ -235,7 +235,7 @@ impl Scene for GameScene {
             self.need_redraw = true;
         }
 
-        if self.world.units.player().action.is_some() {
+        if self.world.player().action.is_some() {
             self.make_world_tick(ctx);
             self.need_redraw = true;
 

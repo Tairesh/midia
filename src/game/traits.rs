@@ -1,7 +1,7 @@
 use crate::assets::Sprite;
 
 pub trait Name {
-    fn name(&self) -> &str;
+    fn name(&self) -> String;
 }
 
 pub trait LooksLike {

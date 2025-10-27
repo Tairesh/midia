@@ -60,8 +60,8 @@ impl From<AttrLevel> for &str {
 }
 
 impl Name for AttrLevel {
-    fn name(&self) -> &'static str {
-        (*self).into()
+    fn name(&self) -> String {
+        <&str>::from(*self).to_string()
     }
 }
 

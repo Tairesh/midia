@@ -110,8 +110,8 @@ impl From<BodyColor> for &str {
 }
 
 impl Name for BodyColor {
-    fn name(&self) -> &'static str {
-        (*self).into()
+    fn name(&self) -> String {
+        <&str>::from(*self).to_string()
     }
 }
 

@@ -24,7 +24,7 @@ impl MeleeAttack {
 impl GameModeImpl for MeleeAttack {
     fn cursors(&self, world: &World) -> Option<Vec<Cursor>> {
         Some(if let Some(target) = self.target {
-            let pos = target - world.units.player().pos;
+            let pos = target - world.player().pos;
             vec![
                 (pos, Colors::CURSOR_BG, CursorType::Fill),
                 (pos, Colors::LIGHT_CORAL, CursorType::Select),
@@ -33,7 +33,7 @@ impl GameModeImpl for MeleeAttack {
             DIR8.iter()
                 .copied()
                 .filter(|&dir| {
-                    let pos = world.units.player().pos + dir;
+                    let pos = world.player().pos + dir;
                     let Some(tile) = world.map.get_tile_opt(pos) else {
                         return false;
                     };
@@ -48,7 +48,7 @@ impl GameModeImpl for MeleeAttack {
         if input::is_key_pressed(ctx, Key::Escape) {
             game.modes.pop();
         } else if let Some(dir) = input::get_direction_keys_down(ctx) {
-            self.target = Some(game.world.units.player().pos + dir);
+            self.target = Some(game.world.player().pos + dir);
             game.try_rotate_player(dir);
         } else if let Some(target) = self.target {
             let action = Melee::new(target, &game.world);

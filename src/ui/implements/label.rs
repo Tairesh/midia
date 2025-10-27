@@ -159,7 +159,7 @@ impl ItemDisplay {
         let (name, looks_like) = if let Some(item) = item {
             (item.name(), item.looks_like())
         } else {
-            ("(empty)", Sprite::Empty)
+            ("(empty)".to_string(), Sprite::Empty)
         };
         Self {
             layout: Layout::new(position),
@@ -177,7 +177,7 @@ impl ItemDisplay {
         let (name, looks_like) = if let Some(item) = item {
             (item.name(), Some(item.looks_like()))
         } else {
-            ("(empty)", None)
+            ("(empty)".to_string(), None)
         };
         if name != self.text.content() || looks_like.is_some() != self.icon {
             if let Some(looks_like) = looks_like {

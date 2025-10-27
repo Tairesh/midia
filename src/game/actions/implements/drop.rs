@@ -51,7 +51,7 @@ impl ActionImpl for DropMainHand {
             .main_hand_take()
             .unwrap();
         let pos = action.owner(world).pos() + self.dir;
-        let name = item.name().to_string();
+        let name = item.name();
         world.map.get_tile_mut(pos).items.push(item);
         world.log.push(LogEvent::new(
             format!(
@@ -80,9 +80,9 @@ mod tests {
         let mut world = prepare_world();
         world.map.get_tile_mut(Point::new(0, 0)).terrain = Dirt::default().into();
         world.map.get_tile_mut(Point::new(0, 0)).items.clear();
-        let player = world.units.player_mut();
-        player.inventory_mut().unwrap().clear();
-        player.inventory_mut().unwrap().wield(Item::new(GOD_AXE));
+        let inventory = world.player_inventory_mut();
+        inventory.clear();
+        inventory.wield(Item::new(GOD_AXE));
 
         let action = Action::new(
             0,
@@ -93,17 +93,11 @@ mod tests {
             &world,
         )
         .unwrap();
-        world.units.player_mut().set_action(Some(action));
+        world.player_mut().set_action(Some(action));
         world.tick();
 
-        assert_eq!(Point::new(0, 0), world.units.player().pos());
-        assert!(world
-            .units
-            .player()
-            .inventory()
-            .unwrap()
-            .main_hand()
-            .is_none());
+        assert_eq!(Point::new(0, 0), world.player().pos());
+        assert!(world.player_inventory().main_hand().is_none());
         assert_eq!(1, world.map.get_tile(Point::new(0, 0)).items.len());
         let item = world.map.get_tile(Point::new(0, 0)).items.first().unwrap();
         assert_eq!(item.proto().id, GOD_AXE);

@@ -563,7 +563,7 @@ impl CharacterAttributes {
     }
 
     fn update_attribute_label(&mut self, attribute: Attribute, ctx: &mut Context) {
-        let dice_name = self.get_attribute(attribute).name().to_string();
+        let dice_name = self.get_attribute(attribute).name();
         let window_size = window_size(ctx);
         self.attribute_label(attribute)
             .update(dice_name, ctx, window_size);
@@ -596,7 +596,7 @@ impl CharacterAttributes {
     }
 
     fn update_skill_label(&mut self, skill: Skill, ctx: &mut Context) {
-        let skill_name = self.get_skill(skill).name().to_string();
+        let skill_name = self.get_skill(skill).name();
         let window_size = window_size(ctx);
         self.skill_label(skill).update(skill_name, ctx, window_size);
         self.update_points(ctx);

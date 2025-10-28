@@ -90,21 +90,14 @@ impl Wear {
             if let Some(container) = item.container_mut() {
                 let index = container.items.iter().position(|i| i.is_ammo(ammo_type));
                 if let Some(index) = index {
-                    return Some(container.items.remove(index));
-                }
-            }
-        }
-
-        None
-    }
-
-    #[allow(dead_code)]
-    pub fn remove_by_proto(&mut self, proto: &str) -> Option<Item> {
-        for item in self.iter_mut() {
-            if let Some(container) = item.container_mut() {
-                let index = container.items.iter().position(|i| i.proto().id == proto);
-                if let Some(index) = index {
-                    return Some(container.items.remove(index));
+                    let ammo = container.items.get_mut(index);
+                    if let Some(ammo) = ammo {
+                        return if ammo.is_stack() && ammo.stack_size() > 1 {
+                            ammo.pop_from_stack()
+                        } else {
+                            Some(container.items.remove(index))
+                        };
+                    }
                 }
             }
         }
@@ -190,6 +183,36 @@ mod tests {
         assert_eq!(arrow.proto().id, WOODEN_ARROW);
 
         assert!(wear.remove_ammo(AmmoType::Bolt).is_none());
+        assert!(wear.remove_ammo(AmmoType::Arrow).is_none());
+    }
+
+    #[test]
+    fn test_remove_ammo_from_stack() {
+        let mut wear = Wear::new([(
+            Item::new(QUIVER).with_items_inside(vec![Item::new(WOODEN_ARROW).with_stack(2)]),
+            0,
+        )]);
+        let arrow = wear.remove_ammo(AmmoType::Arrow);
+        assert!(arrow.is_some());
+        let arrow = arrow.unwrap();
+        assert_eq!(arrow.proto().id, WOODEN_ARROW);
+        assert_eq!(arrow.stack_size(), 1);
+
+        let quiver = wear.iter().next().unwrap();
+        let container = quiver.container().unwrap();
+        assert_eq!(container.items.len(), 1);
+        let remaining_arrows = &container.items[0];
+        assert_eq!(remaining_arrows.stack_size(), 1);
+
+        let arrow = wear.remove_ammo(AmmoType::Arrow);
+        assert!(arrow.is_some());
+        let arrow = arrow.unwrap();
+        assert_eq!(arrow.proto().id, WOODEN_ARROW);
+        assert_eq!(arrow.stack_size(), 1);
+
+        let quiver = wear.iter().next().unwrap();
+        let container = quiver.container().unwrap();
+        assert!(container.items.is_empty());
         assert!(wear.remove_ammo(AmmoType::Arrow).is_none());
     }
 }

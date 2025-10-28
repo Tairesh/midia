@@ -187,8 +187,28 @@ impl Item {
         self.stack.is_some()
     }
 
-    pub fn quantity(&self) -> u8 {
+    pub fn stack_size(&self) -> u8 {
         self.stack.unwrap_or(1)
+    }
+
+    pub fn increase_stack(&mut self, count: u8) {
+        self.stack = Some(count + self.stack_size());
+    }
+
+    pub fn pop_from_stack(&mut self) -> Option<Item> {
+        if let Some(stack) = &mut self.stack {
+            if *stack > 0 {
+                *stack -= 1;
+            }
+            if *stack == 0 {
+                self.stack = None;
+            }
+            let mut item = self.clone();
+            item.stack = None;
+            return Some(item);
+        }
+
+        None
     }
 
     pub fn drop_time(&self) -> f32 {

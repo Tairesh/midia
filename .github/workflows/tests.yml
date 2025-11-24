@@ -36,7 +36,7 @@ jobs:
           libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev
 
       - name: "Checkout code"
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: "Install Rust toolchain"
         uses: dtolnay/rust-toolchain@v1

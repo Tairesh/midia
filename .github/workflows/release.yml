@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: "Create release"
         uses: taiki-e/create-gh-release-action@v1
@@ -40,7 +40,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: "Set up SDL3"
         uses: libsdl-org/setup-sdl@main

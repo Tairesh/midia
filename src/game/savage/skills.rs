@@ -1,5 +1,5 @@
 use rand::distr::{Distribution, StandardUniform};
-use rand::Rng;
+use rand::{Rng, RngExt};
 
 use crate::game::races::Race;
 use crate::game::savage::{AttrLevel, Attributes};

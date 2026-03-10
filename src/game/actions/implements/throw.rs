@@ -1,4 +1,4 @@
-use rand::seq::SliceRandom;
+use rand::seq::IndexedRandom;
 use roguemetry::{Point, DIR8};
 
 use super::super::{

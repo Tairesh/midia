@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use enum_iterator::{next_cycle, previous_cycle, Sequence};
 use rand::distr::{Distribution, StandardUniform};
-use rand::Rng;
+use rand::{Rng, RngExt};
 use serde::{Deserialize, Serialize};
 
 use crate::assets::Sprite;

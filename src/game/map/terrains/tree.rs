@@ -1,6 +1,6 @@
 use rand::{
     distr::{Distribution, StandardUniform},
-    Rng,
+    Rng, RngExt,
 };
 
 use crate::assets::Sprite;

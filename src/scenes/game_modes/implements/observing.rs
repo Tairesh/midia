@@ -1,6 +1,6 @@
 use std::time::Instant;
 
-use rand::Rng;
+use rand::RngExt;
 use roguemetry::{Direction, Point, Rect, Vec2};
 use tetra::{
     graphics::{

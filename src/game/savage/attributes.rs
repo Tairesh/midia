@@ -1,5 +1,5 @@
 use rand::distr::{Distribution, StandardUniform};
-use rand::Rng;
+use rand::{Rng, RngExt};
 use serde::{Deserialize, Serialize};
 use tetra::graphics::Color;
 

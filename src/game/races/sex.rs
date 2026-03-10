@@ -1,6 +1,6 @@
 use enum_iterator::Sequence;
 use rand::distr::{Distribution, StandardUniform};
-use rand::Rng;
+use rand::{Rng, RngExt};
 use serde::{Deserialize, Serialize};
 
 use crate::game::races::Gender;

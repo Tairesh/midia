@@ -13,11 +13,11 @@ features = ["serde", "texture_png", "texture_jpeg", "font_ttf"]
 
 [dependencies]
 # my small library for roguelikes' geometry
-roguemetry = { version = "0.1.1", features = ["serde", "rand"] }
+roguemetry = { version = "0.2.0", features = ["serde", "rand"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 serde_with = "3.11"
-rand = "0.9"
+rand = "0.10"
 chrono = "0.4"
 enum_dispatch = "0.3"
 arrayvec = { version = "0.7", features = ["serde"] }

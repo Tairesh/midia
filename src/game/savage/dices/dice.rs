@@ -1,7 +1,7 @@
 use std::ops::{Add, AddAssign, Sub, SubAssign};
 
 use enum_iterator::{next, previous, Sequence};
-use rand::Rng;
+use rand::RngExt;
 use serde::{Deserialize, Serialize};
 use tetra::math::num_traits::Signed;
 

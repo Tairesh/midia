@@ -1,4 +1,4 @@
-use rand::Rng;
+use rand::RngExt;
 
 use crate::game::savage::dices::DiceStack;
 use crate::game::Dice;

@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use rand::Rng;
+use rand::RngExt;
 use roguemetry::{Direction, Point};
 use serde::{Deserialize, Serialize};
 

@@ -1,4 +1,4 @@
-use rand::Rng;
+use rand::RngExt;
 
 use super::super::{TerrainInteract, TerrainView};
 use crate::assets::Sprite;

@@ -1,4 +1,4 @@
-use rand::{distr::StandardUniform, seq::IndexedRandom, Rng};
+use rand::{distr::StandardUniform, seq::IndexedRandom, Rng, RngExt};
 use serde::{Deserialize, Serialize};
 
 use super::super::{

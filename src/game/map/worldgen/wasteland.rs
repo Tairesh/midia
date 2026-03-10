@@ -1,6 +1,6 @@
 use arrayvec::ArrayVec;
 use bracket_noise::prelude::FastNoise;
-use rand::{distr::StandardUniform, prelude::StdRng, Rng, SeedableRng};
+use rand::{distr::StandardUniform, prelude::StdRng, RngExt, SeedableRng};
 use roguemetry::Point;
 
 use super::{

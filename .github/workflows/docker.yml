@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 env:
-  IMAGE: ghcr.io/${{ github.repository }}/ci
+  IMAGE: ghcr.io/tairesh/midia/ci
 
 jobs:
   build-and-push:

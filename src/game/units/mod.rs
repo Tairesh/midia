@@ -54,7 +54,7 @@ impl Units {
         self.units
             .get(&unit_id)
             .unwrap_or_else(|| {
-                panic!("Trying to get unit with id {unit_id} but there is no such unit!",)
+                panic!("Trying to get unit with id {unit_id} but there is no such unit!")
             })
             .as_ref()
     }
@@ -63,7 +63,7 @@ impl Units {
         self.units
             .get_mut(&unit_id)
             .unwrap_or_else(|| {
-                panic!("Trying to get mutable unit with id {unit_id} but there is no such unit!",)
+                panic!("Trying to get mutable unit with id {unit_id} but there is no such unit!")
             })
             .as_mut()
     }

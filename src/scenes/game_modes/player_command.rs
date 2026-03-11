@@ -21,10 +21,10 @@ impl PlayerCommand {
 
     pub fn can_start(self, world: &World) -> Result<(), String> {
         match self {
-            Self::Drop => {
-                if world.player().inventory.main_hand().is_none() {
-                    return Err("You have nothing to drop!".to_string());
-                }
+            Self::Drop
+                if world.player().inventory.main_hand().is_none() =>
+            {
+                return Err("You have nothing to drop!".to_string());
             }
             Self::WieldFromGround => {
                 return world.player().inventory.can_wield_any();

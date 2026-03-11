@@ -10,17 +10,14 @@ use super::{Meta, SAVEFILES_FOLDER};
 pub fn savefiles_exists() -> bool {
     let path = Path::new(SAVEFILES_FOLDER);
     path.read_dir()
-        .map(|mut read_dir| {
+        .is_ok_and(|mut read_dir| {
             read_dir.any(|entry| {
-                entry
-                    .map(|entry| {
-                        entry.file_type().map(|t| t.is_file()).unwrap_or(false)
-                            && entry.path().extension().is_some_and(|ext| ext == "save")
-                    })
-                    .unwrap_or(false)
+                entry.is_ok_and(|entry| {
+                    entry.file_type().is_ok_and(|t| t.is_file())
+                        && entry.path().extension().is_some_and(|ext| ext == "save")
+                })
             })
         })
-        .unwrap_or(false)
 }
 
 pub fn savefiles() -> Vec<Meta> {

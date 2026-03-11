@@ -71,7 +71,7 @@ pub fn is_possible(
     };
     let close_distance = damage_value.distance;
     if close_distance == 0 {
-        return No(format!("You can't {}.", attack_type.verb_a(false, &weapon),));
+        return No(format!("You can't {}.", attack_type.verb_a(false, &weapon)));
     }
 
     let pos = attack_target.pos(world);

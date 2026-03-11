@@ -24,22 +24,10 @@ env:
 jobs:
   tests:
     runs-on: ubuntu-latest
-    container: fedora:42
+    container: ghcr.io/${{ github.repository }}/ci:latest
     steps:
-      - name: "Install native dependencies"
-        run: dnf install -y git SDL3-devel SDL3_image-devel SDL3_ttf-devel gcc
-
       - name: "Checkout code"
         uses: actions/checkout@v6
-
-      - name: "Install Rust toolchain"
-        uses: dtolnay/rust-toolchain@v1
-        with:
-          toolchain: nightly
-          components: clippy,rustfmt
-
-      - name: "Set up Just"
-        uses: extractions/setup-just@v3
 
       - name: "Run checks"
         run: just check

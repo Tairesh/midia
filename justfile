@@ -2,9 +2,7 @@ set dotenv-load := true
 
 check: fmt-check cargo-check test clippy
 
-check-local: cargo-check test-local clippy
-
-before-commit: fix check-local
+before-commit: fix check
 
 fix:
     cargo +nightly fix --allow-dirty --allow-staged
@@ -17,9 +15,6 @@ cargo-check:
     cargo +nightly check
 
 test:
-    cargo +nightly test --all -Z unstable-options --no-fail-fast --features sdl_build_from_source
-
-test-local:
     cargo +nightly test --all -Z unstable-options --no-fail-fast
 
 clippy:

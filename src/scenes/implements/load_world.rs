@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use chrono::{DateTime, Local};
 use roguemetry::Vec2;
@@ -37,6 +37,10 @@ const KEYS: [Key; 10] = [
     Key::Num0,
 ];
 
+const ROW_HEIGHT: f32 = 50.0;
+const ALERT_WIDTH: f32 = 600.0;
+const ROW_WIDTH: f32 = 564.0;
+
 type Sprites = Vec<Box<dyn UiSprite>>;
 
 pub struct LoadWorld {
@@ -47,24 +51,24 @@ pub struct LoadWorld {
 impl LoadWorld {
     pub fn new(app: &App, ctx: &mut Context) -> Self {
         let savefiles = savefiles();
-        let mut sprites: Sprites = Vec::with_capacity(savefiles.len() * 6 + 1);
-        let height = savefiles.len() as f32 * 50.0 + 33.0;
-        // TODO: Add scroll if there are too many savefiles
-        let mut y = -height / 2.0;
+        let height = savefiles.len() as f32 * ROW_HEIGHT + 33.0;
+        let start_y = -height / 2.0;
 
+        let mut sprites: Sprites = Vec::with_capacity(savefiles.len() * 6 + 1);
         sprites.push(Box::new(Alert::new(
-            600.0,
+            ALERT_WIDTH,
             height,
             app.assets.alert.clone(),
             Position::new(
                 Horizontal::CenterByCenter,
                 Vertical::CenterByTop,
-                Vec2::new(0.0, y - 18.0),
+                Vec2::new(0.0, start_y - 18.0),
             ),
         )));
+
         for (i, savefile) in savefiles.iter().enumerate() {
-            Self::push_sprites_for_savefile(&mut sprites, i, savefile, y, ctx, app);
-            y += 50.0;
+            let y = start_y + i as f32 * ROW_HEIGHT;
+            Self::add_row_sprites(&mut sprites, i, savefile, y, ctx, app);
         }
 
         Self {
@@ -73,7 +77,7 @@ impl LoadWorld {
         }
     }
 
-    fn push_sprites_for_savefile(
+    fn add_row_sprites(
         sprites: &mut Sprites,
         i: usize,
         savefile: &Meta,
@@ -81,21 +85,37 @@ impl LoadWorld {
         ctx: &mut Context,
         app: &App,
     ) {
+        let bg_color = if i % 2 == 1 {
+            Colors::DARK_GRAY.with_alpha(0.3)
+        } else {
+            Colors::TRANSPARENT
+        };
+        let version_color = if savefile.version.as_str() == VERSION {
+            Colors::GREEN
+        } else {
+            Colors::RED
+        };
+        let key_label = |n: usize| if n < 9 { n + 1 } else { 0 };
+
+        // Background row
         sprites.push(Box::new(HoverableMesh::new(
-            Mesh::rectangle(ctx, ShapeStyle::Fill, Rectangle::new(0.0, 0.0, 564.0, 50.0)).unwrap(),
-            if i % 2 == 1 {
-                Colors::DARK_GRAY.with_alpha(0.3)
-            } else {
-                Colors::TRANSPARENT
-            },
+            Mesh::rectangle(
+                ctx,
+                ShapeStyle::Fill,
+                Rectangle::new(0.0, 0.0, ROW_WIDTH, ROW_HEIGHT),
+            )
+            .unwrap(),
+            bg_color,
             Colors::KHAKI.with_alpha(0.6),
-            Vec2::new(560.0, 50.0),
+            Vec2::new(560.0, ROW_HEIGHT),
             Position::new(
                 Horizontal::CenterByLeft,
                 Vertical::CenterByTop,
                 Vec2::new(-282.0, y),
             ),
         )));
+
+        // Savefile name
         sprites.push(Box::new(Label::new(
             savefile.name.as_str(),
             app.assets.fonts.header.clone(),
@@ -106,22 +126,22 @@ impl LoadWorld {
                 Vec2::new(-280.0, y - 2.0),
             ),
         )));
+
+        // Version label
         let mut version_label = Box::new(Label::new(
             savefile.version.as_str(),
             app.assets.fonts.default.clone(),
-            if savefile.version.as_str() == VERSION {
-                Colors::GREEN
-            } else {
-                Colors::RED
-            },
+            version_color,
             Position::new(
                 Horizontal::CenterByLeft,
                 Vertical::CenterByTop,
                 Vec2::new(-275.0, y + 30.0),
             ),
         ));
-        let version_label_size = version_label.size(ctx);
+        let version_width = version_label.size(ctx).x;
         sprites.push(version_label);
+
+        // Date/time label
         let time: DateTime<Local> = savefile.time.into();
         sprites.push(Box::new(Label::new(
             time.format("%Y.%m.%d %H:%M:%S").to_string(),
@@ -130,48 +150,47 @@ impl LoadWorld {
             Position::new(
                 Horizontal::CenterByLeft,
                 Vertical::CenterByTop,
-                Vec2::new(-270.0 + version_label_size.x, y + 30.0),
+                Vec2::new(-270.0 + version_width, y + 30.0),
             ),
         )));
+
+        // Load button
+        let (load_text, load_keys) = if i < 10 {
+            (format!("[{}] Load", key_label(i)), vec![KEYS[i].into()])
+        } else {
+            ("Load".to_string(), vec![])
+        };
         sprites.push(Box::new(
             ButtonBuilder::new(app.assets.button.clone())
-                .with_text(
-                    if i < 10 {
-                        format!("[{}] Load", if i < 9 { i + 1 } else { 0 })
-                    } else {
-                        "Load".to_string()
-                    },
-                    app.assets.fonts.default.clone(),
-                )
+                .with_text(load_text, app.assets.fonts.default.clone())
                 .with_position(Position::new(
                     Horizontal::CenterByRight,
                     Vertical::CenterByCenter,
                     Vec2::new(120.0, y + 24.5),
                 ))
-                .with_keys(if i < 10 { vec![KEYS[i].into()] } else { vec![] })
+                .with_keys(load_keys)
                 .with_transition(Transition::CustomEvent((i * 2) as u8))
                 .build(),
         ));
+
+        // Delete button
+        let (delete_text, delete_keys) = if i < 10 {
+            (
+                format!("[Alt+{}] Delete", key_label(i)),
+                vec![(KEYS[i], KeyModifier::Alt).into()],
+            )
+        } else {
+            ("Delete".to_string(), vec![])
+        };
         sprites.push(Box::new(
             ButtonBuilder::new(app.assets.button.clone())
-                .with_text(
-                    if i < 10 {
-                        format!("[Alt+{}] Delete", if i < 9 { i + 1 } else { 0 })
-                    } else {
-                        "Delete".to_string()
-                    },
-                    app.assets.fonts.default.clone(),
-                )
-                .with_keys(if i < 10 {
-                    vec![(KEYS[i], KeyModifier::Alt).into()]
-                } else {
-                    vec![]
-                })
+                .with_text(delete_text, app.assets.fonts.default.clone())
                 .with_position(Position::new(
                     Horizontal::CenterByRight,
                     Vertical::CenterByCenter,
                     Vec2::new(275.0, y + 24.5),
                 ))
+                .with_keys(delete_keys)
                 .with_transition(Transition::CustomEvent((i * 2 + 1) as u8))
                 .build(),
         ));
@@ -194,25 +213,32 @@ impl Scene for LoadWorld {
     fn custom_event(&mut self, _ctx: &mut Context, event: u8) -> Transition {
         let i = (event / 2) as usize;
         let path = self.paths.get(i).expect("Invalid savefile index");
+
         if event.is_multiple_of(2) {
-            // load
-            if let Some(meta) = savefile::load(path) {
-                if savefile::has_avatar(path) {
-                    Transition::Push(SceneKind::Game(path.clone()))
-                } else {
-                    Transition::Switch(SceneKind::CreateCharacter(meta.path))
-                }
-            } else {
-                panic!("Can't load savefile: {}", path.display());
-            }
+            load_savefile(path)
         } else {
-            // delete
-            savefile::delete(path);
-            if savefiles_exists() {
-                Transition::Switch(SceneKind::LoadWorld)
-            } else {
-                Transition::Pop
-            }
+            delete_savefile(path)
         }
+    }
+}
+
+fn load_savefile(path: &Path) -> Transition {
+    if savefile::load(path).is_some() {
+        if savefile::has_avatar(path) {
+            Transition::Push(SceneKind::Game(path.to_path_buf()))
+        } else {
+            Transition::Switch(SceneKind::CreateCharacter(path.to_path_buf()))
+        }
+    } else {
+        panic!("Can't load savefile: {}", path.display());
+    }
+}
+
+fn delete_savefile(path: &Path) -> Transition {
+    savefile::delete(path);
+    if savefiles_exists() {
+        Transition::Switch(SceneKind::LoadWorld)
+    } else {
+        Transition::Pop
     }
 }

@@ -23,6 +23,26 @@ fn random_seed<R: Rng + ?Sized>(rng: &mut R) -> String {
     rng.next_u32().to_string()
 }
 
+fn field_position(y: f32, is_label: bool) -> Position {
+    Position::new(
+        if is_label {
+            Horizontal::CenterByRight
+        } else {
+            Horizontal::CenterByLeft
+        },
+        Vertical::TopByCenter,
+        Vec2::new(if is_label { -10.0 } else { 0.0 }, y),
+    )
+}
+
+fn error_position(y: f32) -> Position {
+    Position::new(
+        Horizontal::CenterByCenter,
+        Vertical::TopByBottom,
+        Vec2::new(125.0, y),
+    )
+}
+
 pub struct CreateWorld {
     // TODO: use some struct instead of array
     sprites: [Box<dyn UiSprite>; 12],
@@ -30,8 +50,7 @@ pub struct CreateWorld {
 
 impl CreateWorld {
     pub fn new(app: &App, ctx: &mut Context) -> Self {
-        let mut rng = rand::rng();
-
+        let seed = random_seed(&mut rand::rng());
         let [back_btn, randomize_btn, create_btn] = back_randomize_next(
             &app.assets,
             ctx,
@@ -41,77 +60,36 @@ impl CreateWorld {
         );
 
         Self {
-            // Order is matter, change hardcoded indices in functions below if modified
+            // Order matters, change hardcoded indices in functions below if modified
             sprites: [
                 bg(&app.assets),
                 title("Create new world:", &app.assets),
-                label(
-                    "World name:",
-                    &app.assets,
-                    Position::new(
-                        Horizontal::CenterByRight,
-                        Vertical::TopByCenter,
-                        Vec2::new(-10.0, 200.0),
-                    ),
-                ),
+                label("World name:", &app.assets, field_position(200.0, true)),
                 text_input(
                     "Test world",
                     250.0,
                     &app.assets,
-                    Position::new(
-                        Horizontal::CenterByLeft,
-                        Vertical::TopByCenter,
-                        Vec2::new(0.0, 200.0),
-                    ),
+                    field_position(200.0, false),
                 ),
-                label(
-                    "World seed:",
-                    &app.assets,
-                    Position::new(
-                        Horizontal::CenterByRight,
-                        Vertical::TopByCenter,
-                        Vec2::new(-10.0, 270.0),
-                    ),
-                ),
-                text_input(
-                    random_seed(&mut rng).as_str(),
-                    250.0,
-                    &app.assets,
-                    Position::new(
-                        Horizontal::CenterByLeft,
-                        Vertical::TopByCenter,
-                        Vec2::new(0.0, 270.0),
-                    ),
-                ),
+                label("World seed:", &app.assets, field_position(270.0, true)),
+                text_input(&seed, 250.0, &app.assets, field_position(270.0, false)),
                 back_btn,
                 randomize_btn,
                 create_btn,
                 error_label(
                     "Savefile with this name already exists",
                     &app.assets,
-                    Position::new(
-                        Horizontal::CenterByCenter,
-                        Vertical::TopByBottom,
-                        Vec2::new(125.0, 180.0),
-                    ),
+                    error_position(180.0),
                 ),
                 error_label(
                     "Seed shall not be empty!",
                     &app.assets,
-                    Position::new(
-                        Horizontal::CenterByCenter,
-                        Vertical::TopByBottom,
-                        Vec2::new(125.0, 250.0),
-                    ),
+                    error_position(250.0),
                 ),
                 error_label(
                     "World name shall not be empty!",
                     &app.assets,
-                    Position::new(
-                        Horizontal::CenterByCenter,
-                        Vertical::TopByBottom,
-                        Vec2::new(125.0, 180.0),
-                    ),
+                    error_position(180.0),
                 ),
             ],
         }
@@ -136,13 +114,14 @@ impl CreateWorld {
 
 impl Scene for CreateWorld {
     fn on_update(&mut self, _ctx: &mut Context) -> Transition {
-        if !self.name_input().is_danger() && self.name_empty().visible() {
+        let name_danger = self.name_input().is_danger();
+        let seed_danger = self.seed_input().is_danger();
+
+        if !name_danger {
             self.name_empty().set_visible(false);
-        }
-        if !self.name_input().is_danger() && self.name_error().visible() {
             self.name_error().set_visible(false);
         }
-        if !self.seed_input().is_danger() && self.seed_error().visible() {
+        if !seed_danger {
             self.seed_error().set_visible(false);
         }
         Transition::None
@@ -168,41 +147,39 @@ impl Scene for CreateWorld {
         match event {
             RANDOMIZE_EVENT => {
                 self.name_input().set_value("Test world");
-                self.seed_input()
-                    .set_value(random_seed(&mut rand::rng()).as_str());
+                self.seed_input().set_value(random_seed(&mut rand::rng()));
                 Transition::None
             }
-            CREATE_EVENT => {
-                let seed = self.seed_input().value();
-                let name = self.name_input().value();
-                if seed.is_empty() {
-                    self.seed_input().set_danger(true);
-                    self.seed_error().set_visible(true);
-                }
-                if name.is_empty() {
-                    self.name_input().set_danger(true);
-                    self.name_empty().set_visible(true);
-                    Transition::None
-                } else {
-                    match savefile::create(name.as_str(), seed.as_str()) {
-                        Ok(path) => Transition::Switch(SceneKind::CreateCharacter(path)),
-                        Err(err) => match err {
-                            savefile::SaveError::System(err) => {
-                                panic!("Can't write savefile: {err}")
-                            }
-                            savefile::SaveError::Serialize(err) => {
-                                panic!("Can't save world: {err}")
-                            }
-                            savefile::SaveError::FileExists => {
-                                self.name_input().set_danger(true);
-                                self.name_error().set_visible(true);
-                                Transition::None
-                            }
-                        },
-                    }
-                }
-            }
+            CREATE_EVENT => self.try_create_world(),
             _ => Transition::None,
+        }
+    }
+}
+
+impl CreateWorld {
+    fn try_create_world(&mut self) -> Transition {
+        let seed = self.seed_input().value();
+        let name = self.name_input().value();
+
+        if seed.is_empty() {
+            self.seed_input().set_danger(true);
+            self.seed_error().set_visible(true);
+        }
+        if name.is_empty() {
+            self.name_input().set_danger(true);
+            self.name_empty().set_visible(true);
+            return Transition::None;
+        }
+
+        match savefile::create(&name, &seed) {
+            Ok(path) => Transition::Switch(SceneKind::CreateCharacter(path)),
+            Err(savefile::SaveError::FileExists) => {
+                self.name_input().set_danger(true);
+                self.name_error().set_visible(true);
+                Transition::None
+            }
+            Err(savefile::SaveError::System(err)) => panic!("Can't write savefile: {err}"),
+            Err(savefile::SaveError::Serialize(err)) => panic!("Can't save world: {err}"),
         }
     }
 }

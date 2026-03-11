@@ -7,8 +7,8 @@ use crate::{
     app::App,
     settings::Settings,
     ui::{
-        draw_sprites, Button, ButtonBuilder, HasSize, Horizontal, Position, Press, Stringify,
-        TextInput, UISpritesCollection, UiSprite, Vertical,
+        draw_sprites, Button, ButtonBuilder, Horizontal, Position, Press, Stringify, TextInput,
+        UISpritesCollection, UiSprite, Vertical,
     },
 };
 
@@ -26,6 +26,7 @@ enum ButtonEvent {
 }
 
 impl From<u8> for ButtonEvent {
+    #[inline]
     fn from(n: u8) -> Self {
         match n {
             0 => Self::WindowMode,
@@ -44,68 +45,44 @@ pub struct SettingsScene {
 impl SettingsScene {
     pub fn new(app: &App, ctx: &mut Context) -> Self {
         let settings = Settings::instance();
-        let fullscreen_btn = Box::new(
-            ButtonBuilder::new(app.assets.button.clone())
-                .with_text("[Alt+F] Fullscreen", app.assets.fonts.default.clone())
-                .with_keys(vec![(Key::F, KeyModifier::Alt).into()])
-                .with_position(Position::new(
-                    Horizontal::CenterByLeft,
-                    Vertical::TopByCenter,
-                    Vec2::new(100.0, 200.0),
-                ))
-                .with_transition(Transition::CustomEvent(ButtonEvent::FullscreenMode as u8))
-                .with_fixable(true)
-                .with_pressed(settings.window.fullscreen)
-                .build(),
+        let is_fullscreen = settings.window.fullscreen;
+
+        let fullscreen_btn = Self::mode_button(
+            app,
+            "[Alt+F] Fullscreen",
+            Key::F,
+            Horizontal::CenterByLeft,
+            100.0,
+            ButtonEvent::FullscreenMode,
+            is_fullscreen,
         );
-        let mut window_btn = Box::new(
-            ButtonBuilder::new(app.assets.button.clone())
-                .with_text("[Alt+W] Window", app.assets.fonts.default.clone())
-                .with_keys(vec![(Key::W, KeyModifier::Alt).into()])
-                .with_position(Position::new(
-                    Horizontal::CenterByRight,
-                    Vertical::TopByCenter,
-                    Vec2::new(98.0, 200.0),
-                ))
-                .with_transition(Transition::CustomEvent(ButtonEvent::WindowMode as u8))
-                .with_fixable(true)
-                .with_pressed(!settings.window.fullscreen)
-                .build(),
+        let mut window_btn = Self::mode_button(
+            app,
+            "[Alt+W] Window",
+            Key::W,
+            Horizontal::CenterByRight,
+            98.0,
+            ButtonEvent::WindowMode,
+            !is_fullscreen,
         );
-        let window_btn_size = window_btn.size(ctx);
+        let label_x = 90.0 - window_btn.size(ctx).x;
 
         Self {
-            // Order is matter, change hardcoded indices in functions below if modified
+            // Order matters: change hardcoded indices in functions below if modified
             sprites: [
                 bg(&app.assets),
                 title("Settings", &app.assets),
                 fullscreen_btn,
                 window_btn,
-                label(
-                    "Window mode:",
-                    &app.assets,
-                    Position::new(
-                        Horizontal::CenterByRight,
-                        Vertical::TopByCenter,
-                        Vec2::new(90.0 - window_btn_size.x, 200.0),
-                    ),
-                ),
+                label("Window mode:", &app.assets, Self::top_right(label_x, 200.0)),
                 label(
                     "Repeat delay:",
                     &app.assets,
-                    Position::new(
-                        Horizontal::CenterByRight,
-                        Vertical::TopByCenter,
-                        Vec2::new(90.0 - window_btn_size.x, 250.0),
-                    ),
+                    Self::top_right(label_x, 250.0),
                 ),
                 icon_minus(
                     &app.assets,
-                    Position::new(
-                        Horizontal::CenterByRight,
-                        Vertical::TopByCenter,
-                        Vec2::new(0.0, 250.0),
-                    ),
+                    Self::top_right(0.0, 250.0),
                     ButtonEvent::RepeatIntervalMinus as u8,
                 ),
                 Box::new(TextInput::int(
@@ -113,19 +90,11 @@ impl SettingsScene {
                     (1, 10000),
                     190.0,
                     app.assets.fonts.header.clone(),
-                    Position::new(
-                        Horizontal::CenterByLeft,
-                        Vertical::TopByCenter,
-                        Vec2::new(5.0, 250.0),
-                    ),
+                    Self::top_left(5.0, 250.0),
                 )),
                 icon_plus(
                     &app.assets,
-                    Position::new(
-                        Horizontal::CenterByLeft,
-                        Vertical::TopByCenter,
-                        Vec2::new(200.0, 250.0),
-                    ),
+                    Self::top_left(200.0, 250.0),
                     ButtonEvent::RepeatIntervalPlus as u8,
                 ),
                 back_btn(
@@ -134,6 +103,47 @@ impl SettingsScene {
                 ),
             ],
         }
+    }
+
+    fn mode_button(
+        app: &App,
+        text: &str,
+        key: Key,
+        horizontal: Horizontal,
+        x: f32,
+        event: ButtonEvent,
+        pressed: bool,
+    ) -> Box<dyn UiSprite> {
+        Box::new(
+            ButtonBuilder::new(app.assets.button.clone())
+                .with_text(text, app.assets.fonts.default.clone())
+                .with_keys(vec![(key, KeyModifier::Alt).into()])
+                .with_position(Position::new(
+                    horizontal,
+                    Vertical::TopByCenter,
+                    Vec2::new(x, 200.0),
+                ))
+                .with_transition(Transition::CustomEvent(event as u8))
+                .with_fixable(true)
+                .with_pressed(pressed)
+                .build(),
+        )
+    }
+
+    fn top_right(x: f32, y: f32) -> Position {
+        Position::new(
+            Horizontal::CenterByRight,
+            Vertical::TopByCenter,
+            Vec2::new(x, y),
+        )
+    }
+
+    fn top_left(x: f32, y: f32) -> Position {
+        Position::new(
+            Horizontal::CenterByLeft,
+            Vertical::TopByCenter,
+            Vec2::new(x, y),
+        )
     }
 
     fn fullscreen_btn(&mut self) -> &mut Button {
@@ -154,7 +164,6 @@ impl Scene for SettingsScene {
         if self.sprites.iter().any(|s| s.focused()) {
             return Transition::None;
         }
-
         easy_back(&event)
     }
 
@@ -167,8 +176,7 @@ impl Scene for SettingsScene {
     }
 
     fn custom_event(&mut self, ctx: &mut Context, event: u8) -> Transition {
-        let event = ButtonEvent::from(event);
-        match event {
+        match ButtonEvent::from(event) {
             ButtonEvent::FullscreenMode => {
                 self.window_btn().unpress();
                 if !tetra::window::is_fullscreen(ctx) {
@@ -178,7 +186,6 @@ impl Scene for SettingsScene {
                     }
                     tetra::window::set_fullscreen(ctx, true).ok();
                 }
-                Transition::None
             }
             ButtonEvent::WindowMode => {
                 self.fullscreen_btn().unpress();
@@ -197,26 +204,21 @@ impl Scene for SettingsScene {
                         WindowPosition::Centered(current_monitor),
                     );
                 }
-                Transition::None
             }
             ButtonEvent::RepeatIntervalMinus | ButtonEvent::RepeatIntervalPlus => {
                 let input = self.repeat_interval_input();
                 if let Ok(mut value) = input.value().parse::<u32>() {
-                    match event {
-                        ButtonEvent::RepeatIntervalMinus => {
-                            value -= 1;
-                        }
-                        ButtonEvent::RepeatIntervalPlus => {
-                            value += 1;
-                        }
+                    match ButtonEvent::from(event) {
+                        ButtonEvent::RepeatIntervalMinus => value -= 1,
+                        ButtonEvent::RepeatIntervalPlus => value += 1,
                         _ => unreachable!(),
                     }
                     input.set_value(format!("{value}"));
                     Settings::instance().input.repeat_interval = value;
                 }
-                Transition::None
             }
         }
+        Transition::None
     }
 }
 

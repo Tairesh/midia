@@ -50,9 +50,77 @@ impl From<u8> for ButtonEvent {
     }
 }
 
+// Sprite indices for easier maintenance
+mod idx {
+    pub const NAME_INPUT: usize = 4;
+    pub const NAME_ERROR: usize = 5;
+    pub const RACE_NAME: usize = 8;
+    pub const GENDER_INPUT: usize = 12;
+    pub const AGE_INPUT: usize = 16;
+    pub const COLOR_LABEL: usize = 18;
+    pub const COLOR_LEFT: usize = 19;
+    pub const COLOR_BG: usize = 20;
+    pub const COLOR_NAME: usize = 21;
+    pub const COLOR_RIGHT: usize = 22;
+    pub const RACE_SPRITE: usize = 23;
+}
+
+// Common Y positions for form rows
+const Y_NAME: f32 = 200.0;
+const Y_RACE: f32 = 250.0;
+const Y_GENDER: f32 = 300.0;
+const Y_AGE: f32 = 350.0;
+const Y_COLOR: f32 = 400.0;
+
+// Common X positions
+const X_LABEL_RIGHT: f32 = -60.0;
+const X_INPUT_LEFT: f32 = -40.0;
+const X_INPUT_CENTER: f32 = 5.0;
+const X_CENTER: f32 = 120.0;
+const X_RIGHT: f32 = 260.0;
+
+fn label_pos(y: f32) -> Position {
+    Position::new(
+        Horizontal::CenterByRight,
+        Vertical::TopByCenter,
+        Vec2::new(X_LABEL_RIGHT, y),
+    )
+}
+
+fn left_btn_pos(y: f32) -> Position {
+    Position::new(
+        Horizontal::CenterByLeft,
+        Vertical::TopByCenter,
+        Vec2::new(X_INPUT_LEFT, y),
+    )
+}
+
+fn center_pos(y: f32) -> Position {
+    Position::new(
+        Horizontal::CenterByCenter,
+        Vertical::TopByCenter,
+        Vec2::new(X_CENTER, y),
+    )
+}
+
+fn input_pos(y: f32) -> Position {
+    Position::new(
+        Horizontal::CenterByLeft,
+        Vertical::TopByCenter,
+        Vec2::new(X_INPUT_CENTER, y),
+    )
+}
+
+fn right_btn_pos(y: f32) -> Position {
+    Position::new(
+        Horizontal::CenterByRight,
+        Vertical::TopByCenter,
+        Vec2::new(X_RIGHT, y),
+    )
+}
+
 pub struct CreateCharacter {
     meta: Meta,
-    // TODO: Use struct instead of array for better readability
     sprites: [Box<dyn UiSprite>; 27],
     race: PlayableRace,
     body_color: Option<BodyColor>,
@@ -64,6 +132,11 @@ impl CreateCharacter {
     pub fn new(path: &Path, app: &App, ctx: &mut Context) -> Self {
         let meta = savefile::load(path).unwrap();
         let body_color = BodyColor::Ginger;
+        let initial_gender = if meta.time.elapsed().unwrap().as_secs().is_multiple_of(2) {
+            "Female"
+        } else {
+            "Male"
+        };
 
         let [back_btn, randomize_btn, next_btn] = back_randomize_next(
             &app.assets,
@@ -82,15 +155,8 @@ impl CreateCharacter {
                     format!("New adventurer in the «{}» world", meta.name),
                     &app.assets,
                 ),
-                label(
-                    "Name:",
-                    &app.assets,
-                    Position::new(
-                        Horizontal::CenterByRight,
-                        Vertical::TopByCenter,
-                        Vec2::new(-60.0, 200.0),
-                    ),
-                ),
+                // Name row
+                label("Name:", &app.assets, label_pos(Y_NAME)),
                 text_input(
                     "",
                     300.0,
@@ -98,7 +164,7 @@ impl CreateCharacter {
                     Position::new(
                         Horizontal::CenterByLeft,
                         Vertical::TopByCenter,
-                        Vec2::new(-40.0, 200.0),
+                        Vec2::new(X_INPUT_LEFT, Y_NAME),
                     ),
                 ),
                 error_label(
@@ -110,100 +176,50 @@ impl CreateCharacter {
                         Vec2::new(110.0, 180.0),
                     ),
                 ),
-                label(
-                    "Race:",
-                    &app.assets,
-                    Position::new(
-                        Horizontal::CenterByRight,
-                        Vertical::TopByCenter,
-                        Vec2::new(-60.0, 250.0),
-                    ),
-                ),
+                // Race row
+                label("Race:", &app.assets, label_pos(Y_RACE)),
                 icon_left(
                     &app.assets,
-                    Position::new(
-                        Horizontal::CenterByLeft,
-                        Vertical::TopByCenter,
-                        Vec2::new(-40.0, 250.0),
-                    ),
+                    left_btn_pos(Y_RACE),
                     ButtonEvent::RaceLeft as u8,
                 ),
                 Box::new(Label::new(
                     "Gazan",
                     app.assets.fonts.header.clone(),
                     Colors::DARK_BROWN,
-                    Position::new(
-                        Horizontal::CenterByCenter,
-                        Vertical::TopByCenter,
-                        Vec2::new(120.0, 250.0),
-                    ),
+                    center_pos(Y_RACE),
                 )),
                 icon_right(
                     &app.assets,
-                    Position::new(
-                        Horizontal::CenterByRight,
-                        Vertical::TopByCenter,
-                        Vec2::new(260.0, 250.0),
-                    ),
+                    right_btn_pos(Y_RACE),
                     ButtonEvent::RaceRight as u8,
                 ),
+                // Gender row
                 label(
                     "Gender:",
                     &app.assets,
                     Position::new(
                         Horizontal::CenterByRight,
                         Vertical::TopByCenter,
-                        Vec2::new(-60.0, 295.0),
+                        Vec2::new(X_LABEL_RIGHT, 295.0),
                     ),
                 ),
                 icon_left(
                     &app.assets,
-                    Position::new(
-                        Horizontal::CenterByLeft,
-                        Vertical::TopByCenter,
-                        Vec2::new(-40.0, 300.0),
-                    ),
+                    left_btn_pos(Y_GENDER),
                     ButtonEvent::GenderLeft as u8,
                 ),
-                text_input(
-                    if meta.time.elapsed().unwrap().as_secs().is_multiple_of(2) {
-                        "Female"
-                    } else {
-                        "Male"
-                    },
-                    210.0,
-                    &app.assets,
-                    Position::new(
-                        Horizontal::CenterByLeft,
-                        Vertical::TopByCenter,
-                        Vec2::new(5.0, 300.0),
-                    ),
-                ),
+                text_input(initial_gender, 210.0, &app.assets, input_pos(Y_GENDER)),
                 icon_right(
                     &app.assets,
-                    Position::new(
-                        Horizontal::CenterByRight,
-                        Vertical::TopByCenter,
-                        Vec2::new(260.0, 300.0),
-                    ),
+                    right_btn_pos(Y_GENDER),
                     ButtonEvent::GenderRight as u8,
                 ),
-                label(
-                    "Age:",
-                    &app.assets,
-                    Position::new(
-                        Horizontal::CenterByRight,
-                        Vertical::TopByCenter,
-                        Vec2::new(-60.0, 350.0),
-                    ),
-                ),
+                // Age row
+                label("Age:", &app.assets, label_pos(Y_AGE)),
                 icon_minus(
                     &app.assets,
-                    Position::new(
-                        Horizontal::CenterByLeft,
-                        Vertical::TopByCenter,
-                        Vec2::new(-40.0, 350.0),
-                    ),
+                    left_btn_pos(Y_AGE),
                     ButtonEvent::AgeMinus as u8,
                 ),
                 Box::new(TextInput::int(
@@ -211,37 +227,18 @@ impl CreateCharacter {
                     (16, 99),
                     210.0,
                     app.assets.fonts.header.clone(),
-                    Position::new(
-                        Horizontal::CenterByLeft,
-                        Vertical::TopByCenter,
-                        Vec2::new(5.0, 350.0),
-                    ),
+                    input_pos(Y_AGE),
                 )),
                 icon_plus(
                     &app.assets,
-                    Position::new(
-                        Horizontal::CenterByRight,
-                        Vertical::TopByCenter,
-                        Vec2::new(260.0, 350.0),
-                    ),
+                    right_btn_pos(Y_AGE),
                     ButtonEvent::AgePlus as u8,
                 ),
-                label(
-                    "Body color:",
-                    &app.assets,
-                    Position::new(
-                        Horizontal::CenterByRight,
-                        Vertical::TopByCenter,
-                        Vec2::new(-60.0, 400.0),
-                    ),
-                ),
+                // Body color row
+                label("Body color:", &app.assets, label_pos(Y_COLOR)),
                 icon_left(
                     &app.assets,
-                    Position::new(
-                        Horizontal::CenterByLeft,
-                        Vertical::TopByCenter,
-                        Vec2::new(-40.0, 400.0),
-                    ),
+                    left_btn_pos(Y_COLOR),
                     ButtonEvent::ColorLeft as u8,
                 ),
                 Box::new(JustMesh::new(
@@ -257,7 +254,7 @@ impl CreateCharacter {
                     Position::new(
                         Horizontal::CenterByCenter,
                         Vertical::TopByCenter,
-                        Vec2::new(110.0, 400.0),
+                        Vec2::new(110.0, Y_COLOR),
                     ),
                 )),
                 Box::new(Label::new(
@@ -267,25 +264,22 @@ impl CreateCharacter {
                     Position::new(
                         Horizontal::CenterByCenter,
                         Vertical::TopByCenter,
-                        Vec2::new(110.0, 400.0),
+                        Vec2::new(110.0, Y_COLOR),
                     ),
                 )),
                 icon_right(
                     &app.assets,
-                    Position::new(
-                        Horizontal::CenterByRight,
-                        Vertical::TopByCenter,
-                        Vec2::new(260.0, 400.0),
-                    ),
+                    right_btn_pos(Y_COLOR),
                     ButtonEvent::ColorRight as u8,
                 ),
+                // Race preview sprite
                 Box::new(TilesetSprite::new(
                     Race::Gazan.looks_like(),
                     app.assets.tileset.clone(),
                     Position::new(
                         Horizontal::CenterByCenter,
                         Vertical::TopByCenter,
-                        Vec2::new(50.0, 250.0),
+                        Vec2::new(50.0, Y_RACE),
                     ),
                     3.0,
                     Some(body_color.into()),
@@ -300,71 +294,97 @@ impl CreateCharacter {
         }
     }
 
+    // Sprite accessors using index constants
     fn name_input(&mut self) -> &mut TextInput {
-        self.sprites[4].as_text_input().unwrap()
+        self.sprites[idx::NAME_INPUT].as_text_input().unwrap()
     }
     fn name_empty(&mut self) -> &mut Label {
-        self.sprites[5].as_label().unwrap()
+        self.sprites[idx::NAME_ERROR].as_label().unwrap()
     }
     fn race_name(&mut self) -> &mut Label {
-        self.sprites[8].as_label().unwrap()
+        self.sprites[idx::RACE_NAME].as_label().unwrap()
     }
     fn gender_input(&mut self) -> &mut TextInput {
-        self.sprites[12].as_text_input().unwrap()
+        self.sprites[idx::GENDER_INPUT].as_text_input().unwrap()
     }
     fn age_input(&mut self) -> &mut TextInput {
-        self.sprites[16].as_text_input().unwrap()
+        self.sprites[idx::AGE_INPUT].as_text_input().unwrap()
     }
     fn color_label(&mut self) -> &mut Label {
-        self.sprites[18].as_label().unwrap()
+        self.sprites[idx::COLOR_LABEL].as_label().unwrap()
     }
     fn color_left(&mut self) -> &mut Button {
-        self.sprites[19].as_button().unwrap()
+        self.sprites[idx::COLOR_LEFT].as_button().unwrap()
     }
     fn color_bg(&mut self) -> &mut JustMesh {
-        self.sprites[20].as_just_mesh().unwrap()
+        self.sprites[idx::COLOR_BG].as_just_mesh().unwrap()
     }
     fn color_name(&mut self) -> &mut Label {
-        self.sprites[21].as_label().unwrap()
+        self.sprites[idx::COLOR_NAME].as_label().unwrap()
     }
     fn color_right(&mut self) -> &mut Button {
-        self.sprites[22].as_button().unwrap()
+        self.sprites[idx::COLOR_RIGHT].as_button().unwrap()
     }
     fn race_sprite(&mut self) -> &mut TilesetSprite {
-        self.sprites[23].as_tileset_sprite().unwrap()
+        self.sprites[idx::RACE_SPRITE].as_tileset_sprite().unwrap()
     }
 
     fn hide_color_selectors(&mut self, hide: bool) {
-        self.color_label().set_visible(!hide);
-        self.color_left().set_visible(!hide);
-        self.color_bg().set_visible(!hide);
-        self.color_name().set_visible(!hide);
-        self.color_right().set_visible(!hide);
+        let visible = !hide;
+        self.color_label().set_visible(visible);
+        self.color_left().set_visible(visible);
+        self.color_bg().set_visible(visible);
+        self.color_name().set_visible(visible);
+        self.color_right().set_visible(visible);
+    }
+
+    fn update_color_display(&mut self, color: BodyColor, ctx: &mut Context, win_size: Vec2) {
+        self.color_bg().set_color(color);
+        self.color_name().update(color.name(), ctx, win_size);
+        self.color_name().set_color(color.text_color());
+        self.race_sprite().set_color(color);
+    }
+
+    fn update_race_display(&mut self, ctx: &mut Context) {
+        let win_size = window_size(ctx);
+        let race = Race::from(self.race);
+        let race_name = self.race.name();
+
+        self.race_name().update(race_name, ctx, win_size);
+        self.race_sprite().set_sprite(race.looks_like());
+        self.hide_color_selectors(!race.has_custom_colors());
+
+        if race.has_custom_colors() {
+            let color = *race.custom_colors().first().unwrap();
+            self.body_color = Some(color);
+            self.update_color_display(color, ctx, win_size);
+        } else {
+            self.body_color = None;
+            self.race_sprite().remove_color();
+        }
     }
 
     fn randomize(&mut self, ctx: &mut Context) {
-        let mut rng = rand::rng();
-        let character = PlayerPersonality::random_playable(&mut rng);
+        let character = PlayerPersonality::random_playable(&mut rand::rng());
+
         self.gender_input().set_value(character.mind.gender);
         self.name_input().set_value(character.mind.name);
         self.age_input()
             .set_value(character.appearance.age.to_string());
         self.race = character.appearance.race.into();
-        let race_name = self.race.name();
-        let window_size = window_size(ctx);
-        self.race_name().update(race_name, ctx, window_size);
         self.body_color = character.appearance.body_color;
+
+        let win_size = window_size(ctx);
         let race = Race::from(self.race);
+        let race_name = self.race.name();
+
+        self.race_name().update(race_name, ctx, win_size);
         self.hide_color_selectors(!race.has_custom_colors());
         self.race_sprite().set_sprite(race.looks_like());
-        if let Some(body_color) = self.body_color {
-            self.color_bg().set_color(body_color);
-            self.color_name()
-                .update(body_color.name(), ctx, window_size);
-            self.color_name().set_color(body_color.text_color());
-            self.race_sprite().set_color(body_color);
-        } else {
-            self.race_sprite().remove_color();
+
+        match self.body_color {
+            Some(color) => self.update_color_display(color, ctx, win_size),
+            None => self.race_sprite().remove_color(),
         }
     }
 
@@ -373,12 +393,16 @@ impl CreateCharacter {
         if name.is_empty() {
             self.name_input().set_danger(true);
             self.name_empty().set_visible(true);
-            Transition::None
-        } else {
-            let gender: Gender = self.gender_input().value().into();
-            let age = self.age_input().value().parse::<u8>().unwrap();
-            let race = Race::from(self.race);
-            let character = PlayerPersonality::new(
+            return Transition::None;
+        }
+
+        let gender: Gender = self.gender_input().value().into();
+        let age = self.age_input().value().parse::<u8>().unwrap();
+        let race = Race::from(self.race);
+
+        Transition::Push(SceneKind::CharacterAttributes(
+            self.meta.path.clone(),
+            PlayerPersonality::new(
                 Appearance {
                     body_color: self.body_color,
                     sex: Sex::from(&gender),
@@ -387,11 +411,44 @@ impl CreateCharacter {
                 },
                 Mind { name, gender },
                 CharSheet::default(true, race),
-            );
-            Transition::Push(SceneKind::CharacterAttributes(
-                self.meta.path.clone(),
-                character,
-            ))
+            ),
+        ))
+    }
+
+    fn handle_race_change(&mut self, ctx: &mut Context, go_next: bool) {
+        self.race = if go_next {
+            self.race.next()
+        } else {
+            self.race.prev()
+        };
+        self.update_race_display(ctx);
+    }
+
+    fn handle_color_change(&mut self, ctx: &mut Context, go_next: bool) {
+        if let Some(body_color) = self.body_color {
+            let colors = Race::from(self.race).custom_colors();
+            let new_color = next_color(body_color, &colors, go_next);
+            self.body_color = Some(new_color);
+            let win_size = window_size(ctx);
+            self.update_color_display(new_color, ctx, win_size);
+        }
+    }
+
+    fn handle_gender_change(&mut self) {
+        let input = self.gender_input();
+        input.set_value(if input.value() == "Male" {
+            "Female"
+        } else {
+            "Male"
+        });
+    }
+
+    fn handle_age_change(&mut self, increase: bool) {
+        let input = self.age_input();
+        if let Ok(value) = input.value().parse::<u8>() {
+            let delta = if increase { 1 } else { -1i8 };
+            let new_value = (value as i8 + delta).clamp(16, 99) as u8;
+            input.set_value(new_value.to_string());
         }
     }
 }
@@ -404,16 +461,15 @@ impl Scene for CreateCharacter {
         Transition::None
     }
 
-    fn draw(&mut self, ctx: &mut Context) {
-        draw_sprites(ctx, &mut self.sprites);
-    }
-
     fn event(&mut self, _ctx: &mut Context, event: Event) -> Transition {
         if self.sprites.iter().any(|s| s.focused()) {
             return Transition::None;
         }
-
         easy_back(&event)
+    }
+
+    fn draw(&mut self, ctx: &mut Context) {
+        draw_sprites(ctx, &mut self.sprites);
     }
 
     fn sprites_mut(&mut self) -> UISpritesCollection<'_> {
@@ -421,78 +477,17 @@ impl Scene for CreateCharacter {
     }
 
     fn custom_event(&mut self, ctx: &mut Context, event: u8) -> Transition {
-        let event = ButtonEvent::from(event);
-        match event {
-            ButtonEvent::RaceLeft | ButtonEvent::RaceRight => {
-                self.race = match event {
-                    ButtonEvent::RaceLeft => self.race.prev(),
-                    ButtonEvent::RaceRight => self.race.next(),
-                    _ => unreachable!(),
-                };
-                let name = self.race.name();
-                let window_size = window_size(ctx);
-                self.race_name().update(name, ctx, window_size);
-                let race = Race::from(self.race);
-                self.race_sprite().set_sprite(race.looks_like());
-                self.hide_color_selectors(!race.has_custom_colors());
-                if race.has_custom_colors() {
-                    let color = *race.custom_colors().first().unwrap();
-                    self.body_color = Some(color);
-                    let name = color.name();
-                    self.color_name().update(name, ctx, window_size);
-                    self.color_name().set_color(color.text_color());
-                    self.color_bg().set_color(color);
-                    self.race_sprite().set_color(color);
-                } else {
-                    self.body_color = None;
-                    self.race_sprite().remove_color();
-                }
-
-                Transition::None
-            }
-            ButtonEvent::GenderLeft | ButtonEvent::GenderRight => {
-                let input = self.gender_input();
-                let value = input.value();
-                input.set_value(if value == "Male" { "Female" } else { "Male" });
-                Transition::None
-            }
-            ButtonEvent::AgeMinus | ButtonEvent::AgePlus => {
-                // TODO: disable buttons on maximum, minimum values
-                let input = self.age_input();
-                if let Ok(mut value) = input.value().parse::<u8>() {
-                    match event {
-                        ButtonEvent::AgeMinus => {
-                            value -= 1;
-                        }
-                        ButtonEvent::AgePlus => {
-                            value += 1;
-                        }
-                        _ => unreachable!(),
-                    }
-                    input.set_value(format!("{value}"));
-                }
-                Transition::None
-            }
-            ButtonEvent::ColorLeft | ButtonEvent::ColorRight => {
-                if let Some(body_color) = self.body_color {
-                    let colors = Race::from(self.race).custom_colors();
-                    let body_color =
-                        next_color(body_color, &colors, event == ButtonEvent::ColorRight);
-                    self.body_color = Some(body_color);
-                    let name = body_color.name();
-                    let window_size = window_size(ctx);
-                    self.color_name().update(name, ctx, window_size);
-                    self.color_name().set_color(body_color.text_color());
-                    self.color_bg().set_color(body_color);
-                    self.race_sprite().set_color(body_color);
-                }
-                Transition::None
-            }
-            ButtonEvent::Randomize => {
-                self.randomize(ctx);
-                Transition::None
-            }
-            ButtonEvent::Next => self.create(),
+        match ButtonEvent::from(event) {
+            ButtonEvent::RaceLeft => self.handle_race_change(ctx, false),
+            ButtonEvent::RaceRight => self.handle_race_change(ctx, true),
+            ButtonEvent::GenderLeft | ButtonEvent::GenderRight => self.handle_gender_change(),
+            ButtonEvent::AgeMinus => self.handle_age_change(false),
+            ButtonEvent::AgePlus => self.handle_age_change(true),
+            ButtonEvent::ColorLeft => self.handle_color_change(ctx, false),
+            ButtonEvent::ColorRight => self.handle_color_change(ctx, true),
+            ButtonEvent::Randomize => self.randomize(ctx),
+            ButtonEvent::Next => return self.create(),
         }
+        Transition::None
     }
 }

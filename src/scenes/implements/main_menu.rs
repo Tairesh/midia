@@ -78,7 +78,7 @@ impl MainMenu {
         );
 
         Self {
-            // Order is matter, change hardcoded indices in functions below if modified
+            // Order matters, change hardcoded indices in functions below if modified
             sprites: [
                 bg,
                 logo,

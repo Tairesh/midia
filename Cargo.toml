@@ -1,8 +1,8 @@
 [package]
 name = "midia"
-description = "Roguelike about The Chetyrekhstvorchataya Midia"
+description = "Followers of the Midia roguelike"
 version = "0.1.0"
-authors = ["Ilya Agafonov <tairesh.rus@gmail.com>"]
+authors = ["Ilia Agafonov <tairesh.rus@gmail.com>"]
 edition = "2021"
 build = "build.rs"
 
